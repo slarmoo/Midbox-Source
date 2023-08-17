@@ -47,7 +47,10 @@ export const enum EnvelopeType {
     decay,
     modboxBlip,
     modboxTrill,
+    modboxClick,
+    modboxBow,
 }
+
 
 export const enum InstrumentType {
     chip,
@@ -104,7 +107,7 @@ export const enum EnvelopeComputeIndex {
     noteFilterFreq0, noteFilterFreq1, noteFilterFreq2, noteFilterFreq3, noteFilterFreq4, noteFilterFreq5, noteFilterFreq6, noteFilterFreq7,
     noteFilterGain0, noteFilterGain1, noteFilterGain2, noteFilterGain3, noteFilterGain4, noteFilterGain5, noteFilterGain6, noteFilterGain7,
     length,
-    distortion,
+    //distortion,
 }
 
 /*
@@ -291,8 +294,8 @@ export class Config {
         { name: "B", isWhiteKey: true, basePitch: 23 },
     ]);
     public static readonly blackKeyNameParents: ReadonlyArray<number> = [-1, 1, -1, 1, -1, 1, -1, -1, 1, -1, 1, -1];
-    public static readonly tempoMin: number = 30;
-    public static readonly tempoMax: number = 320;
+    public static readonly tempoMin: number = 1;
+    public static readonly tempoMax: number = 750;
     public static readonly echoDelayRange: number = 24;
     public static readonly echoDelayStepTicks: number = 4;
     public static readonly echoSustainRange: number = 8;
@@ -303,10 +306,10 @@ export class Config {
     public static readonly reverbRange: number = 32;
     public static readonly reverbDelayBufferSize: number = 16384; // TODO: Compute a buffer size based on sample rate.
     public static readonly reverbDelayBufferMask: number = Config.reverbDelayBufferSize - 1; // TODO: Compute a buffer size based on sample rate.
-    public static readonly beatsPerBarMin: number = 3;
-    public static readonly beatsPerBarMax: number = 16;
+    public static readonly beatsPerBarMin: number = 1;
+    public static readonly beatsPerBarMax: number = 32;
     public static readonly barCountMin: number = 1;
-    public static readonly barCountMax: number = 256;
+    public static readonly barCountMax: number = 512;
     public static readonly instrumentCountMin: number = 1;
     public static readonly layeredInstrumentCountMax: number = 4;
     public static readonly patternInstrumentCountMax: number = 10;
@@ -344,7 +347,9 @@ export class Config {
         { name: "1/8 pulse", expression: 0.5, samples: centerWave([1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0]) },
         { name: "1/12 pulse", expression: 0.55, samples: centerWave([1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0]) },
         { name: "1/16 pulse", expression: 0.575, samples: centerWave([1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0]) },
-        { name: "heavy saw", expression: 0.4, samples: centerWave([1.0, -1.0, 2.0, -1.0, 0.0, 3.0, 1.0, -1.0, 2.0, -1.0, 0.0, 0.0]) },
+        { name: "heavy saw", expression: 0.5, samples: centerWave([1.0, -1.0, 2.0, -1.0, 0.0, 3.0, 1.0, -1.0, 2.0, -1.0, 0.0, 0.0]) },
+        { name: "bass-y", expression: 0.5, samples: centerWave([1.0, -5.0, 4.0, -3.0, 7.0, -2.0, 3.0, -3.0, 6.0]) },
+        { name: "strange", expression: 0.5, samples: centerWave([1.0, 11.0, 1.0, -11.0, -1.0, -11.0, 4.0, -6.0, 9.0, -1.0, -7.0, 11.0, 2.0, -5.0, 9.0, 9.0, -10.0]) },
         { name: "sawtooth", expression: 0.65, samples: centerWave([1.0 / 31.0, 3.0 / 31.0, 5.0 / 31.0, 7.0 / 31.0, 9.0 / 31.0, 11.0 / 31.0, 13.0 / 31.0, 15.0 / 31.0, 17.0 / 31.0, 19.0 / 31.0, 21.0 / 31.0, 23.0 / 31.0, 25.0 / 31.0, 27.0 / 31.0, 29.0 / 31.0, 31.0 / 31.0, -31.0 / 31.0, -29.0 / 31.0, -27.0 / 31.0, -25.0 / 31.0, -23.0 / 31.0, -21.0 / 31.0, -19.0 / 31.0, -17.0 / 31.0, -15.0 / 31.0, -13.0 / 31.0, -11.0 / 31.0, -9.0 / 31.0, -7.0 / 31.0, -5.0 / 31.0, -3.0 / 31.0, -1.0 / 31.0]) },
         { name: "double saw", expression: 0.5, samples: centerWave([0.0, -0.2, -0.4, -0.6, -0.8, -1.0, 1.0, -0.8, -0.6, -0.4, -0.2, 1.0, 0.8, 0.6, 0.4, 0.2]) },
         { name: "double pulse", expression: 0.4, samples: centerWave([1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0]) },
@@ -432,17 +437,18 @@ export class Config {
         { name: "bowed", voices: 2, spread: 0.02, offset: 0.0, expression: 1.0, sign: -1.0 },
         { name: "piano", voices: 2, spread: 0.01, offset: 0.0, expression: 1.0, sign: 0.7 },
         { name: "warbled", voices: 2, spread: 0.25, offset: 0.05, expression: 0.9, sign: -0.8 },
-        { name: "hyper", voices: 9, spread: 0.03, offset: -0.02, expression: 0.23, sign: 0.7 },
-        { name: "peak", voices: 3, spread: 12.038, offset: 12.01, expression: 0.65, sign: 0.9 },
-        { name: "deep shift", voices: 3, spread: 12.03, offset: -17.01, expression: 0.7, sign: 1.2 },
+        { name: "hyper", voices: 2, spread: 0.03, offset: -0.02, expression: 0.85, sign: 0.7 },
+        { name: "peak", voices: 2, spread: 12.038, offset: 12.01, expression: 0.85, sign: 0.9 },
+        { name: "deep shift", voices: 2, spread: 12.03, offset: -17.01, expression: 0.85, sign: 1.2 },
         { name: "broke", voices: 2, spread: 0.000211, offset: -0.3, expression: 0.8, sign: 1.0 },
-        { name: "vary", voices: 9, spread: 0.0018, offset: 0.0, expression: 0.18, sign: 1.6 },
-        { name: "energetic", voices: 3, spread: 6.15, offset: 6.435, expression: 0.7, sign: 0.9 },
+        { name: "vary", voices: 2, spread: 0.0018, offset: 0.0, expression: 0.85, sign: 1.6 },
+        { name: "energetic", voices: 2, spread: 6.15, offset: 6.435, expression: 0.85, sign: 0.9 },
         { name: "lone fifth", voices: 1, spread: 0.0, offset: 7.0, expression: 1.4, sign: 1.0 },
         { name: "alternate fifth", voices: 2, spread: 2.5, offset: -2.5, expression: 0.9, sign: 1.0 },
         { name: "offtune", voices: 2, spread: 0.40, offset: 0.40, expression: 0.9, sign: 1.0 },
-        { name: "hold", voices: 2, spread: 0.003, offset: 0.0, expression: 0.9, sign: -2.5 },
+        { name: "hold", voices: 2, spread: 0.003, offset: 0.0, expression: 0.8, sign: -2.5 },
         { name: "buried", voices: 2, spread: 0.03575, offset: -36.0, expression: 1.4, sign: 1.0 },
+        { name: "corrupt", voices: 2, spread: 18, offset: 48.0, expression: 0.7, sign: 0.7 },
     ]);
     public static readonly effectNames: ReadonlyArray<string> = ["reverb", "chorus", "panning", "distortion", "bitcrusher", "note filter", "echo", "pitch shift", "detune", "vibrato", "transition type", "chord type"];
     public static readonly effectOrder: ReadonlyArray<EffectType> = [EffectType.panning, EffectType.transition, EffectType.chord, EffectType.pitchShift, EffectType.detune, EffectType.vibrato, EffectType.noteFilter, EffectType.distortion, EffectType.bitcrusher, EffectType.chorus, EffectType.echo, EffectType.reverb];
@@ -496,22 +502,39 @@ export class Config {
         { name: "0.125×", mult: 0.125, hzOffset: 0.0, amplitudeSign: 1.0 },
         { name: "0.25×", mult: 0.25, hzOffset: 0.0, amplitudeSign: 1.0 },
         { name: "0.50×", mult: 0.5, hzOffset: 0.0, amplitudeSign: 1.0 },
+        { name: "~0.50×", mult: 0.5, hzOffset: 2.3, amplitudeSign: -1.0 },
         { name: "0.75×", mult: 0.75, hzOffset: 0.0, amplitudeSign: 1.0 },
+        { name: "~0.75×", mult: 0.75, hzOffset: 1.9, amplitudeSign: -1.0 },
         { name: "1×", mult: 1.0, hzOffset: 0.0, amplitudeSign: 1.0 },
         { name: "~1×", mult: 1.0, hzOffset: 1.5, amplitudeSign: -1.0 },
+        { name: "1.50×", mult: 1.5, hzOffset: 0.0, amplitudeSign: 1.0 },
         { name: "2×", mult: 2.0, hzOffset: 0.0, amplitudeSign: 1.0 },
         { name: "~2×", mult: 2.0, hzOffset: -1.3, amplitudeSign: -1.0 },
+        { name: "2.50×", mult: 2.5, hzOffset: 0.0, amplitudeSign: 1.0 },
         { name: "3×", mult: 3.0, hzOffset: 0.0, amplitudeSign: 1.0 },
         { name: "4×", mult: 4.0, hzOffset: 0.0, amplitudeSign: 1.0 },
+        { name: "~4×", mult: 4.0, hzOffset: -2.1, amplitudeSign: -1.0 },
         { name: "5×", mult: 5.0, hzOffset: 0.0, amplitudeSign: 1.0 },
         { name: "6×", mult: 6.0, hzOffset: 0.0, amplitudeSign: 1.0 },
         { name: "7×", mult: 7.0, hzOffset: 0.0, amplitudeSign: 1.0 },
         { name: "8×", mult: 8.0, hzOffset: 0.0, amplitudeSign: 1.0 },
+        { name: "~8×", mult: 8.0, hzOffset: -4.2, amplitudeSign: -1.0 },
         { name: "9×", mult: 9.0, hzOffset: 0.0, amplitudeSign: 1.0 },
+        { name: "10×", mult: 10.0, hzOffset: 0.0, amplitudeSign: 1.0 },
         { name: "11×", mult: 11.0, hzOffset: 0.0, amplitudeSign: 1.0 },
+        { name: "12×", mult: 12.0, hzOffset: 0.0, amplitudeSign: 1.0 },
         { name: "13×", mult: 13.0, hzOffset: 0.0, amplitudeSign: 1.0 },
+        { name: "14×", mult: 14.0, hzOffset: 0.0, amplitudeSign: 1.0 },
+        { name: "15×", mult: 15.0, hzOffset: 0.0, amplitudeSign: 1.0 },
         { name: "16×", mult: 16.0, hzOffset: 0.0, amplitudeSign: 1.0 },
+        { name: "~16×", mult: 16.0, hzOffset: -6.3, amplitudeSign: -1.0 },
+        { name: "17×", mult: 17.0, hzOffset: 0.0, amplitudeSign: 1.0 },
+        { name: "18×", mult: 18.0, hzOffset: 0.0, amplitudeSign: 1.0 },
+        { name: "19×", mult: 19.0, hzOffset: 0.0, amplitudeSign: 1.0 },
         { name: "20×", mult: 20.0, hzOffset: 0.0, amplitudeSign: 1.0 },
+        { name: "24×", mult: 24.0, hzOffset: 0.0, amplitudeSign: 1.0 },
+        { name: "32×", mult: 32.0, hzOffset: 0.0, amplitudeSign: 1.0 },
+        { name: "~32×", mult: 32.0, hzOffset: -8.4, amplitudeSign: -1.0 },
     ]);
     public static readonly envelopes: DictionaryArray<Envelope> = toNameMap([
         { name: "none", type: EnvelopeType.none, speed: 0.0 },
@@ -526,6 +549,7 @@ export class Config {
         { name: "swell 1", type: EnvelopeType.swell, speed: 32.0 },
         { name: "swell 2", type: EnvelopeType.swell, speed: 8.0 },
         { name: "swell 3", type: EnvelopeType.swell, speed: 2.0 },
+        { name: "slow swell", type: EnvelopeType.swell, speed: 0.5 },
         { name: "tremolo1", type: EnvelopeType.tremolo, speed: 4.0 },
         { name: "tremolo2", type: EnvelopeType.tremolo, speed: 2.0 },
         { name: "tremolo3", type: EnvelopeType.tremolo, speed: 1.0 },
@@ -536,7 +560,9 @@ export class Config {
         { name: "decay 2", type: EnvelopeType.decay, speed: 7.0 },
         { name: "decay 3", type: EnvelopeType.decay, speed: 4.0 },
         { name: "modbox trill", type: EnvelopeType.modboxTrill, speed: 40 },
-        { name: "modbox blip", type: EnvelopeType.modboxBlip, speed: 0.05 },
+        { name: "modbox blip", type: EnvelopeType.modboxBlip, speed: 4 },
+        { name: "modbox click", type: EnvelopeType.modboxClick, speed: 5 },
+        { name: "modbox bow", type: EnvelopeType.modboxBow, speed: 90 },
     ]);
     public static readonly feedbacks: DictionaryArray<Feedback> = toNameMap([
         { name: "1⟲", indices: [[1], [], [], []] },
@@ -572,7 +598,7 @@ export class Config {
     public static readonly harmonicsMax: number = (1 << Config.harmonicsControlPointBits) - 1;
     public static readonly harmonicsWavelength: number = 1 << 11; // 2048
     public static readonly pulseWidthRange: number = 50;
-    public static readonly pulseWidthStepPower: number = 0.5;
+    public static readonly pulseWidthStepPower: number = 0.50;
     public static readonly pitchChannelCountMin: number = 1;
     public static readonly pitchChannelCountMax: number = 40;
     public static readonly noiseChannelCountMin: number = 0;
@@ -589,8 +615,8 @@ export class Config {
     public static readonly justIntonationSemitones: number[] = [1.0 / 2.0, 8.0 / 15.0, 9.0 / 16.0, 3.0 / 5.0, 5.0 / 8.0, 2.0 / 3.0, 32.0 / 45.0, 3.0 / 4.0, 4.0 / 5.0, 5.0 / 6.0, 8.0 / 9.0, 15.0 / 16.0, 1.0, 16.0 / 15.0, 9.0 / 8.0, 6.0 / 5.0, 5.0 / 4.0, 4.0 / 3.0, 45.0 / 32.0, 3.0 / 2.0, 8.0 / 5.0, 5.0 / 3.0, 16.0 / 9.0, 15.0 / 8.0, 2.0].map(x => Math.log2(x) * Config.pitchesPerOctave);
     public static readonly pitchShiftRange: number = Config.justIntonationSemitones.length;
     public static readonly pitchShiftCenter: number = Config.pitchShiftRange >> 1;
-    public static readonly detuneCenter: number = 200;
-    public static readonly detuneMax: number = 400;
+    public static readonly detuneCenter: number = 600;
+    public static readonly detuneMax: number = 1200;
     public static readonly detuneMin: number = 0;
     public static readonly songDetuneMin: number = 0;
     public static readonly songDetuneMax: number = 500;
@@ -618,7 +644,7 @@ export class Config {
         { name: "noteVolume", computeIndex: EnvelopeComputeIndex.noteVolume, displayName: "note volume",      /*perNote:  true,*/ interleave: false, isFilter: false, /*range: Config.volumeRange,             */    maxCount: 1, effect: null, compatibleInstruments: null },
         { name: "pulseWidth", computeIndex: EnvelopeComputeIndex.pulseWidth, displayName: "pulse width",      /*perNote:  true,*/ interleave: false, isFilter: false, /*range: Config.pulseWidthRange,         */    maxCount: 1, effect: null, compatibleInstruments: [InstrumentType.pwm] },
         { name: "stringSustain", computeIndex: EnvelopeComputeIndex.stringSustain, displayName: "sustain",          /*perNote:  true,*/ interleave: false, isFilter: false, /*range: Config.stringSustainRange,      */    maxCount: 1, effect: null, compatibleInstruments: [InstrumentType.pickedString] },
-        { name: "unison", computeIndex: EnvelopeComputeIndex.unison, displayName: "unison",           /*perNote:  true,*/ interleave: false, isFilter: false, /*range: Config.defaultAutomationRange,  */    maxCount: 1, effect: null, compatibleInstruments: [InstrumentType.chip, InstrumentType.harmonics, InstrumentType.pickedString] },
+        { name: "unison", computeIndex: EnvelopeComputeIndex.unison, displayName: "unison",           /*perNote:  true,*/ interleave: false, isFilter: false, /*range: Config.defaultAutomationRange,  */    maxCount: 1, effect: null, compatibleInstruments: [InstrumentType.chip, InstrumentType.harmonics, InstrumentType.pickedString, InstrumentType.customChipWave, InstrumentType.spectrum, InstrumentType.pwm ] },
         { name: "operatorFrequency", computeIndex: EnvelopeComputeIndex.operatorFrequency0, displayName: "fm# freq",         /*perNote:  true,*/ interleave: true, isFilter: false, /*range: Config.defaultAutomationRange,  */    maxCount: Config.operatorCount, effect: null, compatibleInstruments: [InstrumentType.fm] },
         { name: "operatorAmplitude", computeIndex: EnvelopeComputeIndex.operatorAmplitude0, displayName: "fm# volume",       /*perNote:  true,*/ interleave: false, isFilter: false, /*range: Config.operatorAmplitudeMax + 1,*/    maxCount: Config.operatorCount, effect: null, compatibleInstruments: [InstrumentType.fm] },
         { name: "feedbackAmplitude", computeIndex: EnvelopeComputeIndex.feedbackAmplitude, displayName: "fm feedback",      /*perNote:  true,*/ interleave: false, isFilter: false, /*range: Config.operatorAmplitudeMax + 1,*/    maxCount: 1, effect: null, compatibleInstruments: [InstrumentType.fm] },
@@ -705,7 +731,7 @@ export class Config {
         { name: "pulse width", pianoName: "Pulse Width", maxRawVol: Config.pulseWidthRange, newNoteVol: Config.pulseWidthRange, forSong: false, convertRealFactor: 0, associatedEffect: EffectType.length,
             promptName: "Pulse Width", promptDesc: ["This setting controls the width of this instrument's pulse wave, just like the pulse width slider.", "At $HI, your instrument will sound like a pure square wave (on 50% of the time). It will gradually sound narrower down to $LO, where it will be inaudible (as it is on 0% of the time).", "Changing pulse width randomly between a few values is a common strategy in chiptune music to lend some personality to a lead instrument.", "[OVERWRITING] [$LO - $HI] [%Duty]"] },
         { name: "detune", pianoName: "Detune", maxRawVol: Config.detuneMax - Config.detuneMin, newNoteVol: Config.detuneCenter, forSong: false, convertRealFactor: -Config.detuneCenter, associatedEffect: EffectType.detune,
-            promptName: "Instrument Detune", promptDesc: ["This setting controls the detune for this instrument, just like the detune slider.", "At $MID, your instrument will have no detune applied. Each tick corresponds to one cent, or one-hundredth of a pitch. Thus, each change of 100 ticks corresponds to one half-step of detune, up to two half-steps up at $HI, or two half-steps down at $LO.", "[OVERWRITING] [$LO - $HI] [cents]"] },
+            promptName: "Instrument Detune", promptDesc: ["This setting controls the detune for this instrument, just like the detune slider.", "At $MID, your instrument will have no detune applied. Each tick corresponds to one cent, or one-hundredth of a pitch. Thus, each change of 100 ticks corresponds to one half-step of detune, up to six half-steps up at $HI, or six half-steps down at $LO.", "[OVERWRITING] [$LO - $HI] [cents]"] },
         { name: "vibrato depth", pianoName: "Vibrato Depth", maxRawVol: 50, newNoteVol: 0, forSong: false, convertRealFactor: 0, associatedEffect: EffectType.vibrato,
             promptName: "Vibrato Depth", promptDesc: ["This setting controls the amount that your pitch moves up and down by during vibrato, just like the vibrato depth slider.", "At $LO, your instrument will have no vibrato depth so its vibrato would be inaudible. This increases up to $HI, where an extreme pitch change will be noticeable.", "[OVERWRITING] [$LO - $HI] [pitch ÷25]"] },
         { name: "song detune", pianoName: "Detune", maxRawVol: Config.songDetuneMax - Config.songDetuneMin, newNoteVol: Math.ceil((Config.songDetuneMax - Config.songDetuneMin) / 2), forSong: true, convertRealFactor: -250, associatedEffect: EffectType.length,

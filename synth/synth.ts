@@ -2421,17 +2421,17 @@ export class Song {
         this.scale = 0;
         this.key = 0;
         this.loopStart = 0;
-        this.loopLength = 4;
+        this.loopLength = 8;
         this.tempo = 150;
         this.reverb = 0;
         this.beatsPerBar = 8;
         this.barCount = 16;
-        this.patternsPerChannel = 8;
+        this.patternsPerChannel = 32;
         this.rhythm = 1;
         this.layeredInstruments = false;
         this.patternInstruments = false;
 
-        this.title = "Unnamed";
+        this.title = "Untitled Project";
         document.title = EditorConfig.versionDisplayName;
 
         if (andResetChannels) {
@@ -5345,7 +5345,9 @@ class EnvelopeComputer {
             case EnvelopeType.flare: const attack: number = 0.25 / Math.sqrt(envelope.speed); return time < attack ? time / attack : 1.0 / (1.0 + (time - attack) * envelope.speed);
             case EnvelopeType.decay: return Math.pow(2, -envelope.speed * time);
             case EnvelopeType.modboxTrill: const decay = 0.25 / Math.sqrt(envelope.speed); return time < decay ? (decay - time) / decay : 1.0;
-            case EnvelopeType.modboxBlip: return Math.max((1.5 / (-0.85 + envelope.speed - 100 * time + 0.55))) - 1.08;
+            case EnvelopeType.modboxBlip: {const endTime1: number = 0.25 / Math.sqrt(envelope.speed); const endTime2: number = 0.7 / Math.sqrt(envelope.speed); const zeroIntercept: number = 2; const startValue2: number = 0.9; return time < endTime1 ? ((startValue2 - zeroIntercept) / endTime1) * time + zeroIntercept : time < endTime2 ? ((1 - startValue2) / (endTime2 - endTime1)) * (time - endTime1) + startValue2 : 1.0;}
+            case EnvelopeType.modboxClick: {const attack: number = 0.25 / envelope.speed; const zeroIntercept = 9.5; return time < attack ? (time * ((-zeroIntercept) + 1) - attack * (-zeroIntercept)) / attack : 1.0;}
+            case EnvelopeType.modboxBow: {const attack = 0.25 / Math.sqrt(envelope.speed); const zeroIntercept = -0.40; return time < attack ? (time * ((-zeroIntercept) + 1) - attack * (-zeroIntercept)) / attack : 1.0;}
             default: throw new Error("Unrecognized operator envelope type.");
         }
 
@@ -8708,7 +8710,7 @@ export class Synth {
             }
 
             const startFreq: number = Instrument.frequencyFromPitch(startPitch);
-            if (instrument.type == InstrumentType.chip || instrument.type == InstrumentType.customChipWave || instrument.type == InstrumentType.harmonics || instrument.type == InstrumentType.pickedString) {
+            if (instrument.type == InstrumentType.chip || instrument.type == InstrumentType.customChipWave || instrument.type == InstrumentType.harmonics || instrument.type == InstrumentType.pickedString || instrument.type == InstrumentType.spectrum || instrument.type == InstrumentType.pwm) {
                 // These instruments have two waves at different frequencies for the unison feature.
                 const unison: Unison = Config.unisons[instrument.unison];
                 const voiceCountExpression: number = (instrument.type == InstrumentType.pickedString) ? 1 : unison.voices / 2.0;

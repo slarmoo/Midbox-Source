@@ -10,10 +10,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.7/js/select2.min.js"></script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>JummBox</title>
-    <meta name="application-name" content="JummBox" />
-    <meta name="apple-mobile-web-app-title" content="JummBox">
-	<meta name="description" content="JummBox is an online tool for sketching and sharing instrumental music." />
+    <title>Midbox</title>
+    <meta name="application-name" content="Midbox" />
+    <meta name="apple-mobile-web-app-title" content="Midbox">
+	<meta name="description" content="Midbox is an online tool for sketching and sharing instrumental music." />
     <meta name="keywords" content="chiptune, instrumental, music, song, melody, composition, tool, free, square wave, NES, NSF, JummBox, jummbox, BeepBox, beepbox" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -154,29 +154,42 @@
 <body>
     <div id="beepboxEditorContainer">
         <noscript>
-            Sorry, JummBox requires a JavaScript-enabled browser.
+            Sorry, Midbox requires a JavaScript-enabled browser.
         </noscript>
     </div>
     <div id="text-content">
         <section>
 
             <h1>
-                <font color="#9c64f7">JummBox</font>
+                <font color="#9c64f7">Midbox</font>
                 <span id="jummboxPlant" style="display: inline; color:#62a13b"></span>
             </h1>
             
             <p id="introduction">
-                This is an online tool for sketching and sharing chiptune melodies.<br>
-                It is a modification of the <a href="https://www.beepbox.co/">original BeepBox</a> by John Nesky.
+                Midbox is an online tool for sketching and sharing chiptune melodies.<br>
+                This is a modification of <a href="https://jummbus.bitbucket.io/">JummBox</a> by Jummbus.
+                That in turn, is a modification of the original <a href="https://www.beepbox.co/">BeepBox</a> by John Nesky.
             </p>
             <p>
-                If you're familiar with BeepBox and just want to learn what JummBox does differently, check out this <a href="https://youtu.be/26yDP4ACuzE">overview video</a>.
-                You can also find the latest patch notes <a href="https://jummbus.bitbucket.io/patch_notes/2.5.html">here</a>.
+                Midbox was made by Mid. 
+                It was made possible by LeoV.
+                Many other credits can be found within the patch notes of each update!
+            </p>
+            <p>
+                If you're familiar with BeepBox and JummBox, and just want to learn what Midbox does differently, then check the patch notes!
+                You can find the latest patch notes <a href="https://docs.google.com/document/d/1r-1FV-uNmb9fQCZP297HT2XQkoiZII7ICfmeTt16A5w/edit?usp=sharing">here</a>.
             </p>
             <p>
                 All song data is contained in the URL at the top of your browser.
                 When you make changes to the song, the URL is updated to reflect your changes.
                 When you are satisfied with your song, just copy and paste the URL to save and share your song!
+                Of course, there are other ways to share your song too!
+                You can use "shorten song URL" found in the files menu to turn your song link that may hold thousands of characters, into a very small link consisting of only around 30.
+                Pastelink is also a great way to put multiple songs in one area, or put your massive song link into a smaller link.
+                While digging in the files menu, you will find exporting options available too!
+                Take note that importing is currently untested, and may even be broken, and will probably remain like that for a while.
+                You can choose how to export your song, whether that be by link, by mp3, wav, midi, txt, or any other way not mentioned.
+                Please note that anything regarding exporting using json and importing from and to other mods and etc will most likely not be functional.
             </p>
             <!--
     <div class="donation">
@@ -199,8 +212,11 @@
                         Instructions
                     </h2>
                     <p>
-                        You can add or remove notes by clicking on the gray rows at the top.
-                        JummBox automatically plays the notes out loud for you. Try it!
+                        There is a grid at the top.
+                        That grid is the note editor.
+                        Place a note by clicking or tapping on your screen.
+                        Then, go to where it says "play", and click/tap on that.
+                        Midbox will then play those notes to you out loud using whatever audio device you have!
                     </p>
                     <p>
                         Notes go into patterns, and you can edit one pattern at a time.
@@ -208,38 +224,46 @@
                         <span id="bar-editing">
                             Click the boxes to move to a different part of the song, or click the arrows on the currently selected box to swap which pattern is played during that part of the song.
                         </span>
+                        If you are using keyboard, you can also just press a number to change the number of the pattern instantly to the pressed number.
+                        Note that any patterns 33 and above will require you to go to channel settings and increase the maximum yourself.
                     </p>
                     <p>
-                        JummBox can play several rows of patterns simultaneously, and each row has its own set of patterns.
-                        Most rows can play melodies or harmonies, but the bottom row is for drums.
+                        Midbox can play several rows of patterns simultaneously, and each row has its own set of patterns.
+                        Most rows can play melodies or harmonies, which are referred to as pitch channels, but the bottom row is for drums, or drum channels.
+                        Also, who's to say that you can't make drums in the pitch channels too?
+                        You can also head to those channel settings and enable mod channels, which act like a more basic automation.
+                        They will be located below the drum channels and have noticably brighter colors then every other channel.
                     </p>
                     <p>
                         All song data is contained in the URL at the top of your browser.
                         When you make changes to the song, the URL is updated to reflect your changes.
                         When you are satisfied with your song, just copy and paste the URL to save and share your song!
+                        You've heard this before.
+                        If you ever want to share your song to the community, try joining one of BeepBox's various platforms like discord and reddit!
                     </p>
 
                     <div id="keyboard-instructions">
                         <p>
-                            When JummBox has focus (click on its interface above), you can use these keyboard shortcuts: <br />
+                            When Midbox has focus (click on its interface above), you can use these keyboard shortcuts: <br />
                         </p>
                         <ul>
-                            <li>Spacebar: play or pause the song</li>
+                            <li><b>Spacebar</b>: play or pause the song</li>
                             <li><b>Shift Spacebar</b>: play from mouse location</li>
 							<li><b>Z</b>: undo, <b>Y or Shift Z</b>: redo</li>
-                            <li>C: copy pattern from selection</li>
-                            <li>V: paste pattern into selection</li>
+                            <li><b>C</b>: copy pattern from selection</li>
+                            <li><b>V</b>: paste pattern into selection</li>
                             <li><b>0-9</b>: assign pattern number to selection</li>
 							<li><b>Arrows</b>: move selection</li>
 							<li><b>Ctrl + Arrows</b>: rearrange channels</li>
 							<li><b>[ ]</b>: move playhead backward or forward</li>
 							<li><b>F/H</b>: move to First or Highlighted pattern </li>
 							<li><b>Shift & Drag</b>: select part of a pattern (long press on touch screen)</li>
-							<li>These are just a few shortcuts, check JummBox's edit menu for more!</li>
+							<li>These are just a few shortcuts, check Midbox's edit menu for more!</li>
+                            <li>I will also provide a document explaining each keybind and their functions <a href="https://docs.google.com/document/d/1INYcVwx-RqjcviA_a4oXF-Sf-8XlXYT4K4SSaQ8TIvI/edit?usp=sharing">here</a>.</li>
                         </ul>
                     </div>
                     <p>
-                        In the note pattern editor, you can click and drag horizontally on a note to adjust its duration.
+                        In the note editor, you can click and drag horizontally on a note to adjust its duration.
                         You can also click above or below an existing note to add more notes to be played simultaneously, which is called a chord.
                     </p>
                     <p>
@@ -250,7 +274,7 @@
 
                     </p>
                     <p>
-                        JummBox has many more features.
+                        Midbox has many more features, with many more being added nearly weekly!
                         Try playing with the buttons and menus on the right side to find out what it can do!
                         You can also click on the label next to each option for a description of what it does.
                     </p>
@@ -258,6 +282,7 @@
                         <a href="https://twitter.com/beepboxco" target="_blank">Check out some of these songs that other people have posted on Twitter!</a>
                         If you find something you like, you should let the creator know!
                         And if you see any beginners asking for advice, maybe you can help them!
+                        Just to let you know, the bot has stopped retweeting songs due to Twitter/X policy changes.
                     </p>
                 </section>
                 <section>
@@ -265,27 +290,24 @@
                         About
                     </h2>
                     <p>
-                        JummBox is developed by Jummbus. You can find him sporadically at <a href="https://twitter.com/jummbus" target="_blank">twitter.com/jummbus</a>.<br><br>
-                        BeepBox was originally developed by <a href="http://www.johnnesky.com" target="_blank">John Nesky</a>, also known as <a href="https://twitter.com/shaktool" target="_blank">@shaktool</a>.
-                    </p>
-					<p>
-						The next oldest version of JummBox is available <a href=https://jummbus.bitbucket.io/2_4>here</a>.
-					</p>
-                    <p>
-                        JummBox does not claim ownership over songs created with it, so original songs belong to their authors.
+                        Midbox is developed by Mid, of which, is pretty obvious. You can find him hanging out in the BeepBox discord!
+                        BeepBox was originally developed by <a href="http://www.johnnesky.com" target="_blank">John Nesky</a>, also known as <a href="https://twitter.com/shaktool" target="_blank">Shaktool</a>. Check them out!
                     </p>
                     <p>
-                        Neither Jummbus nor Jummbox assume responsibility for any copyrighted material played on JummBox. No songs are ever received, recorded, or distributed by JummBox's servers. All song data is contained in the URL after the hash (#) mark, and JummBox running inside your browser converts that data into sound waves.
+                        Midbox does not claim ownership over songs created with it, so original songs belong to their authors.
                     </p>
                     <p>
-                        JummBox does not collect, track, or share any user data.
+                        Neither Mid, Midbox, or any other BeepMod and/or their repsective developers assume responsibility for any copyrighted material played on Midbox or any similar tools. No songs are ever received, recorded, or distributed by Midbox's servers. All song data is contained in the URL after the hash (#) mark, and Midbox running inside your browser converts that data into sound waves.
+                    </p>
+                    <p>
+                        Midbox does not collect, track, or share any user data.
                     </p>
                     <p id="offline-instructions">
-                        You can download <a download="jummbox_offline.html" href="jummbox_offline.html">an offline version of JummBox</a> to use when you don't have access to the internet. The features are otherwise the same.
+                        You currently cannot download an offline version of Midbox. There will be one soon.
                     </p>
                     <p>
-                        You can download and use <a href="https://github.com/jummbus/jummbox" target="_blank">the source code</a> under the MIT license.
-                        The original BeepBox source code by John Nesky can be found <a href="https://github.com/johnnesky/beepbox" target="_blank">here</a>.
+                        You can download and use the <a href="https://github.com/Mid-The-Modder/Midbox-Source" target="_blank">source code</a> of Midbox under the MIT license.
+                        The original BeepBox source code by John Nesky can be found <a href="https://github.com/johnnesky/beepbox" target="_blank">here</a>. It may also be used under the MIT license.
                     </p>
                 </section>
             </main>
@@ -327,7 +349,7 @@
         }
 
         if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|android|ipad|playbook|silk/i.test(navigator.userAgent)) {
-            document.getElementById("introduction").innerHTML = "JummBox is an online tool for sketching and sharing chiptune melodies. Make sure that your volume is turned up, then press the play button!";
+            document.getElementById("introduction").innerHTML = "Midbox is an online tool for sketching and sharing chiptune melodies. Make sure that your volume is turned up, then press the play button!";
             document.getElementById("keyboard-instructions").style.display = "none";
             document.getElementById("bar-editing").innerHTML = "Tap the boxes to move to a different part of the song, or tap on the currently selected box to swap which pattern is played during that part of the song.";
 			//document.getElementById("offline-instructions").innerHTML = 'You can use BeepBox when your device is offline if you put a shortcut to BeepBox on your home screen. <ul><li>Chrome: find the "Add to Home Screen" option in the ⋮ menu.</li><li>Firefox: find the "Add Page Shortcut" option in the ⋮ menu.</li><li>Safari: find the "Add to Home Screen" option in the bookmark menu.</li></ul>';
@@ -357,7 +379,7 @@
             fileref.setAttribute("src", "beepbox_editor.min.js");
             document.head.appendChild(fileref);
         } else {
-            document.getElementById("beepboxEditorContainer").innerHTML = "Sorry, JummBox doesn't support your browser. Try a recent version of Chrome, Firefox, Edge, Safari, or Opera.";
+            document.getElementById("beepboxEditorContainer").innerHTML = "Sorry, Midbox doesn't support your browser. Try a recent version of Chrome, Firefox, Edge, Safari, or Opera.";
         }
 
 		// If the page was loaded with an old song version that old versions of BeepBox support,

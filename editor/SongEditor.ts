@@ -345,7 +345,7 @@ export class SongEditor {
         option({ value: "copyUrl" }, "⎘ Copy Song URL"),
         option({ value: "shareUrl" }, "⤳ Share Song URL"),
         option({ value: "shortenUrl" }, "… Shorten Song URL"),
-        option({ value: "viewPlayer" }, "▶ View in Song Player"),
+        option({ value: "viewPlayer" }, "▶ View in Song Player (P)"),
         option({ value: "copyEmbed" }, "⎘ Copy HTML Embed Code"),
         option({ value: "songRecovery" }, "⚠ Recover Recent Song..."),
     );
@@ -1811,7 +1811,7 @@ export class SongEditor {
                 this._reverbRow.style.display = "none";
             }
 
-            if (instrument.type == InstrumentType.chip || instrument.type == InstrumentType.customChipWave || instrument.type == InstrumentType.harmonics || instrument.type == InstrumentType.pickedString) {
+            if (instrument.type == InstrumentType.chip || instrument.type == InstrumentType.customChipWave || instrument.type == InstrumentType.harmonics || instrument.type == InstrumentType.pickedString || instrument.type == InstrumentType.spectrum || instrument.type == InstrumentType.pwm || instrument.type == InstrumentType.fm) {
                 this._unisonSelectRow.style.display = "";
                 setSelectedValue(this._unisonSelect, instrument.unison);
             } else {
@@ -2787,6 +2787,11 @@ export class SongEditor {
                     this._toggleRecord();
                     event.preventDefault();
                     this.refocusStage();
+                } else
+                if (canPlayNotes) break;
+                if (needControlForShortcuts == (event.ctrlKey || event.metaKey)) {
+                    location.href = "player/#song=" + this._doc.song.toBase64String();
+                    event.preventDefault();
                 }
                 break;
             case 90: // z

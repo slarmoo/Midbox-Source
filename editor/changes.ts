@@ -700,12 +700,13 @@ export class ChangeRandomGeneratedInstrument extends Change {
             }
         } else {
             const type: InstrumentType = selectWeightedRandom([
-                { item: InstrumentType.chip, weight: 4 },
-                { item: InstrumentType.pwm, weight: 4 },
-                { item: InstrumentType.harmonics, weight: 5 },
-                { item: InstrumentType.pickedString, weight: 5 },
-                { item: InstrumentType.spectrum, weight: 1 },
-                { item: InstrumentType.fm, weight: 5 },
+                { item: InstrumentType.chip, weight: 3 },
+                { item: InstrumentType.pwm, weight: 3 },
+                { item: InstrumentType.harmonics, weight: 3 },
+                { item: InstrumentType.pickedString, weight: 3 },
+                { item: InstrumentType.spectrum, weight: 3 },
+                { item: InstrumentType.fm, weight: 3 },
+                //{ item: InstrumentType.customChipWave, weight: 3 },
             ]);
             instrument.preset = instrument.type = type;
 
@@ -713,16 +714,27 @@ export class ChangeRandomGeneratedInstrument extends Change {
             instrument.fadeOut = selectCurvedDistribution(0, Config.fadeOutTicks.length - 1, Config.fadeOutNeutral, 2);
             if (type == InstrumentType.chip || type == InstrumentType.harmonics || type == InstrumentType.pickedString) {
                 instrument.unison = Config.unisons.dictionary[selectWeightedRandom([
-                    { item: "none", weight: 10 },
-                    { item: "shimmer", weight: 5 },
-                    { item: "hum", weight: 4 },
-                    { item: "honky tonk", weight: 3 },
-                    { item: "dissonant", weight: 1 },
-                    { item: "fifth", weight: 1 },
+                    { item: "none", weight: 20 },
+                    { item: "shimmer", weight: 2 },
+                    { item: "hum", weight: 2 },
+                    { item: "honky tonk", weight: 2 },
+                    { item: "dissonant", weight: 2 },
+                    { item: "fifth", weight: 2 },
                     { item: "octave", weight: 2 },
                     { item: "bowed", weight: 2 },
-                    { item: "piano", weight: 5 },
-                    { item: "warbled", weight: 3 },
+                    { item: "piano", weight: 2 },
+                    { item: "warbled", weight: 2 },
+                    { item: "hyper", weight: 2 },
+                    { item: "peak", weight: 2 },
+                    { item: "deep shift", weight: 2 },
+                    { item: "broke", weight: 2 },
+                    { item: "vary", weight: 2 },
+                    { item: "energetic", weight: 2 },
+                    { item: "lone fifth", weight: 2 },
+                    { item: "alternate fifth", weight: 2 },
+                    { item: "offtune", weight: 2 },
+                    { item: "hold", weight: 2 },
+                    { item: "buried", weight: 2 },
                 ])].index;
             }
 
@@ -730,13 +742,23 @@ export class ChangeRandomGeneratedInstrument extends Change {
                 instrument.effects |= 1 << EffectType.transition;
                 instrument.transition = Config.transitions.dictionary[selectWeightedRandom([
                     { item: "interrupt", weight: 1 },
-                    { item: "slide", weight: 2 },
+                    { item: "slide", weight: 1 },
+                    { item: "insta-slide", weight: 1 },
+                    { item: "slide in pattern", weight: 1 },
+                    { item: "continue", weight: 1 },
+                    { item: "continue in pattern", weight: 1 },
                 ])].index;
             }
             if (Math.random() < 0.2) {
                 instrument.effects |= 1 << EffectType.chord;
                 instrument.chord = Config.chords.dictionary[selectWeightedRandom([
-                    { item: "strum", weight: 2 },
+                    { item: "strum", weight: 1 },
+                    { item: "medium strum", weight: 1 },
+                    { item: "slow strum", weight: 1 },
+                    { item: "1/3 strum", weight: 1 },
+                    { item: "1/3 medium strum", weight: 1 },
+                    { item: "1/3 slow strum", weight: 1 },
+                    { item: "build up", weight: 1 },
                     { item: "arpeggio", weight: 1 },
                 ])].index;
             }
@@ -745,15 +767,22 @@ export class ChangeRandomGeneratedInstrument extends Change {
                 if (instrument.pitchShift != Config.pitchShiftCenter) {
                     instrument.effects |= 1 << EffectType.pitchShift;
                     instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["pitchShift"].index, 0, Config.envelopes.dictionary[selectWeightedRandom([
+                        { item: "none", weight: 4 },
+                        { item: "punch", weight: 2 },
                         { item: "flare 1", weight: 2 },
-                        { item: "flare 2", weight: 1 },
-                        { item: "flare 3", weight: 1 },
-                        { item: "twang 1", weight: 16 },
-                        { item: "twang 2", weight: 8 },
-                        { item: "twang 3", weight: 4 },
-                        { item: "decay 1", weight: 4 },
+                        { item: "flare 2", weight: 2 },
+                        { item: "flare 3", weight: 2 },
+                        { item: "twang 1", weight: 2 },
+                        { item: "twang 2", weight: 2 },
+                        { item: "twang 3", weight: 2 },
+                        { item: "decay 1", weight: 2 },
                         { item: "decay 2", weight: 2 },
-                        { item: "decay 3", weight: 1 },
+                        { item: "decay 3", weight: 2 },
+                        { item: "swell 1", weight: 2 },
+                        { item: "swell 2", weight: 2 },
+                        { item: "swell 3", weight: 2 },
+                        { item: "modbox bow", weight: 2 },
+                        { item: "modbox click", weight: 2 },
                     ])].index);
                 }
             }
@@ -763,7 +792,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                 instrument.vibrato = Config.vibratos.dictionary[selectWeightedRandom([
                     { item: "light", weight: 2 },
                     { item: "delayed", weight: 2 },
-                    { item: "heavy", weight: 1 },
+                    { item: "heavy", weight: 2 },
                     { item: "shaky", weight: 2 },
                 ])].index;
             }
@@ -784,25 +813,30 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     new PotentialFilterPoint(1.0, FilterType.lowPass, midFreq, maxFreq, 8000.0, -1),
                 ]);
                 instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["noteFilterAllFreqs"].index, 0, Config.envelopes.dictionary[selectWeightedRandom([
-                    { item: "punch", weight: 6 },
+                    { item: "note size", weight: 2 },
+                    { item: "punch", weight: 2 },
                     { item: "flare 1", weight: 2 },
-                    { item: "flare 2", weight: 4 },
+                    { item: "flare 2", weight: 2 },
                     { item: "flare 3", weight: 2 },
                     { item: "twang 1", weight: 2 },
-                    { item: "twang 2", weight: 4 },
-                    { item: "twang 3", weight: 4 },
-                    { item: "swell 1", weight: 4 },
+                    { item: "twang 2", weight: 2 },
+                    { item: "twang 3", weight: 2 },
+                    { item: "swell 1", weight: 2 },
                     { item: "swell 2", weight: 2 },
-                    { item: "swell 3", weight: 1 },
-                    { item: "tremolo1", weight: 1 },
-                    { item: "tremolo2", weight: 1 },
-                    { item: "tremolo3", weight: 1 },
-                    { item: "tremolo4", weight: 1 },
-                    { item: "tremolo5", weight: 1 },
-                    { item: "tremolo6", weight: 1 },
-                    { item: "decay 1", weight: 1 },
+                    { item: "swell 3", weight: 2 },
+                    { item: "tremolo1", weight: 2 },
+                    { item: "tremolo2", weight: 2 },
+                    { item: "tremolo3", weight: 2 },
+                    { item: "tremolo4", weight: 2 },
+                    { item: "tremolo5", weight: 2 },
+                    { item: "tremolo6", weight: 2 },
+                    { item: "decay 1", weight: 2 },
                     { item: "decay 2", weight: 2 },
                     { item: "decay 3", weight: 2 },
+                    { item: "modbox trill", weight: 2 },
+                    { item: "modbox blip", weight: 2 },
+                    { item: "modbox click", weight: 2 },
+                    { item: "modbox bow", weight: 2 },
                 ])].index);
             }
             if (Math.random() < 0.1) {
@@ -844,25 +878,29 @@ export class ChangeRandomGeneratedInstrument extends Change {
 
                     if (Math.random() < 0.6) {
                         instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["pulseWidth"].index, 0, Config.envelopes.dictionary[selectWeightedRandom([
-                            { item: "punch", weight: 6 },
+                            { item: "note size", weight: 2 },
+                            { item: "punch", weight: 2 },
                             { item: "flare 1", weight: 2 },
-                            { item: "flare 2", weight: 4 },
+                            { item: "flare 2", weight: 2 },
                             { item: "flare 3", weight: 2 },
                             { item: "twang 1", weight: 2 },
-                            { item: "twang 2", weight: 4 },
-                            { item: "twang 3", weight: 4 },
-                            { item: "swell 1", weight: 4 },
+                            { item: "twang 2", weight: 2 },
+                            { item: "twang 3", weight: 2 },
+                            { item: "swell 1", weight: 2 },
                             { item: "swell 2", weight: 2 },
-                            { item: "swell 3", weight: 1 },
-                            { item: "tremolo1", weight: 1 },
-                            { item: "tremolo2", weight: 1 },
-                            { item: "tremolo3", weight: 1 },
-                            { item: "tremolo4", weight: 1 },
-                            { item: "tremolo5", weight: 1 },
-                            { item: "tremolo6", weight: 1 },
-                            { item: "decay 1", weight: 1 },
+                            { item: "swell 3", weight: 2 },
+                            { item: "tremolo1", weight: 2 },
+                            { item: "tremolo2", weight: 2 },
+                            { item: "tremolo3", weight: 2 },
+                            { item: "tremolo4", weight: 2 },
+                            { item: "tremolo5", weight: 2 },
+                            { item: "tremolo6", weight: 2 },
+                            { item: "decay 1", weight: 2 },
                             { item: "decay 2", weight: 2 },
                             { item: "decay 3", weight: 2 },
+                            { item: "modbox trill", weight: 2 },
+                            { item: "modbox blip", weight: 2 },
+                            { item: "modbox click", weight: 2 },
                         ])].index);
                     }
                 } break;
@@ -932,26 +970,26 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         instrument.operators[i].frequency = selectCurvedDistribution(0, Config.operatorFrequencies.length - 1, 0, 3);
                         instrument.operators[i].amplitude = selectCurvedDistribution(0, Config.operatorAmplitudeMax, Config.operatorAmplitudeMax - 1, 2);
                         instrument.operators[i].waveform = Config.operatorWaves.dictionary[selectWeightedRandom([
-                            { item: "sine", weight: 10 },
-                            { item: "triangle", weight: 6 },
+                            { item: "sine", weight: 3 },
+                            { item: "triangle", weight: 3 },
                             { item: "sawtooth", weight: 3 },
-                            { item: "pulse width", weight: 6 },
+                            { item: "pulse width", weight: 3 },
                             { item: "ramp", weight: 3 },
-                            { item: "trapezoid", weight: 4 },
+                            { item: "trapezoid", weight: 3 },
                         ])].index;
                         if (instrument.operators[i].waveform == 3/*"pulse width"*/) {
                             instrument.operators[i].pulseWidth = selectWeightedRandom([
                                 { item: 0, weight: 3 },
-                                { item: 1, weight: 5 },
-                                { item: 2, weight: 7 },
-                                { item: 3, weight: 10 },
-                                { item: 4, weight: 15 },
-                                { item: 5, weight: 25 }, // 50%
-                                { item: 6, weight: 15 },
-                                { item: 7, weight: 10 },
-                                { item: 8, weight: 7 },
-                                { item: 9, weight: 5 },
+                                { item: 1, weight: 3 },
+                                { item: 2, weight: 3 },
+                                { item: 3, weight: 3 },
+                                { item: 4, weight: 3 },
+                                { item: 5, weight: 3 }, // 50%
+                                { item: 6, weight: 3 },
+                                { item: 7, weight: 3 },
+                                { item: 8, weight: 3 },
                                 { item: 9, weight: 3 },
+                                { item: 9, weight: 3 }, // What is this
                             ]);
                         }
                     }
@@ -970,55 +1008,62 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "swell 1", weight: 2 },
                                 { item: "swell 2", weight: 2 },
                                 { item: "swell 3", weight: 2 },
-                                { item: "tremolo1", weight: 1 },
-                                { item: "tremolo2", weight: 1 },
-                                { item: "tremolo3", weight: 1 },
-                                { item: "tremolo4", weight: 1 },
-                                { item: "tremolo5", weight: 1 },
-                                { item: "tremolo6", weight: 1 },
-                                { item: "decay 1", weight: 1 },
-                                { item: "decay 2", weight: 1 },
-                                { item: "decay 3", weight: 1 },
+                                { item: "tremolo1", weight: 2 },
+                                { item: "tremolo2", weight: 2 },
+                                { item: "tremolo3", weight: 2 },
+                                { item: "tremolo4", weight: 2 },
+                                { item: "tremolo5", weight: 2 },
+                                { item: "tremolo6", weight: 2 },
+                                { item: "decay 1", weight: 2 },
+                                { item: "decay 2", weight: 2 },
+                                { item: "decay 3", weight: 2 },
+                                { item: "modbox trill", weight: 2 },
+                                { item: "modbox blip", weight: 2 },
+                                { item: "modbox click", weight: 2 },
+                                { item: "modbox bow", weight: 2 },
                             ])].index);
                             instrument.operators[i].waveform = Config.operatorWaves.dictionary[selectWeightedRandom([
-                                { item: "sine", weight: 10 },
-                                { item: "triangle", weight: 6 },
+                                { item: "sine", weight: 3 },
+                                { item: "triangle", weight: 3 },
                                 { item: "sawtooth", weight: 3 },
-                                { item: "pulse width", weight: 6 },
+                                { item: "pulse width", weight: 3 },
                                 { item: "ramp", weight: 3 },
-                                { item: "trapezoid", weight: 4 },
+                                { item: "trapezoid", weight: 3 },
                             ])].index;
                             if (instrument.operators[i].waveform == 3) {
                                 instrument.operators[i].pulseWidth = selectWeightedRandom([
                                     { item: 0, weight: 3 },
-                                    { item: 1, weight: 5 },
-                                    { item: 2, weight: 7 },
-                                    { item: 3, weight: 10 },
-                                    { item: 4, weight: 15 },
-                                    { item: 5, weight: 25 }, // 50%
-                                    { item: 6, weight: 15 },
-                                    { item: 7, weight: 10 },
-                                    { item: 8, weight: 7 },
-                                    { item: 9, weight: 5 },
+                                    { item: 1, weight: 3 },
+                                    { item: 2, weight: 3 },
+                                    { item: 3, weight: 3 },
+                                    { item: 4, weight: 3 },
+                                    { item: 5, weight: 3 }, // 50%
+                                    { item: 6, weight: 3 },
+                                    { item: 7, weight: 3 },
+                                    { item: 8, weight: 3 },
+                                    { item: 9, weight: 3 },
                                     { item: 9, weight: 3 },
                                 ]);
                             }
                         }
                         if (instrument.envelopeCount < Config.maxEnvelopeCount && Math.random() < 0.05) {
                             instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["operatorFrequency"].index, i, Config.envelopes.dictionary[selectWeightedRandom([
-                                { item: "punch", weight: 4 },
-                                { item: "flare 1", weight: 4 },
+                                { item: "punch", weight: 2 },
+                                { item: "flare 1", weight: 2 },
                                 { item: "flare 2", weight: 2 },
-                                { item: "flare 3", weight: 1 },
-                                { item: "twang 1", weight: 16 },
+                                { item: "flare 3", weight: 2 },
+                                { item: "twang 1", weight: 2 },
                                 { item: "twang 2", weight: 2 },
-                                { item: "twang 3", weight: 1 },
-                                { item: "swell 1", weight: 4 },
+                                { item: "twang 3", weight: 2 },
+                                { item: "swell 1", weight: 2 },
                                 { item: "swell 2", weight: 2 },
-                                { item: "swell 3", weight: 1 },
+                                { item: "swell 3", weight: 2 },
                                 { item: "decay 1", weight: 2 },
-                                { item: "decay 2", weight: 1 },
-                                { item: "decay 3", weight: 1 },
+                                { item: "decay 2", weight: 2 },
+                                { item: "decay 3", weight: 2 },
+                                { item: "modbox blip", weight: 2 },
+                                { item: "modbox trill", weight: 2 },
+                                { item: "modbox bow", weight: 2 },
                             ])].index);
                         }
                     }
@@ -1035,17 +1080,22 @@ export class ChangeRandomGeneratedInstrument extends Change {
                             { item: "swell 1", weight: 2 },
                             { item: "swell 2", weight: 2 },
                             { item: "swell 3", weight: 2 },
-                            { item: "tremolo1", weight: 1 },
-                            { item: "tremolo2", weight: 1 },
-                            { item: "tremolo3", weight: 1 },
-                            { item: "tremolo4", weight: 1 },
-                            { item: "tremolo5", weight: 1 },
-                            { item: "tremolo6", weight: 1 },
-                            { item: "decay 1", weight: 1 },
-                            { item: "decay 2", weight: 1 },
-                            { item: "decay 3", weight: 1 },
+                            { item: "tremolo1", weight: 2 },
+                            { item: "tremolo2", weight: 2 },
+                            { item: "tremolo3", weight: 2 },
+                            { item: "tremolo4", weight: 2 },
+                            { item: "tremolo5", weight: 2 },
+                            { item: "tremolo6", weight: 2 },
+                            { item: "decay 1", weight: 2 },
+                            { item: "decay 2", weight: 2 },
+                            { item: "decay 3", weight: 2 },
+                            { item: "modbox trill", weight: 2 },
+                            { item: "modbox blip", weight: 2 },
+                            { item: "modbox click", weight: 2 },
+                            { item: "modbox bow", weight: 2 },
                         ])].index);
                     }
+                //case InstrumentType.customChipWave: {
                 } break;
                 default: throw new Error("Unhandled pitched instrument type in random generator.");
             }

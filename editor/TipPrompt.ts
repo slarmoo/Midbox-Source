@@ -34,6 +34,7 @@ export class TipPrompt implements Prompt {
 				message = div(
 					h2("Song Tempo"),
 					p("This setting controls the speed of your song, measured in beats-per-minute. A \"beat\" is the duration of the little gray rectangles in the pattern editor. (In conventional music notation, a \"quarter note\" is usually equivalent to \"beat\".)"),
+					p("Tip: Alternating between two different tempos using a mod channel can create rhythm too! This can allow for easily creating songs with swing."),
 				);
 			} break;
 			case "reverb": {
@@ -52,7 +53,7 @@ export class TipPrompt implements Prompt {
 			case "instrumentIndex": {
 				message = div(
 					h2("Instrument Number"),
-					p("In the \"Channel Settings\" option from JummBox's \"File\" menu, there are a few ways to enable multiple instruments per channel."),
+					p("In the \"Channel Settings\" option from Midbox's \"File\" menu (If you are using keyboard, the keybind would be Q.), there are a few ways to enable multiple instruments per channel."),
 					p("First, you could enable multiple simultaneous instruments per channel. All of the channel's instruments will play all of the notes in the channel at the same time, and you can click an instrument number to view and edit its settings."),
 					p("Second, you could enable different instruments per pattern. Only one of the instruments will play at any given time, but you can click the instrument number to change which instrument is used for the currently selected pattern(s)."),
 					p("Finally, you can enable them both, in which case you can click an instrument number once to view it, and again to toggle whether the instrument is used for the currently selected pattern(s)."),
@@ -64,6 +65,7 @@ export class TipPrompt implements Prompt {
 					h2("Instrument Volume"),
 					p("This setting controls the volume of the selected instrument without affecting the volume of the other instruments. This allows you to balance the loudness of each instrument relative to each other."),
 					p("Please be careful when using volume settings above 0. This indicates amplification and too much of that can trip the audio limiter built into this tool. This can lead to your song sounding muffled if overused. But when used carefully, amplification can be a powerful tool!"),
+					p("Here is a small tip from Mid himself for mixing: Refrain from having any instrument's volume from being above 10, and keep every instrument volume around 0 for the best results. If your song doesn't sound loud enough, you can press Shift + L if you are on keyboard, or got to files > limiter settings to open up the limiter settings. This is a very powerful mixing tool to help mix your songs with more potency. Mess with the master gain to give a boost to your song volume."),
 				);
 			} break;
 			case "pan": {
@@ -71,6 +73,7 @@ export class TipPrompt implements Prompt {
 					h2("Instrument Panning"),
 					p("If you're listening through headphones or some other stereo sound system, this controls the position of the instrument and where the sound is coming from, ranging from left to right."),
 					p("As a suggestion, composers often put lead melodies, drums, and basses in the center, and spread other instruments toward either side. If too many instruments seem like they're coming from the same place, it can feel crowded and harder to distinguish individual sounds, especially if they cover a similar pitch range."),
+					p("Tip: If you have multiple of the same instrument, it is best to use panning to spread them out. You may also use panning to grab the feeling that a sound or ambience is coming from a certain direction, which, if performed correctly, can sound great."),
 				);
 			} break;
 			case "panDelay":
@@ -78,7 +81,7 @@ export class TipPrompt implements Prompt {
 					message = div(
 						h2("Stereo Delay"),
 						p("When panning, a slight delay is often added between the left and right ear to help make a sound feel more 'directional'. For example, in the real world your left ear will hear a sound coming from the left just slightly before the right ear."),
-						p("This setting controls how much delay is added. When this is set to minimum, panning only affects the volume of the left/right ear without changing the delay. This can help to get a more 'uniform' feeling sound, which can be desirable for making 8-bit music.")
+						p("This setting controls how much delay is added. When this is set to minimum, panning only affects the volume of the left/right ear without changing the delay. This can help to get a more 'uniform' feeling sound, which can be desirable for making 8-bit music."),
 					);
 				}
 				break;
@@ -86,7 +89,7 @@ export class TipPrompt implements Prompt {
 				{
 					message = div(
 						h2("Arpeggio Speed"),
-						p("This setting affects how fast your chord will 'arpeggiate', or cycle between notes. With a fast arpeggio speed it will sound rapid-fire, with a slow speed you can hear each note one after another.")
+						p("This setting affects how fast your chord will 'arpeggiate', or cycle between notes. With a fast arpeggio speed it will sound rapid-fire, with a slow speed you can hear each note one after another. If you maintain the arpeggio at a relatively slow pace, you could even lay them out like a normal melody! Although, don't do this. It is very impractical."),
 					);
 				}
 				break;
@@ -94,7 +97,7 @@ export class TipPrompt implements Prompt {
 				{
 					message = div(
 						h2("Faster Two-Note Arpeggio"),
-						p("This setting makes arpeggios with only two notes in them happen twice as fast. Arpeggios with more notes in them are unaffected.")
+						p("This setting makes arpeggios with only two notes in them happen twice as fast. Arpeggios with more notes in them are unaffected."),
 					);
 				}
 				break;
@@ -102,14 +105,19 @@ export class TipPrompt implements Prompt {
 				message = div(
 					h2("Detune"),
 					p("This setting can be used to finely control the pitch of your instrument. It is in units of 'cents', 100 of which equal a pitch shift of one semitone."),
-					p("Careful - you can quickly get very dissonant sounding songs by using this setting."),
+					p("Careful - you can quickly get very dissonant sounding songs by using this setting. If used well, you can detune your whole song and give it a whole new vibe! If used very slightly, it can give your instrument a shimmer effect with other instruments around that very amount of cents."),
 				);
 			} break;
 			case "instrumentType": {
 				message = div(
 					h2("Instrument Type"),
-					p("JummBox comes with many instrument presets, try them out! You can also create your own custom instruments!"),
-					p("There are also options for copying and pasting instrument settings and for generating random instruments at the top of the instrument type menu."),
+					p("Midbox comes with many instrument presets, try them out! You can also create your own custom instruments!"),
+					p("There are also options for copying and pasting instrument settings and for generating random instruments at the top of the instrument type menu. Get a feel of what every setting changes before you start attempting to master instrument design however."),
+					p("There are seven types of instrument types. Chip Wave is the most basic one. It consists of a certain waveform, and a unison. Custom Chip is a bit similar, but you get to create your own waveform!"),
+					p("Harmonics is a series of sine waves combined at multiple frequencies. Harmonics is commonly used for string-like instruments, and Picked String uses harmonics with a sustain to help build such sounds faster. This instrument type also comes with a unison."),
+					p("Pulse Width uses a pulse, like a square wave, and that pulse's duration can be configured manually."),
+					p("Spectrum is an instrument type that makes sounds more for drums, wind, and vocals. It obviously, uses a spectrum to do this."),
+					p("Finally, there is FM. It's a very complex instrument type that consists of waveforms at different frequencies with those waveforms having the ability to operated theirself. This instrument was used a lot by old consoles like the Sega Genisis."),
 				);
 			} break;
 			case "eqFilter": {
@@ -119,6 +127,7 @@ export class TipPrompt implements Prompt {
 					p("Click in the filter editor to insert, delete, or drag a filter control point. The horizontal position of the point determines which frequencies it affects, and the vertical position determines how the volume is affected at that frequency."),
 					p("Insert a new point on the left side of the filter editor to add a \"high-pass\" filter point, which additionally reduces the volume of lower frequencies, or insert a new point on the right side to add a \"low-pass\" filter point which reduces the volume of higher frequencies."),
 					p("You can also enable a \"Note Filter\" as an effect. EQ and note filters are mostly the same, but have different purposes. EQ filters are for overall adjustments, whereas note filters are for dynamic control and can be moved with envelopes. Note filters also change how the distortion effect sounds."),
+					p("Tip: If say, one of your instruments are too loud, yet when you turn down the volume, the best parts of that instrument are too silent, you can put a point on the EQ filter to decrease the volume of the loud part, while keeping that juicy part at normal volume. If you are on keyboard, press Shift + E to open an enhanced view of the EQ filter."),
 				);
 			} break;
 			case "noteFilter": {
@@ -128,6 +137,7 @@ export class TipPrompt implements Prompt {
 					p("Filters are a way of emphasizing or diminishing different parts of a sound. Musical notes have a fundamental (base) frequency, but the sound of a musical note also has parts at higher frequencies and filters can adjust the volume of each of these parts based on their frequency."),
 					p("Click in the filter editor to insert, delete, or drag a filter control point. The horizontal position of the point determines which frequencies it affects, and the vertical position determines how the volume is affected at that frequency."),
 					p("Insert a new point on the left side of the filter editor to add a \"high-pass\" filter point, which additionally reduces the volume of lower frequencies, or insert a new point on the right side to add a \"low-pass\" filter point which reduces the volume of higher frequencies."),
+					p("Tip: Note filters can also make interesting noises when combined with bit crush and frequency crush effects. If you create an envelope that changes the note filter points by note size, and then add a low-pass point somewhere between the top left and top center of the note filter hud, you can create dubstep-like sounds by using note size. If you are on keyboard and have the effect enabled, press Shift + N to open an enhanced view of the note filter."),
 				);
 			} break;
 			case "fadeInOut": {
@@ -136,6 +146,7 @@ export class TipPrompt implements Prompt {
 					p("This setting controls how long it takes for notes to reach full volume at the beginning or decay to silence at the end."),
 					p("An instant fade-in sounds like instruments that are played by hitting or plucking, whereas slower fade-ins sound like instruments that are played by blowing air."),
 					p("You can also make the fade-out start before the note ends to leave a gap before the next note starts, or after the note ends to allow the sound of the end of the note to overlap with the start of the next note."),
+					p("Tip: Be mindful on how transitions work, for if you connect a row of notes together and enable a seamless transition like continue, the fade in/outs will no long take effect until after the chain of notes when no notes connect."),
 				);
 			} break;
 			case "transition": {
@@ -144,39 +155,42 @@ export class TipPrompt implements Prompt {
 					p("Usually, when one note ends at the same time another begins, the old note will fade out and the new note will fade in based on the fade in/out settings, but this setting can override that, connecting the end of one note to the beginning of the next."),
 					p("The \"interrupt\" transition makes the wave suddenly change from the old note's frequency to the new note's frequency without any fading, but still restarts envelopes at the beginning of the new note. The \"continue\" transition is similar but it doesn't even restart envelopes, and can be used to make each of the notes in a chord start or stop at different times!"),
 					p("The \"slide\" transition makes the pitch shift quickly but not instantaneously from the old note's frequency to the new note's frequency, and softly restarts envelopes. The \"slide in pattern\" transition is the same except it doesn't connect the last note in a pattern to the first note in the next pattern."),
+					p("The \"insta-slide\" transition is similar to slide, but slides across one note to another almost simultaneously, and the \"continue in pattern\" transition is like a combo of slide in pattern and continue, but the continue effect ends at the end of a pattern."),
 				);
 			} break;
 			case "chipWave": {
 				message = div(
 					h2("Chip Wave"),
-					p("JummBox comes with some sound waves based on classic electronic sound chips, as well as several unique waves. This is the basic source of the sound of the instrument, which is modified by the other instrument settings."),
+					p("Midbox comes with some sound waves based on classic electronic sound chips, as well as several unique waves. This is the basic source of the sound of the instrument, which is modified by the other instrument settings."),
+					p("Take note that if you want completely accurate waves that aren't chips, you can use the FM ones for more perfect sounds."),
 				);
 			} break;
 			case "chipNoise": {
 				message = div(
 					h2("Noise"),
-					p("JummBox comes with several basic noise sounds. These do not have any distinct musical pitch, and can be used like drums to create beats and emphasize your song's rhythm."),
+					p("Midbox comes with several basic noise sounds. These do not have any distinct musical pitch, and can be used like drums to create beats and emphasize your song's rhythm."),
+					p("Fun fact: Each placement in the drum channel slots is 6 pitches above the one below it."),
 				);
 			} break;
 			case "pulseWidth": {
 				message = div(
 					h2("Pulse Wave Width"),
-					p("This setting controls the shape and sound of a pulse wave. At the minimum width, it sounds light and buzzy. At the maximum width, it is shaped like a classic square wave."),
+					p("This setting controls the shape and sound of a pulse wave. At the minimum width, it sounds light and buzzy. At the maximum width, it is shaped like a classic square wave. Add some envelopes to manipulate the pulse width based on note size to manually be able to make chiptune-ish songs!"),
 				);
 			} break;
 			case "unison": {
 				message = div(
 					h2("Unison"),
 					p("This instrument can play two identical waves at different frequencies. When two waves play at slightly different frequencies, they move in and out of phase with each other over time as different parts of the waves line up. This creates a dynamic, shifting sound. Pianos are a common example of this kind of sound, because each piano key strikes multiple strings that are tuned to slightly different frequencies."),
-					p("The distance between two frequencies is called an \"interval\", and this setting controls how large it is. If the interval is too wide, then the waves may sound out-of-tune and \"dissonant\". However, if the interval is even larger, then the two frequencies can even be distinct pitches."),
+					p("The distance between two frequencies is called an \"interval\", and this setting controls how large it is. If the interval is too wide, then the waves may sound out-of-tune and \"dissonant\". However, if the interval is even larger, then the two frequencies can even be distinct pitches. A unison may also be offset, which allows it to sound like entirely different pitches when compared to no unison."),
 				);
 			} break;
 			case "chords": {
 				message = div(
 					h2("Chords"),
-					p("When multiple different notes occur at the same time, this is called a chord. Chords can be created in JummBox's pattern editor by adding notes above or below another note."),
-					p("This setting determines how chords are played. The standard option is \"simultaneous\" which starts playing all of the pitches in a chord at the same instant. The \"strum\" option is similar, but plays the notes starting at slightly different times. The \"arpeggio\" option is used in \"chiptune\" style music and plays a single tone that rapidly alternates between all of the pitches in the chord."),
-					p("Some JummBox instruments have an option called \"custom interval\" which uses the chord notes to control the interval between the waves of a single tone. This can create strange sound effects when combined with FM modulators."),
+					p("When multiple different notes occur at the same time, this is called a chord. Chords can be created in Midbox's pattern editor by adding notes above or below another note."),
+					p("This setting determines how chords are played. The standard option is \"simultaneous\" which starts playing all of the pitches in a chord at the same time. The \"strum\" option is similar, but plays the notes starting at slightly different times. Midbox currently offers a bunch of different strum settings that strum at different speeds and even different rhythms. Soon, these may be removed and replaced with a custom strum slider similar to the custom arpeggio one. The \"arpeggio\" option is used in chiptune style music and plays a single tone that rapidly alternates between all of the pitches in the chord. This setting may also be customized to your favor."),
+					p("Some Midbox instruments have an option called \"custom interval\" which uses the chord notes to control the interval between the waves of a single tone. This can create strange sound effects when combined with FM modulators."),
 				);
 			} break;
 			case "vibrato": {
@@ -189,21 +203,21 @@ export class TipPrompt implements Prompt {
 				{
 					message = div(
 						h2("Vibrato Depth"),
-						p("This setting affects the depth of your instrument's vibrato, making the wobbling effect sound stronger or weaker.")
+						p("This setting affects the depth of your instrument's vibrato, making the wobbling effect sound stronger or weaker."),
 					);
 				} break;
 			case "vibratoDelay":
 				{
 					message = div(
 						h2("Vibrato Delay"),
-						p("This setting changes when vibrato starts to kick in after a note is played. Vibrato is most common for long held notes and less common in short notes, so this can help you achieve that effect.")
+						p("This setting changes when vibrato starts to kick in after a note is played. Vibrato is most common for long held notes and less common in short notes, so this can help you achieve that effect."),
 					);
 				} break;
 			case "vibratoSpeed":
 				{
 					message = div(
 						h2("Vibrato Speed"),
-						p("This setting determines how fast the vibrato's up-and-down wobble effect will happen for your instrument.")
+						p("This setting determines how fast the vibrato's up-and-down wobble effect will happen for your instrument."),
 					);
 				}
 				break;
@@ -211,7 +225,8 @@ export class TipPrompt implements Prompt {
 				{
 					message = div(
 						h2("Vibrato Type"),
-						p("This determines the way vibrato causes your instrument's pitch to wobble. The normal type is smooth up and down, the shaky type is chaotic.")
+						p("This determines the way vibrato causes your instrument's pitch to wobble. The normal type is a smooth up and down, the shaky type is chaotic."),
+						p("Tip: When making wind sounds, you should enable the shaky vibrato type, along with slow vibrato speed and moderate-high vibrato depth."),
 					);
 				}
 				break;
@@ -221,6 +236,7 @@ export class TipPrompt implements Prompt {
 					p('FM Synthesis is a mysterious but powerful technique for crafting sounds, popularized by Yamaha keyboards and the Sega Genesis/Mega Drive. It may seem confusing, but try playing around with the options until you get a feel for it, or check out some of the preset examples!'),
 					p('This FM synthesizer uses up to four waves, numbered 1, 2, 3, and 4. Each wave may have its own frequency and volume.'),
 					p('There are two kinds of waves: "carrier" waves play a tone out loud, but "modulator" waves distort other waves instead. Wave 1 is always a carrier and plays a tone, but other waves may distort it. The "Algorithm" setting determines which waves are modulators, and which other waves those modulators distort. For example, "1←2" means that wave 2 modulates wave 1, and wave 1 plays out loud.'),
+					p('Tip: I would suggest playing around with FM presets like the synth kick to get a feel of what setting makes that instrument do what it does.'),
 				);
 			} break;
 			case "feedbackType": {
@@ -254,6 +270,7 @@ export class TipPrompt implements Prompt {
 					p("This setting allows you to draw your own noise spectrum! This is good for making drum sounds."),
 					p("If you only use certain frequencies and a soft fade in/out, it's also possible to make howling wind sounds or even musical wind instruments."),
 					p("The left side of the spectrum editor controls the noise energy at lower frequencies, and the right side controls higher frequencies."),
+					p("Adding effects to the spectrum usually has really cool effects. Try plotting out your own spectrum and then putting heavy distortion on it!"),
 				);
 			} break;
 			case "harmonics": {
@@ -261,12 +278,13 @@ export class TipPrompt implements Prompt {
 					h2("Harmonics"),
 					p("This setting allows you to design your own sound wave! Most musical waves are actually a combination of sine waves at certain frequencies, and this lets you control the volume of each sine wave individually."),
 					p("The left side of the harmonics editor controls the sine wave volumes at lower frequencies, and the right side controls higher frequencies."),
+					p("This instrument is more powerful when trying to make instruments such as pianos, bells, and picked string instruments."),
 				);
 			} break;
 			case "effects": {
 				message = div(
 					h2("Effects"),
-					p("JummBox has many different kinds of special effects you can add to instruments. You can turn on multiple effects at once, and they can be configured individually. Try them all out!"),
+					p("Midbox has many different kinds of special effects you can add to instruments. You can turn on multiple effects at once, and they can be configured individually. Try them all out!"),
 				);
 			} break;
 			case "drumsetEnvelope": {
@@ -306,19 +324,20 @@ export class TipPrompt implements Prompt {
 					p("This setting makes instruments play higher or lower pitches than the ones displayed in the pattern editor. Be careful that you don't confuse yourself!"),
 					p("You can combine this with envelopes to bend pitch over time, or play multiple simultaneous instruments with different pitch shifts for interesting layered sounds."),
 					p("The intervals created by this setting are in \"just intonation\" which means they stay in phase with the original pitch instead of shifting in and out of phase over time. If you want the shifting, add the detune effect!"),
+					p("The range of the pitch shift bar goes from -1 octave [-12 semitones] at the very left side of the bar, and +1 octave [+12 semitones] at the very right. The very middle of the bar is the default pitch. If you want to change the key of more than one of your instruments at once, try song key!"),
 				);
 			} break;
 			case "detune": {
 				message = div(
 					h2("Detune"),
-					p("This setting slightly adjusts the frequency of notes played by the instrument. You can use a little bit to add a pleasing shifting sound similar to the \"unison\" feature when combined with other instruments. If you use too much, then the instrument may sound unpleasantly out-of-tune."),
+					p("This setting slightly adjusts the frequency of notes played by the instrument. You can use a little bit to add a pleasing shifting sound similar to the \"unison\" feature when combined with other instruments. If you use too much, then the instrument may sound unpleasantly out-of-tune. This setting can also, when appiled to the grand majority of instruments, change the feel of your song, even if ever so slightly."),
 				);
 			} break;
 			case "distortion": {
 				message = div(
 					h2("Distortion"),
 					p("This is the famous electric guitar effect! However, there are some things to be aware of."),
-					p("First, most chords don't sound right when combined with heavy distortion. The only chords commonly used with distorted electric guitars are \"power chords\" which consist of a root note, a \"fifth\" note above that, and/or any octaves of those two notes."),
+					p("First, most chords don't sound right when combined with heavy distortion, nor heavy bit/freq crush. The only chords commonly used with distorted electric guitars are \"power chords\" which consist of a root note, a \"fifth\" note above that, and/or any octaves of those two notes."),
 					p("Second, the distortion sound depends a lot on filtering. In particular, I recommend enabling the note filter effect, and adding both high-pass and low-pass points to the note filter. (Note filters are applied first, then distortion which transforms the sound based on that filtering, then the EQ filter is applied last.)"),
 					p("Finally, I recommend adjusting the fade-out setting to allow the end of each note to overlap a little bit with the beginning of the next, but not too much!"),
 				);
@@ -326,21 +345,21 @@ export class TipPrompt implements Prompt {
 			case "bitcrusherQuantization": {
 				message = div(
 					h2("Bitcrusher Quantization"),
-					p("This effect makes stuff sounds harsher, artificial, and \"low quality\", which is great if that's what you're going for!"),
+					p("This effect makes stuff sounds harsher, artificial, and \"low quality\", which is great if that's what you're going for! Combine this effect with a bunch of low-pass points gathered on the top left of a note filter, and you can create dynamic sounds based on which pitch the instrument is."),
 				);
 			} break;
 			case "bitcrusherFreq": {
 				message = div(
 					h2("Frequency Quantization"),
 					p("The bitcrusher effect comes with an additional frequency quantization effect! This is a fun one to play with, especially when combined with the note filter effect."),
-					p("Every other notch on this slider is aligned with the currently selected key of the song, and the in-between notches are aligned with the tritones of the key."),
+					p("Every other notch on this slider is aligned with the currently selected key of the song, and the in-between notches are aligned with the tritones of the key. High amounts of this settings will typically make your instrument sound more retro, but don't always expect the same results!"),
 				);
 			} break;
 			case "stringSustain": {
 				message = div(
 					h2("String sustain"),
 					p("This setting controls how quickly the picked string vibration decays."),
-					p("Unlike most of BeepBox's instrument synthesizer features, a picked string cannot change frequency suddenly while maintaining its decay. If a tone's pitch changes suddenly (e.g. if the chord type is set to \"arpeggio\" or the transition type is set to \"continues\") then the string will be re-picked and start decaying from the beginning again, even if the envelopes don't otherwise restart."),
+					p("Unlike most of Midbox's instrument synthesizer features, a picked string cannot change frequency suddenly while maintaining its decay. If a tone's pitch changes suddenly (e.g. if the chord type is set to \"arpeggio\" or the transition type is set to \"continues\") then the string will be re-picked and start decaying from the beginning again, even if the envelopes don't otherwise restart."),
 				);
 			} break;
 			case "envelopes": {
@@ -370,6 +389,7 @@ export class TipPrompt implements Prompt {
 					h2("Modulator Channel"),
 					p("Modulators can be used to change settings in your song automatically over time. This technique is also known as automation."),
 					p("This setting controls which channel the modulators will take effect for. If you choose 'Song', you can change song-wide settings too!"),
+					p("There are a max of 6 slots. Each slot can be assigned to a different instrument and one of it's settings, or the song and one of it's settings. If the note appears neon-colored, that means that your mod channel's selection is currently doing an action. If the note is gray, that means that the mod channel cannot find the setting/doesn't have any setting selected to automate. When making a change between instruments, sometimes the setting box will be surrounded with a red line. This means that the selected instrument does not have that setting, and thus cannot be used until swapped."),
 				);
 			} break;
 			case "modInstrument": {
@@ -412,15 +432,15 @@ export class TipPrompt implements Prompt {
 			case "aliases": {
 				message = div(
 					h2("Aliasing"),
-					p("JummBox applies a technique called 'anti-aliasing' to instruments normally to help them sound cleaner even at high frequencies and low sample rates."),
+					p("Midbox applies a technique called 'anti-aliasing' to instruments normally to help them sound cleaner even at high frequencies and low sample rates."),
 					p("When this setting is ticked that technique is disabled, so you may hear strange audio artifacts especially at high pitches and when bending notes. However, this can lend a grungy sound to an instrument that could be desirable."),
 				);
 			} break;
 			case "operatorWaveform": {
 				message = div(
 					h2("Operator Waveform"),
-					p('This setting controls the what kind of sound wave an individual FM wave uses. By defualt the FM synth only uses sinewaves.'),
-					p('This feature was ported from Aury system`s GoldBox!'),
+					p('This setting controls the what kind of sound wave an individual FM wave uses. By defualt, the FM synth only uses sinewaves.'),
+					p('This feature was ported from Aury System`s GoldBox!'),
 				);
 			} break;
 			case "filterType": {
@@ -435,7 +455,7 @@ export class TipPrompt implements Prompt {
 				message = div(
 					h2("Low-Pass Filter Cutoff Frequency"),
 					p("The lowest setting feels \"muffled\" or \"dark\", and the highest setting feels \"harsh\" or \"bright\"."),
-					p("Most sounds include a range of frequencies from low to high. JummBox instruments have a filter that allows the lowest frequencies to pass through at full volume, but can reduce the volume of the higher frequencies that are above a cutoff frequency. This setting controls the cutoff frequency and thus the range of higher frequencies that are reduced."),
+					p("Most sounds include a range of frequencies from low to high. Midbox instruments have a filter that allows the lowest frequencies to pass through at full volume, but can reduce the volume of the higher frequencies that are above a cutoff frequency. This setting controls the cutoff frequency and thus the range of higher frequencies that are reduced."),
 					p("This cutoff setting also determines which frequency resonates when the resonance peak setting is used."),
 				);
 			} break;
