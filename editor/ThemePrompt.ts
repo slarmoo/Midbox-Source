@@ -34,6 +34,7 @@ export class ThemePrompt implements Prompt {
 		option({ value: "energized" }, "Energized"),
 		option({ value: "neapolitan" }, "Neapolitan"),
 		option({ value: "mono" }, "Mono"),
+		option({ value: "midbox" }, "Midbox")
 	);
 	private readonly _cancelButton: HTMLButtonElement = button({ class: "cancelButton" });
 	private readonly _okayButton: HTMLButtonElement = button({ class: "okayButton", style: "width:45%;" }, "Okay");

@@ -550,7 +550,7 @@ export class Pattern {
 }
 
 export class Operator {
-    public frequency: number = 0;
+    public frequency: number = 6;
     public amplitude: number = 0;
     public waveform: number = 0;
     public pulseWidth: number = 0.5;
@@ -560,7 +560,7 @@ export class Operator {
     }
 
     public reset(index: number): void {
-        this.frequency = 0;
+        this.frequency = 6;
         this.amplitude = (index <= 1) ? Config.operatorAmplitudeMax : 0;
         this.waveform = 0;
         this.pulseWidth = 5;
@@ -1963,7 +1963,7 @@ export class Instrument {
         }
 
         if (this.type == InstrumentType.chip) {
-            const legacyWaveNames: Dictionary<number> = { "triangle": 1, "square": 2, "pulse wide": 3, "pulse narrow": 4, "sawtooth": 5, "double saw": 6, "double pulse": 7, "spiky": 8, "plateau": 0 };
+            const legacyWaveNames: Dictionary<number> = { "triangle": 1, "square": 2, "pulse wide": 3, "pulse narrow": 5, "sawtooth": 11, "double saw": 12, "double pulse": 13, "spiky": 14, "plateau": 0 };
             this.chipWave = legacyWaveNames[instrumentObject["wave"]] != undefined ? legacyWaveNames[instrumentObject["wave"]] : Config.chipWaves.findIndex(wave => wave.name == instrumentObject["wave"]);
             if (this.chipWave == -1) this.chipWave = 1;
         }
@@ -2427,7 +2427,7 @@ export class Song {
         this.beatsPerBar = 8;
         this.barCount = 16;
         this.patternsPerChannel = 32;
-        this.rhythm = 1;
+        this.rhythm = 3;
         this.layeredInstruments = false;
         this.patternInstruments = false;
 
@@ -2435,9 +2435,9 @@ export class Song {
         document.title = EditorConfig.versionDisplayName;
 
         if (andResetChannels) {
-            this.pitchChannelCount = 3;
-            this.noiseChannelCount = 1;
-            this.modChannelCount = 0;
+            this.pitchChannelCount = 4;
+            this.noiseChannelCount = 2;
+            this.modChannelCount = 1;
             for (let channelIndex: number = 0; channelIndex < this.getChannelCount(); channelIndex++) {
                 const isNoiseChannel: boolean = channelIndex >= this.pitchChannelCount && channelIndex < this.pitchChannelCount + this.noiseChannelCount;
                 const isModChannel: boolean = channelIndex >= this.pitchChannelCount + this.noiseChannelCount;

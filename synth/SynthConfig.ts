@@ -449,6 +449,7 @@ export class Config {
         { name: "hold", voices: 2, spread: 0.003, offset: 0.0, expression: 0.8, sign: -2.5 },
         { name: "buried", voices: 2, spread: 0.03575, offset: -36.0, expression: 1.4, sign: 1.0 },
         { name: "corrupt", voices: 2, spread: 18, offset: 48.0, expression: 0.7, sign: 0.7 },
+        { name: "weird octave", voices: 2, spread: 5.85, offset: 5.85, expression: 0.75, sign: 1.0 },
     ]);
     public static readonly effectNames: ReadonlyArray<string> = ["reverb", "chorus", "panning", "distortion", "bitcrusher", "note filter", "echo", "pitch shift", "detune", "vibrato", "transition type", "chord type"];
     public static readonly effectOrder: ReadonlyArray<EffectType> = [EffectType.panning, EffectType.transition, EffectType.chord, EffectType.pitchShift, EffectType.detune, EffectType.vibrato, EffectType.noteFilter, EffectType.distortion, EffectType.bitcrusher, EffectType.chorus, EffectType.echo, EffectType.reverb];
