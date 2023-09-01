@@ -90,6 +90,7 @@ export const enum EffectType {
     chord,
     // If you add more, you'll also have to extend the bitfield used in Base64 which currently uses two six-bit characters.
     length,
+    percussion,
 }
 
 export const enum EnvelopeComputeIndex {
@@ -245,6 +246,7 @@ export interface AutomationTarget extends BeepBoxOption {
     readonly compatibleInstruments: InstrumentType[] | null;
 }
 
+import { Localization as _ } from "../editor/Localization";
 export class Config {
     // Params for post-processing compressor
     public static thresholdVal: number = -10;
@@ -256,27 +258,26 @@ export class Config {
     public static readonly scales: DictionaryArray<Scale> = toNameMap([
 
         //   C     Db      D     Eb      E      F     F#      G     Ab      A     Bb      B      C
-        { name: "Free", realName: "chromatic", flags: [true, true, true, true, true, true, true, true, true, true, true, true] }, // Free
-        { name: "Major", realName: "ionian", flags: [true, false, true, false, true, true, false, true, false, true, false, true] }, // Major
-        { name: "Minor", realName: "aeolian", flags: [true, false, true, true, false, true, false, true, true, false, true, false] }, // Minor
-        { name: "Mixolydian", realName: "mixolydian", flags: [true, false, true, false, true, true, false, true, false, true, true, false] }, // Mixolydian
-        { name: "Lydian", realName: "lydian", flags: [true, false, true, false, true, false, true, true, false, true, false, true] }, // Lydian
-        { name: "Dorian", realName: "dorian", flags: [true, false, true, true, false, true, false, true, false, true, true, false] }, // Dorian
-        { name: "Phrygian", realName: "phrygian", flags: [true, true, false, true, false, true, false, true, true, false, true, false] }, // Phrygian
-        { name: "Locrian", realName: "locrian", flags: [true, true, false, true, false, true, true, false, true, false, true, false] }, // Locrian
-        { name: "Lydian Dominant", realName: "lydian dominant", flags: [true, false, true, false, true, false, true, true, false, true, true, false] }, // Lydian Dominant
-        { name: "Phrygian Dominant", realName: "phrygian dominant", flags: [true, true, false, false, true, true, false, true, true, false, true, false] }, // Phrygian Dominant
-        { name: "Harmonic Major", realName: "harmonic major", flags: [true, false, true, false, true, true, false, true, true, false, false, true] }, // Harmonic Major
-        { name: "Harmonic Minor", realName: "harmonic minor", flags: [true, false, true, true, false, true, false, true, true, false, false, true] }, // Harmonic Minor
-        { name: "Melodic Minor", realName: "melodic minor", flags: [true, false, true, true, false, true, false, true, false, true, false, true] }, // Melodic Minor
-        { name: "Blues", realName: "blues", flags: [true, false, false, true, false, true, true, true, false, false, true, false] }, // Blues
-        { name: "Altered", realName: "altered", flags: [true, true, false, true, true, false, true, false, true, false, true, false] }, // Altered
-        { name: "Major Pentatonic", realName: "major pentatonic", flags: [true, false, true, false, true, false, false, true, false, true, false, false] }, // Major Pentatonic
-        { name: "Minor Pentatonic", realName: "minor pentatonic", flags: [true, false, false, true, false, true, false, true, false, false, true, false] }, // Minor Pentatonic
-        { name: "Whole Tone", realName: "whole tone", flags: [true, false, true, false, true, false, true, false, true, false, true, false] }, // Whole Tone
-        { name: "Octatonic", realName: "octatonic", flags: [true, false, true, true, false, true, true, false, true, true, false, true] }, // Octatonic
-        { name: "Hexatonic", realName: "hexatonic", flags: [true, false, false, true, true, false, false, true, true, false, false, true] }, // Hexatonic
-
+        { name: (_.scale1Label), realName: "chromatic", flags: [true, true, true, true, true, true, true, true, true, true, true, true] }, // Free
+        { name: (_.scale2Label), realName: "ionian", flags: [true, false, true, false, true, true, false, true, false, true, false, true] }, // Major
+        { name: (_.scale3Label), realName: "aeolian", flags: [true, false, true, true, false, true, false, true, true, false, true, false] }, // Minor
+        { name: (_.scale4Label), realName: "mixolydian", flags: [true, false, true, false, true, true, false, true, false, true, true, false] }, // Mixolydian
+        { name: (_.scale5Label), realName: "lydian", flags: [true, false, true, false, true, false, true, true, false, true, false, true] }, // Lydian
+        { name: (_.scale6Label), realName: "dorian", flags: [true, false, true, true, false, true, false, true, false, true, true, false] }, // Dorian
+        { name: (_.scale7Label), realName: "phrygian", flags: [true, true, false, true, false, true, false, true, true, false, true, false] }, // Phrygian
+        { name: (_.scale8Label), realName: "locrian", flags: [true, true, false, true, false, true, true, false, true, false, true, false] }, // Locrian
+        { name: (_.scale9Label), realName: "lydian dominant", flags: [true, false, true, false, true, false, true, true, false, true, true, false] }, // Lydian Dominant
+        { name: (_.scale10Label), realName: "phrygian dominant", flags: [true, true, false, false, true, true, false, true, true, false, true, false] }, // Phrygian Dominant
+        { name: (_.scale11Label), realName: "harmonic major", flags: [true, false, true, false, true, true, false, true, true, false, false, true] }, // Harmonic Major
+        { name: (_.scale12Label), realName: "harmonic minor", flags: [true, false, true, true, false, true, false, true, true, false, false, true] }, // Harmonic Minor
+        { name: (_.scale13Label), realName: "melodic minor", flags: [true, false, true, true, false, true, false, true, false, true, false, true] }, // Melodic Minor
+        { name: (_.scale14Label), realName: "blues", flags: [true, false, false, true, false, true, true, true, false, false, true, false] }, // Blues
+        { name: (_.scale15Label), realName: "altered", flags: [true, true, false, true, true, false, true, false, true, false, true, false] }, // Altered
+        { name: (_.scale16Label), realName: "major pentatonic", flags: [true, false, true, false, true, false, false, true, false, true, false, false] }, // Major Pentatonic
+        { name: (_.scale17Label), realName: "minor pentatonic", flags: [true, false, false, true, false, true, false, true, false, false, true, false] }, // Minor Pentatonic
+        { name: (_.scale18Label), realName: "whole tone", flags: [true, false, true, false, true, false, true, false, true, false, true, false] }, // Whole Tone
+        { name: (_.scale19Label), realName: "octatonic", flags: [true, false, true, true, false, true, true, false, true, true, false, true] }, // Octatonic
+        { name: (_.scale20Label), realName: "hexatonic", flags: [true, false, false, true, true, false, false, true, true, false, false, true] }, // Hexatonic
 
     ]);
     public static readonly keys: DictionaryArray<Key> = toNameMap([
@@ -451,8 +452,8 @@ export class Config {
         { name: "corrupt", voices: 2, spread: 18, offset: 48.0, expression: 0.7, sign: 0.7 },
         { name: "weird octave", voices: 2, spread: 5.85, offset: 5.85, expression: 0.75, sign: 1.0 },
     ]);
-    public static readonly effectNames: ReadonlyArray<string> = ["reverb", "chorus", "panning", "distortion", "bitcrusher", "note filter", "echo", "pitch shift", "detune", "vibrato", "transition type", "chord type"];
-    public static readonly effectOrder: ReadonlyArray<EffectType> = [EffectType.panning, EffectType.transition, EffectType.chord, EffectType.pitchShift, EffectType.detune, EffectType.vibrato, EffectType.noteFilter, EffectType.distortion, EffectType.bitcrusher, EffectType.chorus, EffectType.echo, EffectType.reverb];
+    public static readonly effectNames: ReadonlyArray<string> = ["reverb", "chorus", "panning", "distortion", "bitcrusher", "note filter", "echo", "pitch shift", "detune", "vibrato", "transition type", "chord type", "percussion"];
+    public static readonly effectOrder: ReadonlyArray<EffectType> = [EffectType.panning, EffectType.transition, EffectType.chord, EffectType.pitchShift, EffectType.detune, EffectType.vibrato, EffectType.noteFilter, EffectType.distortion, EffectType.bitcrusher, EffectType.chorus, EffectType.echo, EffectType.reverb, EffectType.percussion];
     public static readonly noteSizeMax: number = 6;
     public static readonly volumeRange: number = 50;
     // Beepbox's old volume scale used factor -0.5 and was [0~7] had roughly value 6 = 0.125 power. This new value is chosen to have -21 be the same,
@@ -541,25 +542,46 @@ export class Config {
         { name: "none", type: EnvelopeType.none, speed: 0.0 },
         { name: "note size", type: EnvelopeType.noteSize, speed: 0.0 },
         { name: "punch", type: EnvelopeType.punch, speed: 0.0 },
+        { name: "flare 0", type: EnvelopeType.flare, speed: 64.0 },
         { name: "flare 1", type: EnvelopeType.flare, speed: 32.0 },
-        { name: "flare 2", type: EnvelopeType.flare, speed: 8.0 },
-        { name: "flare 3", type: EnvelopeType.flare, speed: 2.0 },
+        { name: "flare 2", type: EnvelopeType.flare, speed: 16.0 },
+        { name: "flare 3", type: EnvelopeType.flare, speed: 8.0 },
+        { name: "flare 4", type: EnvelopeType.flare, speed: 4.0 },
+        { name: "flare 5", type: EnvelopeType.flare, speed: 2.0 },
+        { name: "flare 6", type: EnvelopeType.flare, speed: 1.0 },
+        { name: "twang 0", type: EnvelopeType.twang, speed: 64.0 },
         { name: "twang 1", type: EnvelopeType.twang, speed: 32.0 },
-        { name: "twang 2", type: EnvelopeType.twang, speed: 8.0 },
-        { name: "twang 3", type: EnvelopeType.twang, speed: 2.0 },
+        { name: "twang 2", type: EnvelopeType.twang, speed: 16.0 },
+        { name: "twang 3", type: EnvelopeType.twang, speed: 8.0 },
+        { name: "twang 4", type: EnvelopeType.twang, speed: 4.0 },
+        { name: "twang 5", type: EnvelopeType.twang, speed: 2.0 },
+        { name: "twang 6", type: EnvelopeType.twang, speed: 1.0 },
+        { name: "swell 0", type: EnvelopeType.swell, speed: 64.0 },
         { name: "swell 1", type: EnvelopeType.swell, speed: 32.0 },
-        { name: "swell 2", type: EnvelopeType.swell, speed: 8.0 },
-        { name: "swell 3", type: EnvelopeType.swell, speed: 2.0 },
-        { name: "slow swell", type: EnvelopeType.swell, speed: 0.5 },
-        { name: "tremolo1", type: EnvelopeType.tremolo, speed: 4.0 },
-        { name: "tremolo2", type: EnvelopeType.tremolo, speed: 2.0 },
-        { name: "tremolo3", type: EnvelopeType.tremolo, speed: 1.0 },
-        { name: "tremolo4", type: EnvelopeType.tremolo2, speed: 4.0 },
-        { name: "tremolo5", type: EnvelopeType.tremolo2, speed: 2.0 },
-        { name: "tremolo6", type: EnvelopeType.tremolo2, speed: 1.0 },
+        { name: "swell 2", type: EnvelopeType.swell, speed: 16.0 },
+        { name: "swell 3", type: EnvelopeType.swell, speed: 8.0 },
+        { name: "swell 4", type: EnvelopeType.swell, speed: 4.0 },
+        { name: "swell 5", type: EnvelopeType.swell, speed: 2.0 },
+        { name: "swell 6", type: EnvelopeType.swell, speed: 1.0 },
+        { name: "swell 7", type: EnvelopeType.swell, speed: 0.5 },
+        { name: "full tremolo 0", type: EnvelopeType.tremolo, speed: 8.0 },
+        { name: "full tremolo 1", type: EnvelopeType.tremolo, speed: 4.0 },
+        { name: "full tremolo 2", type: EnvelopeType.tremolo, speed: 2.0 },
+        { name: "full tremolo 3", type: EnvelopeType.tremolo, speed: 1.0 },
+        { name: "full tremolo 4", type: EnvelopeType.tremolo, speed: 0.5 },
+        { name: "full tremolo 5", type: EnvelopeType.tremolo, speed: 0.25 },
+        { name: "semi tremolo 0", type: EnvelopeType.tremolo2, speed: 8.0 },
+        { name: "semi tremolo 1", type: EnvelopeType.tremolo2, speed: 4.0 },
+        { name: "semi tremolo 2", type: EnvelopeType.tremolo2, speed: 2.0 },
+        { name: "semi tremolo 3", type: EnvelopeType.tremolo2, speed: 1.0 },
+        { name: "semi tremolo 4", type: EnvelopeType.tremolo2, speed: 0.5 },
+        { name: "semi tremolo 5", type: EnvelopeType.tremolo2, speed: 0.25 },
+        { name: "decay 0", type: EnvelopeType.decay, speed: 18.0 },
         { name: "decay 1", type: EnvelopeType.decay, speed: 10.0 },
         { name: "decay 2", type: EnvelopeType.decay, speed: 7.0 },
         { name: "decay 3", type: EnvelopeType.decay, speed: 4.0 },
+        { name: "decay 4", type: EnvelopeType.decay, speed: 1.5 },
+        { name: "decay 5", type: EnvelopeType.decay, speed: 0.75 },
         { name: "modbox trill", type: EnvelopeType.modboxTrill, speed: 40 },
         { name: "modbox blip", type: EnvelopeType.modboxBlip, speed: 4 },
         { name: "modbox click", type: EnvelopeType.modboxClick, speed: 5 },
@@ -1077,6 +1099,9 @@ export function effectsIncludeEcho(effects: number): boolean {
 export function effectsIncludeReverb(effects: number): boolean {
     return (effects & (1 << EffectType.reverb)) != 0;
 }
+/*export function effectsIncludePercussion(effects: number): boolean {
+    return (effects & (1 << EffectType.percussion)) != 0;
+}*/
 export function rawChipToIntegrated(raw: DictionaryArray<ChipWave>): DictionaryArray<ChipWave> {
     const newArray: Array<ChipWave> = new Array<ChipWave>(raw.length);
     const dictionary: Dictionary<ChipWave> = {};

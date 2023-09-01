@@ -341,7 +341,7 @@ export class SongEditor {
     );
     private readonly _fileMenu: HTMLSelectElement = select({ style: "width: 100%;" },
         option({ selected: true, disabled: true, hidden: false }, span(_.fileSettingsLabel)), // todo: "hidden" should be true but looks wrong on mac chrome, adds checkmark next to first visible option even though it's not selected. :(
-        option({ value: "new" }, "+ New Blank Song"),
+        option({ value: "new" }, "+ New Blank Song (⇧`)"),
         option({ value: "import" }, "↑ Import Song... (" + EditorConfig.ctrlSymbol + "O)"),
         option({ value: "export" }, "↓ Export Song... (" + EditorConfig.ctrlSymbol + "S)"),
         option({ value: "copyUrl" }, "⎘ Copy Song URL"),
@@ -349,7 +349,7 @@ export class SongEditor {
         option({ value: "shortenUrl" }, "… Shorten Song URL (U)"),
         option({ value: "viewPlayer" }, "▶ View in Song Player (P)"),
         option({ value: "copyEmbed" }, "⎘ Copy HTML Embed Code"),
-        option({ value: "songRecovery" }, "⚠ Recover Recent Song..."),
+        option({ value: "songRecovery" }, "⚠ Recover Recent Song... (`)" ),
     );
     private readonly _editMenu: HTMLSelectElement = select({ style: "width: 100%;" },
         option({ selected: true, disabled: true, hidden: false }, span(_.editSettingsLabel)), // todo: "hidden" should be true but looks wrong on mac chrome, adds checkmark next to first visible option even though it's not selected. :(
@@ -2801,7 +2801,7 @@ export class SongEditor {
                     event.preventDefault();
                 }
                 break;
-            case 192: // `
+            case 192: // `/~
                 if (canPlayNotes) break;
                 if (event.shiftKey) {
                     this._doc.goBackToStart();
@@ -2809,6 +2809,12 @@ export class SongEditor {
                 for (const channel of this._doc.song.channels) {
                     channel.muted = false;
                     channel.name = "";
+                    this._doc.record(new ChangeSong(this._doc, ""), false, true);
+                    event.preventDefault();
+                }} else {
+                    if (canPlayNotes) break;
+                    if (needControlForShortcuts == (event.ctrlKey || event.metaKey)) {
+                    this._openPrompt("songRecovery");
                 }}
                 event.preventDefault();
                 break;
@@ -2819,6 +2825,11 @@ export class SongEditor {
                 } else {
                     this._doc.undo();
                 }
+                event.preventDefault();
+                break;
+            case 88: // x
+                if (canPlayNotes) break;
+                this._doc.selection.copy();
                 event.preventDefault();
                 break;
             case 89: // y

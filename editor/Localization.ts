@@ -67,6 +67,26 @@ export class Localization {
     public static preferenceSettingsLabel: string = "Preferences";
     public static bitCrushHover: string = "Bitcrusher Quantization";
     public static freqCrushHover: string = "Frequency Quantization";
+    public static scale1Label: string = "Free / Chromatic";
+    public static scale2Label: string = "Major";
+    public static scale3Label: string = "Minor";
+    public static scale4Label: string = "Mixolydian";
+    public static scale5Label: string = "Lydian";
+    public static scale6Label: string = "Dorian";
+    public static scale7Label: string = "Phrygian";
+    public static scale8Label: string = "Locrian";
+    public static scale9Label: string = "Lydian Dominant";
+    public static scale10Label: string = "Phrygian Dominant";
+    public static scale11Label: string = "Harmonic Major";
+    public static scale12Label: string = "Harmonic Minor";
+    public static scale13Label: string = "Melodic Minor";
+    public static scale14Label: string = "Blues";
+    public static scale15Label: string = "Altered";
+    public static scale16Label: string = "Major Pentatonic";
+    public static scale17Label: string = "Minor Pentatonic";
+    public static scale18Label: string = "Whole Tone";
+    public static scale19Label: string = "Octatonic";
+    public static scale20Label: string = "Hexatonic";
 }
 
 const language: string = window.localStorage.getItem("language") ?? "english";
@@ -139,4 +159,24 @@ if (language == "spanish") {
     Localization.preferenceSettingsLabel = "Preferencias";
     Localization.bitCrushHover = "Compresión de bits";
     Localization.freqCrushHover = "Compresión de frecuencias";
+    Localization.scale1Label = "Libre / Cromática";
+    Localization.scale2Label = "Mayor";
+    Localization.scale3Label = "Menor";
+    Localization.scale4Label = "Mixolídia";
+    Localization.scale5Label = "Lídia";
+    Localization.scale6Label = "Dórica";
+    Localization.scale7Label = "Frígia";
+    Localization.scale8Label = "Locria";
+    Localization.scale9Label = "Lídia Dominante";
+    Localization.scale10Label = "Frígia Dominante";
+    Localization.scale11Label = "Mayor Armónica";
+    Localization.scale12Label = "Menor Armónica";
+    Localization.scale13Label = "Menor Melódica";
+    Localization.scale14Label = "Blues";
+    Localization.scale15Label = "Alterada";
+    Localization.scale16Label = "Mayor Pentatónica";
+    Localization.scale17Label = "Menor Pentatónica";
+    Localization.scale18Label = "De Tonos";
+    Localization.scale19Label = "Octatónica";
+    Localization.scale20Label = "Hexatónica";
 }
