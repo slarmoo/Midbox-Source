@@ -436,6 +436,14 @@ export class TipPrompt implements Prompt {
 					p("When this setting is ticked that technique is disabled, so you may hear strange audio artifacts especially at high pitches and when bending notes. However, this can lend a grungy sound to an instrument that could be desirable."),
 				);
 			} break;
+			case "percussion":{
+				message = div(
+					h2("Percussion"),
+					p("This effect is a bit different from the rest. When the box is checked, the instrument will not be affected by song key."),
+					p("This allows changing your song key without messing up the pitches of your instrument-drums."),
+					p("[Massive thanks to LeoV for basically making this entire feature exist.]"),
+				);
+			} break;
 			case "operatorWaveform": {
 				message = div(
 					h2("Operator Waveform"),

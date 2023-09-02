@@ -1,7 +1,7 @@
 // Copyright (c) 2012-2022 John Nesky and contributing authors, distributed under the MIT license, see accompanying the LICENSE.md file.
 
 //import {Layout} from "./Layout";
-import { InstrumentType, EffectType, Config, effectsIncludeTransition, effectsIncludeChord, effectsIncludePitchShift, effectsIncludeDetune, effectsIncludeVibrato, effectsIncludeNoteFilter, effectsIncludeDistortion, effectsIncludeBitcrusher, effectsIncludePanning, effectsIncludeChorus, effectsIncludeEcho, effectsIncludeReverb, DropdownID } from "../synth/SynthConfig";
+import { InstrumentType, EffectType, Config, effectsIncludeTransition, effectsIncludeChord, effectsIncludePitchShift, effectsIncludeDetune, effectsIncludeVibrato, effectsIncludeNoteFilter, effectsIncludeDistortion, effectsIncludeBitcrusher, effectsIncludePanning, effectsIncludeChorus, effectsIncludeEcho, effectsIncludeReverb, effectsIncludePercussion, DropdownID } from "../synth/SynthConfig";
 import { BarScrollBar } from "./BarScrollBar";
 import { BeatsPerBarPrompt } from "./BeatsPerBarPrompt";
 import { Change, ChangeGroup } from "./Change";
@@ -41,7 +41,7 @@ import { ThemePrompt } from "./ThemePrompt";
 import { TipPrompt } from "./TipPrompt";
 import { LanguagePrompt } from "./LanguagePrompt";
 import { Localization as _ } from "./Localization";
-import { ChangeTempo, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, pickRandomPresetValue, ChangeRandomGeneratedInstrument, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, ChangeChipWave, ChangeNoiseWave, ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeAddEnvelope, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeClicklessTransition, ChangeAliasing } from "./changes";
+import { ChangeTempo, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, pickRandomPresetValue, ChangeRandomGeneratedInstrument, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, ChangeChipWave, ChangeNoiseWave, ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeAddEnvelope, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeClicklessTransition, ChangeAliasing, ChangePercussion, /*ChangeSongSubtitle*/ } from "./changes";
 
 import { TrackEditor } from "./TrackEditor";
 
@@ -86,9 +86,9 @@ function buildPresetOptions(isNoise: boolean, idSet: string): HTMLSelectElement 
         menu.appendChild(option({ value: InstrumentType.customChipWave }, EditorConfig.valueToPreset(InstrumentType.customChipWave)!.name));
     }
 
-    const randomGroup: HTMLElement = optgroup({ label: "Randomize ▾" });
-    randomGroup.appendChild(option({ value: "randomPreset" }, "Random Preset"));
-    randomGroup.appendChild(option({ value: "randomGenerated" }, "Random Generated"));
+    const randomGroup: HTMLElement = optgroup({ label: (_.randomLabel) });
+    randomGroup.appendChild(option({ value: "randomPreset" }, (_.randomPresetLabel)));
+    randomGroup.appendChild(option({ value: "randomGenerated" }, (_.randomGeneratedLabel)));
     menu.appendChild(randomGroup);
 
 
@@ -341,59 +341,81 @@ export class SongEditor {
     );
     private readonly _fileMenu: HTMLSelectElement = select({ style: "width: 100%;" },
         option({ selected: true, disabled: true, hidden: false }, span(_.fileSettingsLabel)), // todo: "hidden" should be true but looks wrong on mac chrome, adds checkmark next to first visible option even though it's not selected. :(
-        option({ value: "new" }, "+ New Blank Song (⇧`)"),
-        option({ value: "import" }, "↑ Import Song... (" + EditorConfig.ctrlSymbol + "O)"),
-        option({ value: "export" }, "↓ Export Song... (" + EditorConfig.ctrlSymbol + "S)"),
-        option({ value: "copyUrl" }, "⎘ Copy Song URL"),
-        option({ value: "shareUrl" }, "⤳ Share Song URL"),
-        option({ value: "shortenUrl" }, "… Shorten Song URL (U)"),
-        option({ value: "viewPlayer" }, "▶ View in Song Player (P)"),
-        option({ value: "copyEmbed" }, "⎘ Copy HTML Embed Code"),
-        option({ value: "songRecovery" }, "⚠ Recover Recent Song... (`)" ),
+        option({ value: "new" }, (_.newBlankSongLabel)),
+        option({ value: "import" }, (_.importSongLabel) + EditorConfig.ctrlSymbol + "O)"),
+        option({ value: "export" }, (_.exportSongLabel) + EditorConfig.ctrlSymbol + "S)"),
+        option({ value: "copyUrl" }, (_.copyURLLabel)),
+        option({ value: "shareUrl" }, (_.shareURLLabel)),
+        option({ value: "shortenUrl" }, (_.shortenURLLabel)),
+        option({ value: "viewPlayer" }, (_.songPlayerLabel)),
+        option({ value: "copyEmbed" }, (_.copyEmbedCodeLabel)),
+        option({ value: "songRecovery" }, (_.recoverSongLabel)),
     );
     private readonly _editMenu: HTMLSelectElement = select({ style: "width: 100%;" },
         option({ selected: true, disabled: true, hidden: false }, span(_.editSettingsLabel)), // todo: "hidden" should be true but looks wrong on mac chrome, adds checkmark next to first visible option even though it's not selected. :(
-        option({ value: "undo" }, "Undo (Z)"),
-        option({ value: "redo" }, "Redo (Y)"),
-        option({ value: "copy" }, "Copy Pattern (C)"),
-        option({ value: "pasteNotes" }, "Paste Pattern Notes (V)"),
-        option({ value: "pasteNumbers" }, "Paste Pattern Numbers (" + EditorConfig.ctrlSymbol + "⇧V)"),
-        option({ value: "insertBars" }, "Insert Bar (⏎)"),
-        option({ value: "deleteBars" }, "Delete Selected Bars (⌫)"),
-        option({ value: "insertChannel" }, "Insert Channel (" + EditorConfig.ctrlSymbol + "⏎)"),
-        option({ value: "deleteChannel" }, "Delete Selected Channels (" + EditorConfig.ctrlSymbol + "⌫)"),
-        option({ value: "selectChannel" }, "Select Channel (⇧A)"),
-        option({ value: "selectAll" }, "Select All (A)"),
-        option({ value: "duplicatePatterns" }, "Duplicate Reused Patterns (D)"),
-        option({ value: "transposeUp" }, "Move Notes Up (+ or ⇧+)"),
-        option({ value: "transposeDown" }, "Move Notes Down (- or ⇧-)"),
-        option({ value: "moveNotesSideways" }, "Move All Notes Sideways... (W)"),
-        option({ value: "beatsPerBar" }, "Change Beats Per Bar... (B)"),
-        option({ value: "barCount" }, "Change Song Length... (L)"),
-        option({ value: "channelSettings" }, "Channel Settings... (Q)"),
-        option({ value: "limiterSettings" }, "Limiter Settings... (⇧L)"),
+        option({ value: "undo" }, (_.undoLabel)),
+        option({ value: "redo" }, (_.redoLabel)),
+        option({ value: "copy" }, (_.copyPatternLabel)),
+        option({ value: "pasteNotes" }, (_.pastePatternNotesLabel)),
+        option({ value: "pasteNumbers" }, (_.pastePatternNumbersLabel) + EditorConfig.ctrlSymbol + "⇧V)"),
+        option({ value: "insertBars" }, (_.insertBarLabel)),
+        option({ value: "deleteBars" }, (_.deleteBarLabel)),
+        option({ value: "insertChannel" }, (_.insertChannelLabel) + EditorConfig.ctrlSymbol + "⏎)"),
+        option({ value: "deleteChannel" }, (_.deleteChannelLabel) + EditorConfig.ctrlSymbol + "⌫)"),
+        option({ value: "selectChannel" }, (_.selectChannelLabel)),
+        option({ value: "selectAll" }, (_.selectAllLabel)),
+        option({ value: "duplicatePatterns" }, (_.duplicatePatternsLabel)),
+        option({ value: "transposeUp" }, (_.moveNotesUpLabel)),
+        option({ value: "transposeDown" }, (_.moveNotesDownLabel)),
+        option({ value: "moveNotesSideways" }, (_.moveNotesSidesLabel)),
+        option({ value: "beatsPerBar" }, (_.beatsInBarLabel)),
+        option({ value: "barCount" }, (_.songLengthLabel)),
+        option({ value: "channelSettings" }, (_.channelSettingsLabel)),
+        option({ value: "limiterSettings" }, (_.limiterSettingsLabel)),
     );
     private readonly _optionsMenu: HTMLSelectElement = select({ style: "width: 100%;" },
         option({ selected: true, disabled: true, hidden: false }, span(_.preferenceSettingsLabel)), // todo: "hidden" should be true but looks wrong on mac chrome, adds checkmark next to first visible option even though it's not selected. :(
-        option({ value: "autoPlay" }, "Auto Play on Load"),
-        option({ value: "autoFollow" }, "Keep Current Pattern Selected"),
-        option({ value: "enableNotePreview" }, "Hear Preview of Added Notes"),
-        option({ value: "showLetters" }, "Show Piano Keys"),
-        option({ value: "showFifth" }, 'Highlight "Fifth" of Song Key'),
-        option({ value: "notesOutsideScale" }, "Allow Adding Notes Not in Scale"),
-        option({ value: "setDefaultScale" }, "Use Current Scale as Default"),
-        option({ value: "showChannels" }, "Show Notes From All Channels"),
-        option({ value: "showScrollBar" }, "Show Octave Scroll Bar"),
-        option({ value: "alwaysFineNoteVol" }, "Always Fine Note Volume"),
-        option({ value: "enableChannelMuting" }, "Enable Channel Muting"),
-        option({ value: "displayBrowserUrl" }, "Display Song Data in URL"),
-        option({ value: "displayVolumeBar" }, "Show Playback Volume"),
-        option({ value: "language" }, "Set Language..."),
-        option({ value: "layout" }, "Set Layout..."),
-        option({ value: "colorTheme" }, "Set Theme..."),
-        option({ value: "recordingSetup" }, "Set Up Note Recording..."),
+        option({ value: "autoPlay" }, (_.autoPlayLabel)),
+        option({ value: "autoFollow" }, (_.autoFollowLabel)),
+        option({ value: "enableNotePreview" }, (_.enableNotePreviewLabel)),
+        option({ value: "showLetters" }, (_.showPianoLabel)),
+        option({ value: "showFifth" }, (_.showFifthLabel)),
+        option({ value: "notesOutsideScale" }, (_.notesOutsideScaleLabel)),
+        option({ value: "setDefaultScale" }, (_.setDefaultScaleLabel)),
+        option({ value: "showChannels" }, (_.showAllChannelsLabel)),
+        option({ value: "showScrollBar" }, (_.scrollbarLabel)),
+        option({ value: "alwaysFineNoteVol" }, (_.fineNoteVolumeLabel)),
+        option({ value: "enableChannelMuting" }, (_.channelMutingLabel)),
+        option({ value: "displayBrowserUrl" }, (_.displayURLInBrowserLabel)),
+        option({ value: "displayVolumeBar" }, (_.showPlaybackBarLabel)),
+        option({ value: "language" }, (_.setLanguageLabel)),
+        option({ value: "layout" }, (_.setLayoutLabel)),
+        option({ value: "colorTheme" }, (_.setThemeLabel)),
+        option({ value: "recordingSetup" }, (_.setNoteRecordingLabel)),
     );
-    private readonly _scaleSelect: HTMLSelectElement = buildOptions(select(), Config.scales.map(scale => scale.name));
+    private readonly _scaleSelect: HTMLSelectElement = buildOptions(select(), [
+        _.scale1Label, 
+        _.scale2Label, 
+        _.scale3Label, 
+        _.scale4Label, 
+        _.scale5Label, 
+        _.scale6Label, 
+        _.scale7Label, 
+        _.scale8Label, 
+        _.scale9Label, 
+        _.scale10Label, 
+        _.scale11Label, 
+        _.scale12Label, 
+        _.scale13Label, 
+        _.scale14Label, 
+        _.scale15Label, 
+        _.scale16Label, 
+        _.scale17Label, 
+        _.scale18Label, 
+        _.scale19Label, 
+        _.scale20Label
+
+    ]);
     private readonly _keySelect: HTMLSelectElement = buildOptions(select(), Config.keys.map(key => key.name).reverse());
     private readonly _tempoSlider: Slider = new Slider(input({ style: "margin: 0; vertical-align: middle;", type: "range", min: "30", max: "320", value: "160", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeTempo(this._doc, oldValue, newValue), false);
     private readonly _tempoStepper: HTMLInputElement = input({ style: "width: 4em; font-size: 80%; margin-left: 0.4em; vertical-align: middle;", type: "number", step: "1" });
@@ -405,7 +427,14 @@ export class SongEditor {
     private readonly _echoSustainRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("echoSustain") }, span(_.echoLabel)), this._echoSustainSlider.container);
     private readonly _echoDelaySlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.echoDelayRange - 1, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeEchoDelay(this._doc, oldValue, newValue), false);
     private readonly _echoDelayRow: HTMLDivElement = div({ class: "selectRow" }, span({ /*style: "font-size: x-small;",*/ class: "tip", onclick: () => this._openPrompt("echoDelay") }, span(_.echoDelayLabel)), this._echoDelaySlider.container);
-    private readonly _rhythmSelect: HTMLSelectElement = buildOptions(select(), Config.rhythms.map(rhythm => rhythm.name));
+    private readonly _rhythmSelect: HTMLSelectElement = buildOptions(select(), [
+        _.rhythmBy3Label,
+        _.rhythmBy4Label,
+        _.rhythmBy6Label,
+        _.rhythmBy8Label,
+        _.rhythmBy24Label
+
+    ]);
     private readonly _pitchedPresetSelect: HTMLSelectElement = buildPresetOptions(false, "pitchPresetSelect");
     private readonly _drumPresetSelect: HTMLSelectElement = buildPresetOptions(true, "drumPresetSelect");
     private readonly _algorithmSelect: HTMLSelectElement = buildOptions(select(), Config.algorithms.map(algorithm => algorithm.name));
@@ -432,8 +461,46 @@ export class SongEditor {
     private readonly _panDelaySlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.modulators.dictionary["pan delay"].maxRawVol, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangePanDelay(this._doc, oldValue, newValue), false);
     private readonly _panDelayRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "margin-left:10px;", onclick: () => this._openPrompt("panDelay") }, span(_.panDelayLabel)), this._panDelaySlider.container);
     private readonly _panDropdownGroup: HTMLElement = div({ class: "editor-controls", style: "display: none;" }, this._panDelayRow);
-    private readonly _chipWaveSelect: HTMLSelectElement = buildOptions(select(), Config.chipWaves.map(wave => wave.name));
-    private readonly _chipNoiseSelect: HTMLSelectElement = buildOptions(select(), Config.chipNoises.map(wave => wave.name));
+    private readonly _chipWaveSelect: HTMLSelectElement = buildOptions(select(), [
+        _.wave1Label,
+        _.wave2Label,
+        _.wave3Label,
+        _.wave4Label,
+        _.wave5Label,
+        _.wave6Label,
+        _.wave7Label,
+        _.wave8Label,
+        _.wave9Label,
+        _.wave10Label,
+        _.wave11Label,
+        _.wave12Label,
+        _.wave13Label,
+        _.wave14Label,
+        _.wave15Label,
+        _.wave16Label,
+        _.wave17Label,
+        _.wave18Label,
+        _.wave19Label,
+        _.wave20Label,
+        _.wave21Label,
+        _.wave22Label,
+        _.wave23Label,
+        _.wave24Label,
+        _.wave25Label,
+        _.wave26Label,
+        _.wave27Label,
+    ]);
+    private readonly _chipNoiseSelect: HTMLSelectElement = buildOptions(select(), [
+        _.noise1Label,
+        _.noise2Label,
+        _.noise3Label,
+        _.noise4Label,
+        _.noise5Label,
+        _.noise6Label,
+        _.noise7Label,
+        _.noise8Label,
+        _.noise9Label,
+    ]);
     private readonly _chipWaveSelectRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("chipWave") }, span(_.waveLabel)), div({ class: "selectContainer" }, this._chipWaveSelect));
     private readonly _chipNoiseSelectRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("chipNoise") }, span(_.noiseLabel)), div({ class: "selectContainer" }, this._chipNoiseSelect));
     private readonly _fadeInOutEditor: FadeInOutEditor = new FadeInOutEditor(this._doc);
@@ -485,13 +552,15 @@ export class SongEditor {
     private readonly _distortionRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("distortion") }, span(_.distortionLabel)), this._distortionSlider.container);
     private readonly _aliasingBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
     private readonly _aliasingRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "margin-left:10px;", onclick: () => this._openPrompt("aliases") }, span(_.aliasingLabel)), this._aliasingBox);
+    private readonly _percussionBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
+    private readonly _percussionRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "margin-left:10px;", onclick: () => this._openPrompt("percussion") }, span(_.percussionLabel)), this._percussionBox);
     private readonly _bitcrusherQuantizationSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.bitcrusherQuantizationRange - 1, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeBitcrusherQuantization(this._doc, oldValue, newValue), false);
     private readonly _bitcrusherQuantizationRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", title: (_.bitCrushHover), onclick: () => this._openPrompt("bitcrusherQuantization") }, span(_.bitCrushLabel)), this._bitcrusherQuantizationSlider.container);
     private readonly _bitcrusherFreqSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.bitcrusherFreqRange - 1, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeBitcrusherFreq(this._doc, oldValue, newValue), false);
     private readonly _bitcrusherFreqRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", title: (_.freqCrushHover), onclick: () => this._openPrompt("bitcrusherFreq") }, span(_.freqCrushLabel)), this._bitcrusherFreqSlider.container);
     private readonly _stringSustainSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.stringSustainRange - 1, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeStringSustain(this._doc, oldValue, newValue), false);
     private readonly _stringSustainRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("stringSustain") }, span(_.sustainLabel)), this._stringSustainSlider.container);
-    private readonly _unisonSelect: HTMLSelectElement = buildOptions(select(), Config.unisons.map(unison => unison.name));
+    private readonly _unisonSelect: HTMLSelectElement = buildOptions(select(), Config.unisons.map(unison => unison.name)); //MID TODO: Hey dummy, need to put the unison translations here!
     private readonly _unisonSelectRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("unison") }, span(_.unisonLabel)), div({ class: "selectContainer" }, this._unisonSelect));
     private readonly _chordSelect: HTMLSelectElement = buildOptions(select(), Config.chords.map(chord => chord.name));
     private readonly _chordDropdown: HTMLButtonElement = button({ style: "margin-left:0em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.Chord) }, "▼");
@@ -535,14 +604,14 @@ export class SongEditor {
     private readonly _modTargetIndicators: SVGElement[];
 
     private readonly _instrumentCopyButton: HTMLButtonElement = button({ style: "max-width:86px; width: 86px;", class: "copyButton" }, [
-        "Copy",
+        (_.copyLabel),
         // Copy icon:
         SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 0; top: 50%; margin-top: -1em; pointer-events: none;", width: "2em", height: "2em", viewBox: "-5 -21 26 26" }, [
             SVG.path({ d: "M 0 -15 L 1 -15 L 1 0 L 13 0 L 13 1 L 0 1 L 0 -15 z M 2 -1 L 2 -17 L 10 -17 L 14 -13 L 14 -1 z M 3 -2 L 13 -2 L 13 -12 L 9 -12 L 9 -16 L 3 -16 z", fill: "currentColor" }),
         ]),
     ]);
     private readonly _instrumentPasteButton: HTMLButtonElement = button({ style: "max-width:86px;", class: "pasteButton" }, [
-        "Paste",
+        (_.pasteLabel),
         // Paste icon:
         SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 0; top: 50%; margin-top: -1em; pointer-events: none;", width: "2em", height: "2em", viewBox: "0 0 26 26" }, [
             SVG.path({ d: "M 8 18 L 6 18 L 6 5 L 17 5 L 17 7 M 9 8 L 16 8 L 20 12 L 20 22 L 9 22 z", stroke: "currentColor", fill: "none" }),
@@ -562,7 +631,8 @@ export class SongEditor {
     ]);
 
     private readonly _songTitleInputBox: InputBox = new InputBox(input({ style: "font-weight:bold; border:none; width: 100%; background-color:${ColorConfig.editorBackground}; color:${ColorConfig.primaryText}; text-align:center", maxlength: "30", type: "text", value: EditorConfig.versionDisplayName }), this._doc, (oldValue: string, newValue: string) => new ChangeSongTitle(this._doc, oldValue, newValue));
-
+    /*private readonly _songSubtitleInputBox: InputBox = new InputBox(input({ style: "font-weight:bold; font-size:13px; border:none; width: 100%; background-color:${ColorConfig.editorBackground}; color:${ColorConfig.primaryText}; text-align:center", maxlength: "45", type: "text", value: EditorConfig.versionDisplayName }), this._doc, (oldValue: string, newValue: string) => new ChangeSongTitle(this._doc, oldValue, newValue));*/
+    //MID TODO: Subtitle box goes here blud.
 
     private readonly _feedbackAmplitudeSlider: Slider = new Slider(input({ type: "range", min: "0", max: Config.operatorAmplitudeMax, value: "0", step: "1", title: "Feedback Amplitude" }), this._doc, (oldValue: number, newValue: number) => new ChangeFeedbackAmplitude(this._doc, oldValue, newValue), false);
     private readonly _feedbackRow2: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("feedbackVolume") }, span(_.feedbackVolumeLabel)), this._feedbackAmplitudeSlider.container);
@@ -620,6 +690,7 @@ export class SongEditor {
         this._echoSustainRow,
         this._echoDelayRow,
         this._reverbRow,
+        this._percussionRow,
         div({ style: `padding: 2px 0; margin-left: 2em; display: flex; align-items: center;` },
             span({ style: `flex-grow: 1; text-align: center;` }, span({ class: "tip", onclick: () => this._openPrompt("envelopes") }, span(_.envelopesLabel))),
             this._addEnvelopeButton,
@@ -633,7 +704,7 @@ export class SongEditor {
         ),
     );
     private readonly _instrumentSettingsTextRow: HTMLDivElement = div({ id: "instrumentSettingsText", style: `padding: 3px 0; max-width: 15em; text-align: center; color: ${ColorConfig.secondaryText};` },
-        "Instrument Settings"
+        (_.instSettingsLabel),
     );
     private readonly _instrumentTypeSelectRow: HTMLDivElement = div({ class: "selectRow", id: "typeSelectRow" },
         span({ class: "tip", onclick: () => this._openPrompt("instrumentType") }, span(_.instTypeLabel)),
@@ -715,7 +786,7 @@ export class SongEditor {
                             this._usedInstrumentIndicator,
                         ),
                     ),
-                    "Song Settings",
+                    span(_.songSettingsLabel),
                     div({ style: "width: 100%; left: 0; top: -1px; position:absolute; overflow-x:clip;" }, this._jumpToModIndicator),
                 ),
             ),
@@ -824,17 +895,17 @@ export class SongEditor {
             this._fileMenu.removeChild(this._fileMenu.querySelector("[value='shareUrl']")!);
         }
 
-        this._scaleSelect.appendChild(optgroup({ label: "Edit" },
+        this._scaleSelect.appendChild(optgroup({ label: (_.editLabel) },
             option({ value: "forceScale" }, span(_.snapScaleLabel)),
         ));
-        this._keySelect.appendChild(optgroup({ label: "Edit" },
+        this._keySelect.appendChild(optgroup({ label: (_.editLabel) },
             option({ value: "detectKey" }, span(_.detectKeyLabel)),
         ));
-        this._rhythmSelect.appendChild(optgroup({ label: "Edit" },
+        this._rhythmSelect.appendChild(optgroup({ label: (_.editLabel) },
             option({ value: "forceRhythm" }, span(_.snapRhythmLabel)),
         ));
 
-        this._vibratoSelect.appendChild(option({ hidden: true, value: 5 }, "custom"));
+        this._vibratoSelect.appendChild(option({ hidden: true, value: 5 }, span(_.customLabel)));
 
         this._showModSliders = new Array<boolean>(Config.modulators.length);
         this._modSliderValues = new Array<number>(Config.modulators.length);
@@ -1062,6 +1133,7 @@ export class SongEditor {
         this._twoNoteArpBox.addEventListener("input", () => { this._doc.record(new ChangeFastTwoNoteArp(this._doc, this._twoNoteArpBox.checked)) });
         this._clicklessTransitionBox.addEventListener("input", () => { this._doc.record(new ChangeClicklessTransition(this._doc, this._clicklessTransitionBox.checked)) });
         this._aliasingBox.addEventListener("input", () => { this._doc.record(new ChangeAliasing(this._doc, this._aliasingBox.checked)) });
+        this._percussionBox.addEventListener("input", () => { this._doc.record(new ChangePercussion(this._doc, this._percussionBox.checked)) });
 
         this._promptContainer.addEventListener("click", (event) => {
             if (event.target == this._promptContainer) {
@@ -1495,10 +1567,25 @@ export class SongEditor {
             this._effectsSelect.appendChild(option({ value: i }));
         }
         this._effectsSelect.selectedIndex = -1;
+        const translatedEffectNames: string[] = [
+            (_.reverbEffectLabel),
+            (_.chorusEffectLabel),
+            (_.panEffectLabel),
+            (_.distortionEffectLabel),
+            (_.bitCrushEffectLabel),
+            (_.noteFiltEffectLabel),
+            (_.echoEffectLabel),
+            (_.pitchShiftEffectLabel),
+            (_.detuneEffectLabel),
+            (_.vibratoEffectLabel),
+            (_.transitionEffectLabel),
+            (_.chordEffectLabel),
+            (_.percussionEffectLabel)
+        ];
         for (let i: number = 0; i < Config.effectOrder.length; i++) {
             let effectFlag: number = Config.effectOrder[i];
             const selected: boolean = ((instrument.effects & (1 << effectFlag)) != 0);
-            const label: string = (selected ? "✓ " : "　") + Config.effectNames[effectFlag];
+            const label: string = (selected ? "✓ " : "　") + translatedEffectNames[effectFlag];
             const option: HTMLOptionElement = <HTMLOptionElement>this._effectsSelect.children[i + 1];
             if (option.textContent != label) option.textContent = label;
         }
@@ -1544,7 +1631,7 @@ export class SongEditor {
             this._instrumentSettingsGroup.insertBefore(this._instrumentSettingsTextRow, this._instrumentSettingsGroup.firstChild);
 
             if (this._doc.song.channels[this._doc.channel].name == "") {
-                this._instrumentSettingsTextRow.textContent = "Instrument Settings";
+                this._instrumentSettingsTextRow.textContent = (_.instSettingsLabel);
             }
             else {
                 this._instrumentSettingsTextRow.textContent = this._doc.song.channels[this._doc.channel].name;
@@ -1818,7 +1905,13 @@ export class SongEditor {
                 this._reverbRow.style.display = "none";
             }
 
-            if (instrument.type == InstrumentType.chip || instrument.type == InstrumentType.customChipWave || instrument.type == InstrumentType.harmonics || instrument.type == InstrumentType.pickedString || instrument.type == InstrumentType.spectrum || instrument.type == InstrumentType.pwm || instrument.type == InstrumentType.fm) {
+            if (effectsIncludePercussion(instrument.effects)) {
+                this._percussionRow.style.display = "";
+            } else {
+                this._percussionRow.style.display = "none";
+            }
+
+            if (instrument.type == InstrumentType.chip || instrument.type == InstrumentType.customChipWave || instrument.type == InstrumentType.harmonics || instrument.type == InstrumentType.pickedString || instrument.type == InstrumentType.spectrum || instrument.type == InstrumentType.pwm || instrument.type == InstrumentType.fm || instrument.type == InstrumentType.drumset || instrument.type == InstrumentType.noise) {
                 this._unisonSelectRow.style.display = "";
                 setSelectedValue(this._unisonSelect, instrument.unison);
             } else {
@@ -2414,6 +2507,7 @@ export class SongEditor {
         this._twoNoteArpBox.checked = instrument.fastTwoNoteArp ? true : false;
         this._clicklessTransitionBox.checked = instrument.clicklessTransition ? true : false;
         this._aliasingBox.checked = instrument.aliases ? true : false;
+        this._percussionBox.checked = instrument.percussion ? true : false;
         this._addEnvelopeButton.disabled = (instrument.envelopeCount >= Config.maxEnvelopeCount);
 
         this._volumeSlider.updateValue(prefs.volume);

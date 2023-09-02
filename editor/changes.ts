@@ -759,7 +759,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                 { item: InstrumentType.spectrum, weight: 3 },
                 { item: InstrumentType.fm, weight: 3 },
                 //{ item: InstrumentType.customChipWave, weight: 3 },
-                // MID TO-DO: Add custom chip as an available random-gen instrument type.
+                // MID TODO: Add custom chip as an available random-gen instrument type.
             ]);
             instrument.preset = instrument.type = type;
 
@@ -1798,6 +1798,19 @@ export class ChangeAliasing extends Change {
         doc.notifier.changed();
         if (oldValue != newValue) {
             instrument.aliases = newValue;
+            this._didSomething();
+        }
+    }
+}
+
+export class ChangePercussion extends Change {
+    constructor(doc: SongDocument, newValue: boolean) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        const oldValue: boolean = instrument.percussion;
+        doc.notifier.changed();
+        if (oldValue != newValue) {
+            instrument.percussion = newValue;
             this._didSomething();
         }
     }

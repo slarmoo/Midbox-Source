@@ -1,10 +1,11 @@
 // Copyright (c) 2012-2022 John Nesky and contributing authors, distributed under the MIT license, see accompanying the LICENSE.md file.
 
-import { Dictionary, DictionaryArray, FilterType, EnvelopeType, InstrumentType, EffectType, EnvelopeComputeIndex, Transition, Unison, Chord, Vibrato, Envelope, AutomationTarget, Config, getDrumWave, drawNoiseSpectrum, getArpeggioPitchIndex, performIntegralOld, getPulseWidthRatio, effectsIncludeTransition, effectsIncludeChord, effectsIncludePitchShift, effectsIncludeDetune, effectsIncludeVibrato, effectsIncludeNoteFilter, effectsIncludeDistortion, effectsIncludeBitcrusher, effectsIncludePanning, effectsIncludeChorus, effectsIncludeEcho, effectsIncludeReverb, /*effectsIncludePercussion,*/ OperatorWave } from "./SynthConfig";
+import { Dictionary, DictionaryArray, FilterType, EnvelopeType, InstrumentType, EffectType, EnvelopeComputeIndex, Transition, Unison, Chord, Vibrato, Envelope, AutomationTarget, Config, getDrumWave, drawNoiseSpectrum, getArpeggioPitchIndex, performIntegralOld, getPulseWidthRatio, effectsIncludeTransition, effectsIncludeChord, effectsIncludePitchShift, effectsIncludeDetune, effectsIncludeVibrato, effectsIncludeNoteFilter, effectsIncludeDistortion, effectsIncludeBitcrusher, effectsIncludePanning, effectsIncludeChorus, effectsIncludeEcho, effectsIncludeReverb, effectsIncludePercussion, OperatorWave } from "./SynthConfig";
 import { EditorConfig } from "../editor/EditorConfig";
 import { scaleElementsByFactor, inverseRealFourierTransform } from "./FFT";
 import { Deque } from "./Deque";
 import { FilterCoefficients, FrequencyResponse, DynamicBiquadFilter } from "./filtering";
+import { Localization as _ } from "../editor/Localization";
 
 declare global {
     interface Window {
@@ -1219,6 +1220,7 @@ export class Instrument {
     public legacyTieOver: boolean = false;
     public clicklessTransition: boolean = false;
     public aliases: boolean = false;
+    public percussion: boolean = false;
     public pulseWidth: number = Config.pulseWidthRange;
     public stringSustain: number = 10;
     public distortion: number = 0;
@@ -1326,6 +1328,7 @@ export class Instrument {
         this.arpeggioSpeed = 12;
         this.legacyTieOver = false;
         this.aliases = false;
+        this.percussion = false;
         this.fadeIn = 0;
         this.fadeOut = Config.fadeOutNeutral;
         this.transition = Config.transitions.dictionary["normal"].index;
@@ -1611,6 +1614,10 @@ export class Instrument {
             instrumentObject["reverb"] = Math.round(100 * this.reverb / (Config.reverbRange - 1));
         }
 
+        if (effectsIncludePercussion(this.effects)) {
+            instrumentObject["percussion"] = this.percussion;
+        }
+
         if (this.type != InstrumentType.drumset) {
             instrumentObject["fadeInSeconds"] = Math.round(10000 * Synth.fadeInSettingToSeconds(this.fadeIn)) / 10000;
             instrumentObject["fadeOutTicks"] = Synth.fadeOutSettingToTicks(this.fadeOut);
@@ -1624,13 +1631,16 @@ export class Instrument {
         }
 
         if (this.type == InstrumentType.noise) {
+            instrumentObject["unison"] = Config.unisons[this.unison].name;
             instrumentObject["wave"] = Config.chipNoises[this.chipNoise].name;
         } else if (this.type == InstrumentType.spectrum) {
+            instrumentObject["unison"] = Config.unisons[this.unison].name;
             instrumentObject["spectrum"] = [];
             for (let i: number = 0; i < Config.spectrumControlPoints; i++) {
                 instrumentObject["spectrum"][i] = Math.round(100 * this.spectrumWave.spectrum[i] / Config.spectrumMax);
             }
         } else if (this.type == InstrumentType.drumset) {
+            instrumentObject["unison"] = Config.unisons[this.unison].name;
             instrumentObject["drums"] = [];
             for (let j: number = 0; j < Config.drumCount; j++) {
                 const spectrum: number[] = [];
@@ -1647,12 +1657,14 @@ export class Instrument {
             instrumentObject["unison"] = Config.unisons[this.unison].name;
         } else if (this.type == InstrumentType.pwm) {
             instrumentObject["pulseWidth"] = this.pulseWidth;
+            instrumentObject["unison"] = Config.unisons[this.unison].name;
         } else if (this.type == InstrumentType.pickedString) {
             instrumentObject["unison"] = Config.unisons[this.unison].name;
             instrumentObject["stringSustain"] = Math.round(100 * this.stringSustain / (Config.stringSustainRange - 1));
         } else if (this.type == InstrumentType.harmonics) {
             instrumentObject["unison"] = Config.unisons[this.unison].name;
         } else if (this.type == InstrumentType.fm) {
+            instrumentObject["unison"] = Config.unisons[this.unison].name;
             const operatorArray: Object[] = [];
             for (const operator of this.operators) {
                 operatorArray.push({
@@ -2080,6 +2092,12 @@ export class Instrument {
                 this.aliases = false;
             }
 
+            if (instrumentObject["percussion"] != undefined) {
+                this.percussion = instrumentObject["percussion"];
+            } else {
+                this.percussion = false;
+            }
+
             if (instrumentObject["noteFilterType"] != undefined) {
                 this.noteFilterType = instrumentObject["noteFilterType"];
             }
@@ -2431,7 +2449,7 @@ export class Song {
         this.layeredInstruments = false;
         this.patternInstruments = false;
 
-        this.title = "Untitled Project";
+        this.title = _.newSongLabel;
         document.title = EditorConfig.versionDisplayName;
 
         if (andResetChannels) {
@@ -2585,8 +2603,16 @@ export class Song {
                     }
                 }
 
-                // The list of enabled effects is represented as a 12-bit bitfield using two six-bit characters.
-                buffer.push(SongTagCode.effects, base64IntToCharCode[instrument.effects >> 6], base64IntToCharCode[instrument.effects & 63]);
+                // The list of enabled effects is represented as a 32-bit bitfield using six six-bit characters.
+                buffer.push(
+                    SongTagCode.effects,
+                    base64IntToCharCode[(instrument.effects >>> (6 * 5)) & 63],
+                    base64IntToCharCode[(instrument.effects >>> (6 * 4)) & 63],
+                    base64IntToCharCode[(instrument.effects >>> (6 * 3)) & 63],
+                    base64IntToCharCode[(instrument.effects >>> (6 * 2)) & 63],
+                    base64IntToCharCode[(instrument.effects >>> (6 * 1)) & 63],
+                    base64IntToCharCode[(instrument.effects >>> (6 * 0)) & 63]
+                );
                 if (effectsIncludeNoteFilter(instrument.effects)) {
                     buffer.push(base64IntToCharCode[+instrument.noteFilterType]);
                     if (instrument.noteFilterType) {
@@ -2674,9 +2700,9 @@ export class Song {
                 if (effectsIncludeReverb(instrument.effects)) {
                     buffer.push(base64IntToCharCode[instrument.reverb]);
                 }
-                /*if (effectsIncludePercussion(instrument.effects)) {
-                    buffer.push(base64IntToCharCode[instrument.percussion]);
-                }*/
+                if (effectsIncludePercussion(instrument.effects)) {
+                    buffer.push(base64IntToCharCode[+instrument.percussion]);
+                }
 
                 if (instrument.type != InstrumentType.drumset) {
                     buffer.push(SongTagCode.fadeInOut, base64IntToCharCode[instrument.fadeIn], base64IntToCharCode[instrument.fadeOut]);
@@ -2697,6 +2723,7 @@ export class Song {
                     buffer.push(SongTagCode.wave, base64IntToCharCode[instrument.chipWave]);
                     buffer.push(SongTagCode.unison, base64IntToCharCode[instrument.unison]);
                 } else if (instrument.type == InstrumentType.fm) {
+                    buffer.push(SongTagCode.unison, base64IntToCharCode[instrument.unison]);
                     buffer.push(SongTagCode.algorithm, base64IntToCharCode[instrument.algorithm]);
                     buffer.push(SongTagCode.feedbackType, base64IntToCharCode[instrument.feedbackType]);
                     buffer.push(SongTagCode.feedbackAmplitude, base64IntToCharCode[instrument.feedbackAmplitude]);
@@ -2727,8 +2754,10 @@ export class Song {
                         buffer.push(base64IntToCharCode[(instrument.customChipWave[j] + 24) as number]);
                     }
                 } else if (instrument.type == InstrumentType.noise) {
+                    buffer.push(SongTagCode.unison, base64IntToCharCode[instrument.unison]);
                     buffer.push(SongTagCode.wave, base64IntToCharCode[instrument.chipNoise]);
                 } else if (instrument.type == InstrumentType.spectrum) {
+                    buffer.push(SongTagCode.unison, base64IntToCharCode[instrument.unison]);
                     buffer.push(SongTagCode.spectrum);
                     const spectrumBits: BitFieldWriter = new BitFieldWriter();
                     for (let i: number = 0; i < Config.spectrumControlPoints; i++) {
@@ -2736,6 +2765,7 @@ export class Song {
                     }
                     spectrumBits.encodeBase64(buffer);
                 } else if (instrument.type == InstrumentType.drumset) {
+                    buffer.push(SongTagCode.unison, base64IntToCharCode[instrument.unison]);
                     buffer.push(SongTagCode.drumsetEnvelopes);
                     for (let j: number = 0; j < Config.drumCount; j++) {
                         buffer.push(base64IntToCharCode[instrument.drumsetEnvelopes[j]]);
@@ -2752,6 +2782,7 @@ export class Song {
                 } else if (instrument.type == InstrumentType.harmonics) {
                     buffer.push(SongTagCode.unison, base64IntToCharCode[instrument.unison]);
                 } else if (instrument.type == InstrumentType.pwm) {
+                    buffer.push(SongTagCode.unison, base64IntToCharCode[instrument.unison]);
                     buffer.push(SongTagCode.pulseWidth, base64IntToCharCode[instrument.pulseWidth]);
                 } else if (instrument.type == InstrumentType.pickedString) {
                     buffer.push(SongTagCode.unison, base64IntToCharCode[instrument.unison]);
@@ -3782,9 +3813,16 @@ export class Song {
                     const legacySettings: LegacySettings = legacySettingsCache![instrumentChannelIterator][instrumentIndexIterator];
                     instrument.convertLegacySettings(legacySettings, forceSimpleFilter);
                 } else {
-                    // BeepBox currently uses two base64 characters at 6 bits each for a bitfield representing all the enabled effects.
-                    if (EffectType.length > 12) throw new Error();
-                    instrument.effects = (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] << 6) | (base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
+                    // BeepBox currently uses six base64 characters at 6 bits each for a bitfield representing all the enabled effects.
+                    if (EffectType.length > 32) throw new Error();
+                    instrument.effects = (
+                        (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] << (6 * 5))
+                        | (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] << (6 * 4))
+                        | (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] << (6 * 3))
+                        | (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] << (6 * 2))
+                        | (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] << (6 * 1))
+                        | (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] << (6 * 0))
+                    ) >>> 0;
 
                     if (effectsIncludeNoteFilter(instrument.effects)) {
                         let typeCheck: number = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
@@ -3922,6 +3960,9 @@ export class Song {
                         } else {
                             instrument.reverb = clamp(0, Config.reverbRange, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                         }
+                    }
+                    if (effectsIncludePercussion(instrument.effects)) {
+                        instrument.percussion = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] ? true : false;
                     }
                 }
                 // Clamp the range.
@@ -5728,6 +5769,7 @@ class InstrumentState {
         const usesChorus: boolean = effectsIncludeChorus(this.effects);
         const usesEcho: boolean = effectsIncludeEcho(this.effects);
         const usesReverb: boolean = effectsIncludeReverb(this.effects);
+        const usesPercussion: boolean = effectsIncludePercussion(this.effects);
 
         if (usesDistortion) {
             let useDistortionStart: number = instrument.distortion;
@@ -5770,7 +5812,10 @@ class InstrumentState {
                 quantizationSettingEnd = synth.getModValue(Config.modulators.dictionary["bit crush"].index, channelIndex, instrumentIndex, true);
             }
 
-            const basePitch: number = Config.keys[synth.song!.key].basePitch; // TODO: What if there's a key change mid-song?
+            let basePitch: number = Config.keys[synth.song!.key].basePitch; // TODO: What if there's a key change mid-song?
+            if (usesPercussion && instrument.percussion) {
+                basePitch = 12;
+            }
             const freqStart: number = Instrument.frequencyFromPitch(basePitch + 60) * Math.pow(2.0, (Config.bitcrusherFreqRange - 1 - freqSettingStart) * Config.bitcrusherOctaveStep);
             const freqEnd: number = Instrument.frequencyFromPitch(basePitch + 60) * Math.pow(2.0, (Config.bitcrusherFreqRange - 1 - freqSettingEnd) * Config.bitcrusherOctaveStep);
             const phaseDeltaStart: number = Math.min(1.0, freqStart / samplesPerSecond);
@@ -8125,6 +8170,9 @@ export class Synth {
 
         let expressionReferencePitch: number = 16; // A low "E" as a MIDI pitch.
         let basePitch: number = Config.keys[song.key].basePitch;
+        if (effectsIncludePercussion(instrument.effects) && instrument.percussion) {
+            basePitch = 12;
+        }
         let baseExpression: number = 1.0;
         let pitchDamping: number = 48;
         if (instrument.type == InstrumentType.spectrum) {
@@ -8713,7 +8761,7 @@ export class Synth {
             }
 
             const startFreq: number = Instrument.frequencyFromPitch(startPitch);
-            if (instrument.type == InstrumentType.chip || instrument.type == InstrumentType.customChipWave || instrument.type == InstrumentType.harmonics || instrument.type == InstrumentType.pickedString || instrument.type == InstrumentType.spectrum || instrument.type == InstrumentType.pwm) {
+            if (instrument.type == InstrumentType.chip || instrument.type == InstrumentType.customChipWave || instrument.type == InstrumentType.harmonics || instrument.type == InstrumentType.pickedString || instrument.type == InstrumentType.spectrum || instrument.type == InstrumentType.pwm || instrument.type == InstrumentType.noise || instrument.type == InstrumentType.drumset) {
                 // These instruments have two waves at different frequencies for the unison feature.
                 const unison: Unison = Config.unisons[instrument.unison];
                 const voiceCountExpression: number = (instrument.type == InstrumentType.pickedString) ? 1 : unison.voices / 2.0;
@@ -9760,8 +9808,20 @@ export class Synth {
         effectsFunction(synth, outputDataL, outputDataR, bufferIndex, runLength, instrumentState);
     }
 
-    private static pulseWidthSynth(synth: Synth, bufferIndex: number, roundedSamplesPerTick: number, tone: Tone, instrument: Instrument): void {
+    private static pulseWidthSynth(synth: Synth, bufferIndex: number, roundedSamplesPerTick: number, tone: Tone, instrument: Instrument, /*instrumentState: InstrumentState*/): void {
         const data: Float32Array = synth.tempMonoInstrumentSampleBuffer!;
+        // const waveLength: number = wave.length - 1;
+        
+        // const unisonSign: number = tone.specialIntervalExpressionMult * instrumentState.unison!.sign;
+        // if (instrumentState.unison!.voices == 1 && !instrumentState.chord!.customInterval) tone.phases[1] = tone.phases[0];
+        // let phaseDeltaA: number = tone.phaseDeltas[0] * waveLength;
+        // let phaseDeltaB: number = tone.phaseDeltas[1] * waveLength;
+        // const phaseDeltaScaleA: number = +tone.phaseDeltaScales[0];
+        // const phaseDeltaScaleB: number = +tone.phaseDeltaScales[1];
+        // let expression: number = +tone.expression;
+        // const expressionDelta: number = +tone.expressionDelta;
+        // let phaseA: number = (tone.phases[0] % 1) * waveLength;
+        // let phaseB: number = (tone.phases[1] % 1) * waveLength;
 
         let phaseDelta: number = tone.phaseDeltas[0];
         const phaseDeltaScale: number = +tone.phaseDeltaScales[0];

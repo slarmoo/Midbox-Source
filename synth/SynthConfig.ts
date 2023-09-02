@@ -88,9 +88,9 @@ export const enum EffectType {
     vibrato,
     transition,
     chord,
+    percussion,
     // If you add more, you'll also have to extend the bitfield used in Base64 which currently uses two six-bit characters.
     length,
-    percussion,
 }
 
 export const enum EnvelopeComputeIndex {
@@ -258,26 +258,26 @@ export class Config {
     public static readonly scales: DictionaryArray<Scale> = toNameMap([
 
         //   C     Db      D     Eb      E      F     F#      G     Ab      A     Bb      B      C
-        { name: (_.scale1Label), realName: "chromatic", flags: [true, true, true, true, true, true, true, true, true, true, true, true] }, // Free
-        { name: (_.scale2Label), realName: "ionian", flags: [true, false, true, false, true, true, false, true, false, true, false, true] }, // Major
-        { name: (_.scale3Label), realName: "aeolian", flags: [true, false, true, true, false, true, false, true, true, false, true, false] }, // Minor
-        { name: (_.scale4Label), realName: "mixolydian", flags: [true, false, true, false, true, true, false, true, false, true, true, false] }, // Mixolydian
-        { name: (_.scale5Label), realName: "lydian", flags: [true, false, true, false, true, false, true, true, false, true, false, true] }, // Lydian
-        { name: (_.scale6Label), realName: "dorian", flags: [true, false, true, true, false, true, false, true, false, true, true, false] }, // Dorian
-        { name: (_.scale7Label), realName: "phrygian", flags: [true, true, false, true, false, true, false, true, true, false, true, false] }, // Phrygian
-        { name: (_.scale8Label), realName: "locrian", flags: [true, true, false, true, false, true, true, false, true, false, true, false] }, // Locrian
-        { name: (_.scale9Label), realName: "lydian dominant", flags: [true, false, true, false, true, false, true, true, false, true, true, false] }, // Lydian Dominant
-        { name: (_.scale10Label), realName: "phrygian dominant", flags: [true, true, false, false, true, true, false, true, true, false, true, false] }, // Phrygian Dominant
-        { name: (_.scale11Label), realName: "harmonic major", flags: [true, false, true, false, true, true, false, true, true, false, false, true] }, // Harmonic Major
-        { name: (_.scale12Label), realName: "harmonic minor", flags: [true, false, true, true, false, true, false, true, true, false, false, true] }, // Harmonic Minor
-        { name: (_.scale13Label), realName: "melodic minor", flags: [true, false, true, true, false, true, false, true, false, true, false, true] }, // Melodic Minor
-        { name: (_.scale14Label), realName: "blues", flags: [true, false, false, true, false, true, true, true, false, false, true, false] }, // Blues
-        { name: (_.scale15Label), realName: "altered", flags: [true, true, false, true, true, false, true, false, true, false, true, false] }, // Altered
-        { name: (_.scale16Label), realName: "major pentatonic", flags: [true, false, true, false, true, false, false, true, false, true, false, false] }, // Major Pentatonic
-        { name: (_.scale17Label), realName: "minor pentatonic", flags: [true, false, false, true, false, true, false, true, false, false, true, false] }, // Minor Pentatonic
-        { name: (_.scale18Label), realName: "whole tone", flags: [true, false, true, false, true, false, true, false, true, false, true, false] }, // Whole Tone
-        { name: (_.scale19Label), realName: "octatonic", flags: [true, false, true, true, false, true, true, false, true, true, false, true] }, // Octatonic
-        { name: (_.scale20Label), realName: "hexatonic", flags: [true, false, false, true, true, false, false, true, true, false, false, true] }, // Hexatonic
+        { name: "Free", realName: "chromatic", flags: [true, true, true, true, true, true, true, true, true, true, true, true] }, // Free
+        { name: "Major", realName: "ionian", flags: [true, false, true, false, true, true, false, true, false, true, false, true] }, // Major
+        { name: "Minor", realName: "aeolian", flags: [true, false, true, true, false, true, false, true, true, false, true, false] }, // Minor
+        { name: "Mixolydian", realName: "mixolydian", flags: [true, false, true, false, true, true, false, true, false, true, true, false] }, // Mixolydian
+        { name: "Lydian", realName: "lydian", flags: [true, false, true, false, true, false, true, true, false, true, false, true] }, // Lydian
+        { name: "Dorian", realName: "dorian", flags: [true, false, true, true, false, true, false, true, false, true, true, false] }, // Dorian
+        { name: "Phrygian", realName: "phrygian", flags: [true, true, false, true, false, true, false, true, true, false, true, false] }, // Phrygian
+        { name: "Locrian", realName: "locrian", flags: [true, true, false, true, false, true, true, false, true, false, true, false] }, // Locrian
+        { name: "Lydian Dominant", realName: "lydian dominant", flags: [true, false, true, false, true, false, true, true, false, true, true, false] }, // Lydian Dominant
+        { name: "Phrygian Dominant", realName: "phrygian dominant", flags: [true, true, false, false, true, true, false, true, true, false, true, false] }, // Phrygian Dominant
+        { name: "Harmonic Major", realName: "harmonic major", flags: [true, false, true, false, true, true, false, true, true, false, false, true] }, // Harmonic Major
+        { name: "Harmonic Minor", realName: "harmonic minor", flags: [true, false, true, true, false, true, false, true, true, false, false, true] }, // Harmonic Minor
+        { name: "Melodic Minor", realName: "melodic minor", flags: [true, false, true, true, false, true, false, true, false, true, false, true] }, // Melodic Minor
+        { name: "Blues", realName: "blues", flags: [true, false, false, true, false, true, true, true, false, false, true, false] }, // Blues
+        { name: "Altered", realName: "altered", flags: [true, true, false, true, true, false, true, false, true, false, true, false] }, // Altered
+        { name: "Major Pentatonic", realName: "major pentatonic", flags: [true, false, true, false, true, false, false, true, false, true, false, false] }, // Major Pentatonic
+        { name: "Minor Pentatonic", realName: "minor pentatonic", flags: [true, false, false, true, false, true, false, true, false, false, true, false] }, // Minor Pentatonic
+        { name: "Whole Tone", realName: "whole tone", flags: [true, false, true, false, true, false, true, false, true, false, true, false] }, // Whole Tone
+        { name: "Octatonic", realName: "octatonic", flags: [true, false, true, true, false, true, true, false, true, true, false, true] }, // Octatonic
+        { name: "Hexatonic", realName: "hexatonic", flags: [true, false, false, true, true, false, false, true, true, false, false, true] }, // Hexatonic
 
     ]);
     public static readonly keys: DictionaryArray<Key> = toNameMap([
@@ -1099,9 +1099,9 @@ export function effectsIncludeEcho(effects: number): boolean {
 export function effectsIncludeReverb(effects: number): boolean {
     return (effects & (1 << EffectType.reverb)) != 0;
 }
-/*export function effectsIncludePercussion(effects: number): boolean {
+export function effectsIncludePercussion(effects: number): boolean {
     return (effects & (1 << EffectType.percussion)) != 0;
-}*/
+}
 export function rawChipToIntegrated(raw: DictionaryArray<ChipWave>): DictionaryArray<ChipWave> {
     const newArray: Array<ChipWave> = new Array<ChipWave>(raw.length);
     const dictionary: Dictionary<ChipWave> = {};
