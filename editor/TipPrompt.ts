@@ -93,6 +93,14 @@ export class TipPrompt implements Prompt {
 					);
 				}
 				break;
+			case "strumSpeed":
+				{
+					message = div(
+						h2("Strum Speed"),
+						p("This setting affects how fast your chord will strum. Strum chords rapidly play all notes in a chord, but not simultaneously. This gives the effect of an instrument sounding manually played on an instrument like a piano or guitar."),
+					);
+				}
+				break;
 			case "twoNoteArpeggio":
 				{
 					message = div(

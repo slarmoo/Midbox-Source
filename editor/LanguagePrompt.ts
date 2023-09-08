@@ -1,19 +1,20 @@
 import { HTML } from "imperative-html/dist/esm/elements-strict";
 import { Prompt } from "./Prompt";
 import { SongDocument } from "./SongDocument";
+import { Localization as _ } from "./Localization";
 
 const { button, div, h2, select, option } = HTML;
 
 export class LanguagePrompt implements Prompt {
 	private readonly _languageSelect: HTMLSelectElement = select({ style: "width: 100%;" },
-			option({ value: "english" }, "English (Default)"),
+			option({ value: "english" }, (_.englishDefaultLanguageLabel)),
 			option({ value: "spanish" }, "Español / Spanish"),
 	);
 	private readonly _cancelButton: HTMLButtonElement = button({ class: "cancelButton" });
-	private readonly _okayButton: HTMLButtonElement = button({ class: "okayButton", style: "width:100%;" }, "Confirm");
+	private readonly _okayButton: HTMLButtonElement = button({ class: "okayButton", style: "width:100%;" }, (_.confirmLabel));
 
 	public readonly container: HTMLDivElement = div({ class: "prompt noSelection", style: "width: 220px;" },
-		h2("Set Language (BETA)"),
+		h2((_.languagePromptLabel)),
 		div({ style: "display: flex; flex-direction: row; align-items: center; height: 2em; justify-content: flex-end;" },
 			div({ class: "selectContainer", style: "width: 100%;" }, this._languageSelect),
 		),

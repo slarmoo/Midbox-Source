@@ -49,6 +49,9 @@ export const enum EnvelopeType {
     modboxTrill,
     modboxClick,
     modboxBow,
+    wibble,
+    linear,
+    rise,
 }
 
 
@@ -89,8 +92,8 @@ export const enum EffectType {
     transition,
     chord,
     percussion,
-    // If you add more, you'll also have to extend the bitfield used in Base64 which currently uses two six-bit characters.
     length,
+    // Mid: Remember that when touching effects, keep length at the end. Add your new effects after "Percussion".
 }
 
 export const enum EnvelopeComputeIndex {
@@ -377,10 +380,11 @@ export class Config {
         { name: "clang", expression: 0.4, basePitch: 69, pitchFilterMult: 1024.0, isSoft: false, samples: null },
         { name: "buzz", expression: 0.3, basePitch: 69, pitchFilterMult: 1024.0, isSoft: false, samples: null },
         { name: "hollow", expression: 1.5, basePitch: 96, pitchFilterMult: 1.0, isSoft: true, samples: null },
-        { name: "shine", expression: 1.0, basePitch: 69, pitchFilterMult: 1024.0, isSoft: false, samples: null },
+        { name: "shine", expression: 0.755, basePitch: 69, pitchFilterMult: 1024.0, isSoft: false, samples: null },
         { name: "deep", expression: 1.5, basePitch: 120, pitchFilterMult: 1024.0, isSoft: true, samples: null },
         { name: "cutter", expression: 0.005, basePitch: 96, pitchFilterMult: 1024.0, isSoft: false, samples: null },
         { name: "metallic", expression: 1.0, basePitch: 96, pitchFilterMult: 1024.0, isSoft: false, samples: null },
+        { name: "static", expression: 0.625, basePitch: 96, pitchFilterMult: 1024.0, isSoft: false, samples: null },
     ]);
 
     public static readonly filterFreqStep: number = 1.0 / 4.0;
@@ -586,6 +590,24 @@ export class Config {
         { name: "modbox blip", type: EnvelopeType.modboxBlip, speed: 4 },
         { name: "modbox click", type: EnvelopeType.modboxClick, speed: 5 },
         { name: "modbox bow", type: EnvelopeType.modboxBow, speed: 90 },
+        { name: "wibble 0", type: EnvelopeType.wibble, speed: 96.0 },
+        { name: "wibble 1", type: EnvelopeType.wibble, speed: 24.0 },
+        { name: "wibble 2", type: EnvelopeType.wibble, speed: 12.0 },
+        { name: "wibble 3", type: EnvelopeType.wibble, speed: 4.0 },
+        { name: "wibble 4", type: EnvelopeType.wibble, speed: 1.0 },
+        { name: "linear 0", type: EnvelopeType.linear, speed: 256.0 },
+        { name: "linear 1", type: EnvelopeType.linear, speed: 128.0 },
+        { name: "linear 2", type: EnvelopeType.linear, speed: 32.0 },
+        { name: "linear 3", type: EnvelopeType.linear, speed: 8.0 },
+        { name: "linear 4", type: EnvelopeType.linear, speed: 2.0 },
+        { name: "linear 5", type: EnvelopeType.linear, speed: 0.5 },
+        { name: "rise 0", type: EnvelopeType.rise, speed: 256.0 },
+        { name: "rise 1", type: EnvelopeType.rise, speed: 128.0 },
+        { name: "rise 2", type: EnvelopeType.rise, speed: 32.0 },
+        { name: "rise 3", type: EnvelopeType.rise, speed: 8.0 },
+        { name: "rise 4", type: EnvelopeType.rise, speed: 2.0 },
+        { name: "rise 5", type: EnvelopeType.rise, speed: 0.5 },
+
     ]);
     public static readonly feedbacks: DictionaryArray<Feedback> = toNameMap([
         { name: "1⟲", indices: [[1], [], [], []] },
@@ -915,7 +937,7 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
             inverseRealFourierTransform!(wave, Config.chipNoiseLength);
             scaleElementsByFactor!(wave, 1.0 / Math.sqrt(Config.chipNoiseLength));
         } else if (index == 5) {
-            // "Shine" drums from modbox!
+            // The "shine" noise type from Modbox!
             var drumBuffer = 1;
             for (var i = 0; i < Config.chipNoiseLength; i++) {
                 wave[i] = (drumBuffer & 1) * 2.0 - 1.0;
@@ -926,13 +948,13 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
                 drumBuffer = newBuffer;
             }
         } else if (index == 6) {
-            // "Deep" drums from modbox!
+            // The "deep" noise type from Modbox!
             drawNoiseSpectrum(wave, Config.chipNoiseLength, 1, 10, 1, 1, 0);
             drawNoiseSpectrum(wave, Config.chipNoiseLength, 20, 14, -2, -2, 0);
             inverseRealFourierTransform!(wave, Config.chipNoiseLength);
             scaleElementsByFactor!(wave, 1.0 / Math.sqrt(Config.chipNoiseLength));
         } else if (index == 7) {
-            // "Cutter" drums from modbox!
+            // The "cutter" noise type from Modbox!
             var drumBuffer = 1;
             for (var i = 0; i < Config.chipNoiseLength; i++) {
                 wave[i] = (drumBuffer & 1) * 4.0 * (Math.random() * 14 + 1);
@@ -943,13 +965,24 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
                 drumBuffer = newBuffer;
             }
         } else if (index == 8) {
-            // "Metallic" drums from modbox!
+            // The "metallic" noise type from Modbox!
             var drumBuffer = 1;
             for (var i = 0; i < 32768; i++) {
                 wave[i] = (drumBuffer & 1) / 2.0 + 0.5;
                 var newBuffer = drumBuffer >> 1;
                 if (((drumBuffer + newBuffer) & 1) == 1) {
                     newBuffer -= 10 << 2;
+                }
+                drumBuffer = newBuffer;
+            }
+        } else if (index == 9) {
+            // The "static" noise type from Goldbox!
+            let drumBuffer: number = 1;
+            for (let i: number = 0; i < Config.chipNoiseLength; i++) {
+                wave[i] = (drumBuffer & 1) * 2.0 - 1.1;
+                let newBuffer: number = drumBuffer >> 1;
+                if (((drumBuffer + newBuffer) & 1) == 1) {
+                    newBuffer += 8 ^ 2 << 16;
                 }
                 drumBuffer = newBuffer;
             }

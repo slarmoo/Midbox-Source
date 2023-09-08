@@ -41,7 +41,7 @@ import { ThemePrompt } from "./ThemePrompt";
 import { TipPrompt } from "./TipPrompt";
 import { LanguagePrompt } from "./LanguagePrompt";
 import { Localization as _ } from "./Localization";
-import { ChangeTempo, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, pickRandomPresetValue, ChangeRandomGeneratedInstrument, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, ChangeChipWave, ChangeNoiseWave, ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeAddEnvelope, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeClicklessTransition, ChangeAliasing, ChangePercussion, /*ChangeSongSubtitle*/ } from "./changes";
+import { ChangeTempo, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, pickRandomPresetValue, ChangeRandomGeneratedInstrument, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, ChangeChipWave, ChangeNoiseWave, ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeAddEnvelope, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeClicklessTransition, ChangeAliasing, ChangePercussion, /*ChangeStrumSpeed, ChangeSongSubtitle*/ } from "./changes";
 
 import { TrackEditor } from "./TrackEditor";
 
@@ -105,21 +105,21 @@ function buildPresetOptions(isNoise: boolean, idSet: string): HTMLSelectElement 
         }
 
         // Need to re-sort some elements for readability. Can't just do this in the menu, because indices are saved in URLs and would get broken if the ordering actually changed.
-        if (category.name == "String Presets" && foundAny) {
+        if (category.name == (_.stringPresetsLabel) && foundAny) {
 
             // Put violin 2 after violin 1
             let moveViolin2 = group.removeChild(group.children[11]);
             group.insertBefore(moveViolin2, group.children[1]);
         }
 
-        if (category.name == "Flute Presets" && foundAny) {
+        if (category.name == (_.flutePresetsLabel) && foundAny) {
 
             // Put flute 2 after flute 1
             let moveFlute2 = group.removeChild(group.children[11]);
             group.insertBefore(moveFlute2, group.children[1]);
         }
 
-        if (category.name == "Keyboard Presets" && foundAny) {
+        if (category.name == (_.keyboardPresetsLabel) && foundAny) {
 
             // Put grand piano 2 after grand piano 1
             let moveGrandPiano2 = group.removeChild(group.children[9]);
@@ -392,6 +392,7 @@ export class SongEditor {
         option({ value: "layout" }, (_.setLayoutLabel)),
         option({ value: "colorTheme" }, (_.setThemeLabel)),
         option({ value: "recordingSetup" }, (_.setNoteRecordingLabel)),
+        option({ value: "songStats" }, (_.viewSongStatsLabel)),
     );
     private readonly _scaleSelect: HTMLSelectElement = buildOptions(select(), [
         _.scale1Label, 
@@ -488,7 +489,8 @@ export class SongEditor {
         _.wave24Label,
         _.wave25Label,
         _.wave26Label,
-        _.wave27Label,
+        _.wave27Label
+
     ]);
     private readonly _chipNoiseSelect: HTMLSelectElement = buildOptions(select(), [
         _.noise1Label,
@@ -500,12 +502,23 @@ export class SongEditor {
         _.noise7Label,
         _.noise8Label,
         _.noise9Label,
+        _.noise10Label
+
     ]);
     private readonly _chipWaveSelectRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("chipWave") }, span(_.waveLabel)), div({ class: "selectContainer" }, this._chipWaveSelect));
     private readonly _chipNoiseSelectRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("chipNoise") }, span(_.noiseLabel)), div({ class: "selectContainer" }, this._chipNoiseSelect));
     private readonly _fadeInOutEditor: FadeInOutEditor = new FadeInOutEditor(this._doc);
     private readonly _fadeInOutRow: HTMLElement = div({ class: "selectRow" }, span({ style: "font-size: smaller;", class: "tip", onclick: () => this._openPrompt("fadeInOut") }, span(_.fadeLabel)), this._fadeInOutEditor.container);
-    private readonly _transitionSelect: HTMLSelectElement = buildOptions(select(), Config.transitions.map(transition => transition.name));
+    private readonly _transitionSelect: HTMLSelectElement = buildOptions(select(), [
+        _.transition1Label,
+        _.transition2Label,
+        _.transition3Label,
+        _.transition4Label,
+        _.transition5Label,
+        _.transition6Label,
+        _.transition7Label
+
+    ]);
     private readonly _transitionDropdown: HTMLButtonElement = button({ style: "margin-left:0em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.Transition) }, "▼");
     private readonly _transitionRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("transition") }, span(_.transitionLabel)), this._transitionDropdown, div({ class: "selectContainer", style: "width: 52.5%;" }, this._transitionSelect));
     private readonly _clicklessTransitionBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
@@ -560,19 +573,55 @@ export class SongEditor {
     private readonly _bitcrusherFreqRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", title: (_.freqCrushHover), onclick: () => this._openPrompt("bitcrusherFreq") }, span(_.freqCrushLabel)), this._bitcrusherFreqSlider.container);
     private readonly _stringSustainSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.stringSustainRange - 1, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeStringSustain(this._doc, oldValue, newValue), false);
     private readonly _stringSustainRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("stringSustain") }, span(_.sustainLabel)), this._stringSustainSlider.container);
-    private readonly _unisonSelect: HTMLSelectElement = buildOptions(select(), Config.unisons.map(unison => unison.name)); //MID TODO: Hey dummy, need to put the unison translations here!
+    private readonly _unisonSelect: HTMLSelectElement = buildOptions(select(), [
+        _.unison1Label,
+        _.unison2Label,
+        _.unison3Label,
+        _.unison4Label,
+        _.unison5Label,
+        _.unison6Label,
+        _.unison7Label,
+        _.unison8Label,
+        _.unison9Label,
+        _.unison10Label,
+        _.unison11Label,
+        _.unison12Label,
+        _.unison13Label,
+        _.unison14Label,
+        _.unison15Label,
+        _.unison16Label,
+        _.unison17Label,
+        _.unison18Label,
+        _.unison19Label,
+        _.unison20Label,
+        _.unison21Label,
+        _.unison22Label,
+        _.unison23Label
+
+    ]);
     private readonly _unisonSelectRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("unison") }, span(_.unisonLabel)), div({ class: "selectContainer" }, this._unisonSelect));
     private readonly _chordSelect: HTMLSelectElement = buildOptions(select(), Config.chords.map(chord => chord.name));
     private readonly _chordDropdown: HTMLButtonElement = button({ style: "margin-left:0em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.Chord) }, "▼");
+    private readonly _chordDropdown2: HTMLButtonElement = button({ style: "margin-left:0em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.Chord) }, "▼");
 
-    private readonly _chordSelectRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("chords") }, span(_.chordLabel)), this._chordDropdown, div({ class: "selectContainer" }, this._chordSelect));
+    private readonly _chordSelectRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("chords") }, span(_.chordLabel)), this._chordDropdown, this._chordDropdown2, div({ class: "selectContainer" }, this._chordSelect));
+    private readonly _strumSpeedSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: "1", value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeArpeggioSpeed(this._doc, oldValue, newValue), false);
+    private readonly _strumSpeedRow: HTMLElement = div({ class: "selectRow" }, span({ style: "font-size: smaller; margin-left:10px;", class: "tip", onclick: () => this._openPrompt("strumSpeed") }, span(_.strumSpeedLabel)), this._strumSpeedSlider.container);
     private readonly _arpeggioSpeedSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.modulators.dictionary["arp speed"].maxRawVol, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeArpeggioSpeed(this._doc, oldValue, newValue), false);
     private readonly _arpeggioSpeedRow: HTMLElement = div({ class: "selectRow" }, span({ style: "font-size: smaller; margin-left:10px;", class: "tip", onclick: () => this._openPrompt("arpeggioSpeed") }, span(_.arpSpeedLabel)), this._arpeggioSpeedSlider.container);
     private readonly _twoNoteArpBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
     private readonly _twoNoteArpRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "margin-left:10px; font-size: 11px;", onclick: () => this._openPrompt("twoNoteArpeggio") }, span(_.twoFastArpLabel)), this._twoNoteArpBox);
     private readonly _chordDropdownGroup: HTMLElement = div({ class: "editor-controls", style: "display: none;" }, this._arpeggioSpeedRow, this._twoNoteArpRow);
+    private readonly _chordDropdownGroup2: HTMLElement = div({ class: "editor-controls", style: "display: none;" }, this._strumSpeedRow);
 
-    private readonly _vibratoSelect: HTMLSelectElement = buildOptions(select(), Config.vibratos.map(vibrato => vibrato.name));
+    private readonly _vibratoSelect: HTMLSelectElement = buildOptions(select(), [
+        _.vibrato1Label,
+        _.vibrato2Label,
+        _.vibrato3Label,
+        _.vibrato4Label,
+        _.vibrato5Label
+
+    ]);
     private readonly _vibratoDropdown: HTMLButtonElement = button({ style: "margin-left:0em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.Vibrato) }, "▼");
     private readonly _vibratoSelectRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("vibrato") }, span(_.vibratoLabel)), this._vibratoDropdown, div({ class: "selectContainer", style: "width: 61.5%;" }, this._vibratoSelect));
     private readonly _vibratoDepthSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.modulators.dictionary["vibrato depth"].maxRawVol, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeVibratoDepth(this._doc, oldValue, newValue), false);
@@ -581,7 +630,11 @@ export class SongEditor {
     private readonly _vibratoSpeedRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "margin-left:10px; font-size: smaller;", onclick: () => this._openPrompt("vibratoSpeed") }, span(_.vibratoSpeedLabel)), this._vibratoSpeedSlider.container);
     private readonly _vibratoDelaySlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.modulators.dictionary["vibrato delay"].maxRawVol, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeVibratoDelay(this._doc, oldValue, newValue), false);
     private readonly _vibratoDelayRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "margin-left:10px;", onclick: () => this._openPrompt("vibratoDelay") }, span(_.vibratoDelayLabel)), this._vibratoDelaySlider.container);
-    private readonly _vibratoTypeSelect: HTMLSelectElement = buildOptions(select(), Config.vibratoTypes.map(vibrato => vibrato.name));
+    private readonly _vibratoTypeSelect: HTMLSelectElement = buildOptions(select(), [
+        _.vibratoNormalLabel,
+        _.vibratoShakyLabel
+
+    ]);
     private readonly _vibratoTypeSelectRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "margin-left:10px;", onclick: () => this._openPrompt("vibratoType") }, span(_.vibratoTypeLabel)), div({ class: "selectContainer", style: "width: 61.5%;" }, this._vibratoTypeSelect));
     private readonly _vibratoDropdownGroup: HTMLElement = div({ class: "editor-controls", style: "display: none;" }, this._vibratoDepthRow, this._vibratoSpeedRow, this._vibratoDelayRow, this._vibratoTypeSelectRow);
     private readonly _phaseModGroup: HTMLElement = div({ class: "editor-controls" });
@@ -674,6 +727,7 @@ export class SongEditor {
         this._transitionDropdownGroup,
         this._chordSelectRow,
         this._chordDropdownGroup,
+        this._chordDropdownGroup2,
         this._pitchShiftRow,
         this._detuneSliderRow,
         this._vibratoSelectRow,
@@ -876,6 +930,7 @@ export class SongEditor {
     private _openPanDropdown: boolean = false;
     private _openVibratoDropdown: boolean = false;
     private _openChordDropdown: boolean = false;
+    private _openChordDropdown2: boolean = false;
     private _openTransitionDropdown: boolean = false;
     private _openOperatorDropdowns: boolean[] = [];
 
@@ -967,7 +1022,7 @@ export class SongEditor {
             spectrumEditor.container.addEventListener("mousedown", this.refocusStage);
             this._drumsetSpectrumEditors[i] = spectrumEditor;
 
-            const envelopeSelect: HTMLSelectElement = buildOptions(select({ style: "width: 100%;", title: "Filter Envelope" }), Config.envelopes.map(envelope => envelope.name));
+            const envelopeSelect: HTMLSelectElement = buildOptions(select({ style: "width: 100%;", title: "Filter Envelope" }), Config.envelopes.map(envelope => envelope.name)); //MID TODO: Envelope translations ova' here
             this._drumsetEnvelopeSelects[i] = envelopeSelect;
             envelopeSelect.addEventListener("change", () => {
                 this._doc.record(new ChangeDrumsetEnvelope(this._doc, drumIndex, envelopeSelect.selectedIndex));
@@ -1174,6 +1229,11 @@ export class SongEditor {
                 this._openChordDropdown = this._openChordDropdown ? false : true;
                 group = this._chordDropdownGroup;
                 break;
+            case DropdownID.Chord:
+                target = this._chordDropdown2;
+                this._openChordDropdown2 = this._openChordDropdown2 ? false : true;
+                group = this._chordDropdownGroup2;
+                break;
             case DropdownID.Transition:
                 target = this._transitionDropdown;
                 this._openTransitionDropdown = this._openTransitionDropdown ? false : true;
@@ -1191,10 +1251,17 @@ export class SongEditor {
             target.textContent = "▲";
             if (group != this._chordDropdownGroup) {
                 group.style.display = "";
-            } // Only show arpeggio dropdown if chord arpeggiates
+            } // Only show arpeggio dropdown if chord arpeggiates.
             else if (instrument.chord == Config.chords.dictionary["arpeggio"].index) {
                 group.style.display = "";
+            if (group != this._chordDropdownGroup2) {
+                group.style.display = "";
+            } // Only show strum dropdown if chord strums.
+            else if (instrument.chord == Config.chords.dictionary["strum"].index) {
+                group.style.display = "";
+                } 
             }
+        
 
         }
         else {
@@ -1533,23 +1600,23 @@ export class SongEditor {
         this._patternEditor.render();
 
         const optionCommands: ReadonlyArray<string> = [
-            (prefs.autoPlay ? "✓ " : "　") + "Auto Play on Load",
-            (prefs.autoFollow ? "✓ " : "　") + "Keep Current Pattern Selected",
-            (prefs.enableNotePreview ? "✓ " : "　") + "Hear Preview of Added Notes",
-            (prefs.showLetters ? "✓ " : "　") + "Show Piano Keys",
-            (prefs.showFifth ? "✓ " : "　") + 'Highlight "Fifth" of Song Key',
-            (prefs.notesOutsideScale ? "✓ " : "　") + "Allow Adding Notes Not in Scale",
-            (prefs.defaultScale == this._doc.song.scale ? "✓ " : "　") + "Use Current Scale as Default",
-            (prefs.showChannels ? "✓ " : "　") + "Show Notes From All Channels",
-            (prefs.showScrollBar ? "✓ " : "　") + "Show Octave Scroll Bar",
-            (prefs.alwaysFineNoteVol ? "✓ " : "") + "Always Fine Note Volume",
-            (prefs.enableChannelMuting ? "✓ " : "　") + "Enable Channel Muting",
-            (prefs.displayBrowserUrl ? "✓ " : "　") + "Display Song Data in URL",
-            (prefs.displayVolumeBar ? "✓ " : "　") + "Show Playback Volume",
-            "　Set Language...",
-            "　Set Layout...",
-            "　Set Theme...",
-            "　Set Up Note Recording...",
+            (prefs.autoPlay ? "✓ " : "　") + (_.autoPlayLabel),
+            (prefs.autoFollow ? "✓ " : "　") + (_.autoFollowLabel),
+            (prefs.enableNotePreview ? "✓ " : "　") + (_.enableNotePreviewLabel),
+            (prefs.showLetters ? "✓ " : "　") + (_.showPianoLabel),
+            (prefs.showFifth ? "✓ " : "　") + (_.showFifthLabel),
+            (prefs.notesOutsideScale ? "✓ " : "　") + (_.notesOutsideScaleLabel),
+            (prefs.defaultScale == this._doc.song.scale ? "✓ " : "　") + (_.setDefaultScaleLabel),
+            (prefs.showChannels ? "✓ " : "　") + (_.showAllChannelsLabel),
+            (prefs.showScrollBar ? "✓ " : "　") + (_.scrollbarLabel),
+            (prefs.alwaysFineNoteVol ? "✓ " : "") + (_.fineNoteVolumeLabel),
+            (prefs.enableChannelMuting ? "✓ " : "　") + (_.channelMutingLabel),
+            (prefs.displayBrowserUrl ? "✓ " : "　") + (_.displayURLInBrowserLabel),
+            (prefs.displayVolumeBar ? "✓ " : "　") + (_.showPlaybackBarLabel),
+            (_.setLanguageLabel),
+            (_.setLayoutLabel),
+            (_.setThemeLabel),
+            (_.setNoteRecordingLabel),
         ];
         for (let i: number = 0; i < optionCommands.length; i++) {
             const option: HTMLOptionElement = <HTMLOptionElement>this._optionsMenu.children[i + 1];
@@ -1781,12 +1848,16 @@ export class SongEditor {
             if (effectsIncludeChord(instrument.effects)) {
                 this._chordSelectRow.style.display = "";
                 this._chordDropdown.style.display = (instrument.chord == Config.chords.dictionary["arpeggio"].index) ? "" : "none";
+                this._chordDropdown2.style.display = (instrument.chord == Config.chords.dictionary["strum"].index) ? "" : "none";
                 this._chordDropdownGroup.style.display = (instrument.chord == Config.chords.dictionary["arpeggio"].index && this._openChordDropdown) ? "" : "none";
+                this._chordDropdownGroup2.style.display = (instrument.chord == Config.chords.dictionary["strum"].index && this._openChordDropdown2) ? "" : "none";
                 setSelectedValue(this._chordSelect, instrument.chord);
             } else {
                 this._chordSelectRow.style.display = "none";
                 this._chordDropdown.style.display = "none";
+                this._chordDropdown2.style.display = "none";
                 this._chordDropdownGroup.style.display = "none";
+                this._chordDropdownGroup2.style.display = "none";
             }
 
             if (effectsIncludePitchShift(instrument.effects)) {
@@ -1994,6 +2065,7 @@ export class SongEditor {
             this._transitionRow.style.display = "none";
             this._chordSelectRow.style.display = "none";
             this._chordDropdownGroup.style.display = "none";
+            this._chordDropdownGroup2.style.display = "none";
             //this._filterCutoffRow.style.display = "none";
             //this._filterResonanceRow.style.display = "none";
             //this._filterEnvelopeRow.style.display = "none";
@@ -2926,6 +2998,7 @@ export class SongEditor {
                 this._doc.selection.copy();
                 event.preventDefault();
                 break;
+            //MID TODO: Make this keybind work!!1!!1!11!1
             case 89: // y
                 if (canPlayNotes) break;
                 this._doc.redo();

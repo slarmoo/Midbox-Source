@@ -5376,7 +5376,7 @@ class EnvelopeComputer {
         }
         this._modifiedEnvelopeCount = 0;
     }
-
+    // MID TODO: Hey looks its your good friend. Wanted to remind you that SOME ENVELOPES BE BROKEN. FIX EM NOW.
     public static computeEnvelope(envelope: Envelope, time: number, beats: number, noteSize: number): number {
         switch (envelope.type) {
             case EnvelopeType.noteSize: return Synth.noteSizeToVolumeMult(noteSize);
@@ -5388,10 +5388,27 @@ class EnvelopeComputer {
             case EnvelopeType.punch: return Math.max(1.0, 2.0 - time * 10.0);
             case EnvelopeType.flare: const attack: number = 0.25 / Math.sqrt(envelope.speed); return time < attack ? time / attack : 1.0 / (1.0 + (time - attack) * envelope.speed);
             case EnvelopeType.decay: return Math.pow(2, -envelope.speed * time);
+            // The next four are replicas of Modbox's unique transition types as envelopes. Awesome, right?
             case EnvelopeType.modboxTrill: const decay = 0.25 / Math.sqrt(envelope.speed); return time < decay ? (decay - time) / decay : 1.0;
             case EnvelopeType.modboxBlip: {const endTime1: number = 0.25 / Math.sqrt(envelope.speed); const endTime2: number = 0.7 / Math.sqrt(envelope.speed); const zeroIntercept: number = 2; const startValue2: number = 0.9; return time < endTime1 ? ((startValue2 - zeroIntercept) / endTime1) * time + zeroIntercept : time < endTime2 ? ((1 - startValue2) / (endTime2 - endTime1)) * (time - endTime1) + startValue2 : 1.0;}
             case EnvelopeType.modboxClick: {const attack: number = 0.25 / envelope.speed; const zeroIntercept = 9.5; return time < attack ? (time * ((-zeroIntercept) + 1) - attack * (-zeroIntercept)) / attack : 1.0;}
             case EnvelopeType.modboxBow: {const attack = 0.25 / Math.sqrt(envelope.speed); const zeroIntercept = -0.40; return time < attack ? (time * ((-zeroIntercept) + 1) - attack * (-zeroIntercept)) / attack : 1.0;}
+            // The next three were yoinked from Goldbox.
+            case EnvelopeType.wibble:
+                let temp = 0.5 - Math.cos(beats * envelope.speed) * 0.5;
+                temp = 1.0 / (1.0 + time * (envelope.speed - (temp / (1.5 / envelope.speed))));
+                temp = temp > 0.0 ? temp : 0.0;
+                return temp;
+            case EnvelopeType.linear: {
+                let lin = (1.0 - (time / (16 / envelope.speed)));
+                lin = lin > 0.0 ? lin : 0.0;
+                return lin;
+            }
+            case EnvelopeType.rise: {
+                let lin = (time / (16 / envelope.speed));
+                lin = lin < 1.0 ? lin : 1.0;
+                return lin;
+            }
             default: throw new Error("Unrecognized operator envelope type.");
         }
 

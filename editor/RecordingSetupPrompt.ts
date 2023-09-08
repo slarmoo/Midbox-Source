@@ -8,13 +8,14 @@ import {HTML} from "imperative-html/dist/esm/elements-strict";
 import {ColorConfig} from "./ColorConfig";
 import {KeyboardLayout} from "./KeyboardLayout";
 import {Piano} from "./Piano";
+import { Localization as _ } from "./Localization";
 
 const {button, label, div, p, a, h2, input, select, option} = HTML;
 
 export class RecordingSetupPrompt implements Prompt {
 	private readonly _keyboardMode: HTMLSelectElement = select({style: "width: 100%;"},
-		option({value: "useCapsLockForNotes"}, "simple shortcuts, use caps lock to play notes"),
-		option({value: "pressControlForShortcuts"}, "simple notes, press " + EditorConfig.ctrlName + " for shortcuts"),
+		option({value: "useCapsLockForNotes"}, "Simple shortcuts | Use CAPS LOCK to play notes."),
+		option({value: "pressControlForShortcuts"}, "Simple notes | press " + EditorConfig.ctrlName + " for shortcuts."),
 	);
 	private readonly _keyboardLayout: HTMLSelectElement = select({style: "width: 100%;"},
 		option({value: "wickiHayden"}, "Wicki-Hayden"),
@@ -32,10 +33,10 @@ export class RecordingSetupPrompt implements Prompt {
 	private readonly _metronomeCountIn: HTMLInputElement = input({style: "width: 2em; margin-left: 1em;", type: "checkbox"});
 	private readonly _metronomeWhileRecording: HTMLInputElement = input({style: "width: 2em; margin-left: 1em;", type: "checkbox"});
 	
-	private readonly _okayButton: HTMLButtonElement = button({class: "okayButton", style: "width:45%;"}, "Okay");
+	private readonly _okayButton: HTMLButtonElement = button({class: "okayButton", style: "width:100%;"}, (_.confirmLabel));
 	private readonly _cancelButton: HTMLButtonElement = button({class: "cancelButton"});
 	public readonly container: HTMLDivElement = div({class: "prompt noSelection recordingSetupPrompt", style: "width: 333px; text-align: right; max-height: 90%;"},
-		h2("Note Recording Setup"),
+		h2((_.noteRecordingPromptLabel)),
 		div({style: "display: grid; overflow-y: auto; overflow-x: hidden; flex-shrink: 1;"},
 			p("BeepBox can record notes as you perform them. You can start recording by pressing Ctrl+Space (or " + EditorConfig.ctrlSymbol + "P)."),
 			label({style: "display: flex; flex-direction: row; align-items: center; height: 2em; justify-content: flex-end;"},
