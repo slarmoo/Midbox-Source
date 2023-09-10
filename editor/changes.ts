@@ -1761,6 +1761,18 @@ export class ChangeArpeggioSpeed extends Change {
     }
 }
 
+/*export class ChangeStrumSpeed extends Change {
+    constructor(doc: SongDocument, oldValue: number, newValue: number) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        instrument.strumSpeed = newValue;
+//      doc.synth.unsetMod(Config.modulators.dictionary["strum speed"].index, doc.channel, doc.getCurrentInstrument());
+
+        doc.notifier.changed();
+        if (oldValue != newValue) this._didSomething();
+    }
+}*/
+
 export class ChangeFastTwoNoteArp extends Change {
     constructor(doc: SongDocument, newValue: boolean) {
         super();

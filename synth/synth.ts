@@ -135,9 +135,10 @@ const enum SongTagCode {
     preset = CharCode.u, // added in 7
     volume = CharCode.v, // added in 2
     wave = CharCode.w, // added in 2
-
+//  strumSpeed = CharCode.x, // Midbox stuff. DEPRECATED for now.
     filterResonance = CharCode.y, // added in 7, DEPRECATED
     drumsetEnvelopes = CharCode.z, // added in 7 for filter envelopes, still used for drumset envelopes
+
     algorithm = CharCode.A, // added in 6
     feedbackAmplitude = CharCode.B, // added in 6
     chord = CharCode.C, // added in 7, DEPRECATED
@@ -147,12 +148,12 @@ const enum SongTagCode {
     arpeggioSpeed = CharCode.G, // [JB], added in 3, DEPRECATED
     harmonics = CharCode.H, // added in 7
     stringSustain = CharCode.I, // added in 9
-
+//  ___ = CharCode.J,
+//  ___ = CharCode.K,
     pan = CharCode.L, // added between 8 and 9, DEPRECATED
     customChipWave = CharCode.M, // [JB], added in 1(?)
     songTitle = CharCode.N, // [JB], added in 1(?)
     limiterSettings = CharCode.O, // [JB], added in 3(?)
-
     operatorAmplitudes = CharCode.P, // added in 6
     operatorFrequencies = CharCode.Q, // added in 6
     operatorWaves = CharCode.R, // [JB], added in 4
@@ -162,6 +163,8 @@ const enum SongTagCode {
     feedbackEnvelope = CharCode.V, // added in 6, DEPRECATED
     pulseWidth = CharCode.W, // added in 7
     aliases = CharCode.X, // [JB], added in 4, DEPRECATED
+    //  ___ = CharCode.Y,
+    //  ___ = CharCode.Z,
 
 }
 
@@ -1217,6 +1220,7 @@ export class Instrument {
     public panDelay: number = 10;
     public arpeggioSpeed: number = 12;
     public fastTwoNoteArp: boolean = false;
+//  public strumSpeed: number = 0;
     public legacyTieOver: boolean = false;
     public clicklessTransition: boolean = false;
     public aliases: boolean = false;
@@ -1326,6 +1330,7 @@ export class Instrument {
         this.stringSustain = 10;
         this.clicklessTransition = false;
         this.arpeggioSpeed = 12;
+    //  this.strumSpeed = 0;
         this.legacyTieOver = false;
         this.aliases = false;
         this.percussion = false;
@@ -1559,6 +1564,7 @@ export class Instrument {
             instrumentObject["chord"] = this.getChord().name;
             instrumentObject["fastTwoNoteArp"] = this.fastTwoNoteArp;
             instrumentObject["arpeggioSpeed"] = this.arpeggioSpeed;
+        //  instrumentObject["strumSpeed"] = this.strumSpeed;
         }
         if (effectsIncludePitchShift(this.effects)) {
             instrumentObject["pitchShiftSemitones"] = this.pitchShift;
@@ -2661,6 +2667,10 @@ export class Song {
                     if (instrument.chord == Config.chords.dictionary["arpeggio"].index) {
                         buffer.push(base64IntToCharCode[instrument.arpeggioSpeed]);
                         buffer.push(base64IntToCharCode[+instrument.fastTwoNoteArp]); // Two note arp setting piggybacks on this
+                    }
+                    // Also don't forget custom strum speed! Only if the instrument strums.
+                    else if (Config.chords[instrument.chord].strumParts > 0) {
+                    // buffer.push(base64IntToCharCode[instrument.strumSpeed]);
                     }
                 }
                 if (effectsIncludePitchShift(instrument.effects)) {

@@ -605,7 +605,7 @@ export class SongEditor {
     private readonly _chordDropdown2: HTMLButtonElement = button({ style: "margin-left:0em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.Chord) }, "▼");
 
     private readonly _chordSelectRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("chords") }, span(_.chordLabel)), this._chordDropdown, this._chordDropdown2, div({ class: "selectContainer" }, this._chordSelect));
-    private readonly _strumSpeedSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: "1", value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeArpeggioSpeed(this._doc, oldValue, newValue), false);
+    private readonly _strumSpeedSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: "12", value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeArpeggioSpeed /*ChangeStrumSpeed*/(this._doc, oldValue, newValue), false);
     private readonly _strumSpeedRow: HTMLElement = div({ class: "selectRow" }, span({ style: "font-size: smaller; margin-left:10px;", class: "tip", onclick: () => this._openPrompt("strumSpeed") }, span(_.strumSpeedLabel)), this._strumSpeedSlider.container);
     private readonly _arpeggioSpeedSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.modulators.dictionary["arp speed"].maxRawVol, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeArpeggioSpeed(this._doc, oldValue, newValue), false);
     private readonly _arpeggioSpeedRow: HTMLElement = div({ class: "selectRow" }, span({ style: "font-size: smaller; margin-left:10px;", class: "tip", onclick: () => this._openPrompt("arpeggioSpeed") }, span(_.arpSpeedLabel)), this._arpeggioSpeedSlider.container);
@@ -1257,9 +1257,9 @@ export class SongEditor {
             if (group != this._chordDropdownGroup2) {
                 group.style.display = "";
             } // Only show strum dropdown if chord strums.
-            else if (instrument.chord == Config.chords.dictionary["strum"].index) {
+            else if (Config.chords[instrument.chord].strumParts > 0) {
                 group.style.display = "";
-                } 
+            }
             }
         
 
@@ -1848,9 +1848,9 @@ export class SongEditor {
             if (effectsIncludeChord(instrument.effects)) {
                 this._chordSelectRow.style.display = "";
                 this._chordDropdown.style.display = (instrument.chord == Config.chords.dictionary["arpeggio"].index) ? "" : "none";
-                this._chordDropdown2.style.display = (instrument.chord == Config.chords.dictionary["strum"].index) ? "" : "none";
+                this._chordDropdown2.style.display = (Config.chords[instrument.chord].strumParts > 0) ? "" : "none";
                 this._chordDropdownGroup.style.display = (instrument.chord == Config.chords.dictionary["arpeggio"].index && this._openChordDropdown) ? "" : "none";
-                this._chordDropdownGroup2.style.display = (instrument.chord == Config.chords.dictionary["strum"].index && this._openChordDropdown2) ? "" : "none";
+                this._chordDropdownGroup2.style.display = (Config.chords[instrument.chord].strumParts > 0 && this._openChordDropdown2) ? "" : "none";
                 setSelectedValue(this._chordSelect, instrument.chord);
             } else {
                 this._chordSelectRow.style.display = "none";
