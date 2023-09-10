@@ -8047,7 +8047,7 @@ export class Synth {
                                 noteEndPart = Math.min(Config.partsPerBeat * this.song!.beatsPerBar, noteEndPart + strumOffsetParts);
                             }
                             if ((!transition.continues && !forceContinueAtStart) || prevNoteForThisTone == null) {
-                                strumOffsetParts += chord.strumParts;
+                                strumOffsetParts += instrument.strumSpeed;
                             }
 
                             const atNoteStart: boolean = (Config.ticksPerPart * noteStartPart == currentTick);
