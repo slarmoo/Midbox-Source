@@ -3905,6 +3905,10 @@ export class Song {
                             instrument.arpeggioSpeed = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
                             instrument.fastTwoNoteArp = (base64CharCodeToInt[compressed.charCodeAt(charIndex++)]) ? true : false;
                         }
+                        // Custom strum speed!
+                        else if (Config.chords[instrument.chord].strumParts > 0 && fromJummBox) {
+                            instrument.strumSpeed = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
+                        }
                     }
                     if (effectsIncludePitchShift(instrument.effects)) {
                         instrument.pitchShift = clamp(0, Config.pitchShiftRange, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
