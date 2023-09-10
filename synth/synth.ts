@@ -1220,7 +1220,7 @@ export class Instrument {
     public panDelay: number = 10;
     public arpeggioSpeed: number = 12;
     public fastTwoNoteArp: boolean = false;
-//  public strumSpeed: number = 0;
+    public strumSpeed: number = 1;
     public legacyTieOver: boolean = false;
     public clicklessTransition: boolean = false;
     public aliases: boolean = false;
@@ -1330,7 +1330,7 @@ export class Instrument {
         this.stringSustain = 10;
         this.clicklessTransition = false;
         this.arpeggioSpeed = 12;
-    //  this.strumSpeed = 0;
+        this.strumSpeed = 1;
         this.legacyTieOver = false;
         this.aliases = false;
         this.percussion = false;
@@ -1564,7 +1564,7 @@ export class Instrument {
             instrumentObject["chord"] = this.getChord().name;
             instrumentObject["fastTwoNoteArp"] = this.fastTwoNoteArp;
             instrumentObject["arpeggioSpeed"] = this.arpeggioSpeed;
-        //  instrumentObject["strumSpeed"] = this.strumSpeed;
+            instrumentObject["strumSpeed"] = this.strumSpeed;
         }
         if (effectsIncludePitchShift(this.effects)) {
             instrumentObject["pitchShiftSemitones"] = this.pitchShift;
@@ -2083,6 +2083,13 @@ export class Instrument {
             else {
                 this.fastTwoNoteArp = useFastTwoNoteArp;
             }
+
+            if (instrumentObject["strumSpeed"] != undefined) {
+                this.strumSpeed = instrumentObject["strumSpeed"];
+            }
+            else {
+                this.strumSpeed = 1;
+            } 
 
             if (instrumentObject["clicklessTransition"] != undefined) {
                 this.clicklessTransition = instrumentObject["clicklessTransition"];
@@ -2670,7 +2677,7 @@ export class Song {
                     }
                     // Also don't forget custom strum speed! Only if the instrument strums.
                     else if (Config.chords[instrument.chord].strumParts > 0) {
-                    // buffer.push(base64IntToCharCode[instrument.strumSpeed]);
+                        buffer.push(base64IntToCharCode[instrument.strumSpeed]);
                     }
                 }
                 if (effectsIncludePitchShift(instrument.effects)) {

@@ -315,7 +315,8 @@ export class SongDocument {
 			// Ensure that the song is not corrupted before saving it.
 			hash = this.song.toBase64String();
 		} catch (error) {
-			window.alert("Whoops, the song data appears to have been corrupted! Please try to recover the last working version of the song from the \"Recover Recent Song...\" option in BeepBox's \"File\" menu.");
+			window.alert("Whoops, the song data appears to have been corrupted! Please try to recover the last working version of the song from the \"Recover Recent Song...\" option in Midbox's \"File\" menu.");
+			console.error(error);
 			return;
 		}
 		if (this._stateShouldBePushed) this._sequenceNumber++;

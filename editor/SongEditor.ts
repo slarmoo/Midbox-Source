@@ -602,7 +602,7 @@ export class SongEditor {
     private readonly _unisonSelectRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("unison") }, span(_.unisonLabel)), div({ class: "selectContainer" }, this._unisonSelect));
     private readonly _chordSelect: HTMLSelectElement = buildOptions(select(), Config.chords.map(chord => chord.name));
     private readonly _chordDropdown: HTMLButtonElement = button({ style: "margin-left:0em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.Chord) }, "▼");
-    private readonly _chordDropdown2: HTMLButtonElement = button({ style: "margin-left:0em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.Chord) }, "▼");
+    private readonly _chordDropdown2: HTMLButtonElement = button({ style: "margin-left:0em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.Strum) }, "▼");
 
     private readonly _chordSelectRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("chords") }, span(_.chordLabel)), this._chordDropdown, this._chordDropdown2, div({ class: "selectContainer" }, this._chordSelect));
     private readonly _strumSpeedSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: "12", value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeArpeggioSpeed /*ChangeStrumSpeed*/(this._doc, oldValue, newValue), false);
@@ -612,7 +612,7 @@ export class SongEditor {
     private readonly _twoNoteArpBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
     private readonly _twoNoteArpRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "margin-left:10px; font-size: 11px;", onclick: () => this._openPrompt("twoNoteArpeggio") }, span(_.twoFastArpLabel)), this._twoNoteArpBox);
     private readonly _chordDropdownGroup: HTMLElement = div({ class: "editor-controls", style: "display: none;" }, this._arpeggioSpeedRow, this._twoNoteArpRow);
-    private readonly _chordDropdownGroup2: HTMLElement = div({ class: "editor-controls", style: "display: none;" }, this._strumSpeedRow);
+    private readonly _strumDropdownGroup: HTMLElement = div({ class: "editor-controls", style: "display: none;" }, this._strumSpeedRow);
 
     private readonly _vibratoSelect: HTMLSelectElement = buildOptions(select(), [
         _.vibrato1Label,
@@ -727,7 +727,7 @@ export class SongEditor {
         this._transitionDropdownGroup,
         this._chordSelectRow,
         this._chordDropdownGroup,
-        this._chordDropdownGroup2,
+        this._strumDropdownGroup,
         this._pitchShiftRow,
         this._detuneSliderRow,
         this._vibratoSelectRow,
@@ -1229,10 +1229,10 @@ export class SongEditor {
                 this._openChordDropdown = this._openChordDropdown ? false : true;
                 group = this._chordDropdownGroup;
                 break;
-            case DropdownID.Chord:
+            case DropdownID.Strum:
                 target = this._chordDropdown2;
                 this._openChordDropdown2 = this._openChordDropdown2 ? false : true;
-                group = this._chordDropdownGroup2;
+                group = this._strumDropdownGroup;
                 break;
             case DropdownID.Transition:
                 target = this._transitionDropdown;
@@ -1249,17 +1249,14 @@ export class SongEditor {
         if (target.textContent == "▼") {
             let instrument: Instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
             target.textContent = "▲";
-            if (group != this._chordDropdownGroup) {
+            if (group != this._chordDropdownGroup || group != this._strumDropdownGroup) {
                 group.style.display = "";
             } // Only show arpeggio dropdown if chord arpeggiates.
             else if (instrument.chord == Config.chords.dictionary["arpeggio"].index) {
                 group.style.display = "";
-            if (group != this._chordDropdownGroup2) {
-                group.style.display = "";
             } // Only show strum dropdown if chord strums.
             else if (Config.chords[instrument.chord].strumParts > 0) {
                 group.style.display = "";
-            }
             }
         
 
@@ -1850,14 +1847,14 @@ export class SongEditor {
                 this._chordDropdown.style.display = (instrument.chord == Config.chords.dictionary["arpeggio"].index) ? "" : "none";
                 this._chordDropdown2.style.display = (Config.chords[instrument.chord].strumParts > 0) ? "" : "none";
                 this._chordDropdownGroup.style.display = (instrument.chord == Config.chords.dictionary["arpeggio"].index && this._openChordDropdown) ? "" : "none";
-                this._chordDropdownGroup2.style.display = (Config.chords[instrument.chord].strumParts > 0 && this._openChordDropdown2) ? "" : "none";
+                this._strumDropdownGroup.style.display = (Config.chords[instrument.chord].strumParts > 0 && this._openChordDropdown2) ? "" : "none";
                 setSelectedValue(this._chordSelect, instrument.chord);
             } else {
                 this._chordSelectRow.style.display = "none";
                 this._chordDropdown.style.display = "none";
                 this._chordDropdown2.style.display = "none";
                 this._chordDropdownGroup.style.display = "none";
-                this._chordDropdownGroup2.style.display = "none";
+                this._strumDropdownGroup.style.display = "none";
             }
 
             if (effectsIncludePitchShift(instrument.effects)) {
@@ -2065,7 +2062,7 @@ export class SongEditor {
             this._transitionRow.style.display = "none";
             this._chordSelectRow.style.display = "none";
             this._chordDropdownGroup.style.display = "none";
-            this._chordDropdownGroup2.style.display = "none";
+            this._strumDropdownGroup.style.display = "none";
             //this._filterCutoffRow.style.display = "none";
             //this._filterResonanceRow.style.display = "none";
             //this._filterEnvelopeRow.style.display = "none";
