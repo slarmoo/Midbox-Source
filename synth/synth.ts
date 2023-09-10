@@ -7928,6 +7928,7 @@ export class Synth {
                     const partsPerBar: Number = Config.partsPerBeat * song.beatsPerBar;
                     const transition: Transition = instrument.getTransition();
                     const chord: Chord = instrument.getChord();
+                    const useStrumSpeed: boolean = chord.strumParts > 0;
                     let forceContinueAtStart: boolean = false;
                     let forceContinueAtEnd: boolean = false;
                     let tonesInPrevNote: number = 0;
@@ -8047,7 +8048,7 @@ export class Synth {
                                 noteEndPart = Math.min(Config.partsPerBeat * this.song!.beatsPerBar, noteEndPart + strumOffsetParts);
                             }
                             if ((!transition.continues && !forceContinueAtStart) || prevNoteForThisTone == null) {
-                                strumOffsetParts += instrument.strumSpeed;
+                                if (useStrumSpeed) strumOffsetParts += Config.strumSpeedScale[instrument.strumSpeed];
                             }
 
                             const atNoteStart: boolean = (Config.ticksPerPart * noteStartPart == currentTick);
