@@ -1079,6 +1079,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                             { item: "pulse width", weight: 3 },
                             { item: "ramp", weight: 3 },
                             { item: "trapezoid", weight: 3 },
+                            { item: "metallic", weight: 3},
                         ])].index;
                         if (instrument.operators[i].waveform == 3/*"pulse width"*/) {
                             instrument.operators[i].pulseWidth = selectWeightedRandom([

@@ -262,26 +262,26 @@ export class Config {
     public static readonly scales: DictionaryArray<Scale> = toNameMap([
 
         //   C     Db      D     Eb      E      F     F#      G     Ab      A     Bb      B      C
-        { name: "Free", realName: "chromatic", flags: [true, true, true, true, true, true, true, true, true, true, true, true] }, // Free
-        { name: "Major", realName: "ionian", flags: [true, false, true, false, true, true, false, true, false, true, false, true] }, // Major
-        { name: "Minor", realName: "aeolian", flags: [true, false, true, true, false, true, false, true, true, false, true, false] }, // Minor
-        { name: "Mixolydian", realName: "mixolydian", flags: [true, false, true, false, true, true, false, true, false, true, true, false] }, // Mixolydian
-        { name: "Lydian", realName: "lydian", flags: [true, false, true, false, true, false, true, true, false, true, false, true] }, // Lydian
-        { name: "Dorian", realName: "dorian", flags: [true, false, true, true, false, true, false, true, false, true, true, false] }, // Dorian
-        { name: "Phrygian", realName: "phrygian", flags: [true, true, false, true, false, true, false, true, true, false, true, false] }, // Phrygian
-        { name: "Locrian", realName: "locrian", flags: [true, true, false, true, false, true, true, false, true, false, true, false] }, // Locrian
-        { name: "Lydian Dominant", realName: "lydian dominant", flags: [true, false, true, false, true, false, true, true, false, true, true, false] }, // Lydian Dominant
-        { name: "Phrygian Dominant", realName: "phrygian dominant", flags: [true, true, false, false, true, true, false, true, true, false, true, false] }, // Phrygian Dominant
-        { name: "Harmonic Major", realName: "harmonic major", flags: [true, false, true, false, true, true, false, true, true, false, false, true] }, // Harmonic Major
-        { name: "Harmonic Minor", realName: "harmonic minor", flags: [true, false, true, true, false, true, false, true, true, false, false, true] }, // Harmonic Minor
-        { name: "Melodic Minor", realName: "melodic minor", flags: [true, false, true, true, false, true, false, true, false, true, false, true] }, // Melodic Minor
-        { name: "Blues", realName: "blues", flags: [true, false, false, true, false, true, true, true, false, false, true, false] }, // Blues
-        { name: "Altered", realName: "altered", flags: [true, true, false, true, true, false, true, false, true, false, true, false] }, // Altered
-        { name: "Major Pentatonic", realName: "major pentatonic", flags: [true, false, true, false, true, false, false, true, false, true, false, false] }, // Major Pentatonic
-        { name: "Minor Pentatonic", realName: "minor pentatonic", flags: [true, false, false, true, false, true, false, true, false, false, true, false] }, // Minor Pentatonic
-        { name: "Whole Tone", realName: "whole tone", flags: [true, false, true, false, true, false, true, false, true, false, true, false] }, // Whole Tone
-        { name: "Octatonic", realName: "octatonic", flags: [true, false, true, true, false, true, true, false, true, true, false, true] }, // Octatonic
-        { name: "Hexatonic", realName: "hexatonic", flags: [true, false, false, true, true, false, false, true, true, false, false, true] }, // Hexatonic
+        { name: "Free", realName: _.scale1Label, flags: [true, true, true, true, true, true, true, true, true, true, true, true] }, // Free
+        { name: "Major", realName: _.scale2Label, flags: [true, false, true, false, true, true, false, true, false, true, false, true] }, // Major
+        { name: "Minor", realName: _.scale3Label, flags: [true, false, true, true, false, true, false, true, true, false, true, false] }, // Minor
+        { name: "Mixolydian", realName: _.scale4Label, flags: [true, false, true, false, true, true, false, true, false, true, true, false] }, // Mixolydian
+        { name: "Lydian", realName: _.scale5Label, flags: [true, false, true, false, true, false, true, true, false, true, false, true] }, // Lydian
+        { name: "Dorian", realName: _.scale6Label, flags: [true, false, true, true, false, true, false, true, false, true, true, false] }, // Dorian
+        { name: "Phrygian", realName: _.scale7Label, flags: [true, true, false, true, false, true, false, true, true, false, true, false] }, // Phrygian
+        { name: "Locrian", realName: _.scale8Label, flags: [true, true, false, true, false, true, true, false, true, false, true, false] }, // Locrian
+        { name: "Lydian Dominant", realName: _.scale9Label, flags: [true, false, true, false, true, false, true, true, false, true, true, false] }, // Lydian Dominant
+        { name: "Phrygian Dominant", realName: _.scale10Label, flags: [true, true, false, false, true, true, false, true, true, false, true, false] }, // Phrygian Dominant
+        { name: "Harmonic Major", realName: _.scale11Label, flags: [true, false, true, false, true, true, false, true, true, false, false, true] }, // Harmonic Major
+        { name: "Harmonic Minor", realName: _.scale12Label, flags: [true, false, true, true, false, true, false, true, true, false, false, true] }, // Harmonic Minor
+        { name: "Melodic Minor", realName: _.scale13Label, flags: [true, false, true, true, false, true, false, true, false, true, false, true] }, // Melodic Minor
+        { name: "Blues", realName: _.scale14Label, flags: [true, false, false, true, false, true, true, true, false, false, true, false] }, // Blues
+        { name: "Altered", realName: _.scale15Label, flags: [true, true, false, true, true, false, true, false, true, false, true, false] }, // Altered
+        { name: "Major Pentatonic", realName: _.scale16Label, flags: [true, false, true, false, true, false, false, true, false, true, false, false] }, // Major Pentatonic
+        { name: "Minor Pentatonic", realName: _.scale17Label, flags: [true, false, false, true, false, true, false, true, false, false, true, false] }, // Minor Pentatonic
+        { name: "Whole Tone", realName: _.scale18Label, flags: [true, false, true, false, true, false, true, false, true, false, true, false] }, // Whole Tone
+        { name: "Octatonic", realName: _.scale19Label, flags: [true, false, true, true, false, true, true, false, true, true, false, true] }, // Octatonic
+        { name: "Hexatonic", realName: _.scale20Label, flags: [true, false, false, true, true, false, false, true, true, false, false, true] }, // Hexatonic
 
     ]);
     public static readonly keys: DictionaryArray<Key> = toNameMap([
@@ -431,8 +431,7 @@ export class Config {
     // This array is more or less a linear step by 0.1 but there's a bit of range added at the start to hit specific ratios, and the end starts to grow faster.
     //                                                             0       1      2    3     4      5    6    7      8     9   10   11 12   13   14   15   16   17   18   19   20   21 22   23   24   25   26   27   28   29   30   31 32   33   34   35   36   37   38    39  40   41 42    43   44   45   46 47   48 49 50
     public static readonly arpSpeedScale: ReadonlyArray<number> = [0, 0.0625, 0.125, 0.2, 0.25, 1 / 3, 0.4, 0.5, 2 / 3, 0.75, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 4, 4.15, 4.3, 4.5, 4.8, 5, 5.5, 6, 8];
-    // However, the strum speed scale is decided by how many quattuorvigintuplets, or 24ths of a note are in a singular beat.
-    // (In notes per beat if beats per bar is 8)                     24 16 12 8  6  4   3   2   1
+    //                                                               24 12 8  6  4  3  2   1.5 1
     public static readonly strumSpeedScale: ReadonlyArray<number> = [1, 2, 3, 4, 6, 8, 12, 16, 24];
 
     public static readonly unisons: DictionaryArray<Unison> = toNameMap([
@@ -728,6 +727,7 @@ export class Config {
         { name: "pulse width", samples: generateSquareWave() },
         { name: "ramp", samples: generateSawWave(true) },
         { name: "trapezoid", samples: generateTrapezoidWave(2) },
+        { name: "metallic", samples: getDrumWave(2, null, null) }
     ]);
     public static readonly pwmOperatorWaves: DictionaryArray<OperatorWave> = toNameMap([
         { name: "1%", samples: generateSquareWave(0.01) },
