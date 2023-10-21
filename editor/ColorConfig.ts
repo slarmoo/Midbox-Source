@@ -2837,7 +2837,7 @@ export class ColorConfig {
 			--disabled-note-secondary: #8c8c8c;
 		}`,
 
-		"midbox":
+		"midbox": // MID TODO: Hey dummy look at this you didn't finish the code for this ok bye
 		`:root {
 					--page-margin: #030b1a;
 					--editor-background: #030b1a;

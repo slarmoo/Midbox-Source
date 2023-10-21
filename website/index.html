@@ -331,7 +331,7 @@
         // Randomize display of header
         // 1-in-10
         if (Math.floor(Math.random() * 10) == 0) {
-            switch (Math.floor(Math.random() * 4)) {
+            switch (Math.floor(Math.random() * 7)) {
                 case 0:
                     document.getElementById("jummboxPlant").innerHTML = "  🍂";
                     break;
@@ -344,10 +344,19 @@
                 case 3:
                     document.getElementById("jummboxPlant").innerHTML = "  🍃";
                     break;
+                case 4: 
+                    document.getElementById("jummboxPlant").innerHTML = "..?";
+                    break;
+                case 5: 
+                    document.getElementById("jummboxPlant").innerHTML = "  MANIA";
+                    break;
+                case 6: 
+                    document.getElementById("jummboxPlant").innerHTML = "  |  It was an attmept...";
+                    break;
             }
         }
         if (Math.floor(Math.random() * 1) == 0) {
-            switch (Math.floor(Math.random() * 75)) {
+            switch (Math.floor(Math.random() * 76)) {
                 case 0:
                     document.getElementById("randomText").innerHTML = "Let's make a song!";
                     break;
@@ -355,7 +364,7 @@
                     document.getElementById("randomText").innerHTML = "Beepbox is actually just a purple circle, not a box.";
                     break;
                 case 2: 
-                    document.getElementById("randomText").innerHTML = "Listen to the same song for 3 hours straight!";
+                    document.getElementById("randomText").innerHTML = "Listen to the same song for 3 hours straight!"; // Relatable
                     break;
                 case 3:
                     document.getElementById("randomText").innerHTML = "Who wants some <a href=\"https://soundcloud.com/nobonoko/strawberry-cake\">strawberry cake</a>?";
@@ -572,6 +581,9 @@
                     break;
                 case 74:
                     document.getElementById("randomText").innerHTML = "There is a chance that along with this text, there will be a plant next to the mod name. Is there?";
+                    break;
+                case 75:
+                    document.getElementById("randomText").innerHTML = "So uh... what are you starin' at?";
                     break;
             }
         }

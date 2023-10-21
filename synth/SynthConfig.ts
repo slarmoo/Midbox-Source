@@ -727,7 +727,8 @@ export class Config {
         { name: "pulse width", samples: generateSquareWave() },
         { name: "ramp", samples: generateSawWave(true) },
         { name: "trapezoid", samples: generateTrapezoidWave(2) },
-        { name: "metallic", samples: getDrumWave(2, null, null) }
+        { name: "clang", samples: getDrumWave(2, null, null) }, //MID TODO: Here they are. Add noise types!
+        { name: "retro", samples: getDrumWave(1, null, null) },
     ]);
     public static readonly pwmOperatorWaves: DictionaryArray<OperatorWave> = toNameMap([
         { name: "1%", samples: generateSquareWave(0.01) },
