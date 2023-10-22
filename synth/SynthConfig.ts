@@ -544,6 +544,7 @@ export class Config {
         { name: "24×", mult: 24.0, hzOffset: 0.0, amplitudeSign: 1.0 },
         { name: "32×", mult: 32.0, hzOffset: 0.0, amplitudeSign: 1.0 },
         { name: "~32×", mult: 32.0, hzOffset: -8.4, amplitudeSign: -1.0 },
+        { name: "64×", mult: 64.0, hzOffset: 0.0, amplitudeSign: 0.0 },
     ]);
     public static readonly envelopes: DictionaryArray<Envelope> = toNameMap([
         { name: "none", type: EnvelopeType.none, speed: 0.0 },
@@ -727,20 +728,37 @@ export class Config {
         { name: "pulse width", samples: generateSquareWave() },
         { name: "ramp", samples: generateSawWave(true) },
         { name: "trapezoid", samples: generateTrapezoidWave(2) },
-        { name: "clang", samples: getDrumWave(2, null, null) }, //MID TODO: Here they are. Add noise types!
-        { name: "retro", samples: getDrumWave(1, null, null) },
+        { name: "clang", samples: generateClangNoise() } //MID TODO: yeah you gave up on this. finish it up.
     ]);
     public static readonly pwmOperatorWaves: DictionaryArray<OperatorWave> = toNameMap([
         { name: "1%", samples: generateSquareWave(0.01) },
+        { name: "2.5%", samples: generateSquareWave(0.025) },
         { name: "5%", samples: generateSquareWave(0.05) },
+        { name: "6.25%", samples: generateSquareWave(0.0625) },
+        { name: "10%", samples: generateSquareWave(0.10) },
         { name: "12.5%", samples: generateSquareWave(0.125) },
+        { name: "15%", samples: generateSquareWave(0.15) },
+        { name: "17.5%", samples: generateSquareWave(0.175) },
+        { name: "20%", samples: generateSquareWave(0.20) },
         { name: "25%", samples: generateSquareWave(0.25) },
+        { name: "30%", samples: generateSquareWave(0.30) },
         { name: "33%", samples: generateSquareWave(1 / 3) },
+        { name: "40%", samples: generateSquareWave(0.40) },
+        { name: "45%", samples: generateSquareWave(0.45) },
         { name: "50%", samples: generateSquareWave(0.5) },
+        { name: "55%", samples: generateSquareWave(0.55) },
+        { name: "60%", samples: generateSquareWave(0.60) },
         { name: "66%", samples: generateSquareWave(2 / 3) },
+        { name: "70%", samples: generateSquareWave(0.70) },
         { name: "75%", samples: generateSquareWave(0.75) },
+        { name: "80%", samples: generateSquareWave(0.80) },
+        { name: "82.5%", samples: generateSquareWave(0.825) },
+        { name: "85%", samples: generateSquareWave(0.85) },
         { name: "87.5%", samples: generateSquareWave(0.875) },
+        { name: "90%", samples: generateSquareWave(0.90) },
+        { name: "93.75%", samples: generateSquareWave(0.9375) },
         { name: "95%", samples: generateSquareWave(0.95) },
+        { name: "97.5%", samples: generateSquareWave(0.975) },
         { name: "99%", samples: generateSquareWave(0.99) },
     ]);
 
@@ -1075,6 +1093,20 @@ function generateSawWave(inverse: boolean = false): Float32Array {
     }
     return wave;
 }
+
+function generateClangNoise() {
+    const wave = new Float32Array(Config.sineWaveLength + 1);
+    for (let i = 0; i < Config.sineWaveLength + 1; i++) {
+        let drumBuffer: number = 1;
+    wave[i] = wave[i] = (drumBuffer & 1) * 2.0 - 1.0;
+    let newBuffer: number = drumBuffer >> 1;
+    if (((drumBuffer + newBuffer) & 1) == 1) {
+        newBuffer += 2 << 14;
+    }
+    drumBuffer = newBuffer;
+        }
+         return wave;
+    }
 
 export function getArpeggioPitchIndex(pitchCount: number, useFastTwoNoteArp: boolean, arpeggio: number): number {
     let arpeggioPattern: ReadonlyArray<number> = Config.arpeggioPatterns[pitchCount - 1];
