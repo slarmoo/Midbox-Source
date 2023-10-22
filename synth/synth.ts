@@ -8909,9 +8909,17 @@ export class Synth {
 				const curvedDynamismEnd:   number = 1.0 - Math.pow(Math.max(0.0, 1.0 - baseDynamismSlider * envelopeEnds[  EnvelopeComputeIndex.supersawDynamism]), 0.2);
 				const firstVoiceAmplitudeStart: number = Math.pow(2.0, Math.log2(minFirstVoiceAmplitude) * curvedDynamismStart);
 				const firstVoiceAmplitudeEnd:   number = Math.pow(2.0, Math.log2(minFirstVoiceAmplitude) * curvedDynamismEnd);
-				// TODO: automation
-				const dynamismStart: number = Math.sqrt((1.0 / Math.pow(firstVoiceAmplitudeStart, 2.0) - 1.0) / (Config.supersawVoiceCount - 1.0));
-				const dynamismEnd:   number = Math.sqrt((1.0 / Math.pow(firstVoiceAmplitudeEnd, 2.0) - 1.0) / (Config.supersawVoiceCount - 1.0));
+
+				let dynamismStart: number = Math.sqrt((1.0 / Math.pow(firstVoiceAmplitudeStart, 2.0) - 1.0) / (Config.supersawVoiceCount - 1.0));
+				let dynamismEnd:   number = Math.sqrt((1.0 / Math.pow(firstVoiceAmplitudeEnd, 2.0) - 1.0) / (Config.supersawVoiceCount - 1.0));
+
+                // Check for the supersaw dynamism mod.
+                /*let dynamismStart: number = instrument.supersawDynamism;
+                let dynamismEnd: number = instrument.supersawDynamism;
+                if (this.isModActive(Config.modulators.dictionary["dynamism"].index, channelIndex, tone.instrumentIndex)) {
+                    dynamismStart = this.getModValue(Config.modulators.dictionary["dynamism"].index, channelIndex, tone.instrumentIndex, false);
+                    dynamismEnd = this.getModValue(Config.modulators.dictionary["dynamism"].index, channelIndex, tone.instrumentIndex, true);
+                }*/
 				tone.supersawDynamism = dynamismStart;
 				tone.supersawDynamismDelta = (dynamismEnd - dynamismStart) / roundedSamplesPerTick;
 				
@@ -9047,13 +9055,7 @@ export class Synth {
 			tone.expression = expressionStart;
 			tone.expressionDelta = (expressionEnd - expressionStart) / roundedSamplesPerTick;
 
-            // Lets check for the new supersaw mods!
-            let dynamismStart: number = instrument.supersawDynamism;
-            let dynamismEnd: number = instrument.supersawDynamism;
-            if (this.isModActive(Config.modulators.dictionary["dynamism"].index, channelIndex, tone.instrumentIndex)) {
-                dynamismStart = this.getModValue(Config.modulators.dictionary["dynamism"].index, channelIndex, tone.instrumentIndex, false);
-                dynamismEnd = this.getModValue(Config.modulators.dictionary["dynamism"].index, channelIndex, tone.instrumentIndex, true);
-            }
+            
         }
 
             if (instrument.type == InstrumentType.pickedString) {
