@@ -273,6 +273,7 @@ export class Localization {
     public static pwmInstLabel: string = "pulse width";
     public static pickedStringInstLabel: string = "picked string";
     public static customChipInstLabel: string = "custom chip";
+    public static supersawInstLabel: string = "supersaw";
     public static customInstrumentsLabel: string = "Instrument Types";
     public static midboxMiscPresetsLabel: string = "Midbox Misc Presets";
     public static midboxDubstepPresetsLabel: string = "Midbox Dubstep Presets";
@@ -362,7 +363,8 @@ export class Localization {
     public static waveform4Label: string = "pulse width";
     public static waveform5Label: string = "ramp";
     public static waveform6Label: string = "trapezoid";
-    public static waveform7Label: string = "metallic";
+    public static waveform7Label: string = "clang";
+    public static waveform8Label: string = "metal";
     public static envelope1Label: string = "none";
     public static envelope2Label: string = "note size";
     public static envelope3Label: string = "punch";
@@ -440,6 +442,9 @@ export class Localization {
     public static hoverText11Label: string = "Zoom Out";
     public static hoverText12Label: string = "Feedback Amplitude";
     public static hoverText13Label: string = "Filter Envelope";
+    public static dynamismLabel: string = "Dynamism:";
+    public static spreadLabel: string = "Spread:";
+    public static sawToPulseLabel: string = "Saw↔Pulse:";
 }
 
 const language: string = window.localStorage.getItem("language") ?? "english";
@@ -700,6 +705,7 @@ if (language == "spanish") {
     Localization.pwmInstLabel = "ancho de pulso";
     Localization.pickedStringInstLabel = "cuerda pulsada";
     Localization.customChipInstLabel = "chip personalizado";
+    Localization.supersawInstLabel = "supersierra";
     Localization.customInstrumentsLabel = "Tipos de Instrumentos";
     Localization.midboxMiscPresetsLabel = "Presets Misc. de Midbox";
     Localization.midboxDubstepPresetsLabel = "Presets de Dubstep de Midbox";
@@ -789,7 +795,8 @@ if (language == "spanish") {
     Localization.waveform4Label = "ancho de pulso";
     Localization.waveform5Label = "rampa";
     Localization.waveform6Label = "trapezoide";
-    Localization.waveform7Label = "metálico";
+    Localization.waveform7Label = "tañido";
+    Localization.waveform8Label = "metal";
     Localization.envelope1Label = "ninguno";
     Localization.envelope2Label = "tamaño del nota";
     Localization.envelope3Label = "puñetazo";
@@ -867,4 +874,7 @@ if (language == "spanish") {
     Localization.hoverText11Label = "Alejar";
     Localization.hoverText12Label = "Amplitud de Respuesta";
     Localization.hoverText13Label = "Envoltura del Filtro";
+    Localization.dynamismLabel = "Dinamismo:";
+    Localization.spreadLabel = "Alcance:";
+    Localization.sawToPulseLabel = "Vió↔Pulso:";
 }

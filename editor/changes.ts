@@ -1888,6 +1888,31 @@ export class ChangePulseWidth extends ChangeInstrumentSlider {
     }
 }
 
+export class ChangeSupersawDynamism extends ChangeInstrumentSlider {
+	constructor(doc: SongDocument, oldValue: number, newValue: number) {
+		super(doc);
+		this._instrument.supersawDynamism = newValue;
+		doc.notifier.changed();
+		if (oldValue != newValue) this._didSomething();
+	}
+}
+export class ChangeSupersawSpread extends ChangeInstrumentSlider {
+	constructor(doc: SongDocument, oldValue: number, newValue: number) {
+		super(doc);
+		this._instrument.supersawSpread = newValue;
+		doc.notifier.changed();
+		if (oldValue != newValue) this._didSomething();
+	}
+}
+export class ChangeSupersawShape extends ChangeInstrumentSlider {
+	constructor(doc: SongDocument, oldValue: number, newValue: number) {
+		super(doc);
+		this._instrument.supersawShape = newValue;
+		doc.notifier.changed();
+		if (oldValue != newValue) this._didSomething();
+	}
+}
+
 export class ChangePitchShift extends ChangeInstrumentSlider {
     constructor(doc: SongDocument, oldValue: number, newValue: number) {
         super(doc);

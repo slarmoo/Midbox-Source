@@ -42,6 +42,7 @@ export class EditorConfig {
                 { name: (_.spectrumInstDrumLabel), customType: InstrumentType.spectrum },
                 { name: (_.drumsetDrumLabel), customType: InstrumentType.drumset },
                 { name: (_.harmonicsInstLabel), customType: InstrumentType.harmonics },
+                { name: (_.supersawInstLabel), customType: InstrumentType.supersaw },
                 { name: (_.pwmInstLabel), customType: InstrumentType.pwm },
                 { name: (_.pickedStringInstLabel), customType: InstrumentType.pickedString },
                 { name: (_.customChipInstLabel), customType: InstrumentType.customChipWave },

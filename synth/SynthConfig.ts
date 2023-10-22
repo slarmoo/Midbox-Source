@@ -62,6 +62,7 @@ export const enum InstrumentType {
     spectrum,
     drumset,
     harmonics,
+    supersaw,
     pwm,
     pickedString,
     customChipWave,
@@ -111,8 +112,10 @@ export const enum EnvelopeComputeIndex {
     vibratoDepth,
     noteFilterFreq0, noteFilterFreq1, noteFilterFreq2, noteFilterFreq3, noteFilterFreq4, noteFilterFreq5, noteFilterFreq6, noteFilterFreq7,
     noteFilterGain0, noteFilterGain1, noteFilterGain2, noteFilterGain3, noteFilterGain4, noteFilterGain5, noteFilterGain6, noteFilterGain7,
+    supersawDynamism,
+	supersawSpread,
+	supersawShape,
     length,
-    //distortion,
 }
 
 /*
@@ -339,6 +342,7 @@ export class Config {
     public static readonly drumsetBaseExpression: number = 0.45; // Drums tend to be loud but brief!
     public static readonly harmonicsBaseExpression: number = 0.025;
     public static readonly pwmBaseExpression: number = 0.04725; // It's actually closer to half of this, the synthesized pulse amplitude range is only .5 to -.5, but also note that the fundamental sine partial amplitude of a square wave is 4/π times the measured square wave amplitude.
+    public static readonly supersawBaseExpression:  number = 0.061425; // It's actually closer to half of this, the synthesized sawtooth amplitude range is only .5 to -.5.
     public static readonly pickedStringBaseExpression: number = 0.025; // Same as harmonics.
     public static readonly distortionBaseVolume: number = 0.011; // Distortion is not affected by pitchDamping, which otherwise approximately halves expression for notes around the middle of the range.
     public static readonly bitcrusherBaseVolume: number = 0.010; // Also not affected by pitchDamping, used when bit crushing is maxed out (aka "1-bit" output).
@@ -619,10 +623,16 @@ export class Config {
         { name: "3⟲", indices: [[], [], [3], []] },
         { name: "4⟲", indices: [[], [], [], [4]] },
         { name: "1⟲ 2⟲", indices: [[1], [2], [], []] },
+        { name: "1⟲ 3⟲", indices: [[1], [], [3], []] },
+        { name: "1⟲ 4⟲", indices: [[1], [], [], [4]] },
+        { name: "2⟲ 3⟲", indices: [[], [2], [3], []] },
+        { name: "2⟲ 4⟲", indices: [[], [2], [], [4]] },
         { name: "3⟲ 4⟲", indices: [[], [], [3], [4]] },
         { name: "1⟲ 2⟲ 3⟲", indices: [[1], [2], [3], []] },
         { name: "2⟲ 3⟲ 4⟲", indices: [[], [2], [3], [4]] },
-        { name: "1⟲ 2⟲ 3⟲ 4⟲", indices: [[1], [2], [3], [4]] },
+        { name: "1⟲ 3⟲ 4⟲", indices: [[1], [], [3], [4]] },
+        { name: "1⟲ 2⟲ 4⟲", indices: [[1], [2], [], [4]] },
+        { name: "⟲ALL", indices: [[1], [2], [3], [4]] },
         { name: "1→2", indices: [[], [1], [], []] },
         { name: "1→3", indices: [[], [], [1], []] },
         { name: "1→4", indices: [[], [], [], [1]] },
@@ -631,6 +641,7 @@ export class Config {
         { name: "3→4", indices: [[], [], [], [3]] },
         { name: "1→3 2→4", indices: [[], [], [1], [2]] },
         { name: "1→4 2→3", indices: [[], [], [2], [1]] },
+        { name: "1→2 3→4", indices: [[], [1], [], [3]] },
         { name: "1→2→3→4", indices: [[], [1], [2], [3]] },
     ]);
     public static readonly chipNoiseLength: number = 1 << 15; // 32768
@@ -648,6 +659,10 @@ export class Config {
     public static readonly harmonicsWavelength: number = 1 << 11; // 2048
     public static readonly pulseWidthRange: number = 50;
     public static readonly pulseWidthStepPower: number = 0.50;
+    public static readonly supersawVoiceCount: number = 7;
+	public static readonly supersawDynamismMax: number = 6;
+	public static readonly supersawSpreadMax: number = 12;
+	public static readonly supersawShapeMax: number = 6;
     public static readonly pitchChannelCountMin: number = 1;
     public static readonly pitchChannelCountMax: number = 40;
     public static readonly noiseChannelCountMin: number = 0;
@@ -691,7 +706,7 @@ export class Config {
     public static readonly instrumentAutomationTargets: DictionaryArray<AutomationTarget> = toNameMap([
         { name: "none", computeIndex: null, displayName: "none",             /*perNote: false,*/ interleave: false, isFilter: false, /*range: 0,                              */    maxCount: 1, effect: null, compatibleInstruments: null },
         { name: "noteVolume", computeIndex: EnvelopeComputeIndex.noteVolume, displayName: "note volume",      /*perNote:  true,*/ interleave: false, isFilter: false, /*range: Config.volumeRange,             */    maxCount: 1, effect: null, compatibleInstruments: null },
-        { name: "pulseWidth", computeIndex: EnvelopeComputeIndex.pulseWidth, displayName: "pulse width",      /*perNote:  true,*/ interleave: false, isFilter: false, /*range: Config.pulseWidthRange,         */    maxCount: 1, effect: null, compatibleInstruments: [InstrumentType.pwm] },
+        { name: "pulseWidth", computeIndex: EnvelopeComputeIndex.pulseWidth, displayName: "pulse width",      /*perNote:  true,*/ interleave: false, isFilter: false, /*range: Config.pulseWidthRange,         */    maxCount: 1, effect: null, compatibleInstruments: [InstrumentType.pwm, InstrumentType.supersaw] },
         { name: "stringSustain", computeIndex: EnvelopeComputeIndex.stringSustain, displayName: "sustain",          /*perNote:  true,*/ interleave: false, isFilter: false, /*range: Config.stringSustainRange,      */    maxCount: 1, effect: null, compatibleInstruments: [InstrumentType.pickedString] },
         { name: "unison", computeIndex: EnvelopeComputeIndex.unison, displayName: "unison",           /*perNote:  true,*/ interleave: false, isFilter: false, /*range: Config.defaultAutomationRange,  */    maxCount: 1, effect: null, compatibleInstruments: [InstrumentType.chip, InstrumentType.harmonics, InstrumentType.pickedString, InstrumentType.customChipWave, InstrumentType.spectrum, InstrumentType.pwm ] },
         { name: "operatorFrequency", computeIndex: EnvelopeComputeIndex.operatorFrequency0, displayName: "fm# freq",         /*perNote:  true,*/ interleave: true, isFilter: false, /*range: Config.defaultAutomationRange,  */    maxCount: Config.operatorCount, effect: null, compatibleInstruments: [InstrumentType.fm] },
@@ -702,8 +717,10 @@ export class Config {
         { name: "vibratoDepth", computeIndex: EnvelopeComputeIndex.vibratoDepth, displayName: "vibrato range",    /*perNote:  true,*/ interleave: false, isFilter: false, /*range: Config.defaultAutomationRange,  */    maxCount: 1, effect: EffectType.vibrato, compatibleInstruments: null },
         { name: "noteFilterAllFreqs", computeIndex: EnvelopeComputeIndex.noteFilterAllFreqs, displayName: "n. filter freqs",  /*perNote:  true,*/ interleave: false, isFilter: true, /*range: null,                           */    maxCount: 1, effect: EffectType.noteFilter, compatibleInstruments: null },
         { name: "noteFilterFreq", computeIndex: EnvelopeComputeIndex.noteFilterFreq0, displayName: "n. filter # freq", /*perNote:  true,*/ interleave: false/*true*/, isFilter: true, /*range: Config.filterFreqRange,     */        maxCount: Config.filterMaxPoints, effect: EffectType.noteFilter, compatibleInstruments: null },
-        //{ name: "distortion", computeIndex: EnvelopeComputeIndex.distortion, displayName: "distortion", /*perNote: false,*/ interleave: false, isFilter: false, /*range: Config.distortionRange,*/ maxCount: 1, effect: EffectType.distortion, compatibleInstruments: null},
         // Controlling filter gain is less obvious and intuitive than controlling filter freq, so to avoid confusion I've disabled it for now...
+        {name: "supersawDynamism",       computeIndex:       EnvelopeComputeIndex.supersawDynamism,       displayName: "dynamism",         /*perNote:  true,*/ interleave: false, isFilter: false, /*range: Config.supersawDynamismMax + 1, */    maxCount: 1,    effect: null,                    compatibleInstruments: [InstrumentType.supersaw]},
+		{name: "supersawSpread",         computeIndex:       EnvelopeComputeIndex.supersawSpread,         displayName: "spread",           /*perNote:  true,*/ interleave: false, isFilter: false, /*range: Config.supersawSpreadMax + 1,   */    maxCount: 1,    effect: null,                    compatibleInstruments: [InstrumentType.supersaw]},
+		{name: "supersawShape",          computeIndex:       EnvelopeComputeIndex.supersawShape,          displayName: "saw↔pulse",        /*perNote:  true,*/ interleave: false, isFilter: false, /*range: Config.supersawShapeMax + 1,    */    maxCount: 1,    effect: null,                    compatibleInstruments: [InstrumentType.supersaw]},
         //{name: "noteFilterGain",         computeIndex:       EnvelopeComputeIndex.noteFilterGain0,        displayName: "n. filter # vol",  /*perNote:  true,*/ interleave: false, isFilter:  true, range: Config.filterGainRange,             maxCount: Config.filterMaxPoints, effect: EffectType.noteFilter, compatibleInstruments: null},
         /*
         {name: "distortion",             computeIndex: InstrumentAutomationIndex.distortion,             displayName: "distortion",       perNote: false, interleave: false, isFilter: false, range: Config.distortionRange,             maxCount: 1,    effect: EffectType.distortion,   compatibleInstruments: null},
@@ -728,7 +745,8 @@ export class Config {
         { name: "pulse width", samples: generateSquareWave() },
         { name: "ramp", samples: generateSawWave(true) },
         { name: "trapezoid", samples: generateTrapezoidWave(2) },
-        { name: "clang", samples: generateClangNoise() } //MID TODO: yeah you gave up on this. finish it up.
+        { name: "clang", samples: generateClangNoise() }, //MID TODO: Add more!
+        { name: "metal", samples: generateMetalNoise() }
     ]);
     public static readonly pwmOperatorWaves: DictionaryArray<OperatorWave> = toNameMap([
         { name: "1%", samples: generateSquareWave(0.01) },
@@ -844,6 +862,12 @@ export class Config {
             promptName: "Picked String Sustain", promptDesc: ["This setting controls the sustain of your picked string instrument, just like the sustain slider.", "At $LO, your instrument will have minimum sustain and sound 'plucky'. This increases to a more held sound as your modulator approaches the maximum, $HI.", "[OVERWRITING] [$LO - $HI]"] },
         { name: "mix volume", pianoName: "Mix Vol.", maxRawVol: Config.volumeRange, newNoteVol: Math.ceil(Config.volumeRange / 2), forSong: false, convertRealFactor: Math.ceil(-Config.volumeRange / 2.0), associatedEffect: EffectType.length,
             promptName: "Mix Volume", promptDesc: ["This setting affects the volume of your instrument as if its volume slider had been moved.", "At $MID, an instrument's volume will be unchanged from default. This means you can still use the volume sliders to mix the base volume of instruments, since this setting and the default value work multiplicatively. The volume gradually increases up to $HI, or decreases down to mute at $LO.", "Unlike the 'note volume' setting, mix volume is very straightforward and simply affects the resultant instrument volume after all effects are applied.", "[MULTIPLICATIVE] [$LO - $HI]"] },
+        { name: "dynamism", pianoName: "Dynamism", maxRawVol: Config.supersawDynamismMax, newNoteVol: 0, forSong: false, convertRealFactor: 0, associatedEffect: EffectType.length,
+            promptName: "Supersaw Dynamism", promptDesc: ["This setting controls the dynamism of each saw/wave in your supersaw instrument."]},
+        { name: "spread", pianoName: "Spread", maxRawVol: Config.supersawSpreadMax, newNoteVol: 0, forSong: false, convertRealFactor: 0, associatedEffect: EffectType.length,
+            promptName: "Supersaw Spread", promptDesc: ["This setting controls the spread of each saw/wave in your supersaw instrument."]},
+        { name: "shape", pianoName: "Shape", maxRawVol: Config.supersawShapeMax, newNoteVol: 0, forSong: false, convertRealFactor: 0, associatedEffect: EffectType.length,
+            promptName: "Supersaw Shape", promptDesc: ["This setting controls the shape of each wave in your supersaw instrument.", "At the lowest value, each wave will be a sawtooth. At the highest value, each wave will be fully affected by the pulse width slider."]},
     ]);
 }
 
@@ -1094,19 +1118,26 @@ function generateSawWave(inverse: boolean = false): Float32Array {
     return wave;
 }
 
-function generateClangNoise() {
+function generateClangNoise() { let drumBuffer: number = 1;
     const wave = new Float32Array(Config.sineWaveLength + 1);
     for (let i = 0; i < Config.sineWaveLength + 1; i++) {
-        let drumBuffer: number = 1;
-    wave[i] = wave[i] = (drumBuffer & 1) * 2.0 - 1.0;
+    wave[i] = (drumBuffer & 1) * 2.0 - 1.0;
     let newBuffer: number = drumBuffer >> 1;
     if (((drumBuffer + newBuffer) & 1) == 1) {
         newBuffer += 2 << 14;
     }
     drumBuffer = newBuffer;
         }
-         return wave;
+        return wave;
     }
+
+    function generateMetalNoise() {
+        const wave = new Float32Array(Config.sineWaveLength + 1);
+        for (let i = 0; i < Config.sineWaveLength + 1; i++) {
+        wave[i] = Math.random() * Math.sin(Math.cos(Config.sineWaveLength) * 3 - 8.0 / Config.sineWaveLength - 1.0);
+            }
+            return wave;
+        }
 
 export function getArpeggioPitchIndex(pitchCount: number, useFastTwoNoteArp: boolean, arpeggio: number): number {
     let arpeggioPattern: ReadonlyArray<number> = Config.arpeggioPatterns[pitchCount - 1];
