@@ -3124,7 +3124,7 @@ export class SongEditor {
                 this._doc.selection.copy();
                 event.preventDefault();
                 break;
-            //MID TODO: Make this keybind work!!1!!1!11!1
+            // MID TODO: Make this keybind work!!1!!1!11!1
             case 89: // y
                 if (canPlayNotes) break;
                 this._doc.redo();
