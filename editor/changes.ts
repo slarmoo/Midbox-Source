@@ -567,12 +567,6 @@ export class ChangeRandomGeneratedInstrument extends Change {
                 instrument.chord = Config.chords.dictionary[selectWeightedRandom([
                     { item: "strum", weight: 2 },
                     { item: "arpeggio", weight: 2 },
-                    { item: "build up", weight: 1 },
-                    { item: "medium strum", weight: 1 },
-                    { item: "slow strum", weight: 1 },
-                    { item: "1/3 strum", weight: 1 },
-                    { item: "1/3 medium strum", weight: 1 },
-                    { item: "1/3 slow strum", weight: 1 },
                 ])].index;
             }
             if (Math.random() < 0.1) {
@@ -615,6 +609,23 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "decay 5", weight: 2 },
                         { item: "modbox click", weight: 2 },
                         { item: "modbox bow", weight: 2 },
+                        { item: "wibble 0", weight: 2},
+                        { item: "wibble 1", weight: 2},
+                        { item: "wibble 2", weight: 2},
+                        { item: "wibble 3", weight: 2},
+                        { item: "wibble 4", weight: 2},
+                        { item: "linear 0", weight: 2},
+                        { item: "linear 1", weight: 2},
+                        { item: "linear 2", weight: 2},
+                        { item: "linear 3", weight: 2},
+                        { item: "linear 4", weight: 2},
+                        { item: "linear 5", weight: 2},
+                        { item: "rise 0", weight: 2},
+                        { item: "rise 1", weight: 2},
+                        { item: "rise 2", weight: 2},
+                        { item: "rise 3", weight: 2},
+                        { item: "rise 4", weight: 2},
+                        { item: "rise 5", weight: 2},
                     ])].index);
                 }
             }
@@ -672,6 +683,23 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "modbox click", weight: 2 },
                         { item: "modbox bow", weight: 2 },
                         { item: "modbox trill", weight: 2 },
+                        { item: "wibble 0", weight: 2},
+                        { item: "wibble 1", weight: 2},
+                        { item: "wibble 2", weight: 2},
+                        { item: "wibble 3", weight: 2},
+                        { item: "wibble 4", weight: 2},
+                        { item: "linear 0", weight: 2},
+                        { item: "linear 1", weight: 2},
+                        { item: "linear 2", weight: 2},
+                        { item: "linear 3", weight: 2},
+                        { item: "linear 4", weight: 2},
+                        { item: "linear 5", weight: 2},
+                        { item: "rise 0", weight: 2},
+                        { item: "rise 1", weight: 2},
+                        { item: "rise 2", weight: 2},
+                        { item: "rise 3", weight: 2},
+                        { item: "rise 4", weight: 2},
+                        { item: "rise 5", weight: 2},
                 ])].index);
             }
             if (Math.random() < 0.1) {
@@ -758,14 +786,15 @@ export class ChangeRandomGeneratedInstrument extends Change {
                 { item: InstrumentType.pickedString, weight: 3 },
                 { item: InstrumentType.spectrum, weight: 3 },
                 { item: InstrumentType.fm, weight: 3 },
-                //{ item: InstrumentType.customChipWave, weight: 3 },
+                { item: InstrumentType.supersaw, weight: 3},
+                { item: InstrumentType.customChipWave, weight: 3 },
                 // MID TODO: Add custom chip as an available random-gen instrument type.
             ]);
             instrument.preset = instrument.type = type;
 
             instrument.fadeIn = (Math.random() < 0.5) ? 0 : selectCurvedDistribution(0, Config.fadeInRange - 1, 0, 2);
             instrument.fadeOut = selectCurvedDistribution(0, Config.fadeOutTicks.length - 1, Config.fadeOutNeutral, 2);
-            if (type == InstrumentType.chip || type == InstrumentType.harmonics || type == InstrumentType.pickedString) {
+            if (type == InstrumentType.chip || type == InstrumentType.harmonics || type == InstrumentType.pickedString || type == InstrumentType.customChipWave) {
                 instrument.unison = Config.unisons.dictionary[selectWeightedRandom([
                     { item: "none", weight: 20 },
                     { item: "shimmer", weight: 2 },
@@ -792,7 +821,11 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "weird octave", weight: 2 },
                 ])].index;
             }
-
+            else {
+                instrument.unison = Config.unisons.dictionary[selectWeightedRandom([
+                    { item: "none", weight: 20 },
+                ])].index;
+            }
             if (Math.random() < 0.1) {
                 instrument.effects |= 1 << EffectType.transition;
                 instrument.transition = Config.transitions.dictionary[selectWeightedRandom([
@@ -808,12 +841,6 @@ export class ChangeRandomGeneratedInstrument extends Change {
                 instrument.effects |= 1 << EffectType.chord;
                 instrument.chord = Config.chords.dictionary[selectWeightedRandom([
                     { item: "strum", weight: 1 },
-                    { item: "medium strum", weight: 1 },
-                    { item: "slow strum", weight: 1 },
-                    { item: "1/3 strum", weight: 1 },
-                    { item: "1/3 medium strum", weight: 1 },
-                    { item: "1/3 slow strum", weight: 1 },
-                    { item: "build up", weight: 1 },
                     { item: "arpeggio", weight: 1 },
                 ])].index;
             }
@@ -858,6 +885,23 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "decay 5", weight: 2 },
                         { item: "modbox click", weight: 2 },
                         { item: "modbox bow", weight: 2 },
+                        { item: "wibble 0", weight: 2},
+                        { item: "wibble 1", weight: 2},
+                        { item: "wibble 2", weight: 2},
+                        { item: "wibble 3", weight: 2},
+                        { item: "wibble 4", weight: 2},
+                        { item: "linear 0", weight: 2},
+                        { item: "linear 1", weight: 2},
+                        { item: "linear 2", weight: 2},
+                        { item: "linear 3", weight: 2},
+                        { item: "linear 4", weight: 2},
+                        { item: "linear 5", weight: 2},
+                        { item: "rise 0", weight: 2},
+                        { item: "rise 1", weight: 2},
+                        { item: "rise 2", weight: 2},
+                        { item: "rise 3", weight: 2},
+                        { item: "rise 4", weight: 2},
+                        { item: "rise 5", weight: 2},
                     ])].index);
                 }
             }
@@ -926,6 +970,23 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "modbox bow", weight: 2 },
                         { item: "modbox trill", weight: 2 },
                         { item: "modbox blip", weight: 2 },
+                        { item: "wibble 0", weight: 2},
+                        { item: "wibble 1", weight: 2},
+                        { item: "wibble 2", weight: 2},
+                        { item: "wibble 3", weight: 2},
+                        { item: "wibble 4", weight: 2},
+                        { item: "linear 0", weight: 2},
+                        { item: "linear 1", weight: 2},
+                        { item: "linear 2", weight: 2},
+                        { item: "linear 3", weight: 2},
+                        { item: "linear 4", weight: 2},
+                        { item: "linear 5", weight: 2},
+                        { item: "rise 0", weight: 2},
+                        { item: "rise 1", weight: 2},
+                        { item: "rise 2", weight: 2},
+                        { item: "rise 3", weight: 2},
+                        { item: "rise 4", weight: 2},
+                        { item: "rise 5", weight: 2},
                 ])].index);
             }
             if (Math.random() < 0.1) {
@@ -1004,6 +1065,260 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "modbox click", weight: 2 },
                         { item: "modbox trill", weight: 2 },
                         { item: "modbox blip", weight: 2 },
+                        { item: "wibble 0", weight: 2},
+                        { item: "wibble 1", weight: 2},
+                        { item: "wibble 2", weight: 2},
+                        { item: "wibble 3", weight: 2},
+                        { item: "wibble 4", weight: 2},
+                        { item: "linear 0", weight: 2},
+                        { item: "linear 1", weight: 2},
+                        { item: "linear 2", weight: 2},
+                        { item: "linear 3", weight: 2},
+                        { item: "linear 4", weight: 2},
+                        { item: "linear 5", weight: 2},
+                        { item: "rise 0", weight: 2},
+                        { item: "rise 1", weight: 2},
+                        { item: "rise 2", weight: 2},
+                        { item: "rise 3", weight: 2},
+                        { item: "rise 4", weight: 2},
+                        { item: "rise 5", weight: 2},
+                        ])].index);
+                    }
+                } break;
+                case InstrumentType.supersaw: {
+                    instrument.supersawDynamism = selectCurvedDistribution(0, Config.supersawDynamismMax - 1, Config.supersawDynamismMax - 1, 2);
+                    instrument.pulseWidth = selectCurvedDistribution(0, Config.pulseWidthRange - 1, Config.pulseWidthRange - 1, 2);
+                    instrument.supersawSpread = selectCurvedDistribution(0, Config.supersawSpreadMax - 1, Config.supersawSpreadMax - 1, 2);
+                    instrument.supersawShape = selectCurvedDistribution(0, Config.supersawShapeMax - 1, Config.supersawShapeMax - 1, 2);
+
+                    if (instrument.envelopeCount < Config.maxEnvelopeCount && Math.random() < 0.3) {
+                        instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["pulseWidth"].index, 0, Config.envelopes.dictionary[selectWeightedRandom([
+                            { item: "punch", weight: 2 },
+                                { item: "flare 0", weight: 2 },
+                                { item: "flare 1", weight: 2 },
+                                { item: "flare 2", weight: 2 },
+                                { item: "flare 3", weight: 2 },
+                                { item: "flare 4", weight: 2 },
+                                { item: "flare 5", weight: 2 },
+                                { item: "flare 6", weight: 2 },
+                                { item: "twang 0", weight: 2 },
+                                { item: "twang 1", weight: 2 },
+                                { item: "twang 2", weight: 2 },
+                                { item: "twang 3", weight: 2 },
+                                { item: "twang 4", weight: 2 },
+                                { item: "twang 5", weight: 2 },
+                                { item: "twang 6", weight: 2 },
+                                { item: "full tremolo 0", weight: 2 },
+                                { item: "full tremolo 1", weight: 2 },
+                                { item: "full tremolo 2", weight: 2 },
+                                { item: "full tremolo 3", weight: 2 },
+                                { item: "full tremolo 4", weight: 2 },
+                                { item: "full tremolo 5", weight: 2 },
+                                { item: "semi tremolo 0", weight: 2 },
+                                { item: "semi tremolo 1", weight: 2 },
+                                { item: "semi tremolo 2", weight: 2 },
+                                { item: "semi tremolo 3", weight: 2 },
+                                { item: "semi tremolo 4", weight: 2 },
+                                { item: "semi tremolo 5", weight: 2 },
+                                { item: "decay 0", weight: 2 },
+                                { item: "decay 1", weight: 2 },
+                                { item: "decay 2", weight: 2 },
+                                { item: "decay 3", weight: 2 },
+                                { item: "decay 4", weight: 2 },
+                                { item: "decay 5", weight: 2 },
+                                { item: "modbox click", weight: 2 },
+                                { item: "modbox bow", weight: 2 },
+                                { item: "modbox trill", weight: 2 },
+                                { item: "modbox blip", weight: 2 },
+                                { item: "wibble 0", weight: 2},
+                                { item: "wibble 1", weight: 2},
+                                { item: "wibble 2", weight: 2},
+                                { item: "wibble 3", weight: 2},
+                                { item: "wibble 4", weight: 2},
+                                { item: "linear 0", weight: 2},
+                                { item: "linear 1", weight: 2},
+                                { item: "linear 2", weight: 2},
+                                { item: "linear 3", weight: 2},
+                                { item: "linear 4", weight: 2},
+                                { item: "linear 5", weight: 2},
+                                { item: "rise 0", weight: 2},
+                                { item: "rise 1", weight: 2},
+                                { item: "rise 2", weight: 2},
+                                { item: "rise 3", weight: 2},
+                                { item: "rise 4", weight: 2},
+                                { item: "rise 5", weight: 2},
+                        ])].index);
+                    }
+                    if (instrument.envelopeCount < Config.maxEnvelopeCount && Math.random() < 0.3) {
+                        instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["supersawDynamism"].index, 0, Config.envelopes.dictionary[selectWeightedRandom([
+                            { item: "punch", weight: 2 },
+                                { item: "flare 0", weight: 2 },
+                                { item: "flare 1", weight: 2 },
+                                { item: "flare 2", weight: 2 },
+                                { item: "flare 3", weight: 2 },
+                                { item: "flare 4", weight: 2 },
+                                { item: "flare 5", weight: 2 },
+                                { item: "flare 6", weight: 2 },
+                                { item: "twang 0", weight: 2 },
+                                { item: "twang 1", weight: 2 },
+                                { item: "twang 2", weight: 2 },
+                                { item: "twang 3", weight: 2 },
+                                { item: "twang 4", weight: 2 },
+                                { item: "twang 5", weight: 2 },
+                                { item: "twang 6", weight: 2 },
+                                { item: "full tremolo 0", weight: 2 },
+                                { item: "full tremolo 1", weight: 2 },
+                                { item: "full tremolo 2", weight: 2 },
+                                { item: "full tremolo 3", weight: 2 },
+                                { item: "full tremolo 4", weight: 2 },
+                                { item: "full tremolo 5", weight: 2 },
+                                { item: "semi tremolo 0", weight: 2 },
+                                { item: "semi tremolo 1", weight: 2 },
+                                { item: "semi tremolo 2", weight: 2 },
+                                { item: "semi tremolo 3", weight: 2 },
+                                { item: "semi tremolo 4", weight: 2 },
+                                { item: "semi tremolo 5", weight: 2 },
+                                { item: "decay 0", weight: 2 },
+                                { item: "decay 1", weight: 2 },
+                                { item: "decay 2", weight: 2 },
+                                { item: "decay 3", weight: 2 },
+                                { item: "decay 4", weight: 2 },
+                                { item: "decay 5", weight: 2 },
+                                { item: "modbox click", weight: 2 },
+                                { item: "modbox trill", weight: 2 },
+                                { item: "modbox blip", weight: 2 },
+                                { item: "wibble 0", weight: 2},
+                                { item: "wibble 1", weight: 2},
+                                { item: "wibble 2", weight: 2},
+                                { item: "wibble 3", weight: 2},
+                                { item: "wibble 4", weight: 2},
+                                { item: "linear 0", weight: 2},
+                                { item: "linear 1", weight: 2},
+                                { item: "linear 2", weight: 2},
+                                { item: "linear 3", weight: 2},
+                                { item: "linear 4", weight: 2},
+                                { item: "linear 5", weight: 2},
+                                { item: "rise 0", weight: 2},
+                                { item: "rise 1", weight: 2},
+                                { item: "rise 2", weight: 2},
+                                { item: "rise 3", weight: 2},
+                                { item: "rise 4", weight: 2},
+                                { item: "rise 5", weight: 2},
+                        ])].index);
+                    }
+                    if (instrument.envelopeCount < Config.maxEnvelopeCount && Math.random() < 0.3) {
+                        instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["supersawShape"].index, 0, Config.envelopes.dictionary[selectWeightedRandom([
+                            { item: "punch", weight: 2 },
+                                { item: "flare 0", weight: 2 },
+                                { item: "flare 1", weight: 2 },
+                                { item: "flare 2", weight: 2 },
+                                { item: "flare 3", weight: 2 },
+                                { item: "flare 4", weight: 2 },
+                                { item: "flare 5", weight: 2 },
+                                { item: "flare 6", weight: 2 },
+                                { item: "twang 0", weight: 2 },
+                                { item: "twang 1", weight: 2 },
+                                { item: "twang 2", weight: 2 },
+                                { item: "twang 3", weight: 2 },
+                                { item: "twang 4", weight: 2 },
+                                { item: "twang 5", weight: 2 },
+                                { item: "twang 6", weight: 2 },
+                                { item: "full tremolo 0", weight: 2 },
+                                { item: "full tremolo 1", weight: 2 },
+                                { item: "full tremolo 2", weight: 2 },
+                                { item: "full tremolo 3", weight: 2 },
+                                { item: "full tremolo 4", weight: 2 },
+                                { item: "full tremolo 5", weight: 2 },
+                                { item: "semi tremolo 0", weight: 2 },
+                                { item: "semi tremolo 1", weight: 2 },
+                                { item: "semi tremolo 2", weight: 2 },
+                                { item: "semi tremolo 3", weight: 2 },
+                                { item: "semi tremolo 4", weight: 2 },
+                                { item: "semi tremolo 5", weight: 2 },
+                                { item: "decay 0", weight: 2 },
+                                { item: "decay 1", weight: 2 },
+                                { item: "decay 2", weight: 2 },
+                                { item: "decay 3", weight: 2 },
+                                { item: "decay 4", weight: 2 },
+                                { item: "decay 5", weight: 2 },
+                                { item: "modbox click", weight: 2 },
+                                { item: "modbox bow", weight: 2 },
+                                { item: "modbox trill", weight: 2 },
+                                { item: "modbox blip", weight: 2 },
+                                { item: "wibble 0", weight: 2},
+                                { item: "wibble 1", weight: 2},
+                                { item: "wibble 2", weight: 2},
+                                { item: "wibble 3", weight: 2},
+                                { item: "wibble 4", weight: 2},
+                                { item: "linear 0", weight: 2},
+                                { item: "linear 1", weight: 2},
+                                { item: "linear 2", weight: 2},
+                                { item: "linear 3", weight: 2},
+                                { item: "linear 4", weight: 2},
+                                { item: "linear 5", weight: 2},
+                                { item: "rise 0", weight: 2},
+                                { item: "rise 1", weight: 2},
+                                { item: "rise 2", weight: 2},
+                                { item: "rise 3", weight: 2},
+                                { item: "rise 4", weight: 2},
+                                { item: "rise 5", weight: 2},
+                        ])].index);
+                    }
+                    if (instrument.envelopeCount < Config.maxEnvelopeCount && Math.random() < 0.3) {
+                        instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["supersawSpread"].index, 0, Config.envelopes.dictionary[selectWeightedRandom([
+                            { item: "punch", weight: 2 },
+                                { item: "flare 0", weight: 2 },
+                                { item: "flare 1", weight: 2 },
+                                { item: "flare 2", weight: 2 },
+                                { item: "flare 3", weight: 2 },
+                                { item: "flare 4", weight: 2 },
+                                { item: "flare 5", weight: 2 },
+                                { item: "flare 6", weight: 2 },
+                                { item: "twang 0", weight: 2 },
+                                { item: "twang 1", weight: 2 },
+                                { item: "twang 2", weight: 2 },
+                                { item: "twang 3", weight: 2 },
+                                { item: "twang 4", weight: 2 },
+                                { item: "twang 5", weight: 2 },
+                                { item: "twang 6", weight: 2 },
+                                { item: "full tremolo 0", weight: 2 },
+                                { item: "full tremolo 1", weight: 2 },
+                                { item: "full tremolo 2", weight: 2 },
+                                { item: "full tremolo 3", weight: 2 },
+                                { item: "full tremolo 4", weight: 2 },
+                                { item: "full tremolo 5", weight: 2 },
+                                { item: "semi tremolo 0", weight: 2 },
+                                { item: "semi tremolo 1", weight: 2 },
+                                { item: "semi tremolo 2", weight: 2 },
+                                { item: "semi tremolo 3", weight: 2 },
+                                { item: "semi tremolo 4", weight: 2 },
+                                { item: "semi tremolo 5", weight: 2 },
+                                { item: "decay 0", weight: 2 },
+                                { item: "decay 1", weight: 2 },
+                                { item: "decay 2", weight: 2 },
+                                { item: "decay 3", weight: 2 },
+                                { item: "decay 4", weight: 2 },
+                                { item: "decay 5", weight: 2 },
+                                { item: "modbox click", weight: 2 },
+                                { item: "modbox trill", weight: 2 },
+                                { item: "modbox blip", weight: 2 },
+                                { item: "wibble 0", weight: 2},
+                                { item: "wibble 1", weight: 2},
+                                { item: "wibble 2", weight: 2},
+                                { item: "wibble 3", weight: 2},
+                                { item: "wibble 4", weight: 2},
+                                { item: "linear 0", weight: 2},
+                                { item: "linear 1", weight: 2},
+                                { item: "linear 2", weight: 2},
+                                { item: "linear 3", weight: 2},
+                                { item: "linear 4", weight: 2},
+                                { item: "linear 5", weight: 2},
+                                { item: "rise 0", weight: 2},
+                                { item: "rise 1", weight: 2},
+                                { item: "rise 2", weight: 2},
+                                { item: "rise 3", weight: 2},
+                                { item: "rise 4", weight: 2},
+                                { item: "rise 5", weight: 2},
                         ])].index);
                     }
                 } break;
@@ -1079,7 +1394,8 @@ export class ChangeRandomGeneratedInstrument extends Change {
                             { item: "pulse width", weight: 3 },
                             { item: "ramp", weight: 3 },
                             { item: "trapezoid", weight: 3 },
-                            { item: "metallic", weight: 3},
+                            { item: "clang", weight: 3},
+                            { item: "metal", weight: 3},
                         ])].index;
                         if (instrument.operators[i].waveform == 3/*"pulse width"*/) {
                             instrument.operators[i].pulseWidth = selectWeightedRandom([
@@ -1088,12 +1404,30 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: 2, weight: 3 },
                                 { item: 3, weight: 3 },
                                 { item: 4, weight: 3 },
-                                { item: 5, weight: 3 }, // 50%
+                                { item: 5, weight: 3 },
                                 { item: 6, weight: 3 },
                                 { item: 7, weight: 3 },
                                 { item: 8, weight: 3 },
                                 { item: 9, weight: 3 },
-                                { item: 9, weight: 3 }, // What is this
+                                { item: 10, weight: 3 },
+                                { item: 11, weight: 3 },
+                                { item: 12, weight: 3 },
+                                { item: 13, weight: 3 },
+                                { item: 14, weight: 15 }, // 50%
+                                { item: 15, weight: 3 },
+                                { item: 16, weight: 3 },
+                                { item: 17, weight: 3 },
+                                { item: 18, weight: 3 },
+                                { item: 19, weight: 3 },
+                                { item: 20, weight: 3 },
+                                { item: 21, weight: 3 },
+                                { item: 22, weight: 3 },
+                                { item: 23, weight: 3 },
+                                { item: 24, weight: 3 },
+                                { item: 25, weight: 3 },
+                                { item: 26, weight: 3 },
+                                { item: 27, weight: 3 },
+                                { item: 28, weight: 3 },
                             ]);
                         }
                     }
@@ -1139,6 +1473,23 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "modbox bow", weight: 2 },
                                 { item: "modbox trill", weight: 2 },
                                 { item: "modbox blip", weight: 2 },
+                                { item: "wibble 0", weight: 2},
+                                { item: "wibble 1", weight: 2},
+                                { item: "wibble 2", weight: 2},
+                                { item: "wibble 3", weight: 2},
+                                { item: "wibble 4", weight: 2},
+                                { item: "linear 0", weight: 2},
+                                { item: "linear 1", weight: 2},
+                                { item: "linear 2", weight: 2},
+                                { item: "linear 3", weight: 2},
+                                { item: "linear 4", weight: 2},
+                                { item: "linear 5", weight: 2},
+                                { item: "rise 0", weight: 2},
+                                { item: "rise 1", weight: 2},
+                                { item: "rise 2", weight: 2},
+                                { item: "rise 3", weight: 2},
+                                { item: "rise 4", weight: 2},
+                                { item: "rise 5", weight: 2},
                             ])].index);
                             instrument.operators[i].waveform = Config.operatorWaves.dictionary[selectWeightedRandom([
                                 { item: "sine", weight: 3 },
@@ -1147,6 +1498,8 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "pulse width", weight: 3 },
                                 { item: "ramp", weight: 3 },
                                 { item: "trapezoid", weight: 3 },
+                                { item: "clang", weight: 3 },
+                                { item: "metal", weight: 3 },
                             ])].index;
                             if (instrument.operators[i].waveform == 3) {
                                 instrument.operators[i].pulseWidth = selectWeightedRandom([
@@ -1155,12 +1508,30 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                     { item: 2, weight: 3 },
                                     { item: 3, weight: 3 },
                                     { item: 4, weight: 3 },
-                                    { item: 5, weight: 3 }, // 50%
+                                    { item: 5, weight: 3 },
                                     { item: 6, weight: 3 },
                                     { item: 7, weight: 3 },
                                     { item: 8, weight: 3 },
                                     { item: 9, weight: 3 },
-                                    { item: 9, weight: 3 },
+                                    { item: 10, weight: 3 },
+                                    { item: 11, weight: 3 },
+                                    { item: 12, weight: 3 },
+                                    { item: 13, weight: 3 },
+                                    { item: 14, weight: 15 }, // 50%
+                                    { item: 15, weight: 3 },
+                                    { item: 16, weight: 3 },
+                                    { item: 17, weight: 3 },
+                                    { item: 18, weight: 3 },
+                                    { item: 19, weight: 3 },
+                                    { item: 20, weight: 3 },
+                                    { item: 21, weight: 3 },
+                                    { item: 22, weight: 3 },
+                                    { item: 23, weight: 3 },
+                                    { item: 24, weight: 3 },
+                                    { item: 25, weight: 3 },
+                                    { item: 26, weight: 3 },
+                                    { item: 27, weight: 3 },
+                                    { item: 28, weight: 3 },
                                 ]);
                             }
                         }
@@ -1202,6 +1573,23 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "modbox bow", weight: 2 },
                                 { item: "modbox trill", weight: 2 },
                                 { item: "modbox blip", weight: 2 },
+                                { item: "wibble 0", weight: 2},
+                                { item: "wibble 1", weight: 2},
+                                { item: "wibble 2", weight: 2},
+                                { item: "wibble 3", weight: 2},
+                                { item: "wibble 4", weight: 2},
+                                { item: "linear 0", weight: 2},
+                                { item: "linear 1", weight: 2},
+                                { item: "linear 2", weight: 2},
+                                { item: "linear 3", weight: 2},
+                                { item: "linear 4", weight: 2},
+                                { item: "linear 5", weight: 2},
+                                { item: "rise 0", weight: 2},
+                                { item: "rise 1", weight: 2},
+                                { item: "rise 2", weight: 2},
+                                { item: "rise 3", weight: 2},
+                                { item: "rise 4", weight: 2},
+                                { item: "rise 5", weight: 2},
                             ])].index);
                         }
                     }
@@ -1245,9 +1633,28 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "modbox bow", weight: 2 },
                                 { item: "modbox trill", weight: 2 },
                                 { item: "modbox blip", weight: 2 },
+                                { item: "wibble 0", weight: 2},
+                                { item: "wibble 1", weight: 2},
+                                { item: "wibble 2", weight: 2},
+                                { item: "wibble 3", weight: 2},
+                                { item: "wibble 4", weight: 2},
+                                { item: "linear 0", weight: 2},
+                                { item: "linear 1", weight: 2},
+                                { item: "linear 2", weight: 2},
+                                { item: "linear 3", weight: 2},
+                                { item: "linear 4", weight: 2},
+                                { item: "linear 5", weight: 2},
+                                { item: "rise 0", weight: 2},
+                                { item: "rise 1", weight: 2},
+                                { item: "rise 2", weight: 2},
+                                { item: "rise 3", weight: 2},
+                                { item: "rise 4", weight: 2},
+                                { item: "rise 5", weight: 2},
                         ])].index);
                     }
-                //case InstrumentType.customChipWave: {
+                } break;
+                case InstrumentType.customChipWave: {
+                    // Randomize the "preset".
                 } break;
                 default: throw new Error("Unhandled pitched instrument type in random generator.");
             }
@@ -1767,7 +2174,7 @@ export class ChangeStrumSpeed extends Change {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
         instrument.strumSpeed = newValue;
-//      doc.synth.unsetMod(Config.modulators.dictionary["strum speed"].index, doc.channel, doc.getCurrentInstrument());
+        doc.synth.unsetMod(Config.modulators.dictionary["strum speed"].index, doc.channel, doc.getCurrentInstrument());
 
         doc.notifier.changed();
         if (oldValue != newValue) this._didSomething();
@@ -4091,6 +4498,19 @@ export class ChangeSongTitle extends Change {
 
         doc.song.title = newValue;
         document.title = newValue + " - " + EditorConfig.versionDisplayName;
+        doc.notifier.changed();
+        if (oldValue != newValue) this._didSomething();
+    }
+}
+
+export class ChangeSongSubtitle extends Change {
+    constructor(doc: SongDocument, oldValue: string, newValue: string) {
+        super();
+        if (newValue.length > 30) {
+            newValue = newValue.substring(0, 30);
+        }
+
+        doc.song.subtitle = newValue;
         doc.notifier.changed();
         if (oldValue != newValue) this._didSomething();
     }

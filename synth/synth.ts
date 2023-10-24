@@ -149,7 +149,7 @@ const enum SongTagCode {
     harmonics = CharCode.H, // added in 7
     stringSustain = CharCode.I, // added in 9
 //  ___ = CharCode.J,
-//  ___ = CharCode.K,
+    songSubtitle = CharCode.K,
     pan = CharCode.L, // added between 8 and 9, DEPRECATED
     customChipWave = CharCode.M, // [JB], added in 1(?)
     songTitle = CharCode.N, // [JB], added in 1(?)
@@ -163,8 +163,8 @@ const enum SongTagCode {
     feedbackEnvelope = CharCode.V, // added in 6, DEPRECATED
     pulseWidth = CharCode.W, // added in 7
     aliases = CharCode.X, // [JB], added in 4, DEPRECATED
-    //  ___ = CharCode.Y,
-    //  ___ = CharCode.Z,
+//  ___ = CharCode.Y,
+//  ___ = CharCode.Z,
 
 }
 
@@ -2047,7 +2047,7 @@ export class Instrument {
                         // GoldBox compatibility
                         if (operatorObject["waveform"] == "square") {
                             operator.waveform = Config.operatorWaves.dictionary["pulse width"].index;
-                            operator.pulseWidth = 5;
+                            operator.pulseWidth = 14;
                         } else {
                             operator.waveform = 0;
                         }
@@ -2059,7 +2059,7 @@ export class Instrument {
                 if (operatorObject["pulseWidth"] != undefined) {
                     operator.pulseWidth = operatorObject["pulseWidth"] | 0;
                 } else {
-                    operator.pulseWidth = 5;
+                    operator.pulseWidth = 14;
                 }
             }
         }
@@ -2335,6 +2335,7 @@ export class Song {
     private static readonly _variant = 0x6A; //"j" ~ jummbox
 
     public title: string;
+    public subtitle: string;
     public scale: number;
     public key: number;
     public tempo: number;
@@ -2494,6 +2495,7 @@ export class Song {
         this.patternInstruments = false;
 
         this.title = _.newSongLabel;
+        this.subtitle = "";
         document.title = EditorConfig.versionDisplayName;
 
         if (andResetChannels) {
@@ -2550,6 +2552,16 @@ export class Song {
         // Actual encoded string follows
         for (let i: number = 0; i < encodedSongTitle.length; i++) {
             buffer.push(encodedSongTitle.charCodeAt(i));
+        }
+
+        // Length of the song name string
+        buffer.push(SongTagCode.songSubtitle);
+        var encodedSongSubtitle: string = encodeURIComponent(this.subtitle);
+        buffer.push(base64IntToCharCode[encodedSongSubtitle.length >> 6], base64IntToCharCode[encodedSongSubtitle.length & 0x3f]);
+
+        // Actual encoded string follows
+        for (let i: number = 0; i < encodedSongSubtitle.length; i++) {
+            buffer.push(encodedSongSubtitle.charCodeAt(i));
         }
 
         buffer.push(SongTagCode.channelCount, base64IntToCharCode[this.pitchChannelCount], base64IntToCharCode[this.noiseChannelCount], base64IntToCharCode[this.modChannelCount]);
@@ -3175,6 +3187,13 @@ export class Song {
                 var songNameLength = (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] << 6) + base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
                 this.title = decodeURIComponent(compressed.substring(charIndex, charIndex + songNameLength));
                 document.title = this.title + " - " + EditorConfig.versionDisplayName;
+
+                charIndex += songNameLength;
+            } break;
+            case SongTagCode.songSubtitle: {
+                // Length of song name string
+                var songNameLength = (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] << 6) + base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
+                this.subtitle = decodeURIComponent(compressed.substring(charIndex, charIndex + songNameLength));
 
                 charIndex += songNameLength;
             } break;
@@ -4761,6 +4780,7 @@ export class Song {
 
         return {
             "name": this.title,
+            "subname": this.subtitle,
             "format": Song._format,
             "version": Song._latestJummBoxVersion,
             "scale": Config.scales[this.scale].name,
@@ -4795,6 +4815,10 @@ export class Song {
 
         if (jsonObject["name"] != undefined) {
             this.title = jsonObject["name"];
+        }
+
+        if (jsonObject["subname"] != undefined) {
+            this.subtitle = jsonObject["subname"];
         }
 
         this.scale = 0; // default to free.
@@ -6570,6 +6594,7 @@ export class Synth {
                     // Instrument type specific
                     || (tgtInstrument.type != InstrumentType.fm && (str == "fm slider 1" || str == "fm slider 2" || str == "fm slider 3" || str == "fm slider 4" || str == "fm feedback"))
                     || (tgtInstrument.type != InstrumentType.pwm && (str == "pulse width"))
+                    || (tgtInstrument.type != InstrumentType.supersaw && (str == "pulse width"))
                     // Arp check
                     || (!tgtInstrument.getChord().arpeggiates && (str == "arp speed" || str == "reset arp"))
                     // EQ Filter check
@@ -8852,15 +8877,6 @@ export class Synth {
                 // Increase expression to compensate for string decay.
                 settingsExpressionMult *= Math.pow(2.0, 0.7 * (1.0 - useSustainStart / (Config.stringSustainRange - 1)));
             }
-            /*if (instrument.type == InstrumentType.supersaw) {
-                // Lets check for the new supersaw mods!
-                let dynamismStart: number = instrument.supersawDynamism;
-                let dynamismEnd: number = instrument.supersawDynamism;
-                if (this.isModActive(Config.modulators.dictionary["dynamism"].index, channelIndex, tone.instrumentIndex)) {
-                    dynamismStart = this.getModValue(Config.modulators.dictionary["dynamism"].index, channelIndex, tone.instrumentIndex, false);
-                    dynamismEnd = this.getModValue(Config.modulators.dictionary["dynamism"].index, channelIndex, tone.instrumentIndex, true);
-                }
-            }*/
 
             const startFreq: number = Instrument.frequencyFromPitch(startPitch);
             if (instrument.type == InstrumentType.chip || instrument.type == InstrumentType.customChipWave || instrument.type == InstrumentType.harmonics || instrument.type == InstrumentType.pickedString || instrument.type == InstrumentType.spectrum || instrument.type == InstrumentType.pwm || instrument.type == InstrumentType.noise || instrument.type == InstrumentType.drumset) {
@@ -8918,13 +8934,6 @@ export class Synth {
 				let dynamismStart: number = Math.sqrt((1.0 / Math.pow(firstVoiceAmplitudeStart, 2.0) - 1.0) / (Config.supersawVoiceCount - 1.0));
 				let dynamismEnd:   number = Math.sqrt((1.0 / Math.pow(firstVoiceAmplitudeEnd, 2.0) - 1.0) / (Config.supersawVoiceCount - 1.0));
 
-                // Check for the supersaw dynamism mod.
-                /*let dynamismStart: number = instrument.supersawDynamism;
-                let dynamismEnd: number = instrument.supersawDynamism;
-                if (this.isModActive(Config.modulators.dictionary["dynamism"].index, channelIndex, tone.instrumentIndex)) {
-                    dynamismStart = this.getModValue(Config.modulators.dictionary["dynamism"].index, channelIndex, tone.instrumentIndex, false);
-                    dynamismEnd = this.getModValue(Config.modulators.dictionary["dynamism"].index, channelIndex, tone.instrumentIndex, true);
-                }*/
 				tone.supersawDynamism = dynamismStart;
 				tone.supersawDynamismDelta = (dynamismEnd - dynamismStart) / roundedSamplesPerTick;
 				
@@ -8997,7 +9006,12 @@ export class Synth {
 				}
 				
 				const baseSpreadSlider: number = instrument.supersawSpread / Config.supersawSpreadMax;
-				// TODO: automation
+				let baseSpreadSliderStart: number = instrument.supersawSpread / Config.supersawSpreadMax;
+                let baseSpreadSliderEnd: number = instrument.supersawSpread / Config.supersawSpreadMax;
+                if (this.isModActive(Config.modulators.dictionary["spread"].index, channelIndex, tone.instrumentIndex)) {
+                  baseSpreadSliderStart = Math.max(0.0, this.getModValue(Config.modulators.dictionary["spread"].index, channelIndex, tone.instrumentIndex, false) / Config.supersawSpreadMax);
+                  baseSpreadSliderEnd = Math.max(0.0, this.getModValue(Config.modulators.dictionary["spread"].index, channelIndex, tone.instrumentIndex, true) / Config.supersawSpreadMax);
+                }
 				const spreadSliderStart: number = baseSpreadSlider * envelopeStarts[EnvelopeComputeIndex.supersawSpread];
 				const spreadSliderEnd:   number = baseSpreadSlider * envelopeEnds[  EnvelopeComputeIndex.supersawSpread];
 				// Just use the average detune for the current tick in the below loop.
@@ -9010,16 +9024,29 @@ export class Synth {
 				}
 				
 				const baseShape: number = instrument.supersawShape / Config.supersawShapeMax;
-				// TODO: automation
+				let baseShapeSliderStart: number = instrument.supersawShape / Config.supersawShapeMax;
+                let baseShapeSliderEnd: number = instrument.supersawShape / Config.supersawShapeMax;
+                if (this.isModActive(Config.modulators.dictionary["shape"].index, channelIndex, tone.instrumentIndex)) {
+                  baseShapeSliderStart = Math.max(0.0, this.getModValue(Config.modulators.dictionary["shape"].index, channelIndex, tone.instrumentIndex, false) / Config.supersawShapeMax);
+                  baseShapeSliderEnd = Math.max(0.0, this.getModValue(Config.modulators.dictionary["shape"].index, channelIndex, tone.instrumentIndex, true) / Config.supersawShapeMax);
+                }
 				const shapeStart: number = baseShape * envelopeStarts[EnvelopeComputeIndex.supersawShape];
 				const shapeEnd:   number = baseShape * envelopeEnds[  EnvelopeComputeIndex.supersawShape];
 				tone.supersawShape = shapeStart;
 				tone.supersawShapeDelta = (shapeEnd - shapeStart) / roundedSamplesPerTick;
 				
 				const basePulseWidth: number = getPulseWidthRatio(instrument.pulseWidth);
-				// TODO: automation
-				const pulseWidthStart: number = basePulseWidth * envelopeStarts[EnvelopeComputeIndex.pulseWidth];
-				const pulseWidthEnd:   number = basePulseWidth * envelopeEnds[  EnvelopeComputeIndex.pulseWidth];
+				
+                // Just like pulse width, check for PWM mods.
+                let pulseWidthModStart: number = basePulseWidth;
+                let pulseWidthModEnd: number = basePulseWidth;
+                if (this.isModActive(Config.modulators.dictionary["pulse width"].index, channelIndex, tone.instrumentIndex)) {
+                  pulseWidthModStart = Math.max(0.0, this.getModValue(Config.modulators.dictionary["pulse width"].index, channelIndex, tone.instrumentIndex, false) / Config.pulseWidthRange);
+                  pulseWidthModEnd = Math.max(0.0, this.getModValue(Config.modulators.dictionary["pulse width"].index, channelIndex, tone.instrumentIndex, true) / Config.pulseWidthRange);
+                }
+
+				const pulseWidthStart: number = pulseWidthModStart * envelopeStarts[EnvelopeComputeIndex.pulseWidth];
+				const pulseWidthEnd:   number = pulseWidthModEnd * envelopeEnds[  EnvelopeComputeIndex.pulseWidth];
 				const phaseDeltaStart: number = (tone.supersawPrevPhaseDelta != null) ? tone.supersawPrevPhaseDelta : startFreq * sampleTime;
 				const phaseDeltaEnd: number = startFreq * sampleTime * freqEndRatio;
 				tone.supersawPrevPhaseDelta = phaseDeltaEnd;

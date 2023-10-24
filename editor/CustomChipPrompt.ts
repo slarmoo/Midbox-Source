@@ -81,7 +81,7 @@ export class CustomChipPromptCanvas {
 
 	}
 
-	private _storeChange = (): void => {
+	public _storeChange = (): void => {
 		// Check if change is unique compared to the current history state
 		var sameCheck = true;
 		if (this._changeQueue.length > 0) {
@@ -290,8 +290,8 @@ export class CustomChipPrompt implements Prompt {
 		this._okayButton.addEventListener("click", this._saveChanges);
 		this._cancelButton.addEventListener("click", this._close);
 		this.container.addEventListener("keydown", this.whenKeyPressed);
-		/*this.copyButton.addEventListener("click", this._copySettings);
-		this.pasteButton.addEventListener("click", this._pasteSettings);*/
+		this.copyButton.addEventListener("click", this._copySettings);
+		this.pasteButton.addEventListener("click", this._pasteSettings);
 		this._playButton.addEventListener("click", this._togglePlay);
 		this.updatePlayButton();
 
@@ -333,20 +333,20 @@ export class CustomChipPrompt implements Prompt {
 		this._playButton.removeEventListener("click", this._togglePlay);
 	}
 
-	/*private _copySettings = (): void => {
-		const chipCopy: any = this.customChipCanvas
-			this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].customChipWave.toJsonObject();
-		window.localStorage.setItem("chipCopy", JSON.stringify(chipCopy));
+	private _copySettings = (): void => {
+		const chipCopy: Float32Array = this.customChipCanvas.chipData
+		window.localStorage.setItem("chipCopy", JSON.stringify(Array.from(chipCopy)));
 	}
 
 	private _pasteSettings = (): void => {
 
-		let chipCopy: CustomChipPromptCanvas = new CustomChipPromptCanvas();
-		chipCopy.fromJsonObject(JSON.parse(String(window.localStorage.getItem("chipCopy"))));
-		if (chipCopy != null) {
-			this.filterEditor.swapToSettings(chipCopy, true);
+		const storedChipWave: any = JSON.parse(String(window.localStorage.getItem("chipCopy")));
+		for (let i: number = 0; i < 64; i++) {
+    	this.customChipCanvas.chipData[i] = storedChipWave[i];
 		}
-    }*/
+		this.customChipCanvas._storeChange();
+		new ChangeCustomWave(this._doc, this.customChipCanvas.chipData);
+    }
 
 	public whenKeyPressed = (event: KeyboardEvent): void => {
 		if ((<Element>event.target).tagName != "BUTTON" && event.keyCode == 13) { // Enter key

@@ -304,7 +304,7 @@ export class Config {
     public static readonly blackKeyNameParents: ReadonlyArray<number> = [-1, 1, -1, 1, -1, 1, -1, -1, 1, -1, 1, -1];
     public static readonly tempoMin: number = 1;
     public static readonly tempoMax: number = 750;
-    public static readonly echoDelayRange: number = 24;
+    public static readonly echoDelayRange: number = 48;
     public static readonly echoDelayStepTicks: number = 4;
     public static readonly echoSustainRange: number = 8;
     public static readonly echoShelfHz: number = 4000.0; // The cutoff freq of the shelf filter that is used to decay echoes.
@@ -333,7 +333,7 @@ export class Config {
         { name: "freehand", stepsPerBeat: 24, /*ticksPerArpeggio: 3, arpeggioPatterns: [[0], [0, 1], [0, 1, 2, 1], [0, 1, 2, 3]]*/ roundUpThresholds: null },
     ]);
 
-    public static readonly instrumentTypeNames: ReadonlyArray<string> = ["chip", "FM", "noise", "spectrum", "drumset", "harmonics", "PWM", "Picked String", "custom chip", "mod"];
+    public static readonly instrumentTypeNames: ReadonlyArray<string> = ["chip", "FM", "noise", "spectrum", "drumset", "harmonics", "supersaw", "PWM", "Picked String", "custom chip", "mod"];
     public static readonly instrumentTypeHasSpecialInterval: ReadonlyArray<boolean> = [true, true, false, false, false, true, false, false, false];
     public static readonly chipBaseExpression: number = 0.03375; // Doubled by unison feature, but affected by expression adjustments per unison setting and wave shape.
     public static readonly fmBaseExpression: number = 0.03;
@@ -435,8 +435,7 @@ export class Config {
     // This array is more or less a linear step by 0.1 but there's a bit of range added at the start to hit specific ratios, and the end starts to grow faster.
     //                                                             0       1      2    3     4      5    6    7      8     9   10   11 12   13   14   15   16   17   18   19   20   21 22   23   24   25   26   27   28   29   30   31 32   33   34   35   36   37   38    39  40   41 42    43   44   45   46 47   48 49 50
     public static readonly arpSpeedScale: ReadonlyArray<number> = [0, 0.0625, 0.125, 0.2, 0.25, 1 / 3, 0.4, 0.5, 2 / 3, 0.75, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 4, 4.15, 4.3, 4.5, 4.8, 5, 5.5, 6, 8];
-    //                                                               24 12 8  6  4  3  2   1.5 1
-    public static readonly strumSpeedScale: ReadonlyArray<number> = [1, 2, 3, 4, 6, 8, 12, 16, 24];
+    public static readonly strumSpeedScale: ReadonlyArray<number> = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24];
 
     public static readonly unisons: DictionaryArray<Unison> = toNameMap([
         { name: "none", voices: 1, spread: 0.0, offset: 0.0, expression: 1.4, sign: 1.0 },
@@ -482,12 +481,6 @@ export class Config {
     public static readonly chords: DictionaryArray<Chord> = toNameMap([
         { name: "simultaneous", customInterval: false, arpeggiates: false, strumParts: 0, singleTone: false },
         { name: "strum", customInterval: false, arpeggiates: false, strumParts: 1, singleTone: false },
-        { name: "medium strum", customInterval: false, arpeggiates: false, strumParts: 3, singleTone: false },
-        { name: "slow strum", customInterval: false, arpeggiates: false, strumParts: 6, singleTone: false },
-        { name: "1/3 strum", customInterval: false, arpeggiates: false, strumParts: 2, singleTone: false },
-        { name: "1/3 medium strum", customInterval: false, arpeggiates: false, strumParts: 4, singleTone: false },
-        { name: "1/3 slow strum", customInterval: false, arpeggiates: false, strumParts: 8, singleTone: false },
-        { name: "build up", customInterval: false, arpeggiates: false, strumParts: 12, singleTone: false },
         { name: "arpeggio", customInterval: false, arpeggiates: true, strumParts: 0, singleTone: true },
         { name: "custom interval", customInterval: true, arpeggiates: false, strumParts: 0, singleTone: true },
     ]);
@@ -745,8 +738,9 @@ export class Config {
         { name: "pulse width", samples: generateSquareWave() },
         { name: "ramp", samples: generateSawWave(true) },
         { name: "trapezoid", samples: generateTrapezoidWave(2) },
-        { name: "clang", samples: generateClangNoise() }, //MID TODO: Add more!
-        { name: "metal", samples: generateMetalNoise() }
+        { name: "clang", samples: generateClangNoise() }, // MID TODO: Add more!
+        { name: "metal", samples: generateMetalNoise() },
+        { name: "rounded", samples: generateRoundedSineWave() },
     ]);
     public static readonly pwmOperatorWaves: DictionaryArray<OperatorWave> = toNameMap([
         { name: "1%", samples: generateSquareWave(0.01) },
@@ -829,6 +823,8 @@ export class Config {
         { name: "arp speed", pianoName: "Arp Speed", maxRawVol: 50, newNoteVol: 10, forSong: false, convertRealFactor: 0, associatedEffect: EffectType.chord,
             promptName: "Arpeggio Speed", promptDesc: ["This setting controls the speed at which your instrument's chords arpeggiate, just like the arpeggio speed slider.", "Each setting corresponds to a different speed, from the slowest to the fastest. The speeds are listed below.",
                 "[0-4]: x0, x1/16, x⅛, x⅕, x¼,", "[5-9]: x⅓, x⅖, x½, x⅔, x¾,", "[10-14]: x⅘, x0.9, x1, x1.1, x1.2,", "[15-19]: x1.3, x1.4, x1.5, x1.6, x1.7,", "[20-24]: x1.8, x1.9, x2, x2.1, x2.2,", "[25-29]: x2.3, x2.4, x2.5, x2.6, x2.7,", "[30-34]: x2.8, x2.9, x3, x3.1, x3.2,", "[35-39]: x3.3, x3.4, x3.5, x3.6, x3.7," ,"[40-44]: x3.8, x3.9, x4, x4.15, x4.3,", "[45-50]: x4.5, x4.8, x5, x5.5, x6, x8", "[OVERWRITING] [$LO - $HI]"] },
+        { name: "strum speed", pianoName: "Strum Speed", maxRawVol: 23, newNoteVol: 0, forSong: false, convertRealFactor: 0, associatedEffect: EffectType.chord,
+            promptName: "Strum Speed", promptDesc: ["This setting controls the speef at which your instrument's chords strum, just like the strum speed slider.", "Note that the lower numbers will strum faster, while the higher numbers will strum slower."]},
         { name: "pan delay", pianoName: "Pan Delay", maxRawVol: 20, newNoteVol: 10, forSong: false, convertRealFactor: 0, associatedEffect: EffectType.panning,
             promptName: "Panning Delay", promptDesc: ["This setting controls the delay applied to panning for your instrument, just like the pan delay slider.", "With more delay, the panning effect will generally be more pronounced. $MID is the default value, whereas $LO will remove any delay at all. No delay can be desirable for chiptune songs.", "[OVERWRITING] [$LO - $HI]"] },
         { name: "reset arp", pianoName: "Reset Arp", maxRawVol: 1, newNoteVol: 1, forSong: false, convertRealFactor: 0, associatedEffect: EffectType.chord,
@@ -1131,14 +1127,21 @@ function generateClangNoise() { let drumBuffer: number = 1;
         return wave;
     }
 
-    function generateMetalNoise() {
+function generateMetalNoise() {
+    const wave = new Float32Array(Config.sineWaveLength + 1);
+    for (let i = 0; i < Config.sineWaveLength + 1; i++) {
+    wave[i] = Math.random() * Math.sin(Math.cos(Config.sineWaveLength) * 3 - 8.0 / Config.sineWaveLength - 1.0);
+        }
+        return wave;
+    }
+
+function generateRoundedSineWave() {
         const wave = new Float32Array(Config.sineWaveLength + 1);
         for (let i = 0; i < Config.sineWaveLength + 1; i++) {
-        wave[i] = Math.random() * Math.sin(Math.cos(Config.sineWaveLength) * 3 - 8.0 / Config.sineWaveLength - 1.0);
-            }
-            return wave;
+            wave[i] = Math.round(Math.sin(i * Math.PI * 2.0 / Config.sineWaveLength));
         }
-
+        return wave;
+	}
 export function getArpeggioPitchIndex(pitchCount: number, useFastTwoNoteArp: boolean, arpeggio: number): number {
     let arpeggioPattern: ReadonlyArray<number> = Config.arpeggioPatterns[pitchCount - 1];
     if (arpeggioPattern != null) {
