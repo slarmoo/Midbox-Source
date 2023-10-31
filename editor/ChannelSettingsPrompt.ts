@@ -6,6 +6,7 @@ import { SongDocument } from "./SongDocument";
 import { Prompt } from "./Prompt";
 import { ChangeGroup } from "./Change";
 import {ChangePatternsPerChannel, ChangeInstrumentsFlags, ChangeChannelCount} from "./changes";
+import { Localization as _ } from "./Localization";
 
 const {button, div, label, br, h2, input} = HTML;
 
@@ -18,36 +19,37 @@ export class ChannelSettingsPrompt implements Prompt {
 		private readonly _patternInstrumentsBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
 
 		private readonly _cancelButton: HTMLButtonElement = button({class: "cancelButton"});
-		private readonly _okayButton: HTMLButtonElement = button({class: "okayButton", style: "width:45%;"}, "Okay");
+		private readonly _okayButton: HTMLButtonElement = button({class: "okayButton", style: "width:45%;"}, _.confirmLabel);
 		
 	public readonly container: HTMLDivElement = div({class: "prompt noSelection", style: "width: 250px; text-align: right;"},
-		h2("Channel Settings"),
+		h2({style: "text-align: center;"},
+			_.channelSettingsPrompt1Label),
 		label({style: "display: flex; flex-direction: row; align-items: center; height: 2em; justify-content: flex-end;"},
-			"Pitch channels:",
+			_.channelSettingsPrompt2Label,
 			this._pitchChannelStepper,
 		),
 		label({style: "display: flex; flex-direction: row; align-items: center; height: 2em; justify-content: flex-end;"},
-			"Drum channels:",
+			_.channelSettingsPrompt3Label,
 			this._drumChannelStepper,
 		),
 		div({ style: "display: flex; flex-direction: row; align-items: center; height: 2em; justify-content: flex-end;" },
-			"Mod channels:",
+			_.channelSettingsPrompt4Label,
 			this._modChannelStepper,
 		),
 		label({style: "display: flex; flex-direction: row; align-items: center; height: 2em; justify-content: flex-end;"},
-			"Available patterns per channel:",
+			_.channelSettingsPrompt5Label,
 			this._patternsStepper,
 		),
 		label({style: "display: flex; flex-direction: row; align-items: center; height: 2em; justify-content: flex-end;"},
-			"Simultaneous instruments",
+			_.channelSettingsPrompt6Label,
 			br(),
-			"per channel:",
+			_.channelSettingsPrompt7Label,
 			this._layeredInstrumentsBox,
 		),
 		label({style: "display: flex; flex-direction: row; align-items: center; height: 2em; justify-content: flex-end;"},
-			"Different instruments",
+			_.channelSettingsPrompt8Label,
 			br(),
-			"per pattern:",
+			_.channelSettingsPrompt9Label,
 			this._patternInstrumentsBox,
 		),
 		label({style: "display: flex; flex-direction: row-reverse; justify-content: space-between;"},

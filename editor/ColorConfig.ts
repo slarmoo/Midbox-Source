@@ -35,6 +35,8 @@ export class ColorConfig {
 				--fifth-note: #468;
 				--white-piano-key: #bbb;
 				--black-piano-key: #444;
+				--oscilloscope-line-L: white;
+				--oscilloscope-line-R: rgba(119,68,255,0.99);
 					--use-color-formula: false;
 					--track-editor-bg-pitch: #444;
 					--track-editor-bg-pitch-dim: #333;
@@ -153,6 +155,8 @@ export class ColorConfig {
 					--fifth-note: #415498;
 					--white-piano-key: #bbb;
 					--black-piano-key: #444;
+					--oscilloscope-line-L: #ddd;
+					--oscilloscope-line-R: rgba(169,0,255,0.99);
 					--use-color-formula: false;
 					--track-editor-bg-pitch: #444;
 					--track-editor-bg-pitch-dim: #333;
@@ -272,6 +276,8 @@ export class ColorConfig {
 				--fifth-note: #bbddf0;
 				--white-piano-key: #eee;
 				--black-piano-key: #666;
+				--oscilloscope-line-L: black;
+				--oscilloscope-line-R: rgba(200,170,255,0.99);
 					--use-color-formula: false;
 					--track-editor-bg-pitch: #ececec;
 					--track-editor-bg-pitch-dim: #fdfdfd;
@@ -398,6 +404,8 @@ export class ColorConfig {
 					--fifth-note: #54547a;
 					--white-piano-key: #eee;
 					--black-piano-key: #666;
+					--oscilloscope-line-L: white;
+					--oscilloscope-line-R: rgba(119,68,255,0.99);
 					--use-color-formula: true;
 					--track-editor-bg-pitch: #393e4f;
 					--track-editor-bg-pitch-dim: #1c1d28;
@@ -512,6 +520,8 @@ export class ColorConfig {
 					--fifth-note: #385840;
 					--white-piano-key: #bda;
 					--black-piano-key: #573;
+					--oscilloscope-line-L: #efe;
+					--oscilloscope-line-R: rgba(255,68,199,0.99);
 					--use-color-formula: true;
 					--track-editor-bg-pitch: #254820;
 					--track-editor-bg-pitch-dim: #102819;
@@ -626,6 +636,8 @@ export class ColorConfig {
 					--fifth-note: #5b3e6b;
 					--white-piano-key: #d89898;
 					--black-piano-key: #572b29;
+					--oscilloscope-line-L: #f5d6bf;
+					--oscilloscope-line-R: rgba(255, 208, 68, 0.99);
 					--use-color-formula: true;
 					--track-editor-bg-pitch: #5e3a41;
 					--track-editor-bg-pitch-dim: #281d1c;
@@ -740,6 +752,8 @@ export class ColorConfig {
 			--fifth-note: #1a1818;
 			--white-piano-key: #a89e9e;
 			--black-piano-key: #2d2424;
+			--oscilloscope-line-L: #fff;
+			--oscilloscope-line-R: rgba(155, 155, 155, 0.99);
 			--use-color-formula: true;
 			--track-editor-bg-pitch: #373737;
 			--track-editor-bg-pitch-dim: #131313;
@@ -855,6 +869,8 @@ export class ColorConfig {
 					--fifth-note: #d8c9fd;
 					--white-piano-key: #e2e2ff;
 					--black-piano-key: #66667a;
+					--oscilloscope-line-L: #401890;
+					--oscilloscope-line-R: rgba(255,160,235,0.99);
 					--use-color-formula: true;
 					--track-editor-bg-pitch: #d9e5ec;
 					--track-editor-bg-pitch-dim: #eaeef5;
@@ -978,6 +994,8 @@ export class ColorConfig {
 			--fifth-note: #0044a0;
 			--white-piano-key: #fff;
 			--black-piano-key: #202d42;
+			--oscilloscope-line-L: #c1f1ff;
+			--oscilloscope-line-R: rgba(119,68,255,0.99);
 			--use-color-formula: false;
 			--track-editor-bg-pitch: #34406c;
 			--track-editor-bg-pitch-dim: #1c1d28;
@@ -1099,6 +1117,8 @@ export class ColorConfig {
 			--fifth-note: #381818;
 			--white-piano-key: #cdcdcd;
 			--black-piano-key: #232323;
+			--oscilloscope-line-L: #b8cee0;
+			--oscilloscope-line-R: rgb(255 68 68 / 99%);
 			--use-color-formula: false;
 			--track-editor-bg-pitch: #302938;
 			--track-editor-bg-pitch-dim: #211c26;
@@ -1217,6 +1237,8 @@ export class ColorConfig {
 			--fifth-note: hsl(206deg 36% 16%);
 			--white-piano-key: #c1bfe9;
 			--black-piano-key: #454354;
+			--oscilloscope-line-L: #D4DCE9;
+			--oscilloscope-line-R: #03599bd9;
 			--use-color-formula: false;
 			--track-editor-bg-pitch: #25568d80;
 			--track-editor-bg-pitch-dim: #10253c80;
@@ -1335,6 +1357,8 @@ export class ColorConfig {
 			--fifth-note: #222;
 			--white-piano-key: #b59b9b;
 			--black-piano-key: #231e1e;
+			--oscilloscope-line-L: white;
+			--oscilloscope-line-R: rgb(115 80 76);
 			--use-color-formula: false;
 			--track-editor-bg-pitch: #352f38;
 			--track-editor-bg-pitch-dim: #232025;
@@ -1453,6 +1477,8 @@ export class ColorConfig {
 			--fifth-note: #191a20;
 			--white-piano-key: #bbbaba;
 			--black-piano-key: #2d2d2d;
+			--oscilloscope-line-L: white;
+			--oscilloscope-line-R: rgb(115 103 76);
 			--use-color-formula: false;
 			--track-editor-bg-pitch: #2b2d40;
 			--track-editor-bg-pitch-dim: #191a25;
@@ -1571,6 +1597,8 @@ export class ColorConfig {
 			--fifth-note: #2E2A15;
 			--white-piano-key: #bbbaba;
 			--black-piano-key: #2d2d2d;
+			--oscilloscope-line-L: white;
+			--oscilloscope-line-R: rgb(94 0 157);
 			--use-color-formula: false;
 			--track-editor-bg-pitch: #2d2e42;
 			--track-editor-bg-pitch-dim: #191a25;
@@ -1689,6 +1717,8 @@ export class ColorConfig {
 			--fifth-note: #18221a;
 			--white-piano-key: #e3e3e3;
 			--black-piano-key: #2d2d2d;
+			--oscilloscope-line-L: white;
+			--oscilloscope-line-R: rgb(147 195 0);
 			--use-color-formula: false;
 			--track-editor-bg-pitch: #38293e;
 			--track-editor-bg-pitch-dim: #251c29;
@@ -1807,6 +1837,8 @@ export class ColorConfig {
 			--fifth-note: #42604d;
 			--white-piano-key: #f6e8ff;
 			--black-piano-key: #5a4972;
+			--oscilloscope-line-L: #f0e0ff;
+			--oscilloscope-line-R: rgba(119,68,255,0.99);
 			--use-color-formula: true;
 			--track-editor-bg-pitch: #392a46;
 			--track-editor-bg-pitch-dim: #1c1d28;
@@ -1921,6 +1953,8 @@ export class ColorConfig {
 			--fifth-note: #0898a1;
 			--white-piano-key: #ffffff;
 			--black-piano-key: #516d7a;
+			--oscilloscope-line-L: white;
+			--oscilloscope-line-R: rgba(119,68,255,0.99);
 			--use-color-formula: false;
 			--track-editor-bg-pitch: #213352;
 			--track-editor-bg-pitch-dim: #152032;
@@ -2039,6 +2073,8 @@ export class ColorConfig {
 			--fifth-note: #ff666640;
 			--white-piano-key: #cdcdcd;
 			--black-piano-key: #232323;
+			--oscilloscope-line-L: #26d9cd;
+			--oscilloscope-line-R: #ffffff;
 			--use-color-formula: false;
 			--track-editor-bg-pitch: #404040bf;
 			--track-editor-bg-pitch-dim: #151515;
@@ -2157,6 +2193,8 @@ export class ColorConfig {
 			--fifth-note: #dcdcdc;
 			--white-piano-key: #ffffff;
 			--black-piano-key: #615f66;
+			--oscilloscope-line-L: black;
+			--oscilloscope-line-R: rgb(132 125 255);
 			--use-color-formula: false;
 			--track-editor-bg-pitch: #e9ebff;
 			--track-editor-bg-pitch-dim: #e9ebff;
@@ -2275,6 +2313,8 @@ export class ColorConfig {
 			--fifth-note: #ab77bd50;
 			--white-piano-key: #EEEEEE;
 			--black-piano-key: #5F5566;
+			--oscilloscope-line-L: white;
+			--oscilloscope-line-R: rgba(141,79,201,0.99);
 			--use-color-formula: true;
 			--track-editor-bg-pitch: #46374C;
 			--track-editor-bg-pitch-dim: #1F1C2850;
@@ -2389,6 +2429,8 @@ export class ColorConfig {
 			--fifth-note: #e7c6c6;
 			--white-piano-key: #cdcdcd;
 			--black-piano-key: #232323;
+			--oscilloscope-line-L: #0e8bf1;
+			--oscilloscope-line-R: #ff4444fc;
 			--use-color-formula: false;
 			--track-editor-bg-pitch: #e5e1ea;
 			--track-editor-bg-pitch-dim: #cbc4d4;
@@ -2507,6 +2549,8 @@ export class ColorConfig {
 			--fifth-note: #ffff6633;
 			--white-piano-key: #66998f;
 			--black-piano-key: #141f1d;
+			--oscilloscope-line-L: white;
+			--oscilloscope-line-R: #ffff6659;
 			--use-color-formula: false;
 			--track-editor-bg-pitch: #66998f40;
 			--track-editor-bg-pitch-dim: #293d3940;
@@ -2625,6 +2669,8 @@ export class ColorConfig {
 			--fifth-note: #41240c;
 			--white-piano-key: #e1c5b7;
 			--black-piano-key: #482c1e;
+			--oscilloscope-line-L: #decdbf;
+			--oscilloscope-line-R: #990036;
 			--use-color-formula: false;
 			--track-editor-bg-pitch: #4d2a19;
 			--track-editor-bg-pitch-dim: #27150c;
@@ -2743,6 +2789,8 @@ export class ColorConfig {
 			--fifth-note: #0d0d0d;
 			--white-piano-key: #808080;
 			--black-piano-key: #232323;
+			--oscilloscope-line-L: white;
+			--oscilloscope-line-R: #696969;
 			--use-color-formula: true;
 			--track-editor-bg-pitch: #262626;
 			--track-editor-bg-pitch-dim: #1a1a1a;
@@ -2837,44 +2885,46 @@ export class ColorConfig {
 			--disabled-note-secondary: #8c8c8c;
 		}`,
 
-		"midbox": // MID TODO: Hey dummy look at this you didn't finish the code for this ok bye
+		"midbox":
 		`:root {
-					--page-margin: #030b1a;
-					--editor-background: #030b1a;
-					--hover-preview: white;
-					--playhead: rgba(255, 255, 255, 0.9);
-					--primary-text: white;
-					--secondary-text: #84859a;
-					--inverted-text: black;
-					--text-selection: rgba(119,68,255,0.99);
-					--box-selection-fill: #044b94;
-					--loop-accent: #74f;
-					--link-accent: #98f;
-					--ui-widget-background: #141945;
-					--ui-widget-focus: #484e7a;
-					--pitch-background: #1b264a;
-					--tonic: #21a6b5;
-					--fifth-note: #4549a1;
-					--white-piano-key: #eee;
-					--black-piano-key: #666;
+					--page-margin: #010a1e;
+					--editor-background: #010a1e;
+					--hover-preview: #dfe9fe;
+					--playhead: #e7f5f6;
+					--primary-text: #f0fdff;
+					--secondary-text: #c4c7d7;
+					--inverted-text: #0f0623;
+					--text-selection: #3f0ab4;
+					--box-selection-fill: #32afb3;
+					--loop-accent: #1719ff;
+					--link-accent: #83a6ed;
+					--ui-widget-background: #222856;
+					--ui-widget-focus: #21417c;
+					--pitch-background: #10264a;
+					--tonic: #0797ce;
+					--fifth-note: #3e2fb5;
+					--white-piano-key: #ebf3f4;
+					--black-piano-key: #253353;
+					--oscilloscope-line-L: #72dcfc;
+					--oscilloscope-line-R: #304eff;
 					--use-color-formula: true;
-					--track-editor-bg-pitch: #15214a; 
-					--track-editor-bg-pitch-dim: #1f2536;
-					--track-editor-bg-noise: #092c45;
-					--track-editor-bg-noise-dim: #011726;
-					--track-editor-bg-mod: #283560;
-					--track-editor-bg-mod-dim: #050817;
-					--multiplicative-mod-slider: #0b1073;
-					--overwriting-mod-slider: #121880;
-					--indicator-primary: #2c3ff2;
-					--indicator-secondary: #1b1e3b;
-					--select2-opt-group: #3e3d73;
-					--input-box-outline: #222;
-					--mute-button-normal: #3c39de;
-					--mute-button-mod: #5bb1c9;
-					--mod-label-primary: #282840;
-					--mod-label-secondary-text: rgb(87, 86, 120);
-					--mod-label-primary-text: white;
+					--track-editor-bg-pitch: #183b65; 
+					--track-editor-bg-pitch-dim: #1f2c3d;
+					--track-editor-bg-noise: #2e196d;
+					--track-editor-bg-noise-dim: #212038;
+					--track-editor-bg-mod: #066433;
+					--track-editor-bg-mod-dim: #152b1f;
+					--multiplicative-mod-slider: #1242a4;
+					--overwriting-mod-slider: #2218db;
+					--indicator-primary: #1698d3;
+					--indicator-secondary: #1b478e;
+					--select2-opt-group: #312f6d;
+					--input-box-outline: #788b96;
+					--mute-button-normal: #1d34f2;
+					--mute-button-mod: #06bad6;
+					--mod-label-primary: #14383f;
+					--mod-label-secondary-text: #1d7080;
+					--mod-label-primary-text: #b7e9f2;
 					--pitch-secondary-channel-hue: 0;
 					--pitch-secondary-channel-hue-scale: 6.1;
 					--pitch-secondary-channel-sat: 83.3;
@@ -2947,8 +2997,8 @@ export class ColorConfig {
 					--mod-primary-note-sat-scale: 0;
 					--mod-primary-note-lum: 85;
 					--mod-primary-note-lum-scale: 0;
-					--disabled-note-primary:    #91879f;
-					--disabled-note-secondary:  #6a677a;
+					--disabled-note-primary:    #53527b;
+					--disabled-note-secondary:  #1c1b30;
 		}`,
     };
 
@@ -2970,6 +3020,8 @@ export class ColorConfig {
     public static readonly fifthNote: string = "var(--fifth-note)";
     public static readonly whitePianoKey: string = "var(--white-piano-key)";
     public static readonly blackPianoKey: string = "var(--black-piano-key)";
+	public static readonly oscilloscopeLineL: string = "var(--oscilloscope-line-L)";
+	public static readonly oscilloscopeLineR: string = "var(--oscilloscope-line-R)";
     public static readonly useColorFormula: string = "var(--use-color-formula)";
     public static readonly pitchSecondaryChannelHue: string = "var(--pitch-secondary-channel-hue)";
     public static readonly pitchSecondaryChannelHueScale: string = "var(--pitch-secondary-channel-hue-scale)";

@@ -2,6 +2,7 @@
 
 import { Dictionary } from "../synth/SynthConfig";
 import { Song } from "../synth/synth";
+import { Localization as _ } from "./Localization";
 
 	
 export interface RecoveredVersion {
@@ -83,7 +84,7 @@ export class SongRecovery {
 				// Ensure that the song is not corrupted.
 				this._song.fromBase64String(songData);
 			} catch (error) {
-				window.alert("Whoops, the song data appears to have been corrupted! Please try to recover the last working version of the song from the \"Recover Recent Song...\" option in Midbox's \"File\" menu.");
+				window.alert(_.songCorruptedLabel);
 				console.error(error);
 				return;
 			}

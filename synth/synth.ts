@@ -6,6 +6,7 @@ import { scaleElementsByFactor, inverseRealFourierTransform } from "./FFT";
 import { Deque } from "./Deque";
 import { FilterCoefficients, FrequencyResponse, DynamicBiquadFilter } from "./filtering";
 import { Localization as _ } from "../editor/Localization";
+import { events } from "../global/Events";
 
 declare global {
     interface Window {
@@ -163,7 +164,7 @@ const enum SongTagCode {
     feedbackEnvelope = CharCode.V, // added in 6, DEPRECATED
     pulseWidth = CharCode.W, // added in 7
     aliases = CharCode.X, // [JB], added in 4, DEPRECATED
-//  ___ = CharCode.Y,
+//  dutyCycle = CharCode.Y,
 //  ___ = CharCode.Z,
 
 }
@@ -1225,6 +1226,10 @@ export class Instrument {
     public clicklessTransition: boolean = false;
     public aliases: boolean = false;
     public percussion: boolean = false;
+    /*public cycleA: number = 1;
+    public cycleB: number = 1;
+    public cycleC: number = 1;
+    public cycleD: number = 1;*/
     public pulseWidth: number = Config.pulseWidthRange;
     public supersawDynamism: number = Config.supersawDynamismMax;
 	public supersawSpread: number = Math.ceil(Config.supersawSpreadMax / 2.0);
@@ -1434,6 +1439,13 @@ export class Instrument {
                     this.supersawShape = 0;
                     this.pulseWidth = Config.pulseWidthRange - 1;
                     break;
+                /*case InstrumentType.dutyCycle:
+                    this.chord = Config.chords.dictionary["arpeggio"].index;
+                    this.cycleA = 1;
+                    this.cycleB = 1;
+                    this.cycleC = 1;
+                    this.cycleD = 1;
+                    break;*/
             default:
                 throw new Error("Unrecognized instrument type: " + type);
         }
@@ -1682,6 +1694,13 @@ export class Instrument {
         } else if (this.type == InstrumentType.pickedString) {
             instrumentObject["unison"] = Config.unisons[this.unison].name;
             instrumentObject["stringSustain"] = Math.round(100 * this.stringSustain / (Config.stringSustainRange - 1));
+        /*} else if (this.type == InstrumentType.dutyCycle) {
+            instrumentObject["cycleTime"] = Config.cycleTime;
+            instrumentObject["cycleA"] = Config.dutycycle[this.cycleA].wave;
+            instrumentObject["cycleB"] = Config.dutyCycle[this.cycleB].wave;
+            instrumentObject["cycleC"] = Config.dutyCycle[this.cycleC].wave;
+            instrumentObject["cycleD"] = Config.dutyCycle[this.cycleD].wave;
+            instrumentObject["dutyAfter"] = Config.dutyAfter[Config.dutyAfterValue].value;*/
         } else if (this.type == InstrumentType.harmonics) {
             instrumentObject["unison"] = Config.unisons[this.unison].name;
         } else if (this.type == InstrumentType.fm) {
@@ -2850,6 +2869,8 @@ export class Song {
                 } else if (instrument.type == InstrumentType.pickedString) {
                     buffer.push(SongTagCode.unison, base64IntToCharCode[instrument.unison]);
                     buffer.push(SongTagCode.stringSustain, base64IntToCharCode[instrument.stringSustain]);
+                /*} else if (instrument.type == InstrumentType.dutyCycle) {
+                    buffer.push(SongTagCode.dutyCycle, base64IntToCharCode[instrument.cycleA], base64IntToCharCode[instrument.cycleB], base64IntToCharCode[instrument.cycleC], base64IntToCharCode[instrument.cycleD], )*/
                 } else if (instrument.type == InstrumentType.mod) {
                     // Handled down below. Could be moved, but meh.
                 } else {
@@ -6635,6 +6656,8 @@ export class Synth {
     public liveInputInstruments: number[] = [];
     public loopRepeatCount: number = -1;
     public volume: number = 1.0;
+    public oscRefreshEventTimer: number = 0;
+    public oscEnabled: boolean = true;
     public enableMetronome: boolean = false;
     public countInMetronome: boolean = false;
     public renderingSong: boolean = false;
@@ -7233,6 +7256,15 @@ export class Synth {
             this.deactivateAudio();
         } else {
             this.synthesize(outputDataL, outputDataR, outputBuffer.length, this.isPlayingSong);
+
+            if (this.oscEnabled) {
+                if (this.oscRefreshEventTimer <= 0) {
+                    events.raise("oscilloscopeUpdate", outputDataL, outputDataR);
+                    this.oscRefreshEventTimer = 2;
+                } else {
+                    this.oscRefreshEventTimer--;
+                }
+            }
         }
     }
 
@@ -7290,8 +7322,8 @@ export class Synth {
 
         // Post processing parameters:
         const volume: number = +this.volume;
-        const limitDecay: number = 1.0 - Math.pow(0.5, 4.0 / this.samplesPerSecond);
-        const limitRise: number = 1.0 - Math.pow(0.5, 4000.0 / this.samplesPerSecond);
+        const limitDecay: number = 1.0 - Math.pow(0.5, this.song.limitDecay / this.samplesPerSecond); // Default 4.0
+        const limitRise: number = 1.0 - Math.pow(0.5, this.song.limitRise / this.samplesPerSecond); // Default 4000.0;
         let limit: number = +this.limit;
         let skippedBars: number[] = [];
         let firstSkippedBufferIndex: number = -1;
@@ -9006,12 +9038,6 @@ export class Synth {
 				}
 				
 				const baseSpreadSlider: number = instrument.supersawSpread / Config.supersawSpreadMax;
-				let baseSpreadSliderStart: number = instrument.supersawSpread / Config.supersawSpreadMax;
-                let baseSpreadSliderEnd: number = instrument.supersawSpread / Config.supersawSpreadMax;
-                if (this.isModActive(Config.modulators.dictionary["spread"].index, channelIndex, tone.instrumentIndex)) {
-                  baseSpreadSliderStart = Math.max(0.0, this.getModValue(Config.modulators.dictionary["spread"].index, channelIndex, tone.instrumentIndex, false) / Config.supersawSpreadMax);
-                  baseSpreadSliderEnd = Math.max(0.0, this.getModValue(Config.modulators.dictionary["spread"].index, channelIndex, tone.instrumentIndex, true) / Config.supersawSpreadMax);
-                }
 				const spreadSliderStart: number = baseSpreadSlider * envelopeStarts[EnvelopeComputeIndex.supersawSpread];
 				const spreadSliderEnd:   number = baseSpreadSlider * envelopeEnds[  EnvelopeComputeIndex.supersawSpread];
 				// Just use the average detune for the current tick in the below loop.
@@ -9022,14 +9048,20 @@ export class Synth {
 					const offset: number = (i == 0) ? 0.0 : Math.pow((((i + 1) >> 1) - 0.5 + 0.025 * ((i & 2) - 1)) / (Config.supersawVoiceCount >> 1), 1.1) * ((i & 1) * 2 - 1);
 					tone.supersawUnisonDetunes[i] = Math.pow(2.0, curvedSpread * offset / 12.0);
 				}
+                /*let baseSpreadSliderStart: number = instrument.supersawSpread / Config.supersawSpreadMax;
+                let baseSpreadSliderEnd: number = instrument.supersawSpread / Config.supersawSpreadMax;
+                if (this.isModActive(Config.modulators.dictionary["spread"].index, channelIndex, tone.instrumentIndex)) {
+                  baseSpreadSliderStart = Math.max(0.0, this.getModValue(Config.modulators.dictionary["spread"].index, channelIndex, tone.instrumentIndex, false) / Config.supersawSpreadMax);
+                  baseSpreadSliderEnd = Math.max(0.0, this.getModValue(Config.modulators.dictionary["spread"].index, channelIndex, tone.instrumentIndex, true) / Config.supersawSpreadMax);
+                }*/
 				
 				const baseShape: number = instrument.supersawShape / Config.supersawShapeMax;
-				let baseShapeSliderStart: number = instrument.supersawShape / Config.supersawShapeMax;
+				/*let baseShapeSliderStart: number = instrument.supersawShape / Config.supersawShapeMax;
                 let baseShapeSliderEnd: number = instrument.supersawShape / Config.supersawShapeMax;
                 if (this.isModActive(Config.modulators.dictionary["shape"].index, channelIndex, tone.instrumentIndex)) {
                   baseShapeSliderStart = Math.max(0.0, this.getModValue(Config.modulators.dictionary["shape"].index, channelIndex, tone.instrumentIndex, false) / Config.supersawShapeMax);
                   baseShapeSliderEnd = Math.max(0.0, this.getModValue(Config.modulators.dictionary["shape"].index, channelIndex, tone.instrumentIndex, true) / Config.supersawShapeMax);
-                }
+                }*/
 				const shapeStart: number = baseShape * envelopeStarts[EnvelopeComputeIndex.supersawShape];
 				const shapeEnd:   number = baseShape * envelopeEnds[  EnvelopeComputeIndex.supersawShape];
 				tone.supersawShape = shapeStart;

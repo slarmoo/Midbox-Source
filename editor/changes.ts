@@ -2320,6 +2320,15 @@ export class ChangeSupersawShape extends ChangeInstrumentSlider {
 	}
 }
 
+/*export class ChangeDutyCycleTime extends ChangeInstrumentSlider {
+    constructor(doc: SongDocument, oldValue: number, newValue: number) {
+		super(doc);
+		this._instrument.cycleTime = newValue;
+		doc.notifier.changed();
+		if (oldValue != newValue) this._didSomething();
+    }
+}*/
+
 export class ChangePitchShift extends ChangeInstrumentSlider {
     constructor(doc: SongDocument, oldValue: number, newValue: number) {
         super(doc);

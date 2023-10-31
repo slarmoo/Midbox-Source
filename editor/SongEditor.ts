@@ -8,6 +8,7 @@ import { Change, ChangeGroup } from "./Change";
 import { ChannelSettingsPrompt } from "./ChannelSettingsPrompt";
 import { ColorConfig, ChannelColors } from "./ColorConfig";
 import { CustomChipPrompt } from "./CustomChipPrompt";
+//import { HarmonicsPrompt } from "./HarmonicsPrompt";
 import { CustomFilterPrompt } from "./CustomFilterPrompt";
 import { EditorConfig, isMobile, prettyNumber, Preset, PresetCategory } from "./EditorConfig";
 import { ExportPrompt } from "./ExportPrompt";
@@ -42,7 +43,7 @@ import { TipPrompt } from "./TipPrompt";
 import { LanguagePrompt } from "./LanguagePrompt";
 import { Localization as _ } from "./Localization";
 import { ChangeTempo, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangeSupersawDynamism, ChangeSupersawSpread, ChangeSupersawShape, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, pickRandomPresetValue, ChangeRandomGeneratedInstrument, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, ChangeChipWave, ChangeNoiseWave, ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeAddEnvelope, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeClicklessTransition, ChangeAliasing, ChangePercussion, ChangeStrumSpeed, ChangeSongSubtitle } from "./changes";
-
+import { oscilloscopeCanvas } from "../global/Oscilloscope"
 import { TrackEditor } from "./TrackEditor";
 
 const { button, div, input, select, span, optgroup, option, canvas } = HTML;
@@ -79,12 +80,13 @@ function buildPresetOptions(isNoise: boolean, idSet: string): HTMLSelectElement 
     } else {
         menu.appendChild(option({ value: InstrumentType.chip }, EditorConfig.valueToPreset(InstrumentType.chip)!.name));
         menu.appendChild(option({ value: InstrumentType.pwm }, EditorConfig.valueToPreset(InstrumentType.pwm)!.name));
-        menu.appendChild(option({ value: InstrumentType.supersaw}, EditorConfig.valueToPreset(InstrumentType.supersaw)!.name));
+        menu.appendChild(option({ value: InstrumentType.supersaw }, EditorConfig.valueToPreset(InstrumentType.supersaw)!.name));
         menu.appendChild(option({ value: InstrumentType.harmonics }, EditorConfig.valueToPreset(InstrumentType.harmonics)!.name));
         menu.appendChild(option({ value: InstrumentType.pickedString }, EditorConfig.valueToPreset(InstrumentType.pickedString)!.name));
         menu.appendChild(option({ value: InstrumentType.spectrum }, EditorConfig.valueToPreset(InstrumentType.spectrum)!.name));
         menu.appendChild(option({ value: InstrumentType.fm }, EditorConfig.valueToPreset(InstrumentType.fm)!.name));
         menu.appendChild(option({ value: InstrumentType.customChipWave }, EditorConfig.valueToPreset(InstrumentType.customChipWave)!.name));
+        //menu.appendChild(option({ value: InstrumentType.dutyCycle }, EditorConfig.valueToPreset(InstrumentType.dutyCycle)!.name))
     }
 
     const randomGroup: HTMLElement = optgroup({ label: (_.randomLabel) });
@@ -389,6 +391,7 @@ export class SongEditor {
         option({ value: "enableChannelMuting" }, (_.channelMutingLabel)),
         option({ value: "displayBrowserUrl" }, (_.displayURLInBrowserLabel)),
         option({ value: "displayVolumeBar" }, (_.showPlaybackBarLabel)),
+        option({ value: "showOscilloscope" }, (_.showOscilloscopeLabel)),
         option({ value: "language" }, (_.setLanguageLabel)),
         option({ value: "layout" }, (_.setLayoutLabel)),
         option({ value: "colorTheme" }, (_.setThemeLabel)),
@@ -503,7 +506,15 @@ export class SongEditor {
         _.noise7Label,
         _.noise8Label,
         _.noise9Label,
-        _.noise10Label
+        _.noise10Label,
+        _.noise11Label,
+        _.noise12Label,
+        _.noise13Label,
+        _.noise14Label,
+        _.noise15Label,
+        _.noise16Label,
+        _.noise17Label,
+        _.noise18Label
 
     ]);
     private readonly _chipWaveSelectRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("chipWave") }, span(_.waveLabel)), div({ class: "selectContainer" }, this._chipWaveSelect));
@@ -555,6 +566,16 @@ export class SongEditor {
 	private readonly _supersawSpreadRow: HTMLDivElement = div({class: "selectRow"}, span({class: "tip", onclick: ()=>this._openPrompt("supersawSpread")}, span(_.spreadLabel)), this._supersawSpreadSlider.container);
 	private readonly _supersawShapeSlider: Slider = new Slider(input({style: "margin: 0;", type: "range", min: "0", max: Config.supersawShapeMax, value: "0", step: "1"}), this._doc, (oldValue: number, newValue: number) => new ChangeSupersawShape(this._doc, oldValue, newValue), false);
 	private readonly _supersawShapeRow: HTMLDivElement = div({class: "selectRow"}, span({class: "tip", onclick: ()=>this._openPrompt("supersawShape")}, span(_.sawToPulseLabel)), this._supersawShapeSlider.container);
+
+    /*private readonly _dutyCyclePulseWidthSlider1: Slider = new Slider(input({style: "margin: 0;", type: "range", min: "1", max: Config.pulseWidthRange, value: "1", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangePulseWidth(this._doc, oldValue, newValue), false);
+    private readonly _dutyCyclePulseWidthRow1: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("pulseWidth") }, span(_.dutyCyclePulse1Label)), this._dutyCyclePulseWidthSlider1.container);
+    private readonly _dutyCyclePulseWidthSlider2: Slider = new Slider(input({style: "margin: 0;", type: "range", min: "1", max: Config.pulseWidthRange, value: "1", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangePulseWidth(this._doc, oldValue, newValue), false);
+    private readonly _dutyCyclePulseWidthRow2: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("pulseWidth") }, span(_.dutyCyclePulse2Label)), this._dutyCyclePulseWidthSlider2.container);
+    private readonly _dutyCyclePulseWidthSlider3: Slider = new Slider(input({style: "margin: 0;", type: "range", min: "1", max: Config.pulseWidthRange, value: "1", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangePulseWidth(this._doc, oldValue, newValue), false);
+    private readonly _dutyCyclePulseWidthRow3: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("pulseWidth") }, span(_.dutyCyclePulse3Label)), this._dutyCyclePulseWidthSlider3.container);
+    private readonly _dutyCyclePulseWidthSlider4: Slider = new Slider(input({style: "margin: 0;", type: "range", min: "1", max: Config.pulseWidthRange, value: "1", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangePulseWidth(this._doc, oldValue, newValue), false);
+    private readonly _dutyCyclePulseWidthRow4: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("pulseWidth") }, span(_.dutyCyclePulse4Label)), this._dutyCyclePulseWidthSlider4.container);
+    private readonly _dutyCycleTimeSlider: Slider = new Slider(input({style: "margin: 0;", type: "range", min: "1", max: "12", value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new Change(this._doc, oldValue, newValue), false)*/
 
     private readonly _pulseWidthSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "1", max: Config.pulseWidthRange, value: "1", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangePulseWidth(this._doc, oldValue, newValue), false);
     private readonly _pulseWidthRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("pulseWidth") }, span(_.pwmLabel)), this._pulseWidthSlider.container);
@@ -657,7 +678,8 @@ export class SongEditor {
     private readonly _spectrumEditor: SpectrumEditor = new SpectrumEditor(this._doc, null);
     private readonly _spectrumRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("spectrum") }, span(_.spectrumLabel)), this._spectrumEditor.container);
     private readonly _harmonicsEditor: HarmonicsEditor = new HarmonicsEditor(this._doc);
-    private readonly _harmonicsRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("harmonics") }, span(_.harmonicsLabel)), this._harmonicsEditor.container);
+    private readonly _harmonicsZoom: HTMLButtonElement = button({ style: "margin-left:0em; padding-left:0.2em; height:1.5em; max-width: 12px;", onclick: () => this._openPrompt("harmonicsSettings") }, "+");
+    private readonly _harmonicsRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "font-size: smaller;", onclick: () => this._openPrompt("harmonics") }, span(_.harmonicsLabel)), this._harmonicsZoom, this._harmonicsEditor.container);
     private readonly _envelopeEditor: EnvelopeEditor = new EnvelopeEditor(this._doc);
     private readonly _drumsetGroup: HTMLElement = div({ class: "editor-controls" });
     private readonly _modulatorGroup: HTMLElement = div({ class: "editor-controls" });
@@ -685,6 +707,11 @@ export class SongEditor {
             SVG.path({ d: "M 9 3 L 14 3 L 14 6 L 9 6 L 9 3 z M 16 8 L 20 12 L 16 12 L 16 8 z", fill: "currentColor", }),
         ]),
     ]);
+
+    public readonly _globalOscilloscope: oscilloscopeCanvas = new oscilloscopeCanvas(canvas({ width: 144, height: 32, style: `border: 2px solid ${ColorConfig.uiWidgetBackground}; position: static;`, id: "oscilloscopeAll" }), 1);
+    private readonly _globalOscilloscopeContainer: HTMLDivElement = div({ style: "height: 38px; margin-left: auto; margin-right: auto;" },
+    this._globalOscilloscope.canvas
+    );
 
     private readonly _customWaveDrawCanvas: CustomChipCanvas = new CustomChipCanvas(canvas({ width: 128, height: 52, style: "border:2px solid " + ColorConfig.uiWidgetBackground, id: "customWaveDrawCanvas" }), this._doc, (newArray: Float32Array) => new ChangeCustomWave(this._doc, newArray));
     private readonly _customWavePresetDrop: HTMLSelectElement = buildHeaderedOptions(_.loadPresetLabel, select({ style: "width: 50%; height:1.5em; text-align: center; text-align-last: center;" }),
@@ -732,6 +759,10 @@ export class SongEditor {
         this._supersawDynamismRow,
 		this._supersawSpreadRow,
 		this._supersawShapeRow,
+        /*this._dutyCyclePulseWidthRow1,
+        this._dutyCyclePulseWidthRow2,
+        this._dutyCyclePulseWidthRow3,
+        this._dutyCyclePulseWidthRow4,*/
         this._pulseWidthRow,
         this._stringSustainRow,
         this._unisonSelectRow,
@@ -905,6 +936,7 @@ export class SongEditor {
                 span({ class: "volume-speaker" }),
                 this._volumeSlider.container,
             ),
+            this._globalOscilloscopeContainer,
         ),
         this._menuArea,
         this._songSettingsArea,
@@ -1579,6 +1611,9 @@ export class SongEditor {
                 case "limiterSettings":
                     this.prompt = new LimiterPrompt(this._doc, this);
                     break;
+                /*case "harmonicsSettings":
+                    this.prompt = new HarmonicsPrompt(this._doc, this);
+                    break;*/
                 case "customChipSettings":
                     this.prompt = new CustomChipPrompt(this._doc, this);
                     break;
@@ -1662,6 +1697,8 @@ export class SongEditor {
         this._octaveScrollBar.container.style.display = prefs.showScrollBar ? "" : "none";
         this._barScrollBar.container.style.display = this._doc.song.barCount > this._doc.trackVisibleBars ? "" : "none";
         this._volumeBarBox.style.display = this._doc.prefs.displayVolumeBar ? "" : "none";
+        this._globalOscilloscopeContainer.style.display = this._doc.prefs.showOscilloscope ? "" : "none";
+        this._doc.synth.oscEnabled = this._doc.prefs.showOscilloscope;
 
         if (this._doc.getFullScreen()) {
             const semitoneHeight: number = this._patternEditorRow.clientHeight / this._doc.getVisiblePitchCount();
@@ -1709,6 +1746,7 @@ export class SongEditor {
             (prefs.enableChannelMuting ? "✓ " : "　") + (_.channelMutingLabel),
             (prefs.displayBrowserUrl ? "✓ " : "　") + (_.displayURLInBrowserLabel),
             (prefs.displayVolumeBar ? "✓ " : "　") + (_.showPlaybackBarLabel),
+            (prefs.showOscilloscope ? "✓ " : "　") + (_.showOscilloscopeLabel),
             (_.setLanguageLabel),
             (_.setLayoutLabel),
             (_.setThemeLabel),
@@ -1950,6 +1988,24 @@ export class SongEditor {
 			} else {
 				this._pulseWidthRow.style.display = "none";
 			}
+
+            /*if (instrument.type == InstrumentType.dutyCycle) {
+                this._chipWaveSelectRow.style.display = "none";
+                this._dutyCyclePulseWidthRow1.style.display = "";
+                this._dutyCyclePulseWidthRow2.style.display = "";
+                this._dutyCyclePulseWidthRow3.style.display = "";
+                this._dutyCyclePulseWidthRow4.style.display = "";
+                this._dutyCyclePulseWidthSlider1.updateValue(instrument.cycleA);
+                this._dutyCyclePulseWidthSlider2.updateValue(instrument.cycleB);
+                this._dutyCyclePulseWidthSlider3.updateValue(instrument.cycleC);
+                this._dutyCyclePulseWidthSlider4.updateValue(instrument.cycleD);
+            } else {
+                this._dutyCyclePulseWidthRow1.style.display = "none";
+                this._dutyCyclePulseWidthRow2.style.display = "none";
+                this._dutyCyclePulseWidthRow3.style.display = "none";
+                this._dutyCyclePulseWidthRow4.style.display = "none";
+            }*/
+            
 
             if (effectsIncludeTransition(instrument.effects)) {
                 this._transitionRow.style.display = "";
@@ -2451,6 +2507,12 @@ export class SongEditor {
                             settingList.push("spread");
                             settingList.push("shape");
                         }
+                        /*if (tgtInstrumentTypes.includes(InstrumentType.dutyCycle)) {
+                            settingList.push("cycleA");
+                            settingList.push("cycleB");
+                            settingList.push("cycleC");
+                            settingList.push("cycleD");
+                        }*/
                         if (anyInstrumentArps) {
                             settingList.push("arp speed");
                             settingList.push("reset arp");
@@ -4112,6 +4174,9 @@ export class SongEditor {
                 break;
             case "displayVolumeBar":
                 this._doc.prefs.displayVolumeBar = !this._doc.prefs.displayVolumeBar;
+                break;
+            case "showOscilloscope":
+                this._doc.prefs.showOscilloscope = !this._doc.prefs.showOscilloscope;
                 break;
             case "language":
                 this._openPrompt("language");

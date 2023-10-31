@@ -66,6 +66,7 @@ export const enum InstrumentType {
     pwm,
     pickedString,
     customChipWave,
+    //dutyCycle,
     mod,
     length,
 }
@@ -241,6 +242,10 @@ export interface Envelope extends BeepBoxOption {
     readonly speed: number;
 }
 
+/*export interface DutyAfter extends BeepBoxOption {
+    readonly value: number;
+}*/
+
 export interface AutomationTarget extends BeepBoxOption {
     readonly computeIndex: EnvelopeComputeIndex /*| InstrumentAutomationIndex*/ | null;
     readonly displayName: string;
@@ -333,7 +338,7 @@ export class Config {
         { name: "freehand", stepsPerBeat: 24, /*ticksPerArpeggio: 3, arpeggioPatterns: [[0], [0, 1], [0, 1, 2, 1], [0, 1, 2, 3]]*/ roundUpThresholds: null },
     ]);
 
-    public static readonly instrumentTypeNames: ReadonlyArray<string> = ["chip", "FM", "noise", "spectrum", "drumset", "harmonics", "supersaw", "PWM", "Picked String", "custom chip", "mod"];
+    public static readonly instrumentTypeNames: ReadonlyArray<string> = ["chip", "FM", "noise", "spectrum", "drumset", "harmonics", "supersaw", "PWM", "Picked String", "custom chip", /*"duty cycle"*/ "mod"];
     public static readonly instrumentTypeHasSpecialInterval: ReadonlyArray<boolean> = [true, true, false, false, false, true, false, false, false];
     public static readonly chipBaseExpression: number = 0.03375; // Doubled by unison feature, but affected by expression adjustments per unison setting and wave shape.
     public static readonly fmBaseExpression: number = 0.03;
@@ -344,6 +349,7 @@ export class Config {
     public static readonly pwmBaseExpression: number = 0.04725; // It's actually closer to half of this, the synthesized pulse amplitude range is only .5 to -.5, but also note that the fundamental sine partial amplitude of a square wave is 4/π times the measured square wave amplitude.
     public static readonly supersawBaseExpression:  number = 0.061425; // It's actually closer to half of this, the synthesized sawtooth amplitude range is only .5 to -.5.
     public static readonly pickedStringBaseExpression: number = 0.025; // Same as harmonics.
+    //public static readonly dutyCycleBaseExpression: number = 0.025; // As a test. Same as both harmonics and pulse width.
     public static readonly distortionBaseVolume: number = 0.011; // Distortion is not affected by pitchDamping, which otherwise approximately halves expression for notes around the middle of the range.
     public static readonly bitcrusherBaseVolume: number = 0.010; // Also not affected by pitchDamping, used when bit crushing is maxed out (aka "1-bit" output).
 
@@ -390,6 +396,14 @@ export class Config {
         { name: "cutter", expression: 0.005, basePitch: 96, pitchFilterMult: 1024.0, isSoft: false, samples: null },
         { name: "metallic", expression: 1.0, basePitch: 96, pitchFilterMult: 1024.0, isSoft: false, samples: null },
         { name: "static", expression: 0.625, basePitch: 96, pitchFilterMult: 1024.0, isSoft: false, samples: null },
+        { name: "retro clang", expression: 1.0, basePitch: 69, pitchFilterMult: 1024.0, isSoft: false, samples: null},
+        { name: "chime", expression: 2, basePitch: 69, pitchFilterMult: 1.0, isSoft: true, samples: null},
+        { name: "harsh", expression: 10, basePitch: 69, pitchFilterMult: 1.0, isSoft: true, samples: null},
+        { name: "tick", expression: 5.0, basePitch: 96, pitchFilterMult: 1024.0, isSoft: true, samples: null},
+        { name: "trill", expression: 1.0, basePitch: 69, pitchFilterMult: 1024.0, isSoft: true, samples: null},
+        { name: "empty", expression: 1.0, basePitch: 96, pitchFilterMult: 1024.0, isSoft: true, samples: null},
+        { name: "detuned periodic", expression: 0.3, basePitch: 69, pitchFilterMult: 1024.0, isSoft: false, samples: null},
+        { name: "snare", expression: 1.0, basePitch: 69, pitchFilterMult: 1024.0, isSoft: false, samples: null},
     ]);
 
     public static readonly filterFreqStep: number = 1.0 / 4.0;
@@ -464,6 +478,13 @@ export class Config {
     ]);
     public static readonly effectNames: ReadonlyArray<string> = ["reverb", "chorus", "panning", "distortion", "bitcrusher", "note filter", "echo", "pitch shift", "detune", "vibrato", "transition type", "chord type", "percussion"];
     public static readonly effectOrder: ReadonlyArray<EffectType> = [EffectType.panning, EffectType.transition, EffectType.chord, EffectType.pitchShift, EffectType.detune, EffectType.vibrato, EffectType.noteFilter, EffectType.distortion, EffectType.bitcrusher, EffectType.chorus, EffectType.echo, EffectType.reverb, EffectType.percussion];
+
+    /*public static readonly dutyAfter: DictionaryArray<DutyAfter> = toNameMap([
+        { name: "after 3", value: 1 },
+        { name: "after 4", value: 2 },
+    ]);
+	public static readonly dutyAfterValue: number = 1;
+	public static readonly cycleTime: number = 0;*/
     public static readonly noteSizeMax: number = 6;
     public static readonly volumeRange: number = 50;
     // Beepbox's old volume scale used factor -0.5 and was [0~7] had roughly value 6 = 0.125 power. This new value is chosen to have -21 be the same,
@@ -656,6 +677,9 @@ export class Config {
 	public static readonly supersawDynamismMax: number = 6;
 	public static readonly supersawSpreadMax: number = 12;
 	public static readonly supersawShapeMax: number = 6;
+    /*public static readonly cycleTimeRange: number = 12;
+    public static readonly cycleTimer: number = 0;
+    public static readonly cycleSwitcher: number = 0;*/
     public static readonly pitchChannelCountMin: number = 1;
     public static readonly pitchChannelCountMax: number = 40;
     public static readonly noiseChannelCountMin: number = 0;
@@ -1028,6 +1052,83 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
                     newBuffer += 8 ^ 2 << 16;
                 }
                 drumBuffer = newBuffer;
+            }
+        } else if (index == 10) {
+            // The "retro clang" noise type from Zefbox.
+            let drumBuffer: number = 1;
+            for (let i: number = 0; i < 32768; i++) {
+                wave[i] = (drumBuffer & 1) * 2.0 - 3.0;
+                let newBuffer: number = drumBuffer >> 1;
+                if (((drumBuffer + newBuffer) & 1) == 1) {
+                     newBuffer += 3 << 14;
+                }
+                drumBuffer = newBuffer;
+            }
+        } else if (index == 11) {
+            // The "chime" noise type from Zefbox.
+            let drumBuffer: number = 1;
+            for (let i: number = 0; i < 32768; i++) {
+                wave[i] = (drumBuffer & 1) * 2.0 - 1.0;
+                let newBuffer: number = drumBuffer >> 1;
+                if (((drumBuffer + newBuffer) & 1) == 1) {
+                    newBuffer += 2 << 50;
+                }
+                drumBuffer = newBuffer;
+            }
+        } else if (index == 12) {
+            // The "harsh" noise type from Zefbox.
+            let drumBuffer: number = 1;
+            for (let i: number = 0; i < 32768; i++) {
+                wave[i] = (drumBuffer & 1) * 4.0 / 11;
+                let newBuffer: number = drumBuffer >> 1;
+                if (((drumBuffer + newBuffer) & 1) == 1) {
+                    newBuffer += 15 << 2;
+                }
+                drumBuffer = newBuffer;
+            }
+        } else if (index == 13) {
+            // The scrapped "tick" noise type from Zefbox.
+            let drumBuffer: number = 1;
+            for (let i: number = 0; i < 32768; i++) {
+                wave[i] = (drumBuffer & 1) / 2.0 + 1.25;
+                let newBuffer: number = drumBuffer >> 1;
+                if (((drumBuffer + newBuffer) & 1) == 1) {
+                    newBuffer -= 1 << 0;
+                }
+                drumBuffer = newBuffer;
+            }         
+        } else if (index == 14) {
+            // The "trill" noise type from Zefbox.
+            let drumBuffer: number = 1;
+            for (let i: number = 0; i < 32768; i++) {
+                wave[i] = (drumBuffer & 1) / 4.0 * Math.random();
+                let newBuffer: number = drumBuffer >> 2;
+                if (((drumBuffer + newBuffer) & 1) == 1) {
+                    newBuffer -= 4 << 2;
+                }
+                drumBuffer = newBuffer;
+            }
+        } else if (index == 15) {
+            // The "empty" noise type from Zefbox.
+            drawNoiseSpectrum(wave, Config.chipNoiseLength, 1, 11, 4, 1, 0);
+            drawNoiseSpectrum(wave, Config.chipNoiseLength, 11, 4, -2, -2, 0);
+            inverseRealFourierTransform!(wave, Config.chipNoiseLength);
+            scaleElementsByFactor!(wave, 1.0 / Math.sqrt(Config.chipNoiseLength));
+        } else if (index == 16) {
+            // The "detuned periodic" noise type from Modbox.
+            let drumBuffer: number = 1;
+            for (let i: number = 0; i < 32767; i++) {
+                wave[i] = (drumBuffer & 1) * 2.0 - 1.0;
+                let newBuffer: number = drumBuffer >> 2;
+                if (((drumBuffer + newBuffer) & 1) == 1) {
+                    newBuffer += 4 << 14;
+                }
+                drumBuffer = newBuffer;
+            }
+        } else if (index == 17) {
+            // The "snare" noise type from Modbox.
+            for (let i: number = 0; i < 32768; i++) {
+                wave[i] = Math.random() * 2.0 - 1.0;
             }
         } else {
             throw new Error("Unrecognized drum index: " + index);

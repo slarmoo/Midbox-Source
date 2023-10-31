@@ -10,6 +10,7 @@ import { ChangeGroup } from "./Change";
 import { removeDuplicatePatterns, ChangeSong, ChangeReplacePatterns } from "./changes";
 import { AnalogousDrum, analogousDrumMap, MidiChunkType, MidiFileFormat, MidiEventType, MidiControlEventMessage, MidiMetaEventMessage, MidiRegisteredParameterNumberMSB, MidiRegisteredParameterNumberLSB, midiVolumeToVolumeMult, midiExpressionToVolumeMult } from "./Midi";
 import { ArrayBufferReader } from "./ArrayBufferReader";
+import { Localization as _ } from "./Localization";
 
 	const {button, p, div, h2, input} = HTML;
 
@@ -18,12 +19,15 @@ export class ImportPrompt implements Prompt {
 		private readonly _cancelButton: HTMLButtonElement = button({class: "cancelButton"});
 		
 		public readonly container: HTMLDivElement = div({class: "prompt noSelection", style: "width: 300px;"},
-		h2("Import"),
+		h2(_.importPrompt1Label),
 			p({style: "text-align: left; margin: 0.5em 0;"},
-			"BeepBox songs can be exported and re-imported as .json files. You could also use other means to make .json files for BeepBox as long as they follow the same structure.",
+			_.importPromptLargeText1Label,
 		),
 			p({style: "text-align: left; margin: 0.5em 0;"},
-			"BeepBox can also (crudely) import .mid files. There are many tools available for creating .mid files. Shorter and simpler songs are more likely to work well.",
+			_.importPromptLargeText2Label,
+		),
+			p({style: "text-align: left; margin: 0.5em 0;"},
+			_.importPromptLargeText3Label,
 		),
 		this._fileInput,
 		this._cancelButton,

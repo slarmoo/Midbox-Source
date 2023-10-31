@@ -166,14 +166,6 @@ export class TipPrompt implements Prompt {
 					p("The \"insta-slide\" transition is similar to slide, but slides across one note to another almost simultaneously, and the \"continue in pattern\" transition is like a combo of slide in pattern and continue, but the continue effect ends at the end of a pattern."),
 				);
 			} break;
-			/*case "waveinvert": {
-				message = div(
-					h2("Wave Inverting"),
-					p("When this setting is checked, the sound wave of the instrument will be inverted."),
-					p("Although nothing may sound different, it can cause certain things to act differently such as reverb."),
-				);
-			} break;*/
-			// I added this while showing someone how to make a tooltip. Will recycle in the future.
 			case "chipWave": {
 				message = div(
 					h2("Chip Wave"),

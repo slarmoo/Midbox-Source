@@ -4,6 +4,7 @@ import { Dictionary, DictionaryArray, EnvelopeType, InstrumentType, Transition, 
 import { ColorConfig } from "../editor/ColorConfig";
 import { NotePin, Note, Pattern, Instrument, Channel, Synth } from "../synth/synth";
 import { HTML, SVG } from "imperative-html/dist/esm/elements-strict";
+import { Localization as _ } from "../editor/Localization";
 
 	const {a, button, div, h1, input} = HTML;
 	const {svg, circle, rect, path} = SVG;
@@ -160,10 +161,10 @@ let outVolumeHistoricCap: number = 0;
 
 const synth: Synth = new Synth();
 let titleText: HTMLHeadingElement = h1({ style: "flex-grow: 1; margin: 0 1px; margin-left: 10px; overflow: hidden;" }, "");
-	let editLink: HTMLAnchorElement = a({target: "_top", style: "margin: 0 4px;"}, "✎ Edit");
-	let copyLink: HTMLAnchorElement = a({href: "javascript:void(0)", style: "margin: 0 4px;"}, "⎘ Copy URL");
-	let shareLink: HTMLAnchorElement = a({href: "javascript:void(0)", style: "margin: 0 4px;"}, "⤳ Share");
-	let fullscreenLink: HTMLAnchorElement = a({target: "_top", style: "margin: 0 4px;"}, "⇱ Fullscreen");
+	let editLink: HTMLAnchorElement = a({target: "_top", style: "margin: 0 4px;"}, _.songPlayer1Label);
+	let copyLink: HTMLAnchorElement = a({href: "javascript:void(0)", style: "margin: 0 4px;"}, _.songPlayer2Label);
+	let shareLink: HTMLAnchorElement = a({href: "javascript:void(0)", style: "margin: 0 4px;"}, _.songPlayer3Label);
+	let fullscreenLink: HTMLAnchorElement = a({target: "_top", style: "margin: 0 4px;"}, _.songPlayer4Label);
 
 let draggingPlayhead: boolean = false;
 	const playButton: HTMLButtonElement = button({style: "width: 100%; height: 100%; max-height: 50px;"});
@@ -171,20 +172,20 @@ let draggingPlayhead: boolean = false;
 	playButton,
 );
 	const loopIcon: SVGPathElement = path({d: "M 4 2 L 4 0 L 7 3 L 4 6 L 4 4 Q 2 4 2 6 Q 2 8 4 8 L 4 10 Q 0 10 0 6 Q 0 2 4 2 M 8 10 L 8 12 L 5 9 L 8 6 L 8 8 Q 10 8 10 6 Q 10 4 8 4 L 8 2 Q 12 2 12 6 Q 12 10 8 10 z"});
-	const loopButton: HTMLButtonElement = button({title: "loop", style: "background: none; flex: 0 0 12px; margin: 0 3px; width: 12px; height: 12px; display: flex;"}, svg({width: 12, height: 12, viewBox: "0 0 12 12"},
+	const loopButton: HTMLButtonElement = button({title: _.songPlayer5Label, style: "background: none; flex: 0 0 12px; margin: 0 3px; width: 12px; height: 12px; display: flex;"}, svg({width: 12, height: 12, viewBox: "0 0 12 12"},
 	loopIcon,
 ));
 
 	const volumeIcon: SVGSVGElement = svg({style: "flex: 0 0 12px; margin: 0 1px; width: 12px; height: 12px;", viewBox: "0 0 12 12"},
 		path({fill: ColorConfig.uiWidgetBackground, d: "M 1 9 L 1 3 L 4 3 L 7 0 L 7 12 L 4 9 L 1 9 M 9 3 Q 12 6 9 9 L 8 8 Q 10.5 6 8 4 L 9 3 z"}),
 );
-const volumeSlider: HTMLInputElement = input({ title: "volume", type: "range", value: 75, min: 0, max: 75, step: 1, style: "width: 12vw; max-width: 100px; margin: 0 1px;" });
+const volumeSlider: HTMLInputElement = input({ title: _.songPlayer6Label, type: "range", value: 75, min: 0, max: 75, step: 1, style: "width: 12vw; max-width: 100px; margin: 0 1px;" });
 
 	const zoomIcon: SVGSVGElement = svg({width: 12, height: 12, viewBox: "0 0 12 12"},
 		circle({cx: "5", cy: "5", r: "4.5", "stroke-width": "1", stroke: "currentColor", fill: "none"}),
 		path({stroke: "currentColor", "stroke-width": "2", d: "M 8 8 L 11 11 M 5 2 L 5 8 M 2 5 L 8 5", fill: "none"}),
 );
-	const zoomButton: HTMLButtonElement = button({title: "zoom", style: "background: none; flex: 0 0 12px; margin: 0 3px; width: 12px; height: 12px; display: flex;"},
+	const zoomButton: HTMLButtonElement = button({title: _.songPlayer7Label, style: "background: none; flex: 0 0 12px; margin: 0 3px; width: 12px; height: 12px; display: flex;"},
 	zoomIcon,
 );
 
@@ -531,13 +532,13 @@ function renderPlayButton(): void {
 	if (synth.playing) {
 		playButton.classList.remove("playButton");
 		playButton.classList.add("pauseButton");
-		playButton.title = "Pause (Space)";
-		playButton.textContent = "Pause";
+		playButton.title = _.pauseSpaceLabel;
+		playButton.textContent = _.pauseLabel;
 	} else {
 		playButton.classList.remove("pauseButton");
 		playButton.classList.add("playButton");
-		playButton.title = "Play (Space)";
-		playButton.textContent = "Play";
+		playButton.title = _.playSpaceLabel;
+		playButton.textContent = _.shortenedPlayLabel;
 	}
 	pauseButtonDisplayed = synth.playing;
 }
