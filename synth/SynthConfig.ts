@@ -237,6 +237,10 @@ export interface Feedback extends BeepBoxOption {
     readonly indices: ReadonlyArray<ReadonlyArray<number>>;
 }
 
+export interface EnvelopeCategory extends BeepBoxOption {
+    readonly envelopes: ReadonlyArray<Envelope>
+}
+
 export interface Envelope extends BeepBoxOption {
     readonly type: EnvelopeType;
     readonly speed: number;
@@ -564,6 +568,121 @@ export class Config {
         { name: "~32×", mult: 32.0, hzOffset: -8.4, amplitudeSign: -1.0 },
         { name: "64×", mult: 64.0, hzOffset: 0.0, amplitudeSign: 0.0 },
     ]);
+
+    /*public static readonly envelopeCategories: DictionaryArray<EnvelopeCategory> = toNameMap([
+        {
+            name: "None", envelopes: <DictionaryArray<Envelope>>toNameMap([
+                { name: "none", type: EnvelopeType.none, speed: 0.0 },
+            ])
+        },
+        {
+            name: "Misc", envelopes: <DictionaryArray<Envelope>>toNameMap([
+                { name: "note size", type: EnvelopeType.noteSize, speed: 0.0 },
+                { name: "punch", type: EnvelopeType.punch, speed: 0.0 },
+            ])
+        },
+        {
+            name: "Flare", envelopes: <DictionaryArray<Envelope>>toNameMap([
+                { name: "flare 0", type: EnvelopeType.flare, speed: 64.0 },
+                { name: "flare 1", type: EnvelopeType.flare, speed: 32.0 },
+                { name: "flare 2", type: EnvelopeType.flare, speed: 16.0 },
+                { name: "flare 3", type: EnvelopeType.flare, speed: 8.0 },
+                { name: "flare 4", type: EnvelopeType.flare, speed: 4.0 },
+                { name: "flare 5", type: EnvelopeType.flare, speed: 2.0 },
+                { name: "flare 6", type: EnvelopeType.flare, speed: 1.0 },
+            ])
+        },
+        {
+            name: "Twang", envelopes: <DictionaryArray<Envelope>>toNameMap([
+                { name: "twang 0", type: EnvelopeType.twang, speed: 64.0 },
+                { name: "twang 1", type: EnvelopeType.twang, speed: 32.0 },
+                { name: "twang 2", type: EnvelopeType.twang, speed: 16.0 },
+                { name: "twang 3", type: EnvelopeType.twang, speed: 8.0 },
+                { name: "twang 4", type: EnvelopeType.twang, speed: 4.0 },
+                { name: "twang 5", type: EnvelopeType.twang, speed: 2.0 },
+                { name: "twang 6", type: EnvelopeType.twang, speed: 1.0 },
+            ])
+        },
+        {
+            name: "Swell", envelopes: <DictionaryArray<Envelope>>toNameMap([
+                { name: "swell 0", type: EnvelopeType.swell, speed: 64.0 },
+                { name: "swell 1", type: EnvelopeType.swell, speed: 32.0 },
+                { name: "swell 2", type: EnvelopeType.swell, speed: 16.0 },
+                { name: "swell 3", type: EnvelopeType.swell, speed: 8.0 },
+                { name: "swell 4", type: EnvelopeType.swell, speed: 4.0 },
+                { name: "swell 5", type: EnvelopeType.swell, speed: 2.0 },
+                { name: "swell 6", type: EnvelopeType.swell, speed: 1.0 },
+                { name: "swell 7", type: EnvelopeType.swell, speed: 0.5 },
+            ])
+        },
+        {
+            name: "Full Tremolo", envelopes: <DictionaryArray<Envelope>>toNameMap([
+                { name: "full tremolo 0", type: EnvelopeType.tremolo, speed: 8.0 },
+                { name: "full tremolo 1", type: EnvelopeType.tremolo, speed: 4.0 },
+                { name: "full tremolo 2", type: EnvelopeType.tremolo, speed: 2.0 },
+                { name: "full tremolo 3", type: EnvelopeType.tremolo, speed: 1.0 },
+                { name: "full tremolo 4", type: EnvelopeType.tremolo, speed: 0.5 },
+                { name: "full tremolo 5", type: EnvelopeType.tremolo, speed: 0.25 },
+            ])
+        },
+        {
+            name: "Semi Tremolo", envelopes: <DictionaryArray<Envelope>>toNameMap([
+                { name: "semi tremolo 0", type: EnvelopeType.tremolo2, speed: 8.0 },
+                { name: "semi tremolo 1", type: EnvelopeType.tremolo2, speed: 4.0 },
+                { name: "semi tremolo 2", type: EnvelopeType.tremolo2, speed: 2.0 },
+                { name: "semi tremolo 3", type: EnvelopeType.tremolo2, speed: 1.0 },
+                { name: "semi tremolo 4", type: EnvelopeType.tremolo2, speed: 0.5 },
+                { name: "semi tremolo 5", type: EnvelopeType.tremolo2, speed: 0.25 },
+            ])
+        },
+        {
+            name: "Decay", envelopes: <DictionaryArray<Envelope>>toNameMap([
+                { name: "decay 0", type: EnvelopeType.decay, speed: 18.0 },
+                { name: "decay 1", type: EnvelopeType.decay, speed: 10.0 },
+                { name: "decay 2", type: EnvelopeType.decay, speed: 7.0 },
+                { name: "decay 3", type: EnvelopeType.decay, speed: 4.0 },
+                { name: "decay 4", type: EnvelopeType.decay, speed: 1.5 },
+                { name: "decay 5", type: EnvelopeType.decay, speed: 0.75 },
+            ])
+        },
+        {
+            name: "Modbox", envelopes: <DictionaryArray<Envelope>>toNameMap([
+                { name: "modbox trill", type: EnvelopeType.modboxTrill, speed: 40 },
+                { name: "modbox blip", type: EnvelopeType.modboxBlip, speed: 4 },
+                { name: "modbox click", type: EnvelopeType.modboxClick, speed: 5 },
+                { name: "modbox bow", type: EnvelopeType.modboxBow, speed: 90 },
+            ])
+        },
+        {
+            name: "Wibble", envelopes: <DictionaryArray<Envelope>>toNameMap([
+                { name: "wibble 0", type: EnvelopeType.wibble, speed: 96.0 },
+                { name: "wibble 1", type: EnvelopeType.wibble, speed: 24.0 },
+                { name: "wibble 2", type: EnvelopeType.wibble, speed: 12.0 },
+                { name: "wibble 3", type: EnvelopeType.wibble, speed: 4.0 },
+                { name: "wibble 4", type: EnvelopeType.wibble, speed: 1.0 },
+            ])
+        },
+        {
+            name: "Linear", envelopes: <DictionaryArray<Envelope>>toNameMap([
+                { name: "linear 0", type: EnvelopeType.linear, speed: 256.0 },
+                { name: "linear 1", type: EnvelopeType.linear, speed: 128.0 },
+                { name: "linear 2", type: EnvelopeType.linear, speed: 32.0 },
+                { name: "linear 3", type: EnvelopeType.linear, speed: 8.0 },
+                { name: "linear 4", type: EnvelopeType.linear, speed: 2.0 },
+                { name: "linear 5", type: EnvelopeType.linear, speed: 0.5 },
+            ])
+        },
+        {
+            name: "Rise", envelopes: <DictionaryArray<Envelope>>toNameMap([
+                { name: "rise 0", type: EnvelopeType.rise, speed: 256.0 },
+                { name: "rise 1", type: EnvelopeType.rise, speed: 128.0 },
+                { name: "rise 2", type: EnvelopeType.rise, speed: 32.0 },
+                { name: "rise 3", type: EnvelopeType.rise, speed: 8.0 },
+                { name: "rise 4", type: EnvelopeType.rise, speed: 2.0 },
+                { name: "rise 5", type: EnvelopeType.rise, speed: 0.5 },
+            ])
+        },*/
+
     public static readonly envelopes: DictionaryArray<Envelope> = toNameMap([
         { name: "none", type: EnvelopeType.none, speed: 0.0 },
         { name: "note size", type: EnvelopeType.noteSize, speed: 0.0 },

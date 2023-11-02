@@ -71,6 +71,7 @@
             margin-top: 0.5em;
             margin-bottom: 0.5em;
             -webkit-text-stroke-width: 0;
+            color: var(--mod-title, var(--link-accent, rgb(61, 33, 216)));
         }
 
         h2 {
@@ -79,6 +80,15 @@
             margin-top: 0.5em;
             margin-bottom: 0.5em;
             -webkit-text-stroke-width: 0;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            text-align: center;
+            margin-top: 0.35rem;
+            margin-bottom: 0.5rem;
+            -webkit-text-stroke-width: 0;
+            color: var(--secondary-text, var(--link-accent, rgb(255, 255, 255)));
         }
 
         .centerDiv {
@@ -161,12 +171,12 @@
         <section>
 
             <h1>
-                <font color="#131875">Midbox</font>
-                <span id="jummboxPlant" style="display: inline; color:#62a13b"></span>
+                <font>Midbox</font>
+                <span id="midboxPlant" style="display: inline; color:#0c46e4e5"></span>
             </h1>
             <h3>
-                <font color="ffffff"></font>
-                <span id="randomText" style="display: inline; color:#ffffff"></span>
+                <font></font>
+                <span id="randomText" style="display: inline;"></span>
             </h3>
             
             <p id="introduction">
@@ -305,13 +315,13 @@
                         Midbox does not claim ownership over songs created with it, so original songs belong to their authors.
                     </p>
                     <p>
-                        Neither Mid, Midbox, or any other BeepMod and/or their repsective developers assume responsibility for any copyrighted material played on Midbox or any similar tools. No songs are ever received, recorded, or distributed by Midbox's servers. All song data is contained in the URL after the hash (#) mark, and Midbox running inside your browser converts that data into sound waves.
+                        Neither Mid, Midbox, nor any other BeepMod and/or their respective developers assume responsibility for any copyrighted material played on Midbox or any similar tools. No songs are ever received, recorded, or distributed by Midbox's servers. All song data is contained in the URL after the hash (#) mark, and Midbox running inside your browser converts that data into sound waves.
                     </p>
                     <p>
                         Midbox does not collect, track, or share any user data.
                     </p>
                     <p id="offline-instructions">
-                        You currently cannot download an offline version of Midbox. There will be one soon.
+                        You currently cannot download an offline version of Midbox.
                     </p>
                     <p>
                         You can download and use the <a href="https://github.com/Mid-The-Modder/Midbox-Source" target="_blank">source code</a> of Midbox under the MIT license.
@@ -333,30 +343,30 @@
         if (Math.floor(Math.random() * 10) == 0) {
             switch (Math.floor(Math.random() * 7)) {
                 case 0:
-                    document.getElementById("jummboxPlant").innerHTML = "  🍂";
+                    document.getElementById("midboxPlant").innerHTML = "  🍂";
                     break;
                 case 1:
-                    document.getElementById("jummboxPlant").innerHTML = "  🌿";
+                    document.getElementById("midboxPlant").innerHTML = "  🌿";
                     break;
                 case 2:
-                    document.getElementById("jummboxPlant").innerHTML = "  🌺";
+                    document.getElementById("midboxPlant").innerHTML = "  🌺";
                     break;
                 case 3:
-                    document.getElementById("jummboxPlant").innerHTML = "  🍃";
+                    document.getElementById("midboxPlant").innerHTML = "  🍃";
                     break;
                 case 4: 
-                    document.getElementById("jummboxPlant").innerHTML = "..?";
+                    document.getElementById("midboxPlant").innerHTML = "..?";
                     break;
                 case 5: 
-                    document.getElementById("jummboxPlant").innerHTML = "  MANIA";
+                    document.getElementById("midboxPlant").innerHTML = "  MANIA";
                     break;
                 case 6: 
-                    document.getElementById("jummboxPlant").innerHTML = "  |  It was an attmept...";
+                    document.getElementById("midboxPlant").innerHTML = "  |  It was an attempt...";
                     break;
             }
         }
         if (Math.floor(Math.random() * 1) == 0) {
-            switch (Math.floor(Math.random() * 76)) {
+            switch (Math.floor(Math.random() * 84)) {
                 case 0:
                     document.getElementById("randomText").innerHTML = "Let's make a song!";
                     break;
@@ -388,13 +398,13 @@
                     document.getElementById("randomText").innerHTML = "Join the <a href=\"https://discord.gg/fdZxm5SpAn\">Beepbox Discord</a>!";
                     break;
                 case 10:
-                    document.getElementById("randomText").innerHTML = "Tip: Press 'Q' on your keyboard to open the channel settings!";
+                    document.getElementById("randomText").innerHTML = "Tip: Press 'Q' on your keyboard to open the channel settings.";
                     break;
                 case 11:
-                    document.getElementById("randomText").innerHTML = "Tip: Press 'SHIFT' + 'L' on your keyboard to open limiter settings!";
+                    document.getElementById("randomText").innerHTML = "Tip: Press 'SHIFT' + 'L' on your keyboard to open limiter settings.";
                     break;
                 case 12:
-                    document.getElementById("randomText").innerHTML = "Tip: Check the description below this message for a bunch of useful sources!";
+                    document.getElementById("randomText").innerHTML = "Tip: Check the description below this message for a bunch of useful sources.";
                     break;
                 case 13:
                     document.getElementById("randomText").innerHTML = "Beepbox's presets are kinda lame. Try Midbox's!";
@@ -412,7 +422,7 @@
                     document.getElementById("randomText").innerHTML = "Tip: Try avoiding setting all of your instrument volumes near the minimum or maximum. Spreading out your mixing volume-wise is often gonna make the mix very messy. Try spreading your instruments out with panning or by multiple different octaves instead!";
                     break;
                 case 18:
-                    document.getElementById("randomText").innerHTML = "Now with multiple languages!";
+                    document.getElementById("randomText").innerHTML = "Now with spanish!";
                     break;
                 case 19:
                     document.getElementById("randomText").innerHTML = '"This mod is so mid."';
@@ -472,7 +482,7 @@
                     document.getElementById("randomText").innerHTML = "Get creative!";
                     break;
                 case 38:
-                    document.getElementById("randomText").innerHTML = "Advice: Don't make music just to be good at it! That ruins the fun! Make music to enjoy it!";
+                    document.getElementById("randomText").innerHTML = "Advice: Don't make music just to be good at it. That ruins the fun! Make music to enjoy it!";
                     break;
                 case 39:
                     document.getElementById("randomText").innerHTML = "Tip: Swap between two tempos repeatedly using a mod channel to create swing!";
@@ -496,7 +506,7 @@
                     document.getElementById("randomText").innerHTML = "Turn the volume up! Things have only started!";
                     break;
                 case 46:
-                    document.getElementById("randomText").innerHTML = "Tip: Not sure on how to make an instrument? Press 'SHIFT' + 'R' on your keyboard and I'll randomly generate one for you!";
+                    document.getElementById("randomText").innerHTML = "Tip: Not sure on how to make an instrument? Press 'SHIFT' + 'R' on your keyboard and the program will randomly generate one for you.";
                     break;
                 case 47:
                     document.getElementById("randomText").innerHTML = "Join the community!";
@@ -511,13 +521,13 @@
                     document.getElementById("randomText").innerHTML = "Zoinks!";
                     break;
                 case 51:
-                    document.getElementById("randomText").innerHTML = "Tip: If something goes wrong, like the song corrupting for instance. Take a screenshot of the error in the dev tool menu and reach out to me via Discord!";
+                    document.getElementById("randomText").innerHTML = "Help!: If something goes wrong, like the song corrupting for instance. Take a screenshot of the error in the dev tool menu and reach out to me via Discord!";
                     break;
                 case 52:
                     document.getElementById("randomText").innerHTML = "Are ya' winnin' son?";
                     break;
                 case 53:
-                    document.getElementById("randomText").innerHTML = "They butchered the dubstep yoi preset, so I dedicated a whole section to my own!";
+                    document.getElementById("randomText").innerHTML = "Thanks to the dubstep yoi yoi preset, Midbox has its own category for dubstep!";
                     break;
                 case 54:
                     document.getElementById("randomText").innerHTML = "If being married to a basic music program is a crime, consider me guilty.";
@@ -526,7 +536,7 @@
                     document.getElementById("randomText").innerHTML = "Now with too many keybinds!";
                     break;
                 case 56:
-                    document.getElementById("randomText").innerHTML = "Tip: Link is too long? Consider shortening it! There is a built-in way to shorten your song into a tinyurl by pressing 'U'! You can also put your entire song link into a pastelink and shorten it like that in case tinyurl doesn't work.";
+                    document.getElementById("randomText").innerHTML = "Tip: Link is too long? Consider shortening it! There is a built-in way to shorten your song into a tinyurl by pressing 'U'. You can also put your entire song link into a pastelink and shorten it like that in case tinyurl doesn't work.";
                     break;
                 case 57:
                     document.getElementById("randomText").innerHTML = "You have no idea how long it took to get this language stuff taken care of. And you probably aren't even using it. What a shame.";
@@ -556,10 +566,10 @@
                     document.getElementById("randomText").innerHTML = "But nobody came.";
                     break;
                 case 66:
-                    document.getElementById("randomText").innerHTML = "Does anyone else use the Jummbox dark theme with the small layout? No? I should've expected that response...";
+                    document.getElementById("randomText").innerHTML = "Does anyone else use the Jummbox dark theme with the small layout? No? I'm the only one?";
                     break;
                 case 67:
-                    document.getElementById("randomText").innerHTML = "Tip: Press '`' on your keyboard to recover a recent song! Hold 'SHIFT' while you do that and you can do the opposite!";
+                    document.getElementById("randomText").innerHTML = "Tip: Press '`' on your keyboard to go to the 'recover recent song' prompt. Hold 'SHIFT' while you do that to start a new song.";
                     break;
                 case 68:
                     document.getElementById("randomText").innerHTML = "Pronouns please?";
@@ -568,13 +578,13 @@
                     document.getElementById("randomText").innerHTML = "Only for people 18+... And below 18 too of course!";
                     break;
                 case 70:
-                    document.getElementById("randomText").innerHTML = "Wanna hear a bad joke? No? Aw man!";
+                    document.getElementById("randomText").innerHTML = "Wanna hear a bad joke? No?";
                     break;
                 case 71:
                     document.getElementById("randomText").innerHTML = "Still looking for where I am supposed to add this code.";
                     break;
                 case 72:
-                    document.getElementById("randomText").innerHTML = "Imagine liking a music program so much you dedicate a huge amount of time of your life on it. I did so much that I made this mod for it!";
+                    document.getElementById("randomText").innerHTML = "I have spent a lot of time using Beepbox. At one point, I decided to make this mod to show my passion for it.";
                     break;
                 case 73:
                     document.getElementById("randomText").innerHTML = "No talking in #finished-beeps please!";
@@ -584,6 +594,30 @@
                     break;
                 case 75:
                     document.getElementById("randomText").innerHTML = "So uh... what are you starin' at?";
+                    break;
+                case 76:
+                    document.getElementById("randomText").innerHTML = "The first mod to port the supersaw!";
+                    break;
+                case 77:
+                    document.getElementById("randomText").innerHTML = "My autocomplete is kinda screwing me over right now...";
+                    break;
+                case 78:
+                    document.getElementById("randomText").innerHTML = "Check out the info doc!";
+                    break;
+                case 79:
+                    document.getElementById("randomText").innerHTML = "Hi chat";
+                    break;
+                case 80:
+                    document.getElementById("randomText").innerHTML = "To be bored or to be board.";
+                    break;
+                case 81:
+                    document.getElementById("randomText").innerHTML = "Have you used the percussion effect?";
+                    break;
+                case 82:
+                    document.getElementById("randomText").innerHTML = "Who keeps pinging me.";
+                    break;
+                case 83:
+                    document.getElementById("randomText").innerHTML = "By the time I am writing this, it is Nov 1, 2023.";
                     break;
             }
         }

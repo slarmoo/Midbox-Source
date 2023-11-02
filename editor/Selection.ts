@@ -337,6 +337,21 @@ export class Selection {
         new ChangePatternSelection(this._doc, 0, 0);
     }
 
+    public cut(): void {
+        const group: ChangeGroup = new ChangeGroup();
+        const channelIndex: number = this.boxSelectionChannel;
+        const barIndex: number = this.boxSelectionBar;
+        const cutHeight: number = this.boxSelectionHeight;
+        const cutWidth: number = this.boxSelectionWidth;
+        this.copy();
+        for (let channel = channelIndex; channel < channelIndex + cutHeight; channel++) {
+            for (let bar = barIndex; bar < barIndex + cutWidth; bar++) {
+                this.erasePatternInBar(group, channel, bar);
+            }
+        }
+        this._doc.record(group);
+    }
+
     // I'm sorry this function is so complicated!
     // Basically I'm trying to avoid accidentally modifying patterns that are used
     // elsewhere in the song (unless we're just pasting a single pattern) but I'm

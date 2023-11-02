@@ -1226,6 +1226,7 @@ export class Instrument {
     public clicklessTransition: boolean = false;
     public aliases: boolean = false;
     public percussion: boolean = false;
+    public songDetuneEffected: boolean = true;
     /*public cycleA: number = 1;
     public cycleB: number = 1;
     public cycleC: number = 1;
@@ -1342,6 +1343,7 @@ export class Instrument {
         this.legacyTieOver = false;
         this.aliases = false;
         this.percussion = false;
+        this.songDetuneEffected = true;
         this.fadeIn = 0;
         this.fadeOut = Config.fadeOutNeutral;
         this.transition = Config.transitions.dictionary["normal"].index;
@@ -1644,6 +1646,7 @@ export class Instrument {
 
         if (effectsIncludePercussion(this.effects)) {
             instrumentObject["percussion"] = this.percussion;
+            instrumentObject["songDetuneEffected"] = this.songDetuneEffected;
         }
 
         if (this.type != InstrumentType.drumset) {
@@ -2159,6 +2162,12 @@ export class Instrument {
                 this.percussion = instrumentObject["percussion"];
             } else {
                 this.percussion = false;
+            }
+
+            if (instrumentObject["songDetuneEffected"] != undefined) {
+                this.songDetuneEffected = instrumentObject["songDetuneEffected"];
+            } else {
+                this.songDetuneEffected = true;
             }
 
             if (instrumentObject["noteFilterType"] != undefined) {
@@ -2780,7 +2789,7 @@ export class Song {
                     buffer.push(base64IntToCharCode[instrument.reverb]);
                 }
                 if (effectsIncludePercussion(instrument.effects)) {
-                    buffer.push(base64IntToCharCode[+instrument.percussion]);
+                    buffer.push(base64IntToCharCode[+instrument.percussion], base64IntToCharCode[+instrument.songDetuneEffected]);
                 }
 
                 if (instrument.type != InstrumentType.drumset) {
@@ -4064,6 +4073,7 @@ export class Song {
                     }
                     if (effectsIncludePercussion(instrument.effects)) {
                         instrument.percussion = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] ? true : false;
+                        instrument.songDetuneEffected = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] ? true : false;
                     }
                 }
                 // Clamp the range.
@@ -6614,8 +6624,7 @@ export class Synth {
                 if (!((Config.modulators[instrument.modulators[mod]].associatedEffect != EffectType.length && !(tgtInstrument.effects & (1 << Config.modulators[instrument.modulators[mod]].associatedEffect)))
                     // Instrument type specific
                     || (tgtInstrument.type != InstrumentType.fm && (str == "fm slider 1" || str == "fm slider 2" || str == "fm slider 3" || str == "fm slider 4" || str == "fm feedback"))
-                    || (tgtInstrument.type != InstrumentType.pwm && (str == "pulse width"))
-                    || (tgtInstrument.type != InstrumentType.supersaw && (str == "pulse width"))
+                    || ((tgtInstrument.type != InstrumentType.pwm && tgtInstrument.type != InstrumentType.supersaw) && (str == "pulse width"))
                     // Arp check
                     || (!tgtInstrument.getChord().arpeggiates && (str == "arp speed" || str == "reset arp"))
                     // EQ Filter check
@@ -8537,7 +8546,7 @@ export class Synth {
                 modDetuneStart = this.getModValue(Config.modulators.dictionary["detune"].index, channelIndex, tone.instrumentIndex, false) + Config.detuneCenter;
                 modDetuneEnd = this.getModValue(Config.modulators.dictionary["detune"].index, channelIndex, tone.instrumentIndex, true) + Config.detuneCenter;
             }
-            if (this.isModActive(Config.modulators.dictionary["song detune"].index, channelIndex, tone.instrumentIndex)) {
+            if (this.isModActive(Config.modulators.dictionary["song detune"].index, channelIndex, tone.instrumentIndex) && (instrument.songDetuneEffected)) {
                 modDetuneStart += 4 * this.getModValue(Config.modulators.dictionary["song detune"].index, channelIndex, tone.instrumentIndex, false);
                 modDetuneEnd += 4 * this.getModValue(Config.modulators.dictionary["song detune"].index, channelIndex, tone.instrumentIndex, true);
             }
@@ -8889,8 +8898,8 @@ export class Synth {
                     pulseWidthModEnd = (this.getModValue(Config.modulators.dictionary["pulse width"].index, channelIndex, tone.instrumentIndex, true)) / (Config.pulseWidthRange * 2);
                 }
 
-                const pulseWidthStart: number = pulseWidthModStart * envelopeStarts[EnvelopeComputeIndex.pulseWidth];
-                const pulseWidthEnd: number = pulseWidthModEnd * envelopeEnds[EnvelopeComputeIndex.pulseWidth];
+                const pulseWidthStart: number = Math.max(0.0, pulseWidthModStart * envelopeStarts[EnvelopeComputeIndex.pulseWidth]);
+                const pulseWidthEnd: number = Math.max(0.0, pulseWidthModEnd * envelopeEnds[EnvelopeComputeIndex.pulseWidth]);
                 tone.pulseWidth = pulseWidthStart;
                 tone.pulseWidthDelta = (pulseWidthEnd - pulseWidthStart) / roundedSamplesPerTick;
             }
@@ -8958,8 +8967,8 @@ export class Synth {
                   baseDynamismSliderStart = Math.max(0.0, this.getModValue(Config.modulators.dictionary["dynamism"].index, channelIndex, tone.instrumentIndex, false) / Config.supersawDynamismMax);
                   baseDynamismSliderEnd = Math.max(0.0, this.getModValue(Config.modulators.dictionary["dynamism"].index, channelIndex, tone.instrumentIndex, true) / Config.supersawDynamismMax);
                 }
-                const curvedDynamismStart: number = 1.0 - Math.pow(Math.max(0.0, 1.0 - baseDynamismSliderStart * envelopeStarts[EnvelopeComputeIndex.supersawDynamism]), 0.2);
-                const curvedDynamismEnd:   number = 1.0 - Math.pow(Math.max(0.0, 1.0 - baseDynamismSliderEnd * envelopeEnds[  EnvelopeComputeIndex.supersawDynamism]), 0.2);
+                const curvedDynamismStart: number = 1.0 - Math.pow(Math.max(0.0, 0.0 - baseDynamismSliderStart * envelopeStarts[EnvelopeComputeIndex.supersawDynamism]), 0.2);
+                const curvedDynamismEnd:   number = 1.0 - Math.pow(Math.max(0.0, 0.0 - baseDynamismSliderEnd * envelopeEnds[  EnvelopeComputeIndex.supersawDynamism]), 0.2);
                 const firstVoiceAmplitudeStart: number = Math.pow(2.0, Math.log2(minFirstVoiceAmplitude) * curvedDynamismStart);
 				const firstVoiceAmplitudeEnd:   number = Math.pow(2.0, Math.log2(minFirstVoiceAmplitude) * curvedDynamismEnd);
 
@@ -9036,10 +9045,17 @@ export class Synth {
 						tone.phases[swappedIndex] = temp;
 					}
 				}
-				
+
+				/*let baseSpreadSliderStart: number = instrument.supersawSpread / Config.supersawSpreadMax;
+                let baseSpreadSliderEnd: number = instrument.supersawSpread / Config.supersawSpreadMax;
+                if (this.isModActive(Config.modulators.dictionary["spread"].index, channelIndex, tone.instrumentIndex)) {
+                baseSpreadSliderStart = Math.max(0.0, this.getModValue(Config.modulators.dictionary["spread"].index, channelIndex, tone.instrumentIndex, false) / Config.supersawSpreadMax);
+                baseSpreadSliderEnd = Math.max(0.0, this.getModValue(Config.modulators.dictionary["spread"].index, channelIndex, tone.instrumentIndex, true) / Config.supersawSpreadMax);
+                }*/
+
 				const baseSpreadSlider: number = instrument.supersawSpread / Config.supersawSpreadMax;
-				const spreadSliderStart: number = baseSpreadSlider * envelopeStarts[EnvelopeComputeIndex.supersawSpread];
-				const spreadSliderEnd:   number = baseSpreadSlider * envelopeEnds[  EnvelopeComputeIndex.supersawSpread];
+				const spreadSliderStart: number = Math.max(0.0, baseSpreadSlider * envelopeStarts[EnvelopeComputeIndex.supersawSpread]);
+				const spreadSliderEnd:   number = Math.max(0.0, baseSpreadSlider * envelopeEnds[  EnvelopeComputeIndex.supersawSpread]);
 				// Just use the average detune for the current tick in the below loop.
 				const averageSpreadSlider: number = (spreadSliderStart + spreadSliderEnd) * 0.5;
 				const curvedSpread: number = Math.pow(1.0 - Math.sqrt(Math.max(0.0, 1.0 - averageSpreadSlider)), 1.75);
@@ -9048,12 +9064,6 @@ export class Synth {
 					const offset: number = (i == 0) ? 0.0 : Math.pow((((i + 1) >> 1) - 0.5 + 0.025 * ((i & 2) - 1)) / (Config.supersawVoiceCount >> 1), 1.1) * ((i & 1) * 2 - 1);
 					tone.supersawUnisonDetunes[i] = Math.pow(2.0, curvedSpread * offset / 12.0);
 				}
-                /*let baseSpreadSliderStart: number = instrument.supersawSpread / Config.supersawSpreadMax;
-                let baseSpreadSliderEnd: number = instrument.supersawSpread / Config.supersawSpreadMax;
-                if (this.isModActive(Config.modulators.dictionary["spread"].index, channelIndex, tone.instrumentIndex)) {
-                  baseSpreadSliderStart = Math.max(0.0, this.getModValue(Config.modulators.dictionary["spread"].index, channelIndex, tone.instrumentIndex, false) / Config.supersawSpreadMax);
-                  baseSpreadSliderEnd = Math.max(0.0, this.getModValue(Config.modulators.dictionary["spread"].index, channelIndex, tone.instrumentIndex, true) / Config.supersawSpreadMax);
-                }*/
 				
 				const baseShape: number = instrument.supersawShape / Config.supersawShapeMax;
 				/*let baseShapeSliderStart: number = instrument.supersawShape / Config.supersawShapeMax;
@@ -9073,8 +9083,8 @@ export class Synth {
                 let pulseWidthModStart: number = basePulseWidth;
                 let pulseWidthModEnd: number = basePulseWidth;
                 if (this.isModActive(Config.modulators.dictionary["pulse width"].index, channelIndex, tone.instrumentIndex)) {
-                  pulseWidthModStart = Math.max(0.0, this.getModValue(Config.modulators.dictionary["pulse width"].index, channelIndex, tone.instrumentIndex, false) / Config.pulseWidthRange);
-                  pulseWidthModEnd = Math.max(0.0, this.getModValue(Config.modulators.dictionary["pulse width"].index, channelIndex, tone.instrumentIndex, true) / Config.pulseWidthRange);
+                  pulseWidthModStart = Math.max(0.0, this.getModValue(Config.modulators.dictionary["pulse width"].index, channelIndex, tone.instrumentIndex, false) / (Config.pulseWidthRange * 2));
+                  pulseWidthModEnd = Math.max(0.0, this.getModValue(Config.modulators.dictionary["pulse width"].index, channelIndex, tone.instrumentIndex, true) / (Config.pulseWidthRange * 2));
                 }
 
 				const pulseWidthStart: number = pulseWidthModStart * envelopeStarts[EnvelopeComputeIndex.pulseWidth];

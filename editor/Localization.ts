@@ -115,7 +115,7 @@ export class Localization {
     // public static rhythmBy12Label: string = "÷12 (Duodectuplets)";
     // public static rhythmBy16Label: string = "÷16 (Hemidemisemiquavers)";
     public static rhythmBy24Label: string = "÷24 (Quattuorvigintuplets)";
-    public static percussionLabel: string = "Percussion:";
+    public static percussionLabel: string = "Key-Affected:";
     public static editLabel: string = "Edit";
     public static customLabel: string = "custom";
     public static newSongLabel: string = "Untitled Project";
@@ -132,6 +132,7 @@ export class Localization {
     public static echoEffectLabel: string = "echo";
     public static reverbEffectLabel: string = "reverb";
     public static percussionEffectLabel: string = "percussion";
+    public static songDetuneEffectedLabel: string = "SD-Affected:";
     public static wave1Label: string = "rounded";
     public static wave2Label: string = "triangle";
     public static wave3Label: string = "square";
@@ -291,6 +292,7 @@ export class Localization {
     public static midboxDrumPresetsLabel: string = "Midbox Drum Presets";
     public static midboxPianoPresetsLabel: string = "Midbox Piano Presets";
     public static midboxLeadPresetsLabel: string = "Midbox Lead Presets";
+    public static midboxFMPresetsLabel: string = "Midbox FM Presets";
     public static beepboxSupersawPresetsLabel: string = "Beepbox Supersaw Presets";
     public static retroPresetsLabel: string = "Retro Presets";
     public static keyboardPresetsLabel: string = "Keyboard Presets";
@@ -586,6 +588,7 @@ export class Localization {
     public static midboxMiscPresets34Label: string = "growling bass";
     public static midboxMiscPresets35Label: string = "freq-crushed xylophone";
     public static midboxMiscPresets36Label: string = "scream";
+    public static midboxMiscPresets37Label: string = "electric guitar";
     public static midboxDubstepPresets1Label: string = "dubstep bwayyyy";
     public static midboxDubstepPresets2Label: string = "dubstep bass hum";
     public static midboxDubstepPresets3Label: string = "dubstep yaa";
@@ -619,6 +622,14 @@ export class Localization {
     public static midboxLeadPresets9Label: string = "chaotic pulse";
     public static midboxLeadPresets10Label: string = "squealing lead";
     public static midboxLeadPresets11Label: string = "distorted lead 2";
+    public static midboxLeadPresets12Label: string = "random lead distortion";
+    public static midboxFMPresets1Label: string = "FM electronic guitar";
+    public static midboxFMPresets2Label: string = "FM electronic bass";
+    public static midboxFMPresets3Label: string = "FM guitar";
+    public static midboxFMPresets4Label: string = "FM pluck bass";
+    public static midboxFMPresets5Label: string = "FM lead";
+    public static midboxFMPresets6Label: string = "";
+    public static midboxFMPresets7Label: string = "";
     public static beepboxSupersawPresets1Label: string = "supersaw lead";
     public static beepboxSupersawPresets2Label: string = "supersaw string";
     public static beepboxSupersawPresets3Label: string = "supersaw pad";
@@ -913,7 +924,8 @@ if (language == "spanish") {
     Localization.rhythmBy6Label = "÷6 (Sextillizos)";
     Localization.rhythmBy8Label = "÷8 (Fusas)";
     Localization.rhythmBy24Label = "÷24 (Quattuorvigntillizos)";
-    Localization.percussionLabel = "Percusión:";
+    Localization.percussionLabel = "Clave-Afectado:";
+    Localization.songDetuneEffectedLabel = "DdC-Afectado:";
     Localization.editLabel = "Modificar";
     Localization.customLabel = "personalizado";
     Localization.newSongLabel = "Nuevo Proyecto";

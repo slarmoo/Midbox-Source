@@ -2236,6 +2236,19 @@ export class ChangePercussion extends Change {
     }
 }
 
+export class ChangeSDAffected extends Change {
+    constructor(doc: SongDocument, newValue: boolean) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        const oldValue: boolean = instrument.songDetuneEffected;
+        doc.notifier.changed();
+        if (oldValue != newValue) {
+            instrument.songDetuneEffected = newValue;
+            this._didSomething();
+        }
+    }
+}
+
 export class ChangeSpectrum extends Change {
     constructor(doc: SongDocument, instrument: Instrument, spectrumWave: SpectrumWave) {
         super();

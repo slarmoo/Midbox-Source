@@ -467,10 +467,19 @@ export class TipPrompt implements Prompt {
 			} break;
 			case "percussion":{
 				message = div(
-					h2("Percussion"),
-					p("This effect is a bit different from the rest. When the box is checked, the instrument will not be affected by song key."),
+					h2("Key-Affected"),
+					p("The percussion effect is a bit different from the rest, more focused on features for your drums. It comes with this checkbox."),
+					p("When the box is checked, the instrument will not be affected by song key."),
 					p("This allows changing your song key without messing up the pitches of your instrument-drums."),
-					p("[Massive thanks to LeoV for basically making this entire feature exist.]"),
+					p("[Massive thanks to LeoV for making this checkbox.]"),
+				);
+			} break;
+			case "songDetuneEffected": {
+				message = div(
+					h2("Song Detune-Affected"),
+					p("The percussion effect comes with another checkbox that decides whether or not the instrument is changed by the song detune modulator."),
+					p("By default, the checkbox is checked. When this box is unchecked, the instrument will no longer be affected by song detune."),
+					p("This allows using the song detune modulator without messing up the pitches of your drums."),
 				);
 			} break;
 			case "operatorWaveform": {

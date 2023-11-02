@@ -37,6 +37,7 @@ export class ColorConfig {
 				--black-piano-key: #444;
 				--oscilloscope-line-L: white;
 				--oscilloscope-line-R: rgba(119,68,255,0.99);
+				--mod-title: white;
 					--use-color-formula: false;
 					--track-editor-bg-pitch: #444;
 					--track-editor-bg-pitch-dim: #333;
@@ -157,6 +158,7 @@ export class ColorConfig {
 					--black-piano-key: #444;
 					--oscilloscope-line-L: #ddd;
 					--oscilloscope-line-R: rgba(169,0,255,0.99);
+					--mod-title: #ececec;
 					--use-color-formula: false;
 					--track-editor-bg-pitch: #444;
 					--track-editor-bg-pitch-dim: #333;
@@ -278,6 +280,7 @@ export class ColorConfig {
 				--black-piano-key: #666;
 				--oscilloscope-line-L: black;
 				--oscilloscope-line-R: rgba(200,170,255,0.99);
+				--mod-title: black;
 					--use-color-formula: false;
 					--track-editor-bg-pitch: #ececec;
 					--track-editor-bg-pitch-dim: #fdfdfd;
@@ -406,6 +409,7 @@ export class ColorConfig {
 					--black-piano-key: #666;
 					--oscilloscope-line-L: white;
 					--oscilloscope-line-R: rgba(119,68,255,0.99);
+					--mod-title: #9c64f7;
 					--use-color-formula: true;
 					--track-editor-bg-pitch: #393e4f;
 					--track-editor-bg-pitch-dim: #1c1d28;
@@ -522,6 +526,7 @@ export class ColorConfig {
 					--black-piano-key: #573;
 					--oscilloscope-line-L: #efe;
 					--oscilloscope-line-R: rgba(255,68,199,0.99);
+					--mod-title: #18e972;
 					--use-color-formula: true;
 					--track-editor-bg-pitch: #254820;
 					--track-editor-bg-pitch-dim: #102819;
@@ -638,6 +643,7 @@ export class ColorConfig {
 					--black-piano-key: #572b29;
 					--oscilloscope-line-L: #f5d6bf;
 					--oscilloscope-line-R: rgba(255, 208, 68, 0.99);
+					--mod-title: #d7c386;
 					--use-color-formula: true;
 					--track-editor-bg-pitch: #5e3a41;
 					--track-editor-bg-pitch-dim: #281d1c;
@@ -754,6 +760,7 @@ export class ColorConfig {
 			--black-piano-key: #2d2424;
 			--oscilloscope-line-L: #fff;
 			--oscilloscope-line-R: rgba(155, 155, 155, 0.99);
+			--mod-title: #9e9e9e;
 			--use-color-formula: true;
 			--track-editor-bg-pitch: #373737;
 			--track-editor-bg-pitch-dim: #131313;
@@ -871,6 +878,7 @@ export class ColorConfig {
 					--black-piano-key: #66667a;
 					--oscilloscope-line-L: #401890;
 					--oscilloscope-line-R: rgba(255,160,235,0.99);
+					--mod-title: #700de8;
 					--use-color-formula: true;
 					--track-editor-bg-pitch: #d9e5ec;
 					--track-editor-bg-pitch-dim: #eaeef5;
@@ -996,6 +1004,7 @@ export class ColorConfig {
 			--black-piano-key: #202d42;
 			--oscilloscope-line-L: #c1f1ff;
 			--oscilloscope-line-R: rgba(119,68,255,0.99);
+			--mod-title: #ef22bb;
 			--use-color-formula: false;
 			--track-editor-bg-pitch: #34406c;
 			--track-editor-bg-pitch-dim: #1c1d28;
@@ -2907,6 +2916,8 @@ export class ColorConfig {
 					--black-piano-key: #253353;
 					--oscilloscope-line-L: #72dcfc;
 					--oscilloscope-line-R: #304eff;
+					--mod-title: #131875;
+					--plant-color: #0c46e4;
 					--use-color-formula: true;
 					--track-editor-bg-pitch: #183b65; 
 					--track-editor-bg-pitch-dim: #1f2c3d;
@@ -2921,6 +2932,7 @@ export class ColorConfig {
 					--select2-opt-group: #312f6d;
 					--input-box-outline: #788b96;
 					--mute-button-normal: #1d34f2;
+					--mute-button-drum: #1107c6;
 					--mute-button-mod: #06bad6;
 					--mod-label-primary: #14383f;
 					--mod-label-secondary-text: #1d7080;
@@ -3022,6 +3034,8 @@ export class ColorConfig {
     public static readonly blackPianoKey: string = "var(--black-piano-key)";
 	public static readonly oscilloscopeLineL: string = "var(--oscilloscope-line-L)";
 	public static readonly oscilloscopeLineR: string = "var(--oscilloscope-line-R)";
+	public static readonly modTitle: string = "var(--mod-title)";
+	public static readonly plantColor: string = "var(--plant-color)"
     public static readonly useColorFormula: string = "var(--use-color-formula)";
     public static readonly pitchSecondaryChannelHue: string = "var(--pitch-secondary-channel-hue)";
     public static readonly pitchSecondaryChannelHueScale: string = "var(--pitch-secondary-channel-hue-scale)";
@@ -3108,6 +3122,7 @@ export class ColorConfig {
     public static readonly select2OptGroup: string = "var(--select2-opt-group)";
     public static readonly inputBoxOutline: string = "var(--input-box-outline)";
     public static readonly muteButtonNormal: string = "var(--mute-button-normal)";
+	public static readonly muteButtonDrum: string = "var(--mute-button-drum)";
     public static readonly muteButtonMod: string = "var(--mute-button-mod)";
     public static readonly modLabelPrimary: string = "var(--mod-label-primary)";
     public static readonly modLabelSecondaryText: string = "var(--mod-label-secondary-text)";
