@@ -1225,7 +1225,7 @@ export class Instrument {
     public legacyTieOver: boolean = false;
     public clicklessTransition: boolean = false;
     public aliases: boolean = false;
-    public percussion: boolean = false;
+    public percussion: boolean = true;
     public songDetuneEffected: boolean = true;
     /*public cycleA: number = 1;
     public cycleB: number = 1;
@@ -1342,7 +1342,7 @@ export class Instrument {
         this.strumSpeed = 1;
         this.legacyTieOver = false;
         this.aliases = false;
-        this.percussion = false;
+        this.percussion = true;
         this.songDetuneEffected = true;
         this.fadeIn = 0;
         this.fadeOut = Config.fadeOutNeutral;
@@ -2161,7 +2161,7 @@ export class Instrument {
             if (instrumentObject["percussion"] != undefined) {
                 this.percussion = instrumentObject["percussion"];
             } else {
-                this.percussion = false;
+                this.percussion = true;
             }
 
             if (instrumentObject["songDetuneEffected"] != undefined) {
@@ -2366,6 +2366,7 @@ export class Song {
     public subtitle: string;
     public scale: number;
     public key: number;
+    //public octave: number;
     public tempo: number;
     public reverb: number;
     public beatsPerBar: number;
@@ -2511,6 +2512,7 @@ export class Song {
     public initToDefault(andResetChannels: boolean = true): void {
         this.scale = 0;
         this.key = 0;
+        //this.octave = 0;
         this.loopStart = 0;
         this.loopLength = 8;
         this.tempo = 150;
@@ -2594,7 +2596,7 @@ export class Song {
 
         buffer.push(SongTagCode.channelCount, base64IntToCharCode[this.pitchChannelCount], base64IntToCharCode[this.noiseChannelCount], base64IntToCharCode[this.modChannelCount]);
         buffer.push(SongTagCode.scale, base64IntToCharCode[this.scale]);
-        buffer.push(SongTagCode.key, base64IntToCharCode[this.key]);
+        buffer.push(SongTagCode.key, base64IntToCharCode[this.key]);//, base64IntToCharCode[this.octave - Config.octaveMin]);
         buffer.push(SongTagCode.loopStart, base64IntToCharCode[this.loopStart >> 6], base64IntToCharCode[this.loopStart & 0x3f]);
         buffer.push(SongTagCode.loopEnd, base64IntToCharCode[(this.loopLength - 1) >> 6], base64IntToCharCode[(this.loopLength - 1) & 0x3f]);
         buffer.push(SongTagCode.tempo, base64IntToCharCode[this.tempo >> 6], base64IntToCharCode[this.tempo & 0x3F]);
@@ -5492,7 +5494,7 @@ class EnvelopeComputer {
         }
         this._modifiedEnvelopeCount = 0;
     }
-    // MID TODO: Hey looks its your good friend. Wanted to remind you that SOME ENVELOPES BE BROKEN. FIX EM NOW.
+
     public static computeEnvelope(envelope: Envelope, time: number, beats: number, noteSize: number): number {
         switch (envelope.type) {
             case EnvelopeType.noteSize: return Synth.noteSizeToVolumeMult(noteSize);
@@ -5760,7 +5762,7 @@ class InstrumentState {
     public reverbShelfPrevInput2: number = 0.0;
     public reverbShelfPrevInput3: number = 0.0;
 
-    //public readonly envelopeComputer: EnvelopeComputer = new EnvelopeComputer(false);
+    public readonly envelopeComputer: EnvelopeComputer = new EnvelopeComputer();
 
     public readonly spectrumWave: SpectrumWaveState = new SpectrumWaveState();
     public readonly harmonicsWave: HarmonicsWaveState = new HarmonicsWaveState();
@@ -5925,9 +5927,11 @@ class InstrumentState {
                 useDistortionStart = synth.getModValue(Config.modulators.dictionary["distortion"].index, channelIndex, instrumentIndex, false);
                 useDistortionEnd = synth.getModValue(Config.modulators.dictionary["distortion"].index, channelIndex, instrumentIndex, true);
             }
-
-            const distortionSliderStart = Math.min(1.0, /*envelopeStarts[InstrumentAutomationIndex.distortion] **/ useDistortionStart / (Config.distortionRange - 1));
-            const distortionSliderEnd = Math.min(1.0, /*envelopeEnds[  InstrumentAutomationIndex.distortion] **/ useDistortionEnd / (Config.distortionRange - 1));
+// MID TODO: Distortion Envelope.
+            //const envelopeStart: number = envelopeStarts[EnvelopeComputeIndex.distortion];
+            //const envelopeEnd: number = envelopeEnds[EnvelopeComputeIndex.distortion];
+            const distortionSliderStart = Math.min(1.0, useDistortionStart / (Config.distortionRange - 1));
+            const distortionSliderEnd = Math.min(1.0, useDistortionEnd / (Config.distortionRange - 1));
             const distortionStart: number = Math.pow(1.0 - 0.895 * (Math.pow(20.0, distortionSliderStart) - 1.0) / 19.0, 2.0);
             const distortionEnd: number = Math.pow(1.0 - 0.895 * (Math.pow(20.0, distortionSliderEnd) - 1.0) / 19.0, 2.0);
             const distortionDriveStart: number = (1.0 + 2.0 * distortionSliderStart) / Config.distortionBaseVolume;
@@ -5958,7 +5962,7 @@ class InstrumentState {
             }
 
             let basePitch: number = Config.keys[synth.song!.key].basePitch; // TODO: What if there's a key change mid-song?
-            if (usesPercussion && instrument.percussion) {
+            if (usesPercussion && (instrument.percussion == false)) {
                 basePitch = 12;
             }
             const freqStart: number = Instrument.frequencyFromPitch(basePitch + 60) * Math.pow(2.0, (Config.bitcrusherFreqRange - 1 - freqSettingStart) * Config.bitcrusherOctaveStep);
@@ -8327,7 +8331,7 @@ export class Synth {
 
         let expressionReferencePitch: number = 16; // A low "E" as a MIDI pitch.
         let basePitch: number = Config.keys[song.key].basePitch;
-        if (effectsIncludePercussion(instrument.effects) && instrument.percussion) {
+        if (effectsIncludePercussion(instrument.effects) && (instrument.percussion == false)) {
             basePitch = 12;
         }
         let baseExpression: number = 1.0;

@@ -469,7 +469,7 @@ export class TipPrompt implements Prompt {
 				message = div(
 					h2("Key-Affected"),
 					p("The percussion effect is a bit different from the rest, more focused on features for your drums. It comes with this checkbox."),
-					p("When the box is checked, the instrument will not be affected by song key."),
+					p("When the box is unchecked, the instrument will not be affected by song key."),
 					p("This allows changing your song key without messing up the pitches of your instrument-drums."),
 					p("[Massive thanks to LeoV for making this checkbox.]"),
 				);
