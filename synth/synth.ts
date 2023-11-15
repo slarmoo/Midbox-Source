@@ -5503,6 +5503,10 @@ class EnvelopeComputer {
             case EnvelopeType.swell: return 1.0 - 1.0 / (1.0 + time * envelope.speed);
             case EnvelopeType.tremolo: return 0.5 - Math.cos(beats * 2.0 * Math.PI * envelope.speed) * 0.5;
             case EnvelopeType.tremolo2: return 0.75 - Math.cos(beats * 2.0 * Math.PI * envelope.speed) * 0.25;
+            case EnvelopeType.tremolo3: return 0.875 - Math.cos(beats * 2.0 * Math.PI * envelope.speed) * 0.125;
+            case EnvelopeType.triptremolo: return 0.5 - Math.cos(beats * 3.0 * Math.PI * envelope.speed) * 0.5;
+            case EnvelopeType.triptremolo2: return 0.75 - Math.cos(beats * 3.0 * Math.PI * envelope.speed) * 0.25;
+            case EnvelopeType.triptremolo3: return 0.875 - Math.cos(beats * 3.0 * Math.PI * envelope.speed) * 0.125;
             case EnvelopeType.punch: return Math.max(1.0, 2.0 - time * 10.0);
             case EnvelopeType.flare: const attack: number = 0.25 / Math.sqrt(envelope.speed); return time < attack ? time / attack : 1.0 / (1.0 + (time - attack) * envelope.speed);
             case EnvelopeType.decay: return Math.pow(2, -envelope.speed * time);
@@ -5511,7 +5515,7 @@ class EnvelopeComputer {
             case EnvelopeType.modboxBlip: {const endTime1: number = 0.25 / Math.sqrt(envelope.speed); const endTime2: number = 0.7 / Math.sqrt(envelope.speed); const zeroIntercept: number = 2; const startValue2: number = 0.9; return time < endTime1 ? ((startValue2 - zeroIntercept) / endTime1) * time + zeroIntercept : time < endTime2 ? ((1 - startValue2) / (endTime2 - endTime1)) * (time - endTime1) + startValue2 : 1.0;}
             case EnvelopeType.modboxClick: {const attack: number = 0.25 / envelope.speed; const zeroIntercept = 9.5; return time < attack ? (time * ((-zeroIntercept) + 1) - attack * (-zeroIntercept)) / attack : 1.0;}
             case EnvelopeType.modboxBow: {const attack = 0.25 / Math.sqrt(envelope.speed); const zeroIntercept = -0.40; return time < attack ? (time * ((-zeroIntercept) + 1) - attack * (-zeroIntercept)) / attack : 1.0;}
-            // The next three were yoinked from Goldbox.
+            // The next three were yoinked from Goldbox, as you can tell from the sudden code layout change.
             case EnvelopeType.wibble:
                 let temp = 0.5 - Math.cos(beats * envelope.speed) * 0.5;
                 temp = 1.0 / (1.0 + time * (envelope.speed - (temp / (1.5 / envelope.speed))));

@@ -24,6 +24,7 @@ import { EnvelopeEditor } from "./EnvelopeEditor";
 import { FadeInOutEditor } from "./FadeInOutEditor";
 import { FilterEditor } from "./FilterEditor";
 import { LimiterPrompt } from "./LimiterPrompt";
+import { RandomGenPrompt } from "./RandomGenPrompt";
 import { LoopEditor } from "./LoopEditor";
 import { MoveNotesSidewaysPrompt } from "./MoveNotesSidewaysPrompt";
 import { MuteEditor } from "./MuteEditor";
@@ -375,6 +376,7 @@ export class SongEditor {
         option({ value: "barCount" }, (_.songLengthLabel)),
         option({ value: "channelSettings" }, (_.channelSettingsLabel)),
         option({ value: "limiterSettings" }, (_.limiterSettingsLabel)),
+        option({ value: "randomGenSettings"}, (_.randomGenSettingsLabel) + EditorConfig.ctrlSymbol + "R)"),
     );
     private readonly _optionsMenu: HTMLSelectElement = select({ style: "width: 100%;" },
         option({ selected: true, disabled: true, hidden: false }, span(_.preferenceSettingsLabel)), // todo: "hidden" should be true but looks wrong on mac chrome, adds checkmark next to first visible option even though it's not selected. :(
@@ -1614,6 +1616,9 @@ export class SongEditor {
                     break;
                 case "limiterSettings":
                     this.prompt = new LimiterPrompt(this._doc, this);
+                    break;
+                case "randomGenSettings":
+                    this.prompt = new RandomGenPrompt(this._doc);
                     break;
                 /*case "harmonicsSettings":
                     this.prompt = new HarmonicsPrompt(this._doc, this);
@@ -3461,14 +3466,14 @@ export class SongEditor {
                 break;
             case 82: // r
                 if (canPlayNotes) break;
-                if (needControlForShortcuts == (event.ctrlKey || event.metaKey)) {
                     if (event.shiftKey) {
                         this._randomGenerated();
+                    } else if (event.ctrlKey || event.metaKey){
+                        this._openPrompt("randomGenSettings");
                     } else {
                         this._randomPreset();
                     }
                     event.preventDefault();
-                }
                 break;
             case 219: // left brace
                 if (canPlayNotes) break;
@@ -4134,6 +4139,9 @@ export class SongEditor {
                 break;
             case "limiterSettings":
                 this._openPrompt("limiterSettings");
+                break;
+            case "randomGenSettings":
+                this._openPrompt("randomGenSettings");
                 break;
         }
         this._editMenu.selectedIndex = 0;

@@ -211,6 +211,7 @@ export class Localization {
     public static songLengthLabel: string = "Change Song Length... (L)";
     public static channelSettingsLabel: string = "Channel Settings... (Q)";
     public static limiterSettingsLabel: string = "Limiter Settings... (⇧L)";
+    public static randomGenSettingsLabel: string = "Random Generation Settings... (";
     public static autoPlayLabel: string = "Auto Play on Load";
     public static autoFollowLabel: string = "Keep Current Pattern Selected";
     public static enableNotePreviewLabel: string = "Preview Added Notes";
@@ -1028,6 +1029,7 @@ if (language == "spanish") {
     Localization.songLengthLabel = "Cambiar Duración de la Canción... (L)";
     Localization.channelSettingsLabel = "Configuración del Canal[es]... (Q)";
     Localization.limiterSettingsLabel = "Configuración del Limitador... (⇧L)";
+    Localization.randomGenSettingsLabel = "Configuración de Aleatorización... (";
     Localization.autoPlayLabel = "Reproducir Después de Cargar";
     Localization.autoFollowLabel = "Mantener Seleccionado el Canal Actual";
     Localization.enableNotePreviewLabel = "Escuchar Notas Añadidas";
