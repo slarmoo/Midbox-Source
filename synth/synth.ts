@@ -2858,7 +2858,7 @@ export class Song {
                     buffer.push(SongTagCode.unison, base64IntToCharCode[instrument.unison]);
                     buffer.push(SongTagCode.drumsetEnvelopes);
                     for (let j: number = 0; j < Config.drumCount; j++) {
-                        buffer.push(base64IntToCharCode[instrument.drumsetEnvelopes[j]]);
+                        buffer.push(base64IntToCharCode[instrument.drumsetEnvelopes[j] >> 6], base64IntToCharCode[instrument.drumsetEnvelopes[j] & 0x3f]);
                     }
 
                     buffer.push(SongTagCode.spectrum);
@@ -2894,7 +2894,7 @@ export class Song {
                     if (Config.instrumentAutomationTargets[instrument.envelopes[envelopeIndex].target].maxCount > 1) {
                         buffer.push(base64IntToCharCode[instrument.envelopes[envelopeIndex].index]);
                     }
-                    buffer.push(base64IntToCharCode[instrument.envelopes[envelopeIndex].envelope]);
+                    buffer.push(base64IntToCharCode[instrument.envelopes[envelopeIndex].envelope >> 6], base64IntToCharCode[instrument.envelopes[envelopeIndex].envelope & 0x3F]);
                 }
             }
         }
@@ -3637,7 +3637,7 @@ export class Song {
                 } else {
                     // This tag is now only used for drumset filter envelopes.
                     for (let i: number = 0; i < Config.drumCount; i++) {
-                        instrument.drumsetEnvelopes[i] = clamp(0, Config.envelopes.length, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
+                        instrument.drumsetEnvelopes[i] = clamp(0, Config.envelopes.length, (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] << 6) + base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                     }
                 }
             } break;
@@ -4244,7 +4244,7 @@ export class Song {
                         if (maxCount > 1) {
                             index = clamp(0, maxCount, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                         }
-                        const envelope: number = clamp(0, Config.envelopes.length, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
+                        const envelope: number = clamp(0, Config.envelopes.length, (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] << 6) + base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                         instrument.addEnvelope(target, index, envelope);
                     }
                 }

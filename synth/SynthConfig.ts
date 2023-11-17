@@ -308,7 +308,7 @@ export class Config {
     public static readonly octaveMin:                 number = -3;
 	public static readonly octaveMax:                 number = 3;
     public static readonly echoDelayRange:            number = 48;
-    public static readonly echoDelayStepTicks:        number = 8;
+    public static readonly echoDelayStepTicks:        number = 4;
     public static readonly echoSustainRange:          number = 8;
     public static readonly echoShelfHz:               number = 4000.0; 
     public static readonly echoShelfGain:             number = Math.pow(2.0, -0.5);
@@ -421,7 +421,6 @@ export class Config {
     public static readonly fadeInRange:                number = 12;
     public static readonly fadeOutTicks:               ReadonlyArray<number> = [-48, -36, -24, -12, -6, -3, -1, 6, 12, 24, 36, 48, 60, 72, 84, 96, 128, 160];
     public static readonly fadeOutNeutral:             number = 6;
-//  MID TODO: See those three things above me? Add more options to fade. Perhaps extend the reach as well.
     public static readonly drumsetFadeOutTicks:        number = 48;
     public static readonly transitions: DictionaryArray<Transition> = toNameMap([
         { name: "normal",              isSeamless: false, continues: false, slides: false, slideTicks: 3, includeAdjacentPatterns: false },

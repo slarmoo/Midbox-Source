@@ -585,11 +585,14 @@ export class Localization {
     public static midboxMiscPresets30Label: string = "harsh mechanical bass";
     public static midboxMiscPresets31Label: string = "sine synth pluck";
     public static midboxMiscPresets32Label: string = "punch synth";
-    public static midboxMiscPresets33Label: string = "electronic pluck";
+    public static midboxMiscPresets33Label: string = "electronic pluck 1";
     public static midboxMiscPresets34Label: string = "growling bass";
     public static midboxMiscPresets35Label: string = "freq-crushed xylophone";
     public static midboxMiscPresets36Label: string = "scream";
     public static midboxMiscPresets37Label: string = "electric guitar";
+    public static midboxMiscPresets38Label: string = "electronic pluck 2";
+    public static midboxMiscPresets39Label: string = "chorus bass";
+    public static midboxMiscPresets40Label: string = "pulse synth";
     public static midboxDubstepPresets1Label: string = "dubstep bwayyyy";
     public static midboxDubstepPresets2Label: string = "dubstep bass hum";
     public static midboxDubstepPresets3Label: string = "dubstep yaa";
@@ -632,6 +635,7 @@ export class Localization {
     public static midboxLeadPresets10Label: string = "squealing lead";
     public static midboxLeadPresets11Label: string = "distorted lead 2";
     public static midboxLeadPresets12Label: string = "random lead distortion";
+    public static midboxLeadPresets13Label: string = "harmonized chipwave";
     public static midboxFMPresets1Label: string = "FM electronic guitar";
     public static midboxFMPresets2Label: string = "FM electronic bass";
     public static midboxFMPresets3Label: string = "FM guitar";
