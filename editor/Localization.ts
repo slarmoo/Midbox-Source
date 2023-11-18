@@ -593,6 +593,10 @@ export class Localization {
     public static midboxMiscPresets38Label: string = "electronic pluck 2";
     public static midboxMiscPresets39Label: string = "chorus bass";
     public static midboxMiscPresets40Label: string = "pulse synth";
+    public static midboxMiscPresets41Label: string = "smooth bass";
+    public static midboxMiscPresets42Label: string = "supersaw brass";
+    public static midboxMiscPresets43Label: string = "supersaw dist. guitar";
+    public static midboxMiscPresets44Label: string = "supersaw click";
     public static midboxDubstepPresets1Label: string = "dubstep bwayyyy";
     public static midboxDubstepPresets2Label: string = "dubstep bass hum";
     public static midboxDubstepPresets3Label: string = "dubstep yaa";
@@ -608,6 +612,10 @@ export class Localization {
     public static midboxDubstepPresets13Label: string = "heavy growl";
     public static midboxDubstepPresets14Label: string = "bouncy wub";
     public static midboxDubstepPresets15Label: string = "dubstep lead 2";
+    public static midboxDubstepPresets16Label: string = "dubstep grinder 1";
+    public static midboxDubstepPresets17Label: string = "dubstep grinder 2";
+    public static midboxDubstepPresets18Label: string = "dubstep robot";
+    public static midboxDubstepPresets19Label: string = "terror";
     public static midboxNoisePresets1Label: string = "hollow retro riser";
     public static midboxNoisePresets2Label: string = "hollow snare-clap";
     public static midboxDrumPresets1Label: string = "enhanced synth kick";
@@ -636,6 +644,7 @@ export class Localization {
     public static midboxLeadPresets11Label: string = "distorted lead 2";
     public static midboxLeadPresets12Label: string = "random lead distortion";
     public static midboxLeadPresets13Label: string = "harmonized chipwave";
+    public static midboxLeadPresets14Label: string = "freq-crushed sawtooth lead";
     public static midboxFMPresets1Label: string = "FM electronic guitar";
     public static midboxFMPresets2Label: string = "FM electronic bass";
     public static midboxFMPresets3Label: string = "FM guitar";
