@@ -32,6 +32,7 @@ export class Preferences {
 	public metronomeCountIn: boolean;
 	public metronomeWhileRecording: boolean;
 	public showOscilloscope: boolean;
+	public unisonOnRandomization: boolean;
 	
 	constructor() {
 		this.reload();
@@ -63,6 +64,7 @@ export class Preferences {
 		this.layout = window.localStorage.getItem("layout") || "small";
 		this.colorTheme = window.localStorage.getItem("colorTheme") || "dark classic";
 		this.visibleOctaves = ((<any>window.localStorage.getItem("visibleOctaves")) >>> 0) || Preferences.defaultVisibleOctaves;
+		this.unisonOnRandomization = window.localStorage.getItem("unisonOnRandomization") != "false";
 		
 		const defaultScale: Scale | undefined = Config.scales.dictionary[window.localStorage.getItem("defaultScale")!];
 		this.defaultScale = (defaultScale != undefined) ? defaultScale.index : 0;
@@ -105,5 +107,6 @@ export class Preferences {
 		window.localStorage.setItem("colorTheme", this.colorTheme);
 		window.localStorage.setItem("volume", String(this.volume));
 		window.localStorage.setItem("visibleOctaves", String(this.visibleOctaves));
+		window.localStorage.setItem("unisonOnRandomization", this.unisonOnRandomization ? "true" : "false");
 	}
 }

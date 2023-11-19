@@ -470,6 +470,7 @@ export class ChangePreset extends Change {
 }
 
 export class ChangeRandomGeneratedInstrument extends Change {
+    private _doc: SongDocument;
     constructor(doc: SongDocument) {
         super();
 
@@ -838,13 +839,13 @@ export class ChangeRandomGeneratedInstrument extends Change {
                 { item: InstrumentType.fm, weight: 3 },
                 { item: InstrumentType.supersaw, weight: 3 },
                 { item: InstrumentType.customChipWave, weight: 3 },
-                // MID TODO: Add custom chip as an available random-gen instrument type.
+                // MID TODO: Finish custom chip.
             ]);
             instrument.preset = instrument.type = type;
 
             instrument.fadeIn = (Math.random() < 0.5) ? 0 : selectCurvedDistribution(0, Config.fadeInRange - 1, 0, 2);
             instrument.fadeOut = selectCurvedDistribution(0, Config.fadeOutTicks.length - 1, Config.fadeOutNeutral, 2);
-            if (type == InstrumentType.chip || type == InstrumentType.harmonics || type == InstrumentType.pickedString || type == InstrumentType.customChipWave || type == InstrumentType.pwm || type == InstrumentType.spectrum) {
+            if (this._doc.prefs.unisonOnRandomization && (type == InstrumentType.chip || type == InstrumentType.harmonics || type == InstrumentType.pickedString || type == InstrumentType.customChipWave || type == InstrumentType.pwm || type == InstrumentType.spectrum)) {
                 instrument.unison = Config.unisons.dictionary[selectWeightedRandom([
                     { item: "none", weight: 20 },
                     { item: "shimmer", weight: 2 },

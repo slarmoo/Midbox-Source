@@ -50,11 +50,43 @@ export class RandomGenPrompt implements Prompt {
     option({value: "customChipGenerateFully"}, "Fully Random"),
     );
 
+    private readonly _FMAlgorithmBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _FMOpFrequencyBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _FMOpVolumeBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _FMOpWaveformBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _FMFeedbackBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _FMFeedbackVolumeBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+
+    private readonly _transitionTypeBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _clicklessBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _chordTypeBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _strumSpeedBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _arpeggioSpeedBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _arpeggioFastTwoNoteBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _pitchShiftBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _detuneBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _vibratoBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _vibratoDepthBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _vibratoSpeedBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _vibratoDelayBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _vibratoTypeBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _distortionBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _aliasingBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _bitCrushBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _freqCrushBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _chorusBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _echoSustainBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _echoDelayBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _reverbBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _keyAffectedBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _SDAffectedBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+
+    private readonly _envelopeBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
 
     private readonly _cancelButton: HTMLButtonElement = button({class: "cancelButton"});
 	private readonly _okayButton: HTMLButtonElement = button({class: "okayButton", style: "width:45%;"}, _.confirmLabel);
 
-public readonly container: HTMLDivElement = div({class: "prompt noSelection", style: "width: 285px; text-align: center; max-height: 60%; overflow-y: auto;"},
+public readonly container: HTMLDivElement = div({class: "prompt noSelection", style: "width: 285px; text-align: center; max-height: 30%; overflow-y: auto;"},
     h2({style: "text-align: center;"},
         "Random Generation Settings"),
     div({style: "display: flex; overflow-y: auto; overflow-x: hidden; flex-shrink: 1;"},
@@ -215,6 +247,135 @@ public readonly container: HTMLDivElement = div({class: "prompt noSelection", st
 			"Custom Chip Waveform:",
 			this._customChipGenerationType,
         ),
+    h4({style: "display: flex; flex-direction: row; text-align: center; align-items: center; height: 0.5em; justify-content: flex-end;"},
+        "FM-Centric",
+    ),    
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"FM Algorithm:",
+			this._FMAlgorithmBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+            "FM Operator Frequency:",
+            this._FMOpFrequencyBox,
+    ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"FM Operator Volume:",
+			this._FMOpVolumeBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"FM Operator Waveform:",
+			this._FMOpWaveformBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"FM Feedback:",
+			this._FMFeedbackBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"FM Feedback Volume:",
+			this._FMFeedbackVolumeBox,
+        ),
+    h4({style: "display: flex; flex-direction: row; text-align: center; align-items: center; height: 0.5em; justify-content: flex-end;"},
+        "Effects",
+    ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Transition Type:",
+			this._transitionTypeBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Clickless Transition:",
+			this._clicklessBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Chord Type:",
+			this._chordTypeBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Strum Speed:",
+			this._strumSpeedBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Arpeggio Speed:",
+			this._arpeggioSpeedBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Fast Two-Note Arpeggio:",
+			this._arpeggioFastTwoNoteBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Pitch Shift:",
+			this._pitchShiftBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Detune:",
+			this._detuneBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Vibrato:",
+			this._vibratoBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Vibrato Depth:",
+			this._vibratoDepthBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Vibrato Speed:",
+			this._vibratoSpeedBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Vibrato Delay:",
+			this._vibratoDelayBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Vibrato Type:",
+			this._vibratoTypeBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Distortion:",
+			this._distortionBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Aliasing:",
+			this._aliasingBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Bit Crush:",
+			this._bitCrushBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Freq Crush:",
+			this._freqCrushBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Chorus:",
+			this._chorusBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Echo Sustain:",
+			this._echoSustainBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Echo Delay:",
+			this._echoDelayBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Reverb:",
+			this._reverbBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Song Key-Affected:",
+			this._keyAffectedBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"SD-Affected:",
+			this._SDAffectedBox,
+        ),
+    h4({style: "display: flex; flex-direction: row; text-align: center; align-items: center; height: 0.5em; justify-content: flex-end;"},
+        "Envelopes",
+    ),  
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"All Envelopes:",
+			this._envelopeBox,
+        ),
     label({style: "display: flex; flex-direction: row-reverse; justify-content: space-between;"},
 			this._okayButton,
 		),
@@ -237,7 +398,7 @@ constructor(private _doc: SongDocument) {
     this._panBox.checked = this._doc.panningOnRandomization;
     this._panDelayBox.checked = this._doc.panDelayOnRandomization;
     this._fadeBox.checked = this._doc.fadeOnRandomization;
-    this._unisonBox.checked = this._doc.unisonOnRandomization;
+    this._unisonBox.checked = this._doc.prefs.unisonOnRandomization;
     this._EQFilterBox.checked = this._doc.EQFilterOnRandomization;
     this._EQFilterCutBox.checked = this._doc.EQFilterCutOnRandomization;
     this._EQFilterPeakBox.checked = this._doc.EQFilterPeakOnRandomization;
@@ -257,6 +418,36 @@ constructor(private _doc: SongDocument) {
     this._spectrumEditorBox.checked = this._doc.spectrumEditorOnRandomization;
     this._customChipWaveBox.checked = this._doc.customChipWaveOnRandomization;
     this._customChipGenerationType.value = this._doc.customChipGenerationType;
+    this._FMAlgorithmBox.checked = this._doc.FMAlgorithmOnRandomization;
+    this._FMOpFrequencyBox.checked = this._doc.FMOpFrequencyOnRandomization;
+    this._FMOpVolumeBox.checked = this._doc.FMOpVolumeOnRandomization;
+    this._FMOpWaveformBox.checked = this._doc.FMOpWaveformOnRandomization;
+    this._FMFeedbackBox.checked = this._doc.FMFeedbackOnRandomization;
+    this._FMFeedbackVolumeBox.checked = this._doc.FMFeedbackVolumeOnRandomization;
+    this._transitionTypeBox.checked = this._doc.transitionTypeOnRandomization;
+    this._clicklessBox.checked = this._doc.clicklessTransitionOnRandomization;
+    this._chordTypeBox.checked = this._doc.chordTypeOnRandomization;
+    this._strumSpeedBox.checked = this._doc.strumSpeedOnRandomization;
+    this._arpeggioSpeedBox.checked = this._doc.arpeggioSpeedOnRandomization;
+    this._arpeggioFastTwoNoteBox.checked = this._doc.arpeggioFastTwoNoteOnRandomization;
+    this._pitchShiftBox.checked = this._doc.pitchShiftOnRandomization;
+    this._detuneBox.checked = this._doc.detuneOnRandomization;
+    this._vibratoBox.checked = this._doc.vibratoOnRandomization;
+    this._vibratoDepthBox.checked = this._doc.vibratoDepthOnRandomization;
+    this._vibratoSpeedBox.checked = this._doc.vibratoSpeedOnRandomization;
+    this._vibratoDelayBox.checked = this._doc.vibratoDelayOnRandomization;
+    this._vibratoTypeBox.checked = this._doc.vibratoTypeOnRandomization;
+    this._distortionBox.checked = this._doc.distortionOnRandomization;
+    this._aliasingBox.checked = this._doc.aliasingOnRandomization;
+    this._bitCrushBox.checked = this._doc.bitCrushOnRandomization;
+    this._freqCrushBox.checked = this._doc.freqCrushOnRandomization;
+    this._chorusBox.checked = this._doc.chorusOnRandomization;
+    this._echoSustainBox.checked = this._doc.echoSustainOnRandomization;
+    this._echoDelayBox.checked = this._doc.echoDelayOnRandomization;
+    this._reverbBox.checked = this._doc.reverbOnRandomization;
+    this._keyAffectedBox.checked = this._doc.keyAffectedOnRandomization;
+    this._SDAffectedBox.checked = this._doc.SDAffectedOnRandomization;
+    this._envelopeBox.checked = this._doc.envelopesOnRandomization;
 
     this._okayButton.addEventListener("click", this._confirm);
 	this._cancelButton.addEventListener("click", this._close);
@@ -268,6 +459,7 @@ private _close = (): void => {
 }
 
 private _confirm = (): void => { 
+    this._doc.prefs.unisonOnRandomization = this._unisonBox.checked;
     this._doc.prefs.save();
 	this._close();
 }

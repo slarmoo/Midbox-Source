@@ -5569,6 +5569,8 @@ class Tone {
     public liveInputSamplesHeld: number = 0;
     public lastInterval: number = 0;
     public noiseSample: number = 0.0;
+    public noiseSampleA: number = 0.0;
+    public noiseSampleB: number = 0.0;
     public stringSustainStart: number = 0;
     public stringSustainEnd: number = 0;
     public readonly phases: number[] = [];
@@ -10173,7 +10175,7 @@ export class Synth {
             let pulseWaveB: number = sawPhaseD - sawPhaseC;
 
             // This is a PolyBLEP, which smooths out discontinuities at any frequency to reduce aliasing. 
-            if (instrumentState.aliases) {
+            if (!instrumentState.aliases) {
                 if (sawPhaseA < phaseDeltaA) {
                     var t = sawPhaseA / phaseDeltaA;
                     pulseWaveA += (t + t - t * t - 1) * 0.5;
@@ -10469,8 +10471,8 @@ export class Synth {
         const phaseDeltaScaleB: number = +tone.phaseDeltaScales[1];
         let expression: number = +tone.expression;
         const expressionDelta: number = +tone.expressionDelta;
-        let noiseSampleA: number = +tone.noiseSample;
-        let noiseSampleB: number = +tone.noiseSample;
+        let noiseSampleA: number = +tone.noiseSampleA;
+        let noiseSampleB: number = +tone.noiseSampleB;
 
         const filters: DynamicBiquadFilter[] = tone.noteFilters;
         const filterCount: number = tone.noteFilterCount | 0;
@@ -10528,8 +10530,8 @@ export class Synth {
         tone.phaseDeltas[0] = phaseDeltaA / samplesInPeriod;
         tone.phaseDeltas[1] = phaseDeltaB / samplesInPeriod;
         tone.expression = expression;
-        tone.noiseSample = noiseSampleA;
-        tone.noiseSample = noiseSampleB;
+        tone.noiseSampleA = noiseSampleA;
+        tone.noiseSampleB = noiseSampleB;
 
         synth.sanitizeFilters(filters);
         tone.initialNoteFilterInput1 = initialFilterInput1;

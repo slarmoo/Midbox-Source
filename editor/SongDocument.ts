@@ -92,6 +92,36 @@ export class SongDocument {
     public spectrumEditorOnRandomization: boolean = true;
     public customChipWaveOnRandomization: boolean = true;
     public customChipGenerationType: string = "customChipGenerateAlgorithm";
+	public FMAlgorithmOnRandomization: boolean = true;
+	public FMOpFrequencyOnRandomization: boolean = true;
+	public FMOpVolumeOnRandomization: boolean = true;
+	public FMOpWaveformOnRandomization: boolean = true;
+	public FMFeedbackOnRandomization: boolean = true;
+	public FMFeedbackVolumeOnRandomization: boolean = true;
+	public transitionTypeOnRandomization: boolean = true;
+	public clicklessTransitionOnRandomization: boolean = false;
+	public chordTypeOnRandomization: boolean = true;
+	public strumSpeedOnRandomization: boolean = false;
+	public arpeggioSpeedOnRandomization: boolean = false;
+	public arpeggioFastTwoNoteOnRandomization: boolean = false;
+	public pitchShiftOnRandomization: boolean = true;
+	public detuneOnRandomization: boolean = false;
+	public vibratoOnRandomization: boolean = true;
+	public vibratoDepthOnRandomization: boolean = false;
+	public vibratoSpeedOnRandomization: boolean = false;
+	public vibratoDelayOnRandomization: boolean = false;
+	public vibratoTypeOnRandomization: boolean = false;
+	public distortionOnRandomization: boolean = true;
+	public aliasingOnRandomization: boolean = false;
+	public bitCrushOnRandomization: boolean = true;
+	public freqCrushOnRandomization: boolean = true;
+	public chorusOnRandomization: boolean = true;
+	public echoSustainOnRandomization: boolean = true;
+	public echoDelayOnRandomization: boolean = true;
+	public reverbOnRandomization: boolean = true;
+	public keyAffectedOnRandomization: boolean = false;
+	public SDAffectedOnRandomization: boolean = false;
+	public envelopesOnRandomization: boolean = true;
 		
 	constructor() {
 		this.notifier.watch(this._validateDocState);
