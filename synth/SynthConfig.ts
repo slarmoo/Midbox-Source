@@ -327,7 +327,8 @@ export class Config {
     public static readonly partsPerBeat:              number = 24;
     public static readonly ticksPerPart:              number = 2;
     public static readonly ticksPerArpeggio:          number = 3;
-    public static readonly arpeggioPatterns:          ReadonlyArray<ReadonlyArray<number>> = [[0], [0, 1], [0, 1, 2, 1], [0, 1, 2, 3], [0, 1, 2, 3, 4], [0, 1, 2, 3, 4, 5], [0, 1, 2, 3, 4, 5, 6], [0, 1, 2, 3, 4, 5, 6, 7]];
+    public static readonly arpeggioPatterns:          ReadonlyArray<ReadonlyArray<number>> = [[0], [0, 1], [0, 1, 2, 1], [0, 1, 2, 3],       [0, 1, 2, 3, 4],          [0, 1, 2, 3, 4, 5],             [0, 1, 2, 3, 4, 5, 6],                [0, 1, 2, 3, 4, 5, 6, 7]                  ];
+    public static readonly bounceArpeggioPatterns:    ReadonlyArray<ReadonlyArray<number>> = [[0], [0, 1], [0, 1, 2, 1], [0, 1, 2, 3, 2, 1], [0, 1, 2, 3, 4, 3, 2, 1], [0, 1, 2, 3, 4, 5, 4, 3, 2, 1], [0, 1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 1], [0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1]];
     public static readonly rhythms: DictionaryArray<Rhythm> = toNameMap([
         { name: "÷3 (triplets)", stepsPerBeat: 3,  roundUpThresholds: [5, 12, 18    ]},
         { name: "÷4 (standard)", stepsPerBeat: 4,  roundUpThresholds: [3, 9,  17, 21]},
@@ -397,9 +398,9 @@ export class Config {
         { name: "retro clang",      expression: 1.0,   basePitch: 69,  pitchFilterMult: 1024.0, isSoft: false, samples: null },
         { name: "chime",            expression: 2,     basePitch: 69,  pitchFilterMult: 1.0,    isSoft: true,  samples: null },
         { name: "harsh",            expression: 10,    basePitch: 69,  pitchFilterMult: 1.0,    isSoft: true,  samples: null },
-        { name: "tick",             expression: 5.0,   basePitch: 96,  pitchFilterMult: 1024.0, isSoft: true,  samples: null },
+        { name: "tick",             expression: 1.0,   basePitch: 96,  pitchFilterMult: 1024.0, isSoft: true,  samples: null },
         { name: "trill",            expression: 1.0,   basePitch: 69,  pitchFilterMult: 1024.0, isSoft: true,  samples: null },
-        { name: "empty",            expression: 1.0,   basePitch: 96,  pitchFilterMult: 1024.0, isSoft: true,  samples: null },
+        { name: "empty",            expression: 0.55,  basePitch: 96,  pitchFilterMult: 1024.0, isSoft: true,  samples: null },
         { name: "detuned periodic", expression: 0.3,   basePitch: 69,  pitchFilterMult: 1024.0, isSoft: false, samples: null },
         { name: "snare",            expression: 1.0,   basePitch: 69,  pitchFilterMult: 1024.0, isSoft: false, samples: null },
     ]);
@@ -1262,7 +1263,7 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
                 drumBuffer = newBuffer;
             }
         } else if (index == 13) {
-            // The scrapped "tick" noise type from Zefbox.
+            // The scrapped "tick" noise type from Zefbox. Should be changed.
             let drumBuffer: number = 1;
             for (let i: number = 0; i < 32768; i++) {
                 wave[i] = (drumBuffer & 1) / 2.0 + 1.25;
@@ -1284,7 +1285,7 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
                 drumBuffer = newBuffer;
             }
         } else if (index == 15) {
-            // The "empty" noise type from Zefbox.
+            // The "empty" noise type from Zefbox. NOT FUNCTIONAL.
             drawNoiseSpectrum(wave, Config.chipNoiseLength, 1, 11, 4, 1, 0);
             drawNoiseSpectrum(wave, Config.chipNoiseLength, 11, 4, -2, -2, 0);
             inverseRealFourierTransform!(wave, Config.chipNoiseLength);
@@ -1418,8 +1419,8 @@ function generateRoundedSineWave() {
         }
         return wave;
 	}
-export function getArpeggioPitchIndex(pitchCount: number, useFastTwoNoteArp: boolean, arpeggio: number): number {
-    let arpeggioPattern: ReadonlyArray<number> = Config.arpeggioPatterns[pitchCount - 1];
+export function getArpeggioPitchIndex(pitchCount: number, useFastTwoNoteArp: boolean, useBounceArp: boolean, arpeggio: number): number {
+    let arpeggioPattern: ReadonlyArray<number> = (useBounceArp ? Config.bounceArpeggioPatterns : Config.arpeggioPatterns)[pitchCount - 1];
     if (arpeggioPattern != null) {
         if (pitchCount == 2 && useFastTwoNoteArp == false) {
             arpeggioPattern = [0, 0, 1, 1];

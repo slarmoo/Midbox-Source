@@ -776,7 +776,7 @@ export class ExportPrompt implements Prompt {
                                                 const midiTicksSinceBeat = (midiTickTime - barStartTime) % midiTicksPerBeat;
                                                 const midiTicksPerArpeggio = Config.ticksPerArpeggio * midiTicksPerPart / Config.ticksPerPart;
                                                 const arpeggio: number = Math.floor(midiTicksSinceBeat / midiTicksPerArpeggio);
-                                                nextPitch = note.pitches[toneIndex + getArpeggioPitchIndex(note.pitches.length - toneIndex, instrument.fastTwoNoteArp, arpeggio)];
+                                                nextPitch = note.pitches[toneIndex + getArpeggioPitchIndex(note.pitches.length - toneIndex, instrument.fastTwoNoteArp, instrument.bounceArp, arpeggio)];
                                             }
                                             nextPitch = channelRoot + nextPitch * intervalScale + pitchOffset;
                                             if (preset != null && preset.midiSubharmonicOctaves != undefined) {

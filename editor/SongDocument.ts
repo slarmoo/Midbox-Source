@@ -92,6 +92,9 @@ export class SongDocument {
     public spectrumEditorOnRandomization: boolean = true;
     public customChipWaveOnRandomization: boolean = true;
     public customChipGenerationType: string = "customChipGenerateAlgorithm";
+	public noiseTypeOnRandomization: boolean = true;
+	public drumsetSpectrumOnRandomization: boolean = true;
+	public drumsetEnvelopeOnRandomization: boolean = true;
 	public FMAlgorithmOnRandomization: boolean = true;
 	public FMOpFrequencyOnRandomization: boolean = true;
 	public FMOpVolumeOnRandomization: boolean = true;

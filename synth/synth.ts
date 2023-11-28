@@ -1221,6 +1221,7 @@ export class Instrument {
     public panDelay: number = 10;
     public arpeggioSpeed: number = 12;
     public fastTwoNoteArp: boolean = false;
+    public bounceArp: boolean = false;
     public strumSpeed: number = 1;
     public legacyTieOver: boolean = false;
     public clicklessTransition: boolean = false;
@@ -8745,7 +8746,7 @@ export class Synth {
             const arpeggiates: boolean = chord.arpeggiates;
             if (tone.pitchCount > 1 && arpeggiates) {
                 const arpeggio: number = Math.floor(instrument.arpTime / Config.ticksPerArpeggio);
-                arpeggioInterval = tone.pitches[getArpeggioPitchIndex(tone.pitchCount, instrument.fastTwoNoteArp, arpeggio)] - tone.pitches[0];
+                arpeggioInterval = tone.pitches[getArpeggioPitchIndex(tone.pitchCount, instrument.fastTwoNoteArp, instrument.bounceArp, arpeggio)] - tone.pitches[0];
             }
 
             const carrierCount: number = Config.algorithms[instrument.algorithm].carrierCount;
@@ -8869,11 +8870,11 @@ export class Synth {
             if (tone.pitchCount > 1 && (chord.arpeggiates || chord.customInterval)) {
                 const arpeggio: number = Math.floor(instrument.arpTime / Config.ticksPerArpeggio);
                 if (chord.customInterval) {
-                    const intervalOffset: number = tone.pitches[1 + getArpeggioPitchIndex(tone.pitchCount - 1, instrument.fastTwoNoteArp, arpeggio)] - tone.pitches[0];
+                    const intervalOffset: number = tone.pitches[1 + getArpeggioPitchIndex(tone.pitchCount - 1, instrument.fastTwoNoteArp, instrument.bounceArp, arpeggio)] - tone.pitches[0];
                     specialIntervalMult = Math.pow(2.0, intervalOffset / 12.0);
                     tone.specialIntervalExpressionMult = Math.pow(2.0, -intervalOffset / pitchDamping);
                 } else {
-                    pitch = tone.pitches[getArpeggioPitchIndex(tone.pitchCount, instrument.fastTwoNoteArp, arpeggio)];
+                    pitch = tone.pitches[getArpeggioPitchIndex(tone.pitchCount, instrument.fastTwoNoteArp, instrument.bounceArp, arpeggio)];
                 }
             }
 

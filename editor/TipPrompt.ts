@@ -109,6 +109,15 @@ export class TipPrompt implements Prompt {
 					);
 				}
 				break;
+			case "bounceArpeggio":
+				{
+					message = div(
+						h2("Bouncing Arpeggio"),
+						p("Arpeggios tend to go from the first placed note, to the next note that was placed, and rapidly does this process until the last note, which it then loops back to the first note."),
+						p("When this setting is ticked, the arpeggio will instead 'bounce' off the last note, going backwards rather than looping."),
+					);
+				}
+				break;
 			case "detune": {
 				message = div(
 					h2("Detune"),

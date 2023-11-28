@@ -316,7 +316,8 @@
                         About
                     </h2>
                     <p>
-                        Midbox is developed by Mid, of which, is pretty obvious. You can find him hanging out in the BeepBox discord!
+                        Midbox is developed by Mid. You can find him hanging out and developing Midbox in the BeepBox discord!
+                        Midbox is a mod of JummBox, which was made by Jummbus. 
                         BeepBox was originally developed by <a href="http://www.johnnesky.com" target="_blank">John Nesky</a>, also known as <a href="https://twitter.com/shaktool" target="_blank">Shaktool</a>. Check them out!
                     </p>
                     <p>
@@ -349,7 +350,7 @@
         // Randomize display of header
         // 1-in-10
         if (Math.floor(Math.random() * 10) == 0) {
-            switch (Math.floor(Math.random() * 7)) {
+            switch (Math.floor(Math.random() * 8)) {
                 case 0:
                     document.getElementById("midboxPlant").innerHTML = "  🍂";
                     break;
@@ -371,10 +372,13 @@
                 case 6: 
                     document.getElementById("midboxPlant").innerHTML = "  |  It was an attempt...";
                     break;
+                case 7: 
+                    document.getElementById("midboxPlant").innerHTML = "  V0.3";
+                    break;
             }
         }
         if (Math.floor(Math.random() * 1) == 0) {
-            switch (Math.floor(Math.random() * 84)) {
+            switch (Math.floor(Math.random() * 85)) {
                 case 0:
                     document.getElementById("randomText").innerHTML = "Let's make a song!";
                     break;
@@ -388,7 +392,7 @@
                     document.getElementById("randomText").innerHTML = "Who wants some <a href=\"https://soundcloud.com/nobonoko/strawberry-cake\">strawberry cake</a>?";
                     break;
                 case 4:
-                    document.getElementById("randomText").innerHTML = "Check out the <a href=\"https://www.youtube.com/@beepboxradio\">Beepbox Radio</a> hosted on every Saturday at 4PM EST!";
+                    document.getElementById("randomText").innerHTML = "Check out the <a href=\"https://www.youtube.com/@beepboxradio\">Beepbox Radio</a> (usually) hosted on every Saturday at 4PM EST!";
                     break;
                 case 5:
                     document.getElementById("randomText").innerHTML = "Wackybox";
@@ -397,7 +401,7 @@
                     document.getElementById("randomText").innerHTML = "Remember: Skittles aren't bars.";
                     break;
                 case 7:
-                    document.getElementById("randomText").innerHTML = "<PDBPX AS WE;;?";
+                    document.getElementById("randomText").innerHTML = "Do you use <pdbpx as we;;?";
                     break;
                 case 8:
                     document.getElementById("randomText").innerHTML = "When life gives you lemons... just throw that garbage away and make some music instead.";
@@ -421,13 +425,13 @@
                     document.getElementById("randomText").innerHTML = "Fun Fact: Midbox was planning to be named 'Bigbox' or 'Think Outside The Box'.";
                     break;
                 case 15:
-                    document.getElementById("randomText").innerHTML = "Thanks again to LeoV for the help on all of this!";
+                    document.getElementById("randomText").innerHTML = "Thanks again to LeoV and Main for the help on all of this!";
                     break;
                 case 16:
                     document.getElementById("randomText").innerHTML = "Also try <a href=\"https://ultraabox.github.io/\">Ultrabox</a>!";
                     break;
                 case 17:
-                    document.getElementById("randomText").innerHTML = "Tip: Try avoiding setting all of your instrument volumes near the minimum or maximum. Spreading out your mixing volume-wise is often gonna make the mix very messy. Try spreading your instruments out with panning or by multiple different octaves instead!";
+                    document.getElementById("randomText").innerHTML = "Spreading out your mixing volume-wise is often gonna make the mix very messy. Try spreading your instruments out with panning or by multiple different octaves instead!";
                     break;
                 case 18:
                     document.getElementById("randomText").innerHTML = "Now with spanish!";
@@ -439,10 +443,10 @@
                     document.getElementById("randomText").innerHTML = "This mod isn't meant to be impressive. It's meant to show how much I love this community!";
                     break;
                 case 21:
-                    document.getElementById("randomText").innerHTML = "Custom sampling will be introduced in 2087.";
+                    document.getElementById("randomText").innerHTML = "Custom sampling will be introduced into Midbox in 2087.";
                     break;
                 case 22:
-                    document.getElementById("randomText").innerHTML = "Oh you like Beepbox huh? Name every mod to ever exist.";
+                    document.getElementById("randomText").innerHTML = "Oh you like Beepbox huh? Say every feature in Beepbox and what their for.";
                     break;
                 case 23:
                     document.getElementById("randomText").innerHTML = "running out of text ideas aaaaaaaaaaaaaaa";
@@ -451,7 +455,7 @@
                     document.getElementById("randomText").innerHTML = "The bite of '87.";
                     break;
                 case 25:
-                    document.getElementById("randomText").innerHTML = "The 20th of Feburary, 2012. That is when this whole world had started. Thank you Shaktool for this gift.";
+                    document.getElementById("randomText").innerHTML = "Fun Fact: The 20th of Feburary, 2012 is when beepbox had started. Thanks Shaktool!";
                     break;
                 case 26:
                     document.getElementById("randomText").innerHTML = "Why don't you try to make your own mod too?";
@@ -626,6 +630,9 @@
                     break;
                 case 83:
                     document.getElementById("randomText").innerHTML = "By the time I am writing this, it is Nov 1, 2023.";
+                    break;
+                case 84:
+                    document.getElementById("randomText").innerHTML = "Tip: Try avoiding setting all of your instrument volumes near the minimum or maximum.";
                     break;
             }
         }

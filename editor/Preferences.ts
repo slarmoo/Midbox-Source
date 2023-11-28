@@ -33,6 +33,20 @@ export class Preferences {
 	public metronomeWhileRecording: boolean;
 	public showOscilloscope: boolean;
 	public unisonOnRandomization: boolean;
+	public chipWaveOnRandomization: boolean;
+	public PWMOnRandomization: boolean;
+	public supersawOnRandomization: boolean;
+	public harmonicsOnRandomization: boolean;
+	public pickedStringOnRandomization: boolean;
+	public spectrumOnRandomization: boolean;
+	public FMOnRandomization: boolean;
+	public customChipOnRandomization: boolean;
+	public drumSpectrumOnRandomization: boolean;
+	public noiseOnRandomization: boolean;
+	public drumsetOnRandomization: boolean;
+	public fadeOnRandomization: boolean;
+	public EQFilterOnRandomization: boolean;
+	public noteFilterOnRandomization: boolean;
 	
 	constructor() {
 		this.reload();
@@ -65,6 +79,20 @@ export class Preferences {
 		this.colorTheme = window.localStorage.getItem("colorTheme") || "dark classic";
 		this.visibleOctaves = ((<any>window.localStorage.getItem("visibleOctaves")) >>> 0) || Preferences.defaultVisibleOctaves;
 		this.unisonOnRandomization = window.localStorage.getItem("unisonOnRandomization") != "false";
+		this.chipWaveOnRandomization = window.localStorage.getItem("chipWaveOnRandomization") != "false";
+		this.PWMOnRandomization = window.localStorage.getItem("PWMOnRandomization") != "false";
+		this.supersawOnRandomization = window.localStorage.getItem("supersawOnRandomization") != "false";
+		this.harmonicsOnRandomization = window.localStorage.getItem("harmonicsOnRandomization") != "false";
+		this.pickedStringOnRandomization = window.localStorage.getItem("pickedStringOnRandomization") != "false";
+		this.spectrumOnRandomization = window.localStorage.getItem("spectrumOnRandomization") != "false";
+		this.FMOnRandomization = window.localStorage.getItem("FMOnRandomization") != "false";
+		this.customChipOnRandomization = window.localStorage.getItem("customChipOnRandomization") != "false";
+		this.drumSpectrumOnRandomization = window.localStorage.getItem("drumSpectrumOnRandomization") != "false";
+		this.noiseOnRandomization = window.localStorage.getItem("noiseOnRandomization") != "false";
+		this.drumsetOnRandomization = window.localStorage.getItem("drumsetOnRandomization") == "true";
+		this.fadeOnRandomization = window.localStorage.getItem("fadeOnRandomization") != "false";
+		this.EQFilterOnRandomization = window.localStorage.getItem("EQFilterOnRandomization") != "false";
+		this.noteFilterOnRandomization = window.localStorage.getItem("noteFilterOnRandomization") != "false";
 		
 		const defaultScale: Scale | undefined = Config.scales.dictionary[window.localStorage.getItem("defaultScale")!];
 		this.defaultScale = (defaultScale != undefined) ? defaultScale.index : 0;
@@ -108,5 +136,19 @@ export class Preferences {
 		window.localStorage.setItem("volume", String(this.volume));
 		window.localStorage.setItem("visibleOctaves", String(this.visibleOctaves));
 		window.localStorage.setItem("unisonOnRandomization", this.unisonOnRandomization ? "true" : "false");
+		window.localStorage.setItem("chipWaveOnRandomization", this.chipWaveOnRandomization ? "true" : "false");
+		window.localStorage.setItem("PWMOnRandomization", this.PWMOnRandomization ? "true" : "false");
+		window.localStorage.setItem("supersawOnRandomization", this.supersawOnRandomization ? "true" : "false");
+		window.localStorage.setItem("harmonicsOnRandomization", this.harmonicsOnRandomization ? "true" : "false");
+		window.localStorage.setItem("pickedStringOnRandomization", this.pickedStringOnRandomization ? "true" : "false");
+		window.localStorage.setItem("spectrumOnRandomization", this.spectrumOnRandomization ? "true" : "false");
+		window.localStorage.setItem("FMOnRandomization", this.FMOnRandomization ? "true" : "false");
+		window.localStorage.setItem("customChipOnRandomization", this.customChipOnRandomization ? "true" : "false");
+		window.localStorage.setItem("drumSpectrumOnRandomization", this.drumSpectrumOnRandomization ? "true" : "false");
+		window.localStorage.setItem("noiseOnRandomization", this.noiseOnRandomization ? "true" : "false");
+		window.localStorage.setItem("drumsetOnRandomization", this.drumsetOnRandomization ? "true" : "false");
+		window.localStorage.setItem("fadeOnRandomization", this.fadeOnRandomization ? "true" : "false");
+		window.localStorage.setItem("EQFilterOnRandomization", this.EQFilterOnRandomization ? "true" : "false");
+		window.localStorage.setItem("noteFilterOnRandomization", this.noteFilterOnRandomization ? "true" : "false");
 	}
 }

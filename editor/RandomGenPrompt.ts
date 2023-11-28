@@ -49,6 +49,9 @@ export class RandomGenPrompt implements Prompt {
     option({value: "customChipGenerateAlgorithm"}, "Algorithmic Generation"),
     option({value: "customChipGenerateFully"}, "Fully Random"),
     );
+    private readonly _noiseTypeBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _drumsetSpectrumBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _drumsetEnvelopeBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
 
     private readonly _FMAlgorithmBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _FMOpFrequencyBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
@@ -244,8 +247,20 @@ public readonly container: HTMLDivElement = div({class: "prompt noSelection", st
 			this._customChipWaveBox,
         ),
     label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
-			"Custom Chip Waveform:",
+			"Custom Chip Generation Type:",
 			this._customChipGenerationType,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Noise Type:",
+			this._noiseTypeBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Drumset Spectrums:",
+			this._drumsetSpectrumBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Drumset Envelopes:",
+			this._drumsetEnvelopeBox,
         ),
     h4({style: "display: flex; flex-direction: row; text-align: center; align-items: center; height: 0.5em; justify-content: flex-end;"},
         "FM-Centric",
@@ -383,27 +398,27 @@ public readonly container: HTMLDivElement = div({class: "prompt noSelection", st
 );
 
 constructor(private _doc: SongDocument) {
-    this._chipWaveBox.checked = this._doc.chipWaveOnRandomization;
-    this._PWMBox.checked = this._doc.PWMOnRandomization;
-    this._supersawBox.checked = this._doc.supersawOnRandomization;
-    this._harmonicsBox.checked = this._doc.harmonicsOnRandomization;
-    this._pickedStringBox.checked = this._doc.pickedStringOnRandomization;
-    this._spectrumBox.checked = this._doc.spectrumOnRandomization;
-    this._FMBox.checked = this._doc.FMOnRandomization;
-    this._customChipBox.checked = this._doc.customChipOnRandomization;
-    this._drumSpectrumBox.checked = this._doc.drumSpectrumOnRandomization;
-    this._noiseBox.checked = this._doc.noiseOnRandomization;
-    this._drumsetBox.checked = this._doc.drumsetOnRandomization;
+    this._chipWaveBox.checked = this._doc.prefs.chipWaveOnRandomization;
+    this._PWMBox.checked = this._doc.prefs.PWMOnRandomization;
+    this._supersawBox.checked = this._doc.prefs.supersawOnRandomization;
+    this._harmonicsBox.checked = this._doc.prefs.harmonicsOnRandomization;
+    this._pickedStringBox.checked = this._doc.prefs.pickedStringOnRandomization;
+    this._spectrumBox.checked = this._doc.prefs.spectrumOnRandomization;
+    this._FMBox.checked = this._doc.prefs.FMOnRandomization;
+    this._customChipBox.checked = this._doc.prefs.customChipOnRandomization;
+    this._drumSpectrumBox.checked = this._doc.prefs.drumSpectrumOnRandomization;
+    this._noiseBox.checked = this._doc.prefs.noiseOnRandomization;
+    this._drumsetBox.checked = this._doc.prefs.drumsetOnRandomization;
     this._volumeBox.checked = this._doc.volumeOnRandomization;
     this._panBox.checked = this._doc.panningOnRandomization;
     this._panDelayBox.checked = this._doc.panDelayOnRandomization;
-    this._fadeBox.checked = this._doc.fadeOnRandomization;
+    this._fadeBox.checked = this._doc.prefs.fadeOnRandomization;
     this._unisonBox.checked = this._doc.prefs.unisonOnRandomization;
-    this._EQFilterBox.checked = this._doc.EQFilterOnRandomization;
+    this._EQFilterBox.checked = this._doc.prefs.EQFilterOnRandomization;
     this._EQFilterCutBox.checked = this._doc.EQFilterCutOnRandomization;
     this._EQFilterPeakBox.checked = this._doc.EQFilterPeakOnRandomization;
     this._EQFilterTypeBox.checked = this._doc.EQFilterTypeOnRandomization;
-    this._noteFilterBox.checked = this._doc.noteFilterOnRandomization;
+    this._noteFilterBox.checked = this._doc.prefs.noteFilterOnRandomization;
     this._noteFilterCutBox.checked = this._doc.noteFilterCutOnRandomization;
     this._noteFilterPeakBox.checked = this._doc.noteFilterPeakOnRandomization;
     this._noteFilterTypeBox.checked = this._doc.noteFilterTypeOnRandomization;
@@ -418,6 +433,9 @@ constructor(private _doc: SongDocument) {
     this._spectrumEditorBox.checked = this._doc.spectrumEditorOnRandomization;
     this._customChipWaveBox.checked = this._doc.customChipWaveOnRandomization;
     this._customChipGenerationType.value = this._doc.customChipGenerationType;
+    this._noiseTypeBox.checked = this._doc.noiseTypeOnRandomization;
+    this._drumsetSpectrumBox.checked = this._doc.drumsetSpectrumOnRandomization;
+    this._drumsetEnvelopeBox.checked = this._doc.drumsetEnvelopeOnRandomization;
     this._FMAlgorithmBox.checked = this._doc.FMAlgorithmOnRandomization;
     this._FMOpFrequencyBox.checked = this._doc.FMOpFrequencyOnRandomization;
     this._FMOpVolumeBox.checked = this._doc.FMOpVolumeOnRandomization;
@@ -459,7 +477,25 @@ private _close = (): void => {
 }
 
 private _confirm = (): void => { 
+    this._doc.prefs.chipWaveOnRandomization = this._chipWaveBox.checked;
+    this._doc.prefs.PWMOnRandomization = this._PWMBox.checked;
+    this._doc.prefs.supersawOnRandomization = this._supersawBox.checked;
+    this._doc.prefs.harmonicsOnRandomization = this._harmonicsBox.checked;
+    this._doc.prefs.pickedStringOnRandomization = this._pickedStringBox.checked;
+    this._doc.prefs.spectrumOnRandomization = this._spectrumBox.checked;
+    this._doc.prefs.FMOnRandomization = this._FMBox.checked;
+    this._doc.prefs.customChipOnRandomization = this._customChipBox.checked;
+
+    this._doc.prefs.drumSpectrumOnRandomization = this._drumSpectrumBox.checked;
+    this._doc.prefs.noiseOnRandomization = this._noiseBox.checked;
+    this._doc.prefs.drumsetOnRandomization = this._drumsetBox.checked;
+
+    this._doc.prefs.fadeOnRandomization = this._fadeBox.checked;
     this._doc.prefs.unisonOnRandomization = this._unisonBox.checked;
+
+    this._doc.prefs.EQFilterOnRandomization = this._EQFilterBox.checked;
+    this._doc.prefs.noteFilterOnRandomization = this._noteFilterBox.checked;
+
     this._doc.prefs.save();
 	this._close();
 }

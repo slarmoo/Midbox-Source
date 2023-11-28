@@ -55,6 +55,7 @@ export class Localization {
     public static strumSpeedLabel: string = "Speed:";
     public static arpSpeedLabel: string = "Speed:";
     public static twoFastArpLabel: string = "Fast Two-Note:";
+    public static bounceArpLabel: string = "Bounce:";
     public static vibratoDepthLabel: string = "Depth:";
     public static vibratoSpeedLabel: string = "Speed:";
     public static vibratoDelayLabel: string = "Delay:";
@@ -892,6 +893,7 @@ if (language == "spanish") {
     Localization.strumSpeedLabel = "Velocidad:";
     Localization.arpSpeedLabel = "Velocidad:";
     Localization.twoFastArpLabel = "Rapido Dos-Notas:";
+    Localization.bounceArpLabel = "Rebote:";
     Localization.vibratoDepthLabel = "Profundidad:";
     Localization.vibratoSpeedLabel = "Velocidad:";
     Localization.vibratoDelayLabel = "Retraso:";
