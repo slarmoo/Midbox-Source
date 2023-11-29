@@ -1315,7 +1315,7 @@ export class Instrument {
         this.chorus = Config.chorusRange - 1;
         this.reverb = 0;
         this.echoSustain = Math.floor((Config.echoSustainRange - 1) * 0.5);
-        this.echoDelay = Math.floor((Config.echoDelayRange - 1) * 0.5);
+        this.echoDelay = Math.floor((Config.echoDelayRange - 1) * 0.25);
         this.eqFilter.reset();
         this.eqFilterType = false;
         this.eqFilterSimpleCut = Config.filterSimpleCutRange - 1;

@@ -433,7 +433,9 @@ export class SongEditor {
     private readonly _echoSustainSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.echoSustainRange - 1, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeEchoSustain(this._doc, oldValue, newValue), false);
     private readonly _echoSustainRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("echoSustain") }, span(_.echoLabel)), this._echoSustainSlider.container);
     private readonly _echoDelaySlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.echoDelayRange - 1, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeEchoDelay(this._doc, oldValue, newValue), false);
-    private readonly _echoDelayRow: HTMLDivElement = div({ class: "selectRow" }, span({ /*style: "font-size: x-small;",*/ class: "tip", onclick: () => this._openPrompt("echoDelay") }, span(_.echoDelayLabel)), this._echoDelaySlider.container);
+    private readonly _echoDelayBeatMarkers: HTMLDivElement[] = [div({ class: "pitchShiftMarker", style: { color: ColorConfig.uiWidgetBackground, left: "23%" } }), div({ class: "pitchShiftMarker", style: { color: ColorConfig.uiWidgetBackground, left: "49%" } }), div({ class: "pitchShiftMarker", style: { color: ColorConfig.uiWidgetBackground, left: "74%" } }), div({ class: "pitchShiftMarker", style: { color: ColorConfig.uiWidgetBackground, left: "100%" } })];
+    private readonly _echoDelayBeatMarkerContainer: HTMLDivElement = div({ style: "display: flex; position: relative;" }, this._echoDelaySlider.container, div({ class: "pitchShiftMarkerContainer" }, this._echoDelayBeatMarkers));
+    private readonly _echoDelayRow: HTMLDivElement = div({ class: "selectRow" }, span({ /*style: "font-size: x-small;",*/ class: "tip", onclick: () => this._openPrompt("echoDelay") }, span(_.echoDelayLabel)), this._echoDelayBeatMarkerContainer);
     private readonly _rhythmSelect: HTMLSelectElement = buildOptions(select(), [
         _.rhythmBy3Label,
         _.rhythmBy4Label,
@@ -1217,6 +1219,8 @@ export class SongEditor {
         // @jummbus - Unsure why this hack is needed for alignment, but I've never been a css wiz...
         this._pitchShiftSlider.container.style.setProperty("transform", "translate(0px, 3px)");
         this._pitchShiftSlider.container.style.setProperty("width", "100%");
+        this._echoDelaySlider.container.style.setProperty("transform", "translate(0px, 3px)")
+        this._echoDelaySlider.container.style.setProperty("width", "100%");
 
         this._fileMenu.addEventListener("change", this._fileMenuHandler);
         this._editMenu.addEventListener("change", this._editMenuHandler);
