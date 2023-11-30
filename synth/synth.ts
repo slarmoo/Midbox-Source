@@ -2809,6 +2809,7 @@ export class Song {
                     buffer.push(SongTagCode.fadeInOut, base64IntToCharCode[instrument.fadeIn], base64IntToCharCode[instrument.fadeOut]);
                     // Transition info follows transition song tag
                     buffer.push(base64IntToCharCode[+instrument.clicklessTransition]);
+                    buffer.push(base64IntToCharCode[+instrument.continueThruPattern]);
                 }
 
                 if (instrument.type == InstrumentType.harmonics || instrument.type == InstrumentType.pickedString) {
@@ -7847,14 +7848,14 @@ export class Synth {
 
             // Otherwise, check that both instruments are seamless across patterns.
             const otherTransition: Transition = otherInstrument.getTransition();
-            if (instrument.continueThruPattern && transition.includeAdjacentPatterns && otherTransition.includeAdjacentPatterns && otherTransition.slides == transition.slides) {
+            if ((!instrument.continueThruPattern) && transition.includeAdjacentPatterns && otherTransition.includeAdjacentPatterns && otherTransition.slides == transition.slides) {
                 return otherInstrument.getChord();
             } else {
                 return null;
             }
         } else {
             // If both patterns contain the same instrument, check that it is seamless across patterns.
-            return (forceContinue || instrument.continueThruPattern && transition.includeAdjacentPatterns) ? chord : null;
+            return (forceContinue || (!instrument.continueThruPattern) && transition.includeAdjacentPatterns) ? chord : null;
         }
     }
 

@@ -531,8 +531,6 @@ export class SongEditor {
         _.transition3Label,
         _.transition4Label,
         _.transition5Label,
-        _.transition6Label,
-        _.transition7Label
 
     ]);
     private readonly _transitionDropdown: HTMLButtonElement = button({ style: "margin-left:0em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.Transition) }, "▼");
@@ -2030,6 +2028,7 @@ export class SongEditor {
                 this._transitionRow.style.display = "";
                 if (this._openTransitionDropdown)
                     this._transitionDropdownGroup.style.display = "";
+                    this._continueThruPatternRow.style.display = (instrument.transition == Config.transitions.dictionary["normal"].index) ? "none" : "";
                 setSelectedValue(this._transitionSelect, instrument.transition);
             } else {
                 this._transitionDropdownGroup.style.display = "none";
@@ -2786,6 +2785,7 @@ export class SongEditor {
         this._twoNoteArpBox.checked = instrument.fastTwoNoteArp ? true : false;
         this._bounceArpBox.checked = instrument.bounceArp ? true : false;
         this._clicklessTransitionBox.checked = instrument.clicklessTransition ? true : false;
+        this._continueThruPatternBox.checked = instrument.continueThruPattern ? true : false;
         this._aliasingBox.checked = instrument.aliases ? true : false;
         this._percussionBox.checked = instrument.percussion ? true : false;
         this._songDetuneEffectedBox.checked = instrument.songDetuneEffected ? true : false;

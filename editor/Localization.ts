@@ -258,10 +258,8 @@ export class Localization {
     public static transition1Label: string = "normal";
     public static transition2Label: string = "interrupt";
     public static transition3Label: string = "continue";
-    public static transition4Label: string = "continue in pattern";
-    public static transition5Label: string = "slide";
-    public static transition6Label: string = "slide in pattern";
-    public static transition7Label: string = "insta-slide";
+    public static transition4Label: string = "slide";
+    public static transition5Label: string = "insta-slide";
     public static vibrato1Label: string = "none";
     public static vibrato2Label: string = "light";
     public static vibrato3Label: string = "delayed";
@@ -1091,10 +1089,8 @@ if (language == "spanish") {
     Localization.transition1Label = "normal";
     Localization.transition2Label = "interrumpir";
     Localization.transition3Label = "continuar";
-    Localization.transition4Label = "continuar en patrón";
-    Localization.transition5Label = "deslizar";
-    Localization.transition6Label = "deslizar en patrón";
-    Localization.transition7Label = "insta-deslizar";
+    Localization.transition4Label = "deslizar";
+    Localization.transition5Label = "insta-deslizar";
     Localization.vibrato1Label = "desactivado";
     Localization.vibrato2Label = "ligero";
     Localization.vibrato3Label = "retrasado";
