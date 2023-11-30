@@ -3737,7 +3737,6 @@ export class Song {
 
                         }
                         instrument.clicklessTransition = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] ? true : false;
-                        instrument.continueThruPattern = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] ? true : false;
 
                         if (instrument.transition != Config.transitions.dictionary["normal"].index || instrument.clicklessTransition) {
                             // Enable transition if it was used.
@@ -3748,8 +3747,10 @@ export class Song {
                     const instrument: Instrument = this.channels[instrumentChannelIterator].instruments[instrumentIndexIterator];
                     instrument.fadeIn = clamp(0, Config.fadeInRange, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                     instrument.fadeOut = clamp(0, Config.fadeOutTicks.length, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
-                    if (fromJummBox)
+                    if (fromJummBox) {
                         instrument.clicklessTransition = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] ? true : false;
+                        instrument.continueThruPattern = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] ? true : false;
+                    }
                 }
             } break;
             case SongTagCode.vibrato: {
@@ -7846,14 +7847,14 @@ export class Synth {
 
             // Otherwise, check that both instruments are seamless across patterns.
             const otherTransition: Transition = otherInstrument.getTransition();
-            if (transition.includeAdjacentPatterns && otherTransition.includeAdjacentPatterns && otherTransition.slides == transition.slides) {
+            if (instrument.continueThruPattern && transition.includeAdjacentPatterns && otherTransition.includeAdjacentPatterns && otherTransition.slides == transition.slides) {
                 return otherInstrument.getChord();
             } else {
                 return null;
             }
         } else {
             // If both patterns contain the same instrument, check that it is seamless across patterns.
-            return (forceContinue || transition.includeAdjacentPatterns) ? chord : null;
+            return (forceContinue || instrument.continueThruPattern && transition.includeAdjacentPatterns) ? chord : null;
         }
     }
 
