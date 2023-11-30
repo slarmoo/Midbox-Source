@@ -467,6 +467,12 @@ export class TipPrompt implements Prompt {
 					p("Sometimes, seamless and other transition types can make audible 'clicks' when changing between notes. Ticking this option will cause those clicks to be silenced as much as possible."),
 				);
 			} break;
+			case "continueThruPattern": {
+				message = div(
+					h2("Continue Through Pattern"),
+					p("By default, this checkbox is ticked. When unticked, if the transition is 'seamless', the transition will be cut off at the end of a pattern."),
+				);
+			} break;
 			case "aliases": {
 				message = div(
 					h2("Aliasing"),

@@ -1225,6 +1225,7 @@ export class Instrument {
     public strumSpeed: number = 1;
     public legacyTieOver: boolean = false;
     public clicklessTransition: boolean = false;
+    public continueThruPattern: boolean = true;
     public aliases: boolean = false;
     public percussion: boolean = true;
     public songDetuneEffected: boolean = true;
@@ -1339,6 +1340,7 @@ export class Instrument {
         this.unison = 0;
         this.stringSustain = 10;
         this.clicklessTransition = false;
+        this.continueThruPattern = true;
         this.arpeggioSpeed = 12;
         this.strumSpeed = 1;
         this.legacyTieOver = false;
@@ -1584,6 +1586,7 @@ export class Instrument {
         if (effectsIncludeTransition(this.effects)) {
             instrumentObject["transition"] = Config.transitions[this.transition].name;
             instrumentObject["clicklessTransition"] = this.clicklessTransition;
+            instrumentObject["continueThruPattern"] = this.continueThruPattern;
         }
         if (effectsIncludeChord(this.effects)) {
             instrumentObject["chord"] = this.getChord().name;
@@ -2150,6 +2153,13 @@ export class Instrument {
             }
             else {
                 this.clicklessTransition = false;
+            }
+
+            if (instrumentObject["continueThruPattern"] != undefined) {
+                this.continueThruPattern = instrumentObject["continueThruPattern"];
+            }
+            else {
+                this.continueThruPattern = true;
             }
 
             if (instrumentObject["aliases"] != undefined) {
@@ -3727,6 +3737,7 @@ export class Song {
 
                         }
                         instrument.clicklessTransition = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] ? true : false;
+                        instrument.continueThruPattern = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] ? true : false;
 
                         if (instrument.transition != Config.transitions.dictionary["normal"].index || instrument.clicklessTransition) {
                             // Enable transition if it was used.
@@ -7815,7 +7826,7 @@ export class Synth {
 
     // Returns the chord type of the instrument in the adjacent pattern if it is compatible for a
     // seamless transition across patterns, otherwise returns null.
-    private adjacentPatternHasCompatibleInstrumentTransition(song: Song, channel: Channel, pattern: Pattern, otherPattern: Pattern, instrumentIndex: number, transition: Transition, chord: Chord, note: Note, otherNote: Note, forceContinue: boolean): Chord | null {
+    private adjacentPatternHasCompatibleInstrumentTransition(song: Song, channel: Channel, pattern: Pattern, otherPattern: Pattern, instrumentIndex: number, transition: Transition, chord: Chord, note: Note, otherNote: Note, forceContinue: boolean, instrument: Instrument): Chord | null {
         if (song.patternInstruments && otherPattern.instruments.indexOf(instrumentIndex) == -1) {
             // The adjacent pattern does not contain the same instrument as the current pattern.
 
@@ -8068,7 +8079,7 @@ export class Synth {
                             const lastNote: Note | null = (prevPattern.notes.length <= 0) ? null : prevPattern.notes[prevPattern.notes.length - 1];
                             if (lastNote != null && lastNote.end == partsPerBar) {
                                 const patternForcesContinueAtStart: boolean = note.continuesLastPattern && Synth.adjacentNotesHaveMatchingPitches(lastNote, note);
-                                const chordOfCompatibleInstrument: Chord | null = this.adjacentPatternHasCompatibleInstrumentTransition(song, channel, pattern!, prevPattern, instrumentIndex, transition, chord, note, lastNote, patternForcesContinueAtStart);
+                                const chordOfCompatibleInstrument: Chord | null = this.adjacentPatternHasCompatibleInstrumentTransition(song, channel, pattern!, prevPattern, instrumentIndex, transition, chord, note, lastNote, patternForcesContinueAtStart, instrument);
                                 if (chordOfCompatibleInstrument != null) {
                                     prevNoteForThisInstrument = lastNote;
                                     tonesInPrevNote = chordOfCompatibleInstrument.singleTone ? 1 : prevNoteForThisInstrument.pitches.length
@@ -8087,7 +8098,7 @@ export class Synth {
                             const firstNote: Note | null = (nextPattern.notes.length <= 0) ? null : nextPattern.notes[0];
                             if (firstNote != null && firstNote.start == 0) {
                                 const nextPatternForcesContinueAtStart: boolean = firstNote.continuesLastPattern && Synth.adjacentNotesHaveMatchingPitches(note, firstNote);
-                                const chordOfCompatibleInstrument: Chord | null = this.adjacentPatternHasCompatibleInstrumentTransition(song, channel, pattern!, nextPattern, instrumentIndex, transition, chord, note, firstNote, nextPatternForcesContinueAtStart);
+                                const chordOfCompatibleInstrument: Chord | null = this.adjacentPatternHasCompatibleInstrumentTransition(song, channel, pattern!, nextPattern, instrumentIndex, transition, chord, note, firstNote, nextPatternForcesContinueAtStart, instrument);
                                 if (chordOfCompatibleInstrument != null) {
                                     nextNoteForThisInstrument = firstNote;
                                     tonesInNextNote = chordOfCompatibleInstrument.singleTone ? 1 : nextNoteForThisInstrument.pitches.length

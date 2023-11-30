@@ -35,6 +35,7 @@ export class Localization {
     public static noiseLabel: string = "Noise:";
     public static transitionLabel: string = "Transition:";
     public static clicklessLabel: string = "Clickless:";
+    public static continueThroughPatternLabel: string = "In Pattern:";
     public static simpleLabel: string = "Simple";
     public static advancedLabel: string = "Advanced";
     public static EQLabel: string = "EQ Filt:";
@@ -873,6 +874,7 @@ if (language == "spanish") {
     Localization.noiseLabel = "Ruido:";
     Localization.transitionLabel = "Transición:";
     Localization.clicklessLabel = "Sin Clics:";
+    Localization.continueThroughPatternLabel = "En Patrón";
     Localization.simpleLabel = "Sencillo";
     Localization.advancedLabel = "Avanzado";
     Localization.EQLabel = "Filt. EC:";

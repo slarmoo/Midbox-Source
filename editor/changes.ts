@@ -2529,6 +2529,20 @@ export class ChangeClicklessTransition extends Change {
     }
 }
 
+export class ChangeContinueThruPattern extends Change {
+    constructor(doc: SongDocument, newValue: boolean) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        const oldValue = instrument.continueThruPattern;
+
+        doc.notifier.changed();
+        if (oldValue != newValue) {
+            instrument.continueThruPattern = newValue;
+            this._didSomething();
+        }
+    }
+}
+
 export class ChangeAliasing extends Change {
     constructor(doc: SongDocument, newValue: boolean) {
         super();
