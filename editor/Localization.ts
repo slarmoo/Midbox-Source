@@ -54,6 +54,7 @@ export class Localization {
     public static fadeLabel: string = "Fade:";
     public static unisonLabel: string = "Unison:";
     public static strumSpeedLabel: string = "Speed:";
+    public static slideSpeedLabel: string = "Speed:";
     public static arpSpeedLabel: string = "Speed:";
     public static twoFastArpLabel: string = "Fast Two-Note:";
     public static bounceArpLabel: string = "Bounce:";
@@ -891,6 +892,7 @@ if (language == "spanish") {
     Localization.fadeLabel = "Desvanecerse:";
     Localization.unisonLabel = "Unísono:";
     Localization.strumSpeedLabel = "Velocidad:";
+    Localization.slideSpeedLabel = "Velocidad:";
     Localization.arpSpeedLabel = "Velocidad:";
     Localization.twoFastArpLabel = "Rapido Dos-Notas:";
     Localization.bounceArpLabel = "Rebote:";

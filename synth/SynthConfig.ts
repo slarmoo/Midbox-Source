@@ -446,6 +446,7 @@ export class Config {
 //                                                                   0       1      2    3     4      5    6    7      8     9   10   11 12   13   14   15   16   17   18   19   20   21 22   23   24   25   26   27   28   29   30   31 32   33   34   35   36   37   38    39  40   41 42    43   44   45   46 47   48 49 50
     public static readonly arpSpeedScale:   ReadonlyArray<number> = [0, 0.0625, 0.125, 0.2, 0.25, 1 / 3, 0.4, 0.5, 2 / 3, 0.75, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 4, 4.15, 4.3, 4.5, 4.8, 5, 5.5, 6, 8];
     public static readonly strumSpeedScale: ReadonlyArray<number> = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24];
+    public static readonly slideSpeedScale: ReadonlyArray<number> = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24];
 
     public static readonly unisons: DictionaryArray<Unison> = toNameMap([
         { name: "none",            voices: 1, spread: 0.0,      offset:  0.0,    expression: 1.4,  sign:  1.0 },
@@ -1003,7 +1004,7 @@ export class Config {
             promptName: "Arpeggio Speed",               promptDesc: ["This setting controls the speed at which your instrument's chords arpeggiate, just like the arpeggio speed slider.", "Each setting corresponds to a different speed, from the slowest to the fastest. The speeds are listed below.", "[0-4]: x0, x1/16, x⅛, x⅕, x¼,", "[5-9]: x⅓, x⅖, x½, x⅔, x¾,", "[10-14]: x⅘, x0.9, x1, x1.1, x1.2,", "[15-19]: x1.3, x1.4, x1.5, x1.6, x1.7,", "[20-24]: x1.8, x1.9, x2, x2.1, x2.2,", "[25-29]: x2.3, x2.4, x2.5, x2.6, x2.7,", "[30-34]: x2.8, x2.9, x3, x3.1, x3.2,", "[35-39]: x3.3, x3.4, x3.5, x3.6, x3.7," ,"[40-44]: x3.8, x3.9, x4, x4.15, x4.3,", "[45-50]: x4.5, x4.8, x5, x5.5, x6, x8", "[OVERWRITING] [$LO - $HI]"] },
 
         { name: "strum speed",    pianoName: "Strum Speed",            maxRawVol: 23,                                                     newNoteVol: 0,                                                            forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.chord,
-            promptName: "Strum Speed",                  promptDesc: ["This setting controls the speef at which your instrument's chords strum, just like the strum speed slider.", "Note that the lower numbers will strum faster, while the higher numbers will strum slower."]},
+            promptName: "Strum Speed",                  promptDesc: ["This setting controls the speed at which your instrument's chords strum, just like the strum speed slider.", "Note that the lower numbers will strum faster, while the higher numbers will strum slower."]},
 
         { name: "pan delay",      pianoName: "Pan Delay",              maxRawVol: 20,                                                     newNoteVol: 10,                                                           forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.panning,
             promptName: "Panning Delay",                promptDesc: ["This setting controls the delay applied to panning for your instrument, just like the pan delay slider.", "With more delay, the panning effect will generally be more pronounced. $MID is the default value, whereas $LO will remove any delay at all. No delay can be desirable for chiptune songs.", "[OVERWRITING] [$LO - $HI]"] },
@@ -1061,6 +1062,9 @@ export class Config {
 
         { name: "shape",          pianoName: "Shape",                  maxRawVol: Config.supersawShapeMax,                                newNoteVol: 0,                                                            forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.length,
             promptName: "Supersaw Shape",               promptDesc: ["This setting controls the shape of each wave in your supersaw instrument.", "At the lowest value, each wave will be a sawtooth. At the highest value, each wave will be fully affected by the pulse width slider."]},
+
+        { name: "slide speed",    pianoName: "Slide Speed",            maxRawVol: 23,                                                     newNoteVol: 0,                                                            forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.transition,
+            promptName: "Slide Speed",                  promptDesc: ["This setting controls the speed at which your instrument 'slides' between notes.", "Note that the lower numbers will slide faster, while the higher numbers will slide slower."]},
 
     ]);
 }

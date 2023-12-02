@@ -1223,6 +1223,7 @@ export class Instrument {
     public fastTwoNoteArp: boolean = false;
     public bounceArp: boolean = false;
     public strumSpeed: number = 1;
+    public slideSpeed: number = 3;
     public legacyTieOver: boolean = false;
     public clicklessTransition: boolean = false;
     public continueThruPattern: boolean = true;
@@ -1343,6 +1344,7 @@ export class Instrument {
         this.continueThruPattern = true;
         this.arpeggioSpeed = 12;
         this.strumSpeed = 1;
+        this.slideSpeed = 3;
         this.legacyTieOver = false;
         this.aliases = false;
         this.percussion = true;
@@ -1585,6 +1587,7 @@ export class Instrument {
 
         if (effectsIncludeTransition(this.effects)) {
             instrumentObject["transition"] = Config.transitions[this.transition].name;
+            instrumentObject["slideSpeed"] = this.slideSpeed;
             instrumentObject["clicklessTransition"] = this.clicklessTransition;
             instrumentObject["continueThruPattern"] = this.continueThruPattern;
         }
@@ -2146,6 +2149,13 @@ export class Instrument {
             }
             else {
                 this.strumSpeed = 1;
+            } 
+
+            if (instrumentObject["slideSpeed"] != undefined) {
+                this.slideSpeed = instrumentObject["slideSpeed"];
+            }
+            else {
+                this.slideSpeed = 3;
             } 
 
             if (instrumentObject["clicklessTransition"] != undefined) {
@@ -2752,6 +2762,10 @@ export class Song {
                 if (effectsIncludeTransition(instrument.effects)) {
                     buffer.push(base64IntToCharCode[instrument.transition]);
                 }
+                // Slide speed. Only if the instrument has the slide transition.
+                else if (instrument.transition == Config.transitions.dictionary["slide"].index) {
+                    buffer.push(base64IntToCharCode[instrument.slideSpeed]);
+                }
                 if (effectsIncludeChord(instrument.effects)) {
                     buffer.push(base64IntToCharCode[instrument.chord]);
                     // Custom arpeggio speed... only if the instrument arpeggiates.
@@ -2759,7 +2773,7 @@ export class Song {
                         buffer.push(base64IntToCharCode[instrument.arpeggioSpeed]);
                         buffer.push(base64IntToCharCode[+instrument.fastTwoNoteArp]); // Two note arp setting piggybacks on this
                     }
-                    // Also don't forget custom strum speed! Only if the instrument strums.
+                    // Also don't forget strum speed! Only if the instrument strums.
                     else if (Config.chords[instrument.chord].strumParts > 0) {
                         buffer.push(base64IntToCharCode[instrument.strumSpeed]);
                     }
@@ -4001,6 +4015,9 @@ export class Song {
                     }
                     if (effectsIncludeTransition(instrument.effects)) {
                         instrument.transition = clamp(0, Config.transitions.length, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
+                    }   // Slide speed!
+                        else if (instrument.transition == Config.transitions.dictionary["slide"].index) {
+                        instrument.slideSpeed = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
                     }
                     if (effectsIncludeChord(instrument.effects)) {
                         instrument.chord = clamp(0, Config.chords.length, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
@@ -5397,7 +5414,11 @@ class EnvelopeComputer {
                 const noteEndTick: number = tone.noteEndPart * Config.ticksPerPart;
                 const noteLengthTicks: number = noteEndTick - noteStartTick;
                 const maximumSlideTicks: number = noteLengthTicks * 0.5;
-                const slideTicks: number = Math.min(maximumSlideTicks, transition.slideTicks);
+                let slideTicks: number = Math.min(maximumSlideTicks, transition.slideTicks);
+                const useSlideSpeed: boolean = (instrument.transition == Config.transitions.dictionary["slide"].index) ? true : false;
+                if (useSlideSpeed) { 
+                    slideTicks += Config.strumSpeedScale[instrument.strumSpeed];
+                }
                 if (tone.prevNote != null && !tone.forceContinueAtStart) {
                     if (tickTimeStart - noteStartTick < slideTicks) {
                         prevSlideStart = true;
