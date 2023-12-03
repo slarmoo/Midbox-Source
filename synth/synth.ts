@@ -2763,7 +2763,7 @@ export class Song {
                     buffer.push(base64IntToCharCode[instrument.transition]);
                 }
                 // Slide speed. Only if the instrument has the slide transition.
-                else if (instrument.transition == Config.transitions.dictionary["slide"].index) {
+                if (instrument.transition == Config.transitions.dictionary["slide"].index) {
                     buffer.push(base64IntToCharCode[instrument.slideSpeed]);
                 }
                 if (effectsIncludeChord(instrument.effects)) {
@@ -5417,7 +5417,7 @@ class EnvelopeComputer {
                 let slideTicks: number = Math.min(maximumSlideTicks, transition.slideTicks);
                 const useSlideSpeed: boolean = (instrument.transition == Config.transitions.dictionary["slide"].index) ? true : false;
                 if (useSlideSpeed) { 
-                    slideTicks += Config.strumSpeedScale[instrument.strumSpeed];
+                    slideTicks += Config.slideSpeedScale[instrument.slideSpeed];
                 }
                 if (tone.prevNote != null && !tone.forceContinueAtStart) {
                     if (tickTimeStart - noteStartTick < slideTicks) {

@@ -529,8 +529,7 @@ export class SongEditor {
         _.transition1Label,
         _.transition2Label,
         _.transition3Label,
-        _.transition4Label,
-        _.transition5Label,
+        _.transition4Label
 
     ]);
     private readonly _transitionDropdown: HTMLButtonElement = button({ style: "margin-left:0em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.Transition) }, "▼");

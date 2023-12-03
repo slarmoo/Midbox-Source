@@ -428,7 +428,6 @@ export class Config {
         { name: "interrupt",           isSeamless: true,  continues: false, slides: false, slideTicks: 3, includeAdjacentPatterns: true  },
         { name: "continue",            isSeamless: true,  continues: true,  slides: false, slideTicks: 3, includeAdjacentPatterns: true  },
         { name: "slide",               isSeamless: true,  continues: false, slides: true,  slideTicks: 3, includeAdjacentPatterns: true  },
-        { name: "insta-slide",         isSeamless: true,  continues: false, slides: true,  slideTicks: 1, includeAdjacentPatterns: true  },
     ]);
 
     public static readonly vibratos: DictionaryArray<Vibrato> = toNameMap([
