@@ -57,6 +57,7 @@ export class SongDocument {
 	private _stateShouldBePushed: boolean = false;
 	private _recordedNewSong: boolean = false;
 	public _waitingToUpdateState: boolean = false;
+
     public chipWaveOnRandomization: boolean = true;
 	public PWMOnRandomization: boolean = true;
 	public supersawOnRandomization: boolean = true;
@@ -125,6 +126,9 @@ export class SongDocument {
 	public keyAffectedOnRandomization: boolean = false;
 	public SDAffectedOnRandomization: boolean = false;
 	public envelopesOnRandomization: boolean = true;
+
+	public deactivateCapsLock: boolean = true;
+	public CTRLrEvent: string = "ctrlRtoRandomGenPrompt";
 		
 	constructor() {
 		this.notifier.watch(this._validateDocState);

@@ -343,7 +343,7 @@ export class Localization {
     public static layout2Label: string = "Long";
     public static layout3Label: string = "Tall";
     public static layout4Label: string = "Wide (JB)";
-    public static viewSongStatsLabel: string = "View Song Statistics...";
+    public static keybindSetupLabel: string = "Keybind Setup...";
     public static noteRecordingPromptLabel: string = "Note Recording Setup";
     public static playSpaceLabel: string = "Play (Space)";
     public static pauseSpaceLabel: string = "Pause (Space)";
@@ -1173,7 +1173,7 @@ if (language == "spanish") {
     Localization.layout2Label = "Largo";
     Localization.layout3Label = "Alto";
     Localization.layout4Label = "Ancho (JB)";
-    Localization.viewSongStatsLabel = "Ver Estadísticas de Canción...";
+    Localization.keybindSetupLabel = "Configuración de Asignación de Teclado...";
     Localization.noteRecordingPromptLabel = "Configurar Grabación de Notas";
     Localization.playSpaceLabel = "Reproducir (Espacio)";
     Localization.pauseSpaceLabel = "Pausa (Espacio)";

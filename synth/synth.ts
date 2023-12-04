@@ -4015,10 +4015,11 @@ export class Song {
                     }
                     if (effectsIncludeTransition(instrument.effects)) {
                         instrument.transition = clamp(0, Config.transitions.length, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
-                    }   // Slide speed!
-                        else if (instrument.transition == Config.transitions.dictionary["slide"].index) {
-                        instrument.slideSpeed = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
-                    }
+                        // Slide speed!
+                        if (instrument.transition == Config.transitions.dictionary["slide"].index) {
+                            instrument.slideSpeed = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
+                        }
+                    }   
                     if (effectsIncludeChord(instrument.effects)) {
                         instrument.chord = clamp(0, Config.chords.length, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                         // Custom arpeggio speed... only in JB, and only if the instrument arpeggiates.

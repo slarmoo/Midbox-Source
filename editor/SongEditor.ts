@@ -9,6 +9,7 @@ import { ChannelSettingsPrompt } from "./ChannelSettingsPrompt";
 import { ColorConfig, ChannelColors } from "./ColorConfig";
 import { CustomChipPrompt } from "./CustomChipPrompt";
 //import { HarmonicsPrompt } from "./HarmonicsPrompt";
+import { KeybindSetupPrompt } from "./KeybindSetupPrompt";
 import { CustomFilterPrompt } from "./CustomFilterPrompt";
 import { EditorConfig, isMobile, prettyNumber, Preset, PresetCategory } from "./EditorConfig";
 import { ExportPrompt } from "./ExportPrompt";
@@ -398,7 +399,7 @@ export class SongEditor {
         option({ value: "layout" }, (_.setLayoutLabel)),
         option({ value: "colorTheme" }, (_.setThemeLabel)),
         option({ value: "recordingSetup" }, (_.setNoteRecordingLabel)),
-        option({ value: "songStats" }, (_.viewSongStatsLabel)),
+        option({ value: "keybindSetup" }, (_.keybindSetupLabel)),
     );
     private readonly _scaleSelect: HTMLSelectElement = buildOptions(select(), [
         _.scale1Label, 
@@ -1655,6 +1656,9 @@ export class SongEditor {
                 case "recordingSetup":
                     this.prompt = new RecordingSetupPrompt(this._doc);
                     break;
+                case "keybindSetup":
+                    this.prompt = new KeybindSetupPrompt(this._doc);
+                    break;
                 default:
                     this.prompt = new TipPrompt(this._doc, promptName);
                     break;
@@ -1771,6 +1775,7 @@ export class SongEditor {
             (_.setLayoutLabel),
             (_.setThemeLabel),
             (_.setNoteRecordingLabel),
+            (_.keybindSetupLabel),
         ];
         for (let i: number = 0; i < optionCommands.length; i++) {
             const option: HTMLOptionElement = <HTMLOptionElement>this._optionsMenu.children[i + 1];
@@ -3137,7 +3142,7 @@ export class SongEditor {
             return;
         }
 
-        const needControlForShortcuts: boolean = (this._doc.prefs.pressControlForShortcuts != event.getModifierState("CapsLock"));
+        const needControlForShortcuts: boolean = (this._doc.prefs.deactivateCapsLock) && (this._doc.prefs.pressControlForShortcuts != event.getModifierState("CapsLock"));
         const canPlayNotes: boolean = (!event.ctrlKey && !event.metaKey && needControlForShortcuts);
         if (canPlayNotes) this._keyboardLayout.handleKeyEvent(event, true);
 
@@ -3485,8 +3490,10 @@ export class SongEditor {
                 if (canPlayNotes) break;
                     if (event.shiftKey) {
                         this._randomGenerated();
-                    } else if (event.ctrlKey || event.metaKey){
+                    } else if ((event.ctrlKey || event.metaKey) && (this._doc.prefs.CTRLrEvent == "ctrlRtoRandomGenPrompt")) {
                         this._openPrompt("randomGenSettings");
+                    } else if ((event.ctrlKey || event.metaKey) && (this._doc.prefs.CTRLrEvent == "ctrlRtoPageReload")) {
+                        break;
                     } else {
                         this._randomPreset();
                     }
@@ -4220,6 +4227,9 @@ export class SongEditor {
                 break;
             case "recordingSetup":
                 this._openPrompt("recordingSetup");
+                break;
+            case "keybindSetup":
+                this._openPrompt("keybindSetup")
                 break;
         }
         this._optionsMenu.selectedIndex = 0;

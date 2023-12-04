@@ -32,6 +32,7 @@ export class Preferences {
 	public metronomeCountIn: boolean;
 	public metronomeWhileRecording: boolean;
 	public showOscilloscope: boolean;
+
 	public unisonOnRandomization: boolean;
 	public chipWaveOnRandomization: boolean;
 	public PWMOnRandomization: boolean;
@@ -47,6 +48,9 @@ export class Preferences {
 	public fadeOnRandomization: boolean;
 	public EQFilterOnRandomization: boolean;
 	public noteFilterOnRandomization: boolean;
+
+	public deactivateCapsLock: boolean;
+	public CTRLrEvent: string;
 	
 	constructor() {
 		this.reload();
@@ -78,6 +82,7 @@ export class Preferences {
 		this.layout = window.localStorage.getItem("layout") || "small";
 		this.colorTheme = window.localStorage.getItem("colorTheme") || "dark classic";
 		this.visibleOctaves = ((<any>window.localStorage.getItem("visibleOctaves")) >>> 0) || Preferences.defaultVisibleOctaves;
+
 		this.unisonOnRandomization = window.localStorage.getItem("unisonOnRandomization") != "false";
 		this.chipWaveOnRandomization = window.localStorage.getItem("chipWaveOnRandomization") != "false";
 		this.PWMOnRandomization = window.localStorage.getItem("PWMOnRandomization") != "false";
@@ -94,6 +99,9 @@ export class Preferences {
 		this.EQFilterOnRandomization = window.localStorage.getItem("EQFilterOnRandomization") != "false";
 		this.noteFilterOnRandomization = window.localStorage.getItem("noteFilterOnRandomization") != "false";
 		
+		this.deactivateCapsLock = window.localStorage.getItem("deactivateCapsLock") != "false";
+		this.CTRLrEvent = window.localStorage.getItem("CTRLrEvent") || "ctrlRtoRandomGenPrompt";
+
 		const defaultScale: Scale | undefined = Config.scales.dictionary[window.localStorage.getItem("defaultScale")!];
 		this.defaultScale = (defaultScale != undefined) ? defaultScale.index : 0;
 		
@@ -135,6 +143,7 @@ export class Preferences {
 		window.localStorage.setItem("colorTheme", this.colorTheme);
 		window.localStorage.setItem("volume", String(this.volume));
 		window.localStorage.setItem("visibleOctaves", String(this.visibleOctaves));
+
 		window.localStorage.setItem("unisonOnRandomization", this.unisonOnRandomization ? "true" : "false");
 		window.localStorage.setItem("chipWaveOnRandomization", this.chipWaveOnRandomization ? "true" : "false");
 		window.localStorage.setItem("PWMOnRandomization", this.PWMOnRandomization ? "true" : "false");
@@ -150,5 +159,8 @@ export class Preferences {
 		window.localStorage.setItem("fadeOnRandomization", this.fadeOnRandomization ? "true" : "false");
 		window.localStorage.setItem("EQFilterOnRandomization", this.EQFilterOnRandomization ? "true" : "false");
 		window.localStorage.setItem("noteFilterOnRandomization", this.noteFilterOnRandomization ? "true" : "false");
+		
+		window.localStorage.setItem("deactivateCapsLock", this.deactivateCapsLock ? "true" : "false");
+		window.localStorage.setItem("CTRLrEvent", this.CTRLrEvent);
 	}
 }

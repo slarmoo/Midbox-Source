@@ -499,6 +499,7 @@ private _confirm = (): void => {
     this._doc.prefs.save();
 	this._close();
 }
+
 public cleanUp = (): void => { 
     this._okayButton.removeEventListener("click", this._confirm);
     this._cancelButton.removeEventListener("click", this._close);
