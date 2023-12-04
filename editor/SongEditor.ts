@@ -363,6 +363,7 @@ export class SongEditor {
         option({ value: "copy" }, (_.copyPatternLabel)),
         option({ value: "pasteNotes" }, (_.pastePatternNotesLabel)),
         option({ value: "pasteNumbers" }, (_.pastePatternNumbersLabel) + EditorConfig.ctrlSymbol + "⇧V)"),
+        option({ value: "cut"}, (_.cutLabel)),
         option({ value: "insertBars" }, (_.insertBarLabel)),
         option({ value: "deleteBars" }, (_.deleteBarLabel)),
         option({ value: "insertChannel" }, (_.insertChannelLabel) + EditorConfig.ctrlSymbol + "⏎)"),
@@ -4115,6 +4116,9 @@ export class SongEditor {
                 break;
             case "copy":
                 this._doc.selection.copy();
+                break;
+            case "cut":
+                this._doc.selection.cut();
                 break;
             case "insertBars":
                 this._doc.selection.insertBars();

@@ -478,7 +478,7 @@ export class TipPrompt implements Prompt {
 			case "continueThruPattern": {
 				message = div(
 					h2("Continue Through Pattern"),
-					p("By default, this checkbox is ticked. When unticked, if the transition is 'seamless', the transition will be cut off at the end of a pattern."),
+					p("By default, this checkbox is ticked. When ticked, if the transition is 'seamless', the transition will be cut off at the end of a pattern."),
 				);
 			} break;
 			case "aliases": {

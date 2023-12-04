@@ -346,7 +346,11 @@ export class Selection {
         this.copy();
         for (let channel = channelIndex; channel < channelIndex + cutHeight; channel++) {
             for (let bar = barIndex; bar < barIndex + cutWidth; bar++) {
-                this.erasePatternInBar(group, channel, bar);
+                const patternNumber: number = this._doc.song.channels[channel].bars[bar];
+                if (patternNumber != 0) {
+                const pattern: Pattern = this._doc.song.channels[channel].patterns[patternNumber - 1];
+                group.append(new ChangeNoteTruncate(this._doc, pattern, 0, Config.partsPerBeat * this._doc.song.beatsPerBar));
+                }
             }
         }
         this._doc.record(group);

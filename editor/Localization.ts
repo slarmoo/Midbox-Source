@@ -200,6 +200,7 @@ export class Localization {
     public static copyPatternLabel: string = "Copy Pattern (C)";
     public static pastePatternNotesLabel: string = "Paste Pattern Notes (V)";
     public static pastePatternNumbersLabel: string = "Paste Pattern Numbers (";
+    public static cutLabel: string = "Cut (X)";
     public static insertBarLabel: string = "Insert Bar (⏎)";
     public static deleteBarLabel: string = "Delete Selected Bars (⌫)";
     public static insertChannelLabel: string = "Insert Channel (";
@@ -1031,6 +1032,7 @@ if (language == "spanish") {
     Localization.copyPatternLabel = "Copiar Patrón (C)";
     Localization.pastePatternNotesLabel = "Pegar Notas del Patrón (V)";
     Localization.pastePatternNumbersLabel = "Pegar Números de Patrón (";
+    Localization.cutLabel = "Cortar (X)"
     Localization.insertBarLabel = "Insertar Barra (⏎)";
     Localization.deleteBarLabel = "Quitar Barra (⌫)";
     Localization.insertChannelLabel = "Insertar Canal (";

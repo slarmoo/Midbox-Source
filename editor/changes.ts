@@ -563,10 +563,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "normal", weight: 30 },
                     { item: "interrupt", weight: 2 },
                     { item: "slide", weight: 2 },
-                    { item: "insta-slide", weight: 1 },
-                    { item: "slide in pattern", weight: 1 },
                     { item: "continue", weight: 2 },
-                    { item: "continue in pattern", weight: 1 },
                 ])].index;
             }
             if (Math.random() < 0.2) {
@@ -897,10 +894,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                 instrument.transition = Config.transitions.dictionary[selectWeightedRandom([
                     { item: "interrupt", weight: 1 },
                     { item: "slide", weight: 1 },
-                    { item: "insta-slide", weight: 1 },
-                    { item: "slide in pattern", weight: 1 },
                     { item: "continue", weight: 1 },
-                    { item: "continue in pattern", weight: 1 },
                 ])].index;
             }
             if (Math.random() < 0.2) {
