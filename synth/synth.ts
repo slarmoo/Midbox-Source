@@ -3504,7 +3504,7 @@ export class Song {
                     const legacyWaves: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 0];
                     for (let channelIndex: number = 0; channelIndex < this.getChannelCount(); channelIndex++) {
                         for (const instrument of this.channels[channelIndex].instruments) {
-                            if (channelIndex >= this.pitchChannelCount) {
+                            if (this.channels[instrumentChannelIterator].instruments[instrumentIndexIterator].type == InstrumentType.noise) {
                                 instrument.chipNoise = clamp(0, Config.chipNoises.length, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                             } else {
                                 instrument.chipWave = clamp(0, Config.chipWaves.length, legacyWaves[base64CharCodeToInt[compressed.charCodeAt(charIndex++)]] | 0);
@@ -8390,8 +8390,12 @@ export class Synth {
             baseExpression = Config.drumsetBaseExpression;
             expressionReferencePitch = basePitch;
         } else if (instrument.type == InstrumentType.noise) {
-            basePitch = Config.chipNoises[instrument.chipNoise].basePitch;
+            basePitch = Config.chipNoises[instrument.chipNoise].basePitch + Config.keys[song.key].basePitch;
+            if (isNoiseChannel) {
             baseExpression = Config.noiseBaseExpression;
+            } else {
+                baseExpression = (Config.noiseBaseExpression / 1.7); // Normally, noise is intended for drum channels. If it's in a pitch channel, we need it to be quieter.
+            }
             expressionReferencePitch = basePitch;
             pitchDamping = Config.chipNoises[instrument.chipNoise].isSoft ? 24.0 : 60.0;
         } else if (instrument.type == InstrumentType.fm) {

@@ -274,7 +274,7 @@ export class Localization {
     public static chord4Label: string = "custom interval";
     public static chipWaveInstLabel: string = "chip wave";
     public static FMInstLabel: string = "FM";
-    public static noiseDrumLabel: string = "basic noise";
+    public static noiseInstDrumLabel: string = "basic noise";
     public static spectrumInstDrumLabel: string = "spectrum";
     public static drumsetDrumLabel: string = "drumset";
     public static harmonicsInstLabel: string = "harmonics";
@@ -1106,7 +1106,7 @@ if (language == "spanish") {
     Localization.chord4Label = "intervalo personalizado";
     Localization.chipWaveInstLabel = "onda de chip";
     Localization.FMInstLabel = "FM";
-    Localization.noiseDrumLabel = "ruido básico";
+    Localization.noiseInstDrumLabel = "ruido básico";
     Localization.spectrumInstDrumLabel = "espectro";
     Localization.drumsetDrumLabel = "batería";
     Localization.harmonicsInstLabel = "armónicos";

@@ -38,7 +38,7 @@ export class EditorConfig {
             name: (_.customInstrumentsLabel), presets: <DictionaryArray<Preset>>toNameMap([
                 { name: (_.chipWaveInstLabel), customType: InstrumentType.chip },
                 { name: (_.FMInstLabel), customType: InstrumentType.fm },
-                { name: (_.noiseDrumLabel), customType: InstrumentType.noise },
+                { name: (_.noiseInstDrumLabel), customType: InstrumentType.noise },
                 { name: (_.spectrumInstDrumLabel), customType: InstrumentType.spectrum },
                 { name: (_.drumsetDrumLabel), customType: InstrumentType.drumset },
                 { name: (_.harmonicsInstLabel), customType: InstrumentType.harmonics },

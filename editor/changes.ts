@@ -845,6 +845,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
             if (doc.prefs.FMOnRandomization) { possibleTypes.push({ item: InstrumentType.fm, weight: 3 }); }
             if (doc.prefs.supersawOnRandomization) { possibleTypes.push({ item: InstrumentType.supersaw, weight: 3 }); }
             if (doc.prefs.customChipOnRandomization) { possibleTypes.push({ item: InstrumentType.customChipWave, weight: 3 }); }
+            if (doc.prefs.noiseOnRandomization) { possibleTypes.push({ item: InstrumentType.noise, weight: 3 }); }
 
             let type: InstrumentType = instrument.type;
             if (possibleTypes.length > 0) {
@@ -1955,6 +1956,9 @@ export class ChangeRandomGeneratedInstrument extends Change {
                 } break;
                 case InstrumentType.customChipWave: {
                     // Randomize the "preset".
+                } break;
+                case InstrumentType.noise: {
+                    instrument.chipNoise = (Math.random() * Config.chipNoises.length) | 0;
                 } break;
                 default: throw new Error("Unhandled pitched instrument type in random generator.");
             }
