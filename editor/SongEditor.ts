@@ -573,7 +573,7 @@ export class SongEditor {
 	private readonly _supersawShapeSlider: Slider = new Slider(input({style: "margin: 0;", type: "range", min: "0", max: Config.supersawShapeMax, value: "0", step: "1"}), this._doc, (oldValue: number, newValue: number) => new ChangeSupersawShape(this._doc, oldValue, newValue), false);
 	private readonly _supersawShapeRow: HTMLDivElement = div({class: "selectRow"}, span({class: "tip", onclick: ()=>this._openPrompt("supersawShape")}, span(_.sawToPulseLabel)), this._supersawShapeSlider.container);
 
-    // Nothing yet.
+    // Wavetable stuff here
 
     private readonly _pulseWidthSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "1", max: Config.pulseWidthRange, value: "1", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangePulseWidth(this._doc, oldValue, newValue), false);
     private readonly _pulseWidthRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("pulseWidth") }, span(_.pwmLabel)), this._pulseWidthSlider.container);
@@ -2003,9 +2003,8 @@ export class SongEditor {
 			}
 
             if (instrument.type == InstrumentType.wavetable) {
-                this._chipWaveSelectRow.style.display = "";
+                this._chipWaveSelectRow.style.display = "none";
             } else {
-                this._chipWaveSelectRow.style.display = "none"
             }
             
 

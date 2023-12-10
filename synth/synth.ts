@@ -5698,6 +5698,7 @@ class InstrumentState {
     public type: InstrumentType = InstrumentType.chip;
     public synthesizer: Function | null = null;
     public wave: Float32Array | null = null;
+    public wavetableWaves: Float32Array[];
     public noisePitchFilterMult: number = 1.0;
     public unison: Unison | null = null;
     public chord: Chord | null = null;
@@ -6379,6 +6380,18 @@ class InstrumentState {
                 this.drumsetSpectrumWaves[i].getCustomWave(instrument.drumsetSpectrumWaves[i], InstrumentState._drumsetIndexToSpectrumOctave(i));
             }
             this.wave = null;
+        } else if (instrument.type == InstrumentType.wavetable) {
+            this.wave = null;
+            this.wavetableWaves = [
+                Config.chipWaves.dictionary["square"].samples,
+                Config.chipWaves.dictionary["1/4 pulse"].samples,
+                Config.chipWaves.dictionary["1/6 pulse"].samples,
+                Config.chipWaves.dictionary["1/8 pulse"].samples,
+                Config.chipWaves.dictionary["square"].samples,
+                Config.chipWaves.dictionary["1/4 pulse"].samples,
+                Config.chipWaves.dictionary["sawtooth"].samples,
+                Config.chipWaves.dictionary["double saw"].samples,
+              ];
         } else {
             this.wave = null;
         }
@@ -10770,8 +10783,102 @@ export class Synth {
             }
         }
     }
-    private static wavetableSynth(synth: Synth): void {
-        // Nothing yet.
+    private static wavetableSynth(synth: Synth, bufferIndex: number, roundedSamplesPerTick: number, tone: Tone, instrumentState: InstrumentState): void {
+        const aliases: boolean = (effectsIncludeDistortion(instrumentState.effects) && instrumentState.aliases);
+        const data: Float32Array = synth.tempMonoInstrumentSampleBuffer!;
+        const volumeScale = instrumentState.volumeScale;
+        //const wavetableWaves: Float32Array[] = instrumentState.wavetableWaves;
+        const wave: Float32Array = instrumentState.wavetableWaves[0];
+
+        // For all but aliasing custom chip, the first sample is duplicated at the end, so don't double-count it.
+        const waveLength: number = (aliases && instrumentState.type == InstrumentType.customChipWave) ? wave.length : wave.length - 1;
+
+        const unisonSign: number = tone.specialIntervalExpressionMult * instrumentState.unison!.sign;
+        if (instrumentState.unison!.voices == 1 && !instrumentState.chord!.customInterval) tone.phases[1] = tone.phases[0];
+        let phaseDeltaA: number = tone.phaseDeltas[0] * waveLength;
+        let phaseDeltaB: number = tone.phaseDeltas[1] * waveLength;
+        const phaseDeltaScaleA: number = +tone.phaseDeltaScales[0];
+        const phaseDeltaScaleB: number = +tone.phaseDeltaScales[1];
+        let expression: number = +tone.expression;
+        const expressionDelta: number = +tone.expressionDelta;
+        let phaseA: number = (tone.phases[0] % 1) * waveLength;
+        let phaseB: number = (tone.phases[1] % 1) * waveLength;
+
+        const filters: DynamicBiquadFilter[] = tone.noteFilters;
+        const filterCount: number = tone.noteFilterCount | 0;
+        let initialFilterInput1: number = +tone.initialNoteFilterInput1;
+        let initialFilterInput2: number = +tone.initialNoteFilterInput2;
+        const applyFilters: Function = Synth.applyFilters;
+        let prevWaveIntegralA: number = 0;
+        let prevWaveIntegralB: number = 0;
+
+        if (!aliases) {
+            const phaseAInt: number = phaseA | 0;
+            const phaseBInt: number = phaseB | 0;
+            const indexA: number = phaseAInt % waveLength;
+            const indexB: number = phaseBInt % waveLength;
+            const phaseRatioA: number = phaseA - phaseAInt;
+            const phaseRatioB: number = phaseB - phaseBInt;
+            prevWaveIntegralA = +wave[indexA];
+            prevWaveIntegralB = +wave[indexB];
+            prevWaveIntegralA += (wave[indexA + 1] - prevWaveIntegralA) * phaseRatioA;
+            prevWaveIntegralB += (wave[indexB + 1] - prevWaveIntegralB) * phaseRatioB;
+        }
+
+        const stopIndex: number = bufferIndex + roundedSamplesPerTick;
+        for (let sampleIndex: number = bufferIndex; sampleIndex < stopIndex; sampleIndex++) {
+
+            phaseA += phaseDeltaA;
+            phaseB += phaseDeltaB;
+
+            let waveA: number;
+            let waveB: number;
+            let inputSample: number;
+
+            if (aliases) {
+                waveA = wave[(0 | phaseA) % waveLength];
+                waveB = wave[(0 | phaseB) % waveLength];
+                inputSample = waveA + waveB;
+            } else {
+                const phaseAInt: number = phaseA | 0;
+                const phaseBInt: number = phaseB | 0;
+                const indexA: number = phaseAInt % waveLength;
+                const indexB: number = phaseBInt % waveLength;
+                let nextWaveIntegralA: number = wave[indexA];
+                let nextWaveIntegralB: number = wave[indexB];
+                const phaseRatioA: number = phaseA - phaseAInt;
+                const phaseRatioB: number = phaseB - phaseBInt;
+                nextWaveIntegralA += (wave[indexA + 1] - nextWaveIntegralA) * phaseRatioA;
+                nextWaveIntegralB += (wave[indexB + 1] - nextWaveIntegralB) * phaseRatioB;
+                waveA = (nextWaveIntegralA - prevWaveIntegralA) / phaseDeltaA;
+                waveB = (nextWaveIntegralB - prevWaveIntegralB) / phaseDeltaB;
+                prevWaveIntegralA = nextWaveIntegralA;
+                prevWaveIntegralB = nextWaveIntegralB;
+                inputSample = waveA + waveB * unisonSign;
+            }
+
+            const sample: number = applyFilters(inputSample * volumeScale, initialFilterInput1, initialFilterInput2, filterCount, filters);
+            initialFilterInput2 = initialFilterInput1;
+            initialFilterInput1 = inputSample * volumeScale;
+
+            phaseDeltaA *= phaseDeltaScaleA;
+            phaseDeltaB *= phaseDeltaScaleB;
+
+            const output: number = sample * expression;
+            expression += expressionDelta;
+
+            data[sampleIndex] += output;
+        }
+
+        tone.phases[0] = phaseA / waveLength;
+        tone.phases[1] = phaseB / waveLength;
+        tone.phaseDeltas[0] = phaseDeltaA / waveLength;
+        tone.phaseDeltas[1] = phaseDeltaB / waveLength;
+        tone.expression = expression;
+
+        synth.sanitizeFilters(filters);
+        tone.initialNoteFilterInput1 = initialFilterInput1;
+        tone.initialNoteFilterInput2 = initialFilterInput2;
     }
 
     private static findRandomZeroCrossing(wave: Float32Array, waveLength: number): number {
