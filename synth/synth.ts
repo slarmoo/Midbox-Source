@@ -164,7 +164,7 @@ const enum SongTagCode {
     feedbackEnvelope = CharCode.V, // added in 6, DEPRECATED
     pulseWidth = CharCode.W, // added in 7
     aliases = CharCode.X, // [JB], added in 4, DEPRECATED
-//  dutyCycle = CharCode.Y,
+    wavetable = CharCode.Y, // Midbox
 //  ___ = CharCode.Z,
 
 }
@@ -1446,13 +1446,9 @@ export class Instrument {
                     this.supersawShape = 0;
                     this.pulseWidth = Config.pulseWidthRange - 1;
                     break;
-                /*case InstrumentType.dutyCycle:
+                case InstrumentType.wavetable:
                     this.chord = Config.chords.dictionary["arpeggio"].index;
-                    this.cycleA = 1;
-                    this.cycleB = 1;
-                    this.cycleC = 1;
-                    this.cycleD = 1;
-                    break;*/
+                    break;
             default:
                 throw new Error("Unrecognized instrument type: " + type);
         }
@@ -1704,13 +1700,8 @@ export class Instrument {
         } else if (this.type == InstrumentType.pickedString) {
             instrumentObject["unison"] = Config.unisons[this.unison].name;
             instrumentObject["stringSustain"] = Math.round(100 * this.stringSustain / (Config.stringSustainRange - 1));
-        /*} else if (this.type == InstrumentType.dutyCycle) {
-            instrumentObject["cycleTime"] = Config.cycleTime;
-            instrumentObject["cycleA"] = Config.dutycycle[this.cycleA].wave;
-            instrumentObject["cycleB"] = Config.dutyCycle[this.cycleB].wave;
-            instrumentObject["cycleC"] = Config.dutyCycle[this.cycleC].wave;
-            instrumentObject["cycleD"] = Config.dutyCycle[this.cycleD].wave;
-            instrumentObject["dutyAfter"] = Config.dutyAfter[Config.dutyAfterValue].value;*/
+        } else if (this.type == InstrumentType.wavetable) {
+            // Nothing yet.
         } else if (this.type == InstrumentType.harmonics) {
             instrumentObject["unison"] = Config.unisons[this.unison].name;
         } else if (this.type == InstrumentType.fm) {
@@ -2905,8 +2896,8 @@ export class Song {
                 } else if (instrument.type == InstrumentType.pickedString) {
                     buffer.push(SongTagCode.unison, base64IntToCharCode[instrument.unison]);
                     buffer.push(SongTagCode.stringSustain, base64IntToCharCode[instrument.stringSustain]);
-                /*} else if (instrument.type == InstrumentType.dutyCycle) {
-                    buffer.push(SongTagCode.dutyCycle, base64IntToCharCode[instrument.cycleA], base64IntToCharCode[instrument.cycleB], base64IntToCharCode[instrument.cycleC], base64IntToCharCode[instrument.cycleD], )*/
+                } else if (instrument.type == InstrumentType.wavetable) {
+                    // Nothing yet.
                 } else if (instrument.type == InstrumentType.mod) {
                     // Handled down below. Could be moved, but meh.
                 } else {
@@ -8411,6 +8402,8 @@ export class Synth {
 			baseExpression = Config.supersawBaseExpression;
         } else if (instrument.type == InstrumentType.pickedString) {
             baseExpression = Config.pickedStringBaseExpression;
+        } else if (instrument.type == InstrumentType.wavetable) {
+            baseExpression = Config.wavetableBaseExpression;
         } else if (instrument.type == InstrumentType.mod) {
             baseExpression = 1.0;
             expressionReferencePitch = 0;
@@ -9271,6 +9264,8 @@ export class Synth {
 			return Synth.supersawSynth;
         } else if (instrument.type == InstrumentType.pickedString) {
             return Synth.pickedStringSynth;
+        } else if (instrument.type == InstrumentType.wavetable) {
+            return Synth.wavetableSynth;
         } else if (instrument.type == InstrumentType.noise) {
             return Synth.noiseSynth;
         } else if (instrument.type == InstrumentType.spectrum) {
@@ -10774,6 +10769,9 @@ export class Synth {
                 }
             }
         }
+    }
+    private static wavetableSynth(synth: Synth): void {
+        // Nothing yet.
     }
 
     private static findRandomZeroCrossing(wave: Float32Array, waveLength: number): number {

@@ -46,7 +46,7 @@ export class EditorConfig {
                 { name: (_.pwmInstLabel), customType: InstrumentType.pwm },
                 { name: (_.pickedStringInstLabel), customType: InstrumentType.pickedString },
                 { name: (_.customChipInstLabel), customType: InstrumentType.customChipWave },
-                //{ name: (_.dutyCycleInstLabel), customType: InstrumentType.dutyCycle},
+                { name: (_.wavetableInstLabel), customType: InstrumentType.wavetable},
             ])
         },
         {

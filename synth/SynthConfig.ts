@@ -72,7 +72,7 @@ export const enum InstrumentType {
     pwm,
     pickedString,
     customChipWave,
-//  dutyCycle,
+    wavetable,
     mod,
     length,
 }
@@ -239,12 +239,6 @@ export interface Envelope extends BeepBoxOption {
     readonly speed: number;
 }
 
-/*
-export interface DutyAfter extends BeepBoxOption {
-    readonly value: number;
-}
-*/
-
 export interface AutomationTarget extends BeepBoxOption {
     readonly computeIndex:          EnvelopeComputeIndex | null;
     readonly displayName:           string;
@@ -337,8 +331,8 @@ export class Config {
         { name: "freehand",      stepsPerBeat: 24, roundUpThresholds: null           },
     ]);
 
-    public static readonly instrumentTypeNames:              ReadonlyArray<string> =  ["chip", "FM", "noise", "spectrum", "drumset", "harmonics", "supersaw", "PWM", "Picked String", "custom chip", /*"duty cycle"*/ "mod"];
-    public static readonly instrumentTypeHasSpecialInterval: ReadonlyArray<boolean> = [ true,   true, false,   false,      false,     true,        false,      false, false];
+    public static readonly instrumentTypeNames:              ReadonlyArray<string> =  ["chip", "FM", "noise", "spectrum", "drumset", "harmonics", "supersaw", "PWM", "Picked String", "custom chip", "wavetable", "mod"];
+    public static readonly instrumentTypeHasSpecialInterval: ReadonlyArray<boolean> = [ true,   true, false,   false,      false,     true,        false,      false, false,           false];
     public static readonly chipBaseExpression:               number = 0.03375;   // Doubled by unison feature, but affected by expression adjustments per unison setting and wave shape.
     public static readonly fmBaseExpression:                 number = 0.03;
     public static readonly noiseBaseExpression:              number = 0.19;
@@ -348,7 +342,7 @@ export class Config {
     public static readonly pwmBaseExpression:                number = 0.04725;   // It's actually closer to half of this, the synthesized pulse amplitude range is only .5 to -.5, but also note that the fundamental sine partial amplitude of a square wave is 4/π times the measured square wave amplitude.
     public static readonly supersawBaseExpression:           number = 0.061425;  // It's actually closer to half of this, the synthesized sawtooth amplitude range is only .5 to -.5.
     public static readonly pickedStringBaseExpression:       number = 0.025;     // Same as harmonics.
-//  public static readonly dutyCycleBaseExpression:          number = 0.025;     // As a test. Same as both harmonics and pulse width.
+    public static readonly wavetableBaseExpression:          number = 0.03375;   // Gonna keep it the same as chipBaseExpression for now.
     public static readonly distortionBaseVolume:             number = 0.011;     // Distortion is not affected by pitchDamping, which otherwise approximately halves expression for notes around the middle of the range.
     public static readonly bitcrusherBaseVolume:             number = 0.010;     // Also not affected by pitchDamping, used when bit crushing is maxed out (aka "1-bit" output).
 
@@ -674,7 +668,8 @@ export class Config {
                 { name: "rise 4", type: EnvelopeType.rise, speed: 2.0   },
                 { name: "rise 5", type: EnvelopeType.rise, speed: 0.5   },
             ])
-        },*/
+        },
+        This is an organized envelope system that I have yet to implement. We'll see how that goes.*/
 
     public static readonly envelopes: DictionaryArray<Envelope> = toNameMap([
         { name: "none",           type: EnvelopeType.none,         speed: 0.0   },
@@ -815,9 +810,6 @@ export class Config {
 	public static readonly supersawDynamismMax:              number = 6;
 	public static readonly supersawSpreadMax:                number = 12;
 	public static readonly supersawShapeMax:                 number = 6;
-/*  public static readonly cycleTimeRange:                   number = 12;
-    public static readonly cycleTimer:                       number = 0;
-    public static readonly cycleSwitcher:                    number = 0;*/
     public static readonly pitchChannelCountMin:             number = 1;
     public static readonly pitchChannelCountMax:             number = 40;
     public static readonly noiseChannelCountMin:             number = 0;

@@ -89,7 +89,7 @@ function buildPresetOptions(isNoise: boolean, idSet: string): HTMLSelectElement 
         menu.appendChild(option({ value: InstrumentType.fm }, EditorConfig.valueToPreset(InstrumentType.fm)!.name));
         menu.appendChild(option({ value: InstrumentType.customChipWave }, EditorConfig.valueToPreset(InstrumentType.customChipWave)!.name));
         menu.appendChild(option({ value: InstrumentType.noise }, EditorConfig.valueToPreset(InstrumentType.noise)!.name));
-        //menu.appendChild(option({ value: InstrumentType.dutyCycle }, EditorConfig.valueToPreset(InstrumentType.dutyCycle)!.name))
+        menu.appendChild(option({ value: InstrumentType.wavetable }, EditorConfig.valueToPreset(InstrumentType.wavetable)!.name))
     }
 
     const randomGroup: HTMLElement = optgroup({ label: (_.randomLabel) });
@@ -573,15 +573,7 @@ export class SongEditor {
 	private readonly _supersawShapeSlider: Slider = new Slider(input({style: "margin: 0;", type: "range", min: "0", max: Config.supersawShapeMax, value: "0", step: "1"}), this._doc, (oldValue: number, newValue: number) => new ChangeSupersawShape(this._doc, oldValue, newValue), false);
 	private readonly _supersawShapeRow: HTMLDivElement = div({class: "selectRow"}, span({class: "tip", onclick: ()=>this._openPrompt("supersawShape")}, span(_.sawToPulseLabel)), this._supersawShapeSlider.container);
 
-    /*private readonly _dutyCyclePulseWidthSlider1: Slider = new Slider(input({style: "margin: 0;", type: "range", min: "1", max: Config.pulseWidthRange, value: "1", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangePulseWidth(this._doc, oldValue, newValue), false);
-    private readonly _dutyCyclePulseWidthRow1: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("pulseWidth") }, span(_.dutyCyclePulse1Label)), this._dutyCyclePulseWidthSlider1.container);
-    private readonly _dutyCyclePulseWidthSlider2: Slider = new Slider(input({style: "margin: 0;", type: "range", min: "1", max: Config.pulseWidthRange, value: "1", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangePulseWidth(this._doc, oldValue, newValue), false);
-    private readonly _dutyCyclePulseWidthRow2: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("pulseWidth") }, span(_.dutyCyclePulse2Label)), this._dutyCyclePulseWidthSlider2.container);
-    private readonly _dutyCyclePulseWidthSlider3: Slider = new Slider(input({style: "margin: 0;", type: "range", min: "1", max: Config.pulseWidthRange, value: "1", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangePulseWidth(this._doc, oldValue, newValue), false);
-    private readonly _dutyCyclePulseWidthRow3: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("pulseWidth") }, span(_.dutyCyclePulse3Label)), this._dutyCyclePulseWidthSlider3.container);
-    private readonly _dutyCyclePulseWidthSlider4: Slider = new Slider(input({style: "margin: 0;", type: "range", min: "1", max: Config.pulseWidthRange, value: "1", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangePulseWidth(this._doc, oldValue, newValue), false);
-    private readonly _dutyCyclePulseWidthRow4: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("pulseWidth") }, span(_.dutyCyclePulse4Label)), this._dutyCyclePulseWidthSlider4.container);
-    private readonly _dutyCycleTimeSlider: Slider = new Slider(input({style: "margin: 0;", type: "range", min: "1", max: "12", value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new Change(this._doc, oldValue, newValue), false)*/
+    // Nothing yet.
 
     private readonly _pulseWidthSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "1", max: Config.pulseWidthRange, value: "1", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangePulseWidth(this._doc, oldValue, newValue), false);
     private readonly _pulseWidthRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("pulseWidth") }, span(_.pwmLabel)), this._pulseWidthSlider.container);
@@ -769,10 +761,6 @@ export class SongEditor {
         this._supersawDynamismRow,
 		this._supersawSpreadRow,
 		this._supersawShapeRow,
-        /*this._dutyCyclePulseWidthRow1,
-        this._dutyCyclePulseWidthRow2,
-        this._dutyCyclePulseWidthRow3,
-        this._dutyCyclePulseWidthRow4,*/
         this._pulseWidthRow,
         this._stringSustainRow,
         this._unisonSelectRow,
@@ -830,7 +818,6 @@ export class SongEditor {
         this._instrumentsButtonRow,
         this._instrumentTypeSelectRow,
         this._instrumentVolumeSliderRow,
-        //this._customizeInstrumentButton,
         this._customInstrumentSettingsGroup,
     );
     private readonly _usedPatternIndicator: SVGElement = SVG.path({ d: "M -6 -6 H 6 V 6 H -6 V -6 M -2 -3 L -2 -3 L -1 -4 H 1 V 4 H -1 V -1.2 L -1.2 -1 H -2 V -3 z", fill: ColorConfig.indicatorSecondary, "fill-rule": "evenodd" });
@@ -1634,7 +1621,8 @@ export class SongEditor {
                     break;
                 /*case "harmonicsSettings":
                     this.prompt = new HarmonicsPrompt(this._doc, this);
-                    break;*/
+                    break;
+                    MID TODO: Uncomment this and work on it ya lazy dog.*/
                 case "customChipSettings":
                     this.prompt = new CustomChipPrompt(this._doc, this);
                     break;
@@ -2014,22 +2002,11 @@ export class SongEditor {
 				this._pulseWidthRow.style.display = "none";
 			}
 
-            /*if (instrument.type == InstrumentType.dutyCycle) {
-                this._chipWaveSelectRow.style.display = "none";
-                this._dutyCyclePulseWidthRow1.style.display = "";
-                this._dutyCyclePulseWidthRow2.style.display = "";
-                this._dutyCyclePulseWidthRow3.style.display = "";
-                this._dutyCyclePulseWidthRow4.style.display = "";
-                this._dutyCyclePulseWidthSlider1.updateValue(instrument.cycleA);
-                this._dutyCyclePulseWidthSlider2.updateValue(instrument.cycleB);
-                this._dutyCyclePulseWidthSlider3.updateValue(instrument.cycleC);
-                this._dutyCyclePulseWidthSlider4.updateValue(instrument.cycleD);
+            if (instrument.type == InstrumentType.wavetable) {
+                this._chipWaveSelectRow.style.display = "";
             } else {
-                this._dutyCyclePulseWidthRow1.style.display = "none";
-                this._dutyCyclePulseWidthRow2.style.display = "none";
-                this._dutyCyclePulseWidthRow3.style.display = "none";
-                this._dutyCyclePulseWidthRow4.style.display = "none";
-            }*/
+                this._chipWaveSelectRow.style.display = "none"
+            }
             
 
             if (effectsIncludeTransition(instrument.effects)) {

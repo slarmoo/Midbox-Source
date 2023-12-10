@@ -280,11 +280,7 @@ export class Localization {
     public static pickedStringInstLabel: string = "picked string";
     public static customChipInstLabel: string = "custom chip";
     public static supersawInstLabel: string = "supersaw";
-    public static dutyCycleInstLabel: string = "duty cycle";
-    public static dutyCyclePulse1Label: string = "Pulse 1:"
-    public static dutyCyclePulse2Label: string = "Pulse 2:"
-    public static dutyCyclePulse3Label: string = "Pulse 3:"
-    public static dutyCyclePulse4Label: string = "Pulse 4:"
+    public static wavetableInstLabel: string = "wavetable";
     public static customInstrumentsLabel: string = "Instrument Types";
     public static midboxMiscPresetsLabel: string = "Midbox Misc Presets";
     public static midboxDubstepPresetsLabel: string = "Midbox Dubstep Presets";
@@ -1111,11 +1107,7 @@ if (language == "spanish") {
     Localization.pickedStringInstLabel = "cuerda pulsada";
     Localization.customChipInstLabel = "chip personalizado";
     Localization.supersawInstLabel = "supersierra";
-    Localization.dutyCycleInstLabel = "ciclo de trabajo";
-    Localization.dutyCyclePulse1Label = "Pulso 1:";
-    Localization.dutyCyclePulse2Label = "Pulso 2:";
-    Localization.dutyCyclePulse3Label = "Pulso 3:";
-    Localization.dutyCyclePulse4Label = "Pulso 4:";
+    Localization.wavetableInstLabel = "wavetable";
     Localization.customInstrumentsLabel = "Tipos de Instrumentos";
     Localization.midboxMiscPresetsLabel = "Presets Misc. de Midbox";
     Localization.midboxDubstepPresetsLabel = "Presets de Dubstep de Midbox";
