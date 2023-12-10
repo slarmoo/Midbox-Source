@@ -1230,10 +1230,6 @@ export class Instrument {
     public aliases: boolean = false;
     public percussion: boolean = true;
     public songDetuneEffected: boolean = true;
-    /*public cycleA: number = 1;
-    public cycleB: number = 1;
-    public cycleC: number = 1;
-    public cycleD: number = 1;*/
     public pulseWidth: number = Config.pulseWidthRange;
     public supersawDynamism: number = Config.supersawDynamismMax;
 	public supersawSpread: number = Math.ceil(Config.supersawSpreadMax / 2.0);
@@ -1701,7 +1697,7 @@ export class Instrument {
             instrumentObject["unison"] = Config.unisons[this.unison].name;
             instrumentObject["stringSustain"] = Math.round(100 * this.stringSustain / (Config.stringSustainRange - 1));
         } else if (this.type == InstrumentType.wavetable) {
-            // Nothing yet.
+            instrumentObject["unison"] = Config.unisons[this.unison].name;
         } else if (this.type == InstrumentType.harmonics) {
             instrumentObject["unison"] = Config.unisons[this.unison].name;
         } else if (this.type == InstrumentType.fm) {
@@ -2830,7 +2826,6 @@ export class Song {
                     buffer.push(SongTagCode.wave, base64IntToCharCode[instrument.chipWave]);
                     buffer.push(SongTagCode.unison, base64IntToCharCode[instrument.unison]);
                 } else if (instrument.type == InstrumentType.fm) {
-                    buffer.push(SongTagCode.unison, base64IntToCharCode[instrument.unison]);
                     buffer.push(SongTagCode.algorithm, base64IntToCharCode[instrument.algorithm]);
                     buffer.push(SongTagCode.feedbackType, base64IntToCharCode[instrument.feedbackType]);
                     buffer.push(SongTagCode.feedbackAmplitude, base64IntToCharCode[instrument.feedbackAmplitude]);
@@ -2897,7 +2892,7 @@ export class Song {
                     buffer.push(SongTagCode.unison, base64IntToCharCode[instrument.unison]);
                     buffer.push(SongTagCode.stringSustain, base64IntToCharCode[instrument.stringSustain]);
                 } else if (instrument.type == InstrumentType.wavetable) {
-                    // Nothing yet.
+                    buffer.push(SongTagCode.unison, base64IntToCharCode[instrument.unison]);
                 } else if (instrument.type == InstrumentType.mod) {
                     // Handled down below. Could be moved, but meh.
                 } else {
@@ -8976,7 +8971,7 @@ export class Synth {
             }
 
             const startFreq: number = Instrument.frequencyFromPitch(startPitch);
-            if (instrument.type == InstrumentType.chip || instrument.type == InstrumentType.customChipWave || instrument.type == InstrumentType.harmonics || instrument.type == InstrumentType.pickedString || instrument.type == InstrumentType.spectrum || instrument.type == InstrumentType.pwm || instrument.type == InstrumentType.noise) {
+            if (instrument.type == InstrumentType.chip || instrument.type == InstrumentType.customChipWave || instrument.type == InstrumentType.harmonics || instrument.type == InstrumentType.pickedString || instrument.type == InstrumentType.spectrum || instrument.type == InstrumentType.pwm || instrument.type == InstrumentType.noise || instrument.type == InstrumentType.wavetable) {
                 // These instruments have two waves at different frequencies for the unison feature.
                 const unison: Unison = Config.unisons[instrument.unison];
                 const voiceCountExpression: number = (instrument.type == InstrumentType.pickedString && InstrumentType.pwm && InstrumentType.spectrum) ? 1 : unison.voices / 2.0;
