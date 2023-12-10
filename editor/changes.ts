@@ -544,7 +544,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
         if (isNoise) {
             const possibleTypes: ({ item: InstrumentType, weight: number })[] = [];
             if (doc.prefs.drumSpectrumOnRandomization) { possibleTypes.push({ item: InstrumentType.spectrum, weight: 3 }); }
-            if (doc.prefs.noiseOnRandomization) { possibleTypes.push({ item: InstrumentType.noise, weight: 3 }); }
+            if (doc.prefs.drumNoiseOnRandomization) { possibleTypes.push({ item: InstrumentType.noise, weight: 3 }); }
             if (doc.prefs.drumsetOnRandomization) { possibleTypes.push({ item: InstrumentType.drumset, weight: 3 }); }
 
             let type: InstrumentType = instrument.type;
@@ -564,6 +564,10 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "interrupt", weight: 2 },
                     { item: "slide", weight: 2 },
                     { item: "continue", weight: 2 },
+                ])].index;
+            } else {
+                instrument.transition = Config.transitions.dictionary[selectWeightedRandom([
+                    { item: "normal", weight: 1 },
                 ])].index;
             }
             if (Math.random() < 0.2) {
@@ -896,6 +900,10 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "interrupt", weight: 1 },
                     { item: "slide", weight: 1 },
                     { item: "continue", weight: 1 },
+                ])].index;
+            } else {
+                instrument.transition = Config.transitions.dictionary[selectWeightedRandom([
+                    { item: "normal", weight: 1 },
                 ])].index;
             }
             if (Math.random() < 0.2) {

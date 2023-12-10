@@ -42,8 +42,9 @@ export class Preferences {
 	public spectrumOnRandomization: boolean;
 	public FMOnRandomization: boolean;
 	public customChipOnRandomization: boolean;
-	public drumSpectrumOnRandomization: boolean;
 	public noiseOnRandomization: boolean;
+	public drumSpectrumOnRandomization: boolean;
+	public drumNoiseOnRandomization: boolean;
 	public drumsetOnRandomization: boolean;
 	public fadeOnRandomization: boolean;
 	public EQFilterOnRandomization: boolean;
@@ -92,8 +93,9 @@ export class Preferences {
 		this.spectrumOnRandomization = window.localStorage.getItem("spectrumOnRandomization") != "false";
 		this.FMOnRandomization = window.localStorage.getItem("FMOnRandomization") != "false";
 		this.customChipOnRandomization = window.localStorage.getItem("customChipOnRandomization") != "false";
-		this.drumSpectrumOnRandomization = window.localStorage.getItem("drumSpectrumOnRandomization") != "false";
 		this.noiseOnRandomization = window.localStorage.getItem("noiseOnRandomization") != "false";
+		this.drumSpectrumOnRandomization = window.localStorage.getItem("drumSpectrumOnRandomization") != "false";
+		this.drumNoiseOnRandomization = window.localStorage.getItem("drumNoiseOnRandomization") != "false";
 		this.drumsetOnRandomization = window.localStorage.getItem("drumsetOnRandomization") == "true";
 		this.fadeOnRandomization = window.localStorage.getItem("fadeOnRandomization") != "false";
 		this.EQFilterOnRandomization = window.localStorage.getItem("EQFilterOnRandomization") != "false";
@@ -153,13 +155,14 @@ export class Preferences {
 		window.localStorage.setItem("spectrumOnRandomization", this.spectrumOnRandomization ? "true" : "false");
 		window.localStorage.setItem("FMOnRandomization", this.FMOnRandomization ? "true" : "false");
 		window.localStorage.setItem("customChipOnRandomization", this.customChipOnRandomization ? "true" : "false");
-		window.localStorage.setItem("drumSpectrumOnRandomization", this.drumSpectrumOnRandomization ? "true" : "false");
 		window.localStorage.setItem("noiseOnRandomization", this.noiseOnRandomization ? "true" : "false");
+		window.localStorage.setItem("drumSpectrumOnRandomization", this.drumSpectrumOnRandomization ? "true" : "false");
+		window.localStorage.setItem("drumNoiseOnRandomization", this.drumNoiseOnRandomization ? "true" : "false");
 		window.localStorage.setItem("drumsetOnRandomization", this.drumsetOnRandomization ? "true" : "false");
 		window.localStorage.setItem("fadeOnRandomization", this.fadeOnRandomization ? "true" : "false");
 		window.localStorage.setItem("EQFilterOnRandomization", this.EQFilterOnRandomization ? "true" : "false");
 		window.localStorage.setItem("noteFilterOnRandomization", this.noteFilterOnRandomization ? "true" : "false");
-		
+
 		window.localStorage.setItem("deactivateCapsLock", this.deactivateCapsLock ? "true" : "false");
 		window.localStorage.setItem("CTRLrEvent", this.CTRLrEvent);
 	}

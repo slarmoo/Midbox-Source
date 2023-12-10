@@ -14,9 +14,10 @@ export class RandomGenPrompt implements Prompt {
     private readonly _spectrumBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _FMBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _customChipBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _noiseBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
 
     private readonly _drumSpectrumBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
-    private readonly _noiseBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _drumNoiseBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _drumsetBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
 
     private readonly _fadeBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
@@ -130,6 +131,10 @@ public readonly container: HTMLDivElement = div({class: "prompt noSelection", st
 			"Custom Chip:",
 			this._customChipBox,
         ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+            "Noise:",
+            this._noiseBox,
+        ),
     h4({style: "display: flex; flex-direction: row; text-align: center; align-items: center; height: 0.5em; justify-content: flex-end;"},
         "Drum Types",
     ),
@@ -138,8 +143,8 @@ public readonly container: HTMLDivElement = div({class: "prompt noSelection", st
 			this._drumSpectrumBox,
         ),
     label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
-			"Noise:",
-			this._noiseBox,
+			"Drum Noise:",
+			this._drumNoiseBox,
         ),
     label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
 			"Drumset:",
@@ -406,8 +411,9 @@ constructor(private _doc: SongDocument) {
     this._spectrumBox.checked = this._doc.prefs.spectrumOnRandomization;
     this._FMBox.checked = this._doc.prefs.FMOnRandomization;
     this._customChipBox.checked = this._doc.prefs.customChipOnRandomization;
-    this._drumSpectrumBox.checked = this._doc.prefs.drumSpectrumOnRandomization;
     this._noiseBox.checked = this._doc.prefs.noiseOnRandomization;
+    this._drumSpectrumBox.checked = this._doc.prefs.drumSpectrumOnRandomization;
+    this._drumNoiseBox.checked = this._doc.prefs.drumNoiseOnRandomization;
     this._drumsetBox.checked = this._doc.prefs.drumsetOnRandomization;
     this._volumeBox.checked = this._doc.volumeOnRandomization;
     this._panBox.checked = this._doc.panningOnRandomization;
@@ -485,9 +491,10 @@ private _confirm = (): void => {
     this._doc.prefs.spectrumOnRandomization = this._spectrumBox.checked;
     this._doc.prefs.FMOnRandomization = this._FMBox.checked;
     this._doc.prefs.customChipOnRandomization = this._customChipBox.checked;
+    this._doc.prefs.noiseOnRandomization = this._noiseBox.checked;
 
     this._doc.prefs.drumSpectrumOnRandomization = this._drumSpectrumBox.checked;
-    this._doc.prefs.noiseOnRandomization = this._noiseBox.checked;
+    this._doc.prefs.drumNoiseOnRandomization = this._drumNoiseBox.checked;
     this._doc.prefs.drumsetOnRandomization = this._drumsetBox.checked;
 
     this._doc.prefs.fadeOnRandomization = this._fadeBox.checked;

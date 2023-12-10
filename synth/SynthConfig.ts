@@ -398,9 +398,7 @@ export class Config {
         { name: "retro clang",      expression: 1.0,   basePitch: 69,  pitchFilterMult: 1024.0, isSoft: false, samples: null },
         { name: "chime",            expression: 2,     basePitch: 69,  pitchFilterMult: 1.0,    isSoft: true,  samples: null },
         { name: "harsh",            expression: 10,    basePitch: 69,  pitchFilterMult: 1.0,    isSoft: true,  samples: null },
-        { name: "tick",             expression: 1.0,   basePitch: 96,  pitchFilterMult: 1024.0, isSoft: true,  samples: null },
         { name: "trill",            expression: 1.0,   basePitch: 69,  pitchFilterMult: 1024.0, isSoft: true,  samples: null },
-        { name: "empty",            expression: 0.55,  basePitch: 96,  pitchFilterMult: 1024.0, isSoft: true,  samples: null },
         { name: "detuned periodic", expression: 0.3,   basePitch: 69,  pitchFilterMult: 1024.0, isSoft: false, samples: null },
         { name: "snare",            expression: 1.0,   basePitch: 69,  pitchFilterMult: 1024.0, isSoft: false, samples: null },
     ]);
@@ -1262,19 +1260,8 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
                     newBuffer += 15 << 2;
                 }
                 drumBuffer = newBuffer;
-            }
+            } 
         } else if (index == 13) {
-            // The scrapped "tick" noise type from Zefbox. Should be changed.
-            let drumBuffer: number = 1;
-            for (let i: number = 0; i < 32768; i++) {
-                wave[i] = (drumBuffer & 1) / 2.0 + 1.25;
-                let newBuffer: number = drumBuffer >> 1;
-                if (((drumBuffer + newBuffer) & 1) == 1) {
-                    newBuffer -= 1 << 0;
-                }
-                drumBuffer = newBuffer;
-            }         
-        } else if (index == 14) {
             // The "trill" noise type from Zefbox.
             let drumBuffer: number = 1;
             for (let i: number = 0; i < 32768; i++) {
@@ -1285,13 +1272,7 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
                 }
                 drumBuffer = newBuffer;
             }
-        } else if (index == 15) {
-            // The "empty" noise type from Zefbox. NOT FUNCTIONAL.
-            drawNoiseSpectrum(wave, Config.chipNoiseLength, 1, 11, 4, 1, 0);
-            drawNoiseSpectrum(wave, Config.chipNoiseLength, 11, 4, -2, -2, 0);
-            inverseRealFourierTransform!(wave, Config.chipNoiseLength);
-            scaleElementsByFactor!(wave, 1.0 / Math.sqrt(Config.chipNoiseLength));
-        } else if (index == 16) {
+        } else if (index == 14) {
             // The "detuned periodic" noise type from Modbox.
             let drumBuffer: number = 1;
             for (let i: number = 0; i < 32767; i++) {
@@ -1302,7 +1283,7 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
                 }
                 drumBuffer = newBuffer;
             }
-        } else if (index == 17) {
+        } else if (index == 15) {
             // The "snare" noise type from Modbox.
             for (let i: number = 0; i < 32768; i++) {
                 wave[i] = Math.random() * 2.0 - 1.0;

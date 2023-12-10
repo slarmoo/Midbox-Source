@@ -519,9 +519,7 @@ export class SongEditor {
         _.noise13Label,
         _.noise14Label,
         _.noise15Label,
-        _.noise16Label,
-        _.noise17Label,
-        _.noise18Label
+        _.noise16Label
 
     ]);
     private readonly _chipWaveSelectRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("chipWave") }, span(_.waveLabel)), div({ class: "selectContainer" }, this._chipWaveSelect));

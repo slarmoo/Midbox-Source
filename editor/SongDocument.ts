@@ -66,8 +66,9 @@ export class SongDocument {
 	public spectrumOnRandomization: boolean = true;
 	public FMOnRandomization: boolean = true;
 	public customChipOnRandomization: boolean = true;
-	public drumSpectrumOnRandomization: boolean = true;
 	public noiseOnRandomization: boolean = true;
+	public drumSpectrumOnRandomization: boolean = true;
+	public drumNoiseOnRandomization: boolean = true;
 	public drumsetOnRandomization: boolean = false;
 	public volumeOnRandomization: boolean = false;
 	public panningOnRandomization: boolean = false;

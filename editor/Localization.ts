@@ -176,11 +176,9 @@ export class Localization {
     public static noise11Label: string = "retro clang";
     public static noise12Label: string = "chime";
     public static noise13Label: string = "harsh";
-    public static noise14Label: string = "tick";
-    public static noise15Label: string = "trill";
-    public static noise16Label: string = "empty";
-    public static noise17Label: string = "detuned periodic";
-    public static noise18Label: string = "snare";
+    public static noise14Label: string = "trill";
+    public static noise15Label: string = "detuned periodic";
+    public static noise16Label: string = "snare";
     public static copyLabel: string = "Copy";
     public static pasteLabel: string = "Paste";
     public static randomLabel: string = "Randomize ▾";
@@ -581,7 +579,7 @@ export class Localization {
     public static midboxMiscPresets25Label: string = "clang synth guitar";
     public static midboxMiscPresets26Label: string = "midbox banjo";
     public static midboxMiscPresets27Label: string = "corrupted sine bass";
-    public static midboxMiscPresets28Label: string = "corrupted vocals";
+    public static midboxMiscPresets28Label: string = "corrupted vocals 1";
     public static midboxMiscPresets29Label: string = "electronic rounded synth";
     public static midboxMiscPresets30Label: string = "harsh mechanical bass";
     public static midboxMiscPresets31Label: string = "sine synth pluck";
@@ -598,6 +596,7 @@ export class Localization {
     public static midboxMiscPresets42Label: string = "supersaw brass";
     public static midboxMiscPresets43Label: string = "supersaw dist. guitar";
     public static midboxMiscPresets44Label: string = "supersaw click";
+    public static midboxMiscPresets45Label: string = "corrupted vocals 2";
     public static midboxDubstepPresets1Label: string = "dubstep bwayyyy";
     public static midboxDubstepPresets2Label: string = "dubstep bass hum";
     public static midboxDubstepPresets3Label: string = "dubstep yaa";
@@ -1008,11 +1007,9 @@ if (language == "spanish") {
     Localization.noise11Label = "tañido retro";
     Localization.noise12Label = "carillón";
     Localization.noise13Label = "áspero";
-    Localization.noise14Label = "garrapata";
-    Localization.noise15Label = "trino";
-    Localization.noise16Label = "vacío";
-    Localization.noise17Label = "periódico desafinado";
-    Localization.noise18Label = "tarola";
+    Localization.noise14Label = "trino";
+    Localization.noise15Label = "periódico desafinado";
+    Localization.noise16Label = "tarola";
     Localization.copyLabel = "Copiar";
     Localization.pasteLabel = "Pegar";
     Localization.randomLabel = "Aleatorizar ▾";
