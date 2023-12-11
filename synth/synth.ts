@@ -1250,8 +1250,11 @@ export class Instrument {
     public arpTime: number = 0;
     public customChipWave: Float32Array = new Float32Array(64);
     public customChipWaveIntegral: Float32Array = new Float32Array(65); // One extra element for wrap-around in chipSynth.
+    public wavetableWaves: Float32Array[];
+    public wavetableIntegralWaves: Float32Array[];
     public currentWave: number = 0;
     public wavetableSpeed: number = 12;
+    public currentCycle: number[] = [0, 1, 2, 3, 4, 5, 6, 7];
     public readonly operators: Operator[] = [];
     public readonly spectrumWave: SpectrumWave;
     public readonly harmonicsWave: HarmonicsWave = new HarmonicsWave();
@@ -1446,6 +1449,30 @@ export class Instrument {
                     break;
                 case InstrumentType.wavetable:
                     this.chord = Config.chords.dictionary["arpeggio"].index;
+                    this.wavetableIntegralWaves = [
+                        Config.chipWaves.dictionary["square"].samples,
+                        Config.chipWaves.dictionary["1/4 pulse"].samples,
+                        Config.chipWaves.dictionary["1/6 pulse"].samples,
+                        Config.chipWaves.dictionary["1/8 pulse"].samples,
+                        Config.chipWaves.dictionary["square"].samples,
+                        Config.chipWaves.dictionary["1/4 pulse"].samples,
+                        Config.chipWaves.dictionary["sawtooth"].samples,
+                        Config.chipWaves.dictionary["double saw"].samples
+                    ];
+                    this.wavetableWaves = [
+                        Config.rawChipWaves.dictionary["square"].samples,
+                        Config.rawChipWaves.dictionary["1/4 pulse"].samples,
+                        Config.rawChipWaves.dictionary["1/6 pulse"].samples,
+                        Config.rawChipWaves.dictionary["1/8 pulse"].samples,
+                        Config.rawChipWaves.dictionary["square"].samples,
+                        Config.rawChipWaves.dictionary["1/4 pulse"].samples,
+                        Config.rawChipWaves.dictionary["sawtooth"].samples,
+                        Config.rawChipWaves.dictionary["double saw"].samples
+                    ];
+                    this.currentCycle = [];
+                    for (let i: number = 0; i < this.wavetableWaves.length; i++) {
+                        this.currentCycle.push(i);
+                    }
                     break;
             default:
                 throw new Error("Unrecognized instrument type: " + type);
@@ -5696,7 +5723,7 @@ class InstrumentState {
     public type: InstrumentType = InstrumentType.chip;
     public synthesizer: Function | null = null;
     public wave: Float32Array | null = null;
-    public wavetableWaves: Float32Array[];
+    public wavetableWaves: Float32Array[] | null = null;
     public noisePitchFilterMult: number = 1.0;
     public unison: Unison | null = null;
     public chord: Chord | null = null;
@@ -6380,16 +6407,7 @@ class InstrumentState {
             this.wave = null;
         } else if (instrument.type == InstrumentType.wavetable) {
             this.wave = null;
-            this.wavetableWaves = [
-                Config.chipWaves.dictionary["square"].samples,
-                Config.chipWaves.dictionary["1/4 pulse"].samples,
-                Config.chipWaves.dictionary["1/6 pulse"].samples,
-                Config.chipWaves.dictionary["1/8 pulse"].samples,
-                Config.chipWaves.dictionary["square"].samples,
-                Config.chipWaves.dictionary["1/4 pulse"].samples,
-                Config.chipWaves.dictionary["sawtooth"].samples,
-                Config.chipWaves.dictionary["double saw"].samples,
-              ];
+            this.wavetableWaves = this.aliases ? instrument.wavetableWaves : instrument.wavetableIntegralWaves;
         } else {
             this.wave = null;
         }
@@ -8964,7 +8982,7 @@ export class Synth {
                 tone.pulseWidthDelta = (pulseWidthEnd - pulseWidthStart) / roundedSamplesPerTick;
             }
             if (instrument.type == InstrumentType.wavetable) {
-                tone.currentWave = instrument.currentWave;
+                tone.currentWave = instrument.currentCycle[Math.floor(instrument.currentWave) % instrument.currentCycle.length];
             }
             if (instrument.type == InstrumentType.pickedString) {
                 // Check for sustain mods
@@ -10795,7 +10813,7 @@ export class Synth {
         const data: Float32Array = synth.tempMonoInstrumentSampleBuffer!;
         const volumeScale = instrumentState.volumeScale;
         //const wavetableWaves: Float32Array[] = instrumentState.wavetableWaves;
-        const wave: Float32Array = instrumentState.wavetableWaves[Math.floor(tone.currentWave) % instrumentState.wavetableWaves.length];
+        const wave: Float32Array = instrumentState.wavetableWaves![Math.floor(tone.currentWave) % instrumentState.wavetableWaves!.length];
 
         // For all but aliasing custom chip, the first sample is duplicated at the end, so don't double-count it.
         const waveLength: number = (aliases && instrumentState.type == InstrumentType.customChipWave) ? wave.length : wave.length - 1;
