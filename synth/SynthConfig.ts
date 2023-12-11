@@ -1057,6 +1057,9 @@ export class Config {
         { name: "slide speed",    pianoName: "Slide Speed",            maxRawVol: 23,                                                     newNoteVol: 0,                                                            forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.transition,
             promptName: "Slide Speed",                  promptDesc: ["This setting controls the speed at which your instrument 'slides' between notes.", "Note that the lower numbers will slide faster, while the higher numbers will slide slower."]},
 
+        { name: "cycle wave",     pianoName: "Cycle Wave",             maxRawVol: 31,                                                     newNoteVol: 0,                                                            forSong: false,   convertRealFactor: 1,                                    associatedEffect: EffectType.length,
+            promptName: "Cycle Wave",                   promptDesc: ["This setting sets the current position in the cycle your wavetable instrument is in according to the value you put.", "Note that only the value at the beginning of the note will count."]}
+
     ]);
 }
 

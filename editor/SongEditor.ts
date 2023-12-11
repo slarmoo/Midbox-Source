@@ -2520,12 +2520,9 @@ export class SongEditor {
                             settingList.push("spread");
                             settingList.push("shape");
                         }
-                        /*if (tgtInstrumentTypes.includes(InstrumentType.dutyCycle)) {
-                            settingList.push("cycleA");
-                            settingList.push("cycleB");
-                            settingList.push("cycleC");
-                            settingList.push("cycleD");
-                        }*/
+                        if (tgtInstrumentTypes.includes(InstrumentType.wavetable)) {
+                            settingList.push("cycle wave");
+                        }
                         if (anyInstrumentArps) {
                             settingList.push("arp speed");
                             settingList.push("reset arp");
