@@ -1250,6 +1250,8 @@ export class Instrument {
     public arpTime: number = 0;
     public customChipWave: Float32Array = new Float32Array(64);
     public customChipWaveIntegral: Float32Array = new Float32Array(65); // One extra element for wrap-around in chipSynth.
+    public currentWave: number = 0;
+    public wavetableSpeed: number = 12;
     public readonly operators: Operator[] = [];
     public readonly spectrumWave: SpectrumWave;
     public readonly harmonicsWave: HarmonicsWave = new HarmonicsWave();
@@ -5608,6 +5610,7 @@ class Tone {
     public prevStringDecay: number | null = null;
     public pulseWidth: number = 0.0;
     public pulseWidthDelta: number = 0.0;
+    public currentWave: number = 0;
     public supersawDynamism: number = 0.0;
 	public supersawDynamismDelta: number = 0.0;
 	public supersawUnisonDetunes: number[] = []; // These can change over time, but slowly enough that I'm not including corresponding delta values within a tick run.
@@ -6456,6 +6459,7 @@ export class Synth {
                     instrument.LFOtime = 0;
                     instrument.nextLFOtime = 0;
                     instrument.arpTime = 0;
+                    instrument.currentWave = 0;
                     instrument.tmpEqFilterStart = instrument.eqFilter;
                     instrument.tmpEqFilterEnd = null;
                     instrument.tmpNoteFilterStart = instrument.noteFilter;
@@ -7597,10 +7601,15 @@ export class Synth {
                     }
                 }
 
-                // Update arpeggio time, which is used to calculate arpeggio position
+                // Update arpeggio time, which is used to calculate arpeggio position. Same for finding the current wave of the wavetable.
                 for (let channel: number = 0; channel < this.song.pitchChannelCount + this.song.noiseChannelCount; channel++) {
                     for (let instrumentIdx: number = 0; instrumentIdx < this.song.channels[channel].instruments.length; instrumentIdx++) {
                         let instrument: Instrument = this.song.channels[channel].instruments[instrumentIdx];
+                        if (instrument.type == InstrumentType.wavetable) {
+                            const wavetableSize: number = 8;
+                            const wavetableSpeed: number = Config.wavetableSpeedScale[instrument.wavetableSpeed];
+                            instrument.currentWave = (instrument.currentWave + wavetableSpeed * (1.0 / (Config.ticksPerPart * Config.partsPerBeat))) % wavetableSize;
+                        }
                         let useArpeggioSpeed: number = instrument.arpeggioSpeed;
                         if (this.isModActive(Config.modulators.dictionary["arp speed"].index, channel, instrumentIdx)) {
                             useArpeggioSpeed = this.getModValue(Config.modulators.dictionary["arp speed"].index, channel, instrumentIdx, false);
@@ -8953,6 +8962,9 @@ export class Synth {
                 const pulseWidthEnd: number = Math.max(0.0, pulseWidthModEnd * envelopeEnds[EnvelopeComputeIndex.pulseWidth]);
                 tone.pulseWidth = pulseWidthStart;
                 tone.pulseWidthDelta = (pulseWidthEnd - pulseWidthStart) / roundedSamplesPerTick;
+            }
+            if (instrument.type == InstrumentType.wavetable) {
+                tone.currentWave = instrument.currentWave;
             }
             if (instrument.type == InstrumentType.pickedString) {
                 // Check for sustain mods
@@ -10783,7 +10795,7 @@ export class Synth {
         const data: Float32Array = synth.tempMonoInstrumentSampleBuffer!;
         const volumeScale = instrumentState.volumeScale;
         //const wavetableWaves: Float32Array[] = instrumentState.wavetableWaves;
-        const wave: Float32Array = instrumentState.wavetableWaves[0];
+        const wave: Float32Array = instrumentState.wavetableWaves[Math.floor(tone.currentWave) % instrumentState.wavetableWaves.length];
 
         // For all but aliasing custom chip, the first sample is duplicated at the end, so don't double-count it.
         const waveLength: number = (aliases && instrumentState.type == InstrumentType.customChipWave) ? wave.length : wave.length - 1;

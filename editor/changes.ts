@@ -2753,6 +2753,15 @@ export class ChangeStringSustain extends ChangeInstrumentSlider {
     }
 }
 
+export class ChangeWavetableSpeed extends ChangeInstrumentSlider {
+    constructor(doc: SongDocument, oldValue: number, newValue: number) {
+        super(doc);
+        this._instrument.wavetableSpeed = newValue;
+        doc.notifier.changed();
+        if (oldValue != newValue) this._didSomething();
+    }
+}
+
 export class ChangeEQFilterType extends Change {
     constructor(doc: SongDocument, instrument: Instrument, newValue: boolean) {
         super();

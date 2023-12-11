@@ -535,6 +535,12 @@ export class TipPrompt implements Prompt {
 					p("The filter preserves the volume of frequencies that are below the cutoff frequency, and reduces the volume of frequencies that are above the cutoff. If this setting is used, the filter also increases the volume of frequencies that are near the cutoff."),
 				);
 			} break;
+			case "wavetableSpeed": {
+				message = div(
+					h2("Wavetable Speed"),
+					p("The wavetable consists of multiple custom chipwaves that constantly cycle between each other. This slider controls how fast they cycle."),
+				);
+			} break;
 
 			default:
 				// Check for modSetinfo#
