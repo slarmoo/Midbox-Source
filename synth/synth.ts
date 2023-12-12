@@ -1775,6 +1775,7 @@ export class Instrument {
             instrumentObject["stringSustain"] = Math.round(100 * this.stringSustain / (Config.stringSustainRange - 1));
         } else if (this.type == InstrumentType.wavetable) {
             instrumentObject["unison"] = Config.unisons[this.unison].name;
+            instrumentObject["wavetableSpeed"] = this.wavetableSpeed;
         } else if (this.type == InstrumentType.harmonics) {
             instrumentObject["unison"] = Config.unisons[this.unison].name;
         } else if (this.type == InstrumentType.fm) {
@@ -2074,6 +2075,10 @@ export class Instrument {
             this.stringSustain = clamp(0, Config.stringSustainRange, Math.round((Config.stringSustainRange - 1) * (instrumentObject["stringSustain"] | 0) / 100));
         } else {
             this.stringSustain = 10;
+        }
+
+        if (this.type == InstrumentType.wavetable) {
+            // Something Something for the wavetable.
         }
 
         if (this.type == InstrumentType.noise) {
@@ -2970,6 +2975,7 @@ export class Song {
                     buffer.push(SongTagCode.stringSustain, base64IntToCharCode[instrument.stringSustain]);
                 } else if (instrument.type == InstrumentType.wavetable) {
                     buffer.push(SongTagCode.unison, base64IntToCharCode[instrument.unison]);
+                    buffer.push(SongTagCode.wavetable, base64IntToCharCode[instrument.wavetableSpeed])
                 } else if (instrument.type == InstrumentType.mod) {
                     // Handled down below. Could be moved, but meh.
                 } else {
@@ -4856,6 +4862,12 @@ export class Song {
                             }
                         }
                     }
+                }
+            } break;
+            case SongTagCode.wavetable: {
+                const instrument: Instrument = this.channels[instrumentChannelIterator].instruments[instrumentIndexIterator];
+                if (instrument.type == InstrumentType.wavetable) {
+                    
                 }
             } break;
             default: {
@@ -10755,7 +10767,7 @@ export class Synth {
             }
             // Setting the position of the cycle according to it's mod's value.
             else if (setting == Config.modulators.dictionary["cycle wave"].index && synth.tick == 0 && tone.noteStartPart == synth.beat * Config.partsPerBeat + synth.part) {
-                synth.song.channels[instrument.modChannels[mod]].instruments[usedInstruments[instrumentIndex]].currentWave = synth.getModValue(Config.modulators.dictionary["cycle wave"].index);
+                synth.song.channels[instrument.modChannels[mod]].instruments[usedInstruments[instrumentIndex]].currentWave = synth.getModValue(Config.modulators.dictionary["cycle wave"].index, instrument.modChannels[mod], usedInstruments[instrumentIndex], false) - Config.modulators.dictionary["cycle wave"].convertRealFactor;
             } 
             // Denote next bar skip
             else if (setting == Config.modulators.dictionary["next bar"].index) {
@@ -10865,7 +10877,6 @@ export class Synth {
         const aliases: boolean = (effectsIncludeDistortion(instrumentState.effects) && instrumentState.aliases);
         const data: Float32Array = synth.tempMonoInstrumentSampleBuffer!;
         const volumeScale = instrumentState.volumeScale;
-        //const wavetableWaves: Float32Array[] = instrumentState.wavetableWaves;
         const wave: Float32Array = instrumentState.wavetableWaves![Math.floor(tone.currentWave) % instrumentState.wavetableWaves!.length];
 
         // For all but aliasing custom chip, the first sample is duplicated at the end, so don't double-count it.
