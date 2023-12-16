@@ -1284,6 +1284,75 @@ export class Instrument {
             this.drumsetSpectrumWaves[i] = new SpectrumWave(true);
         }
 
+        this.wavetableIntegralWaves = [
+            Config.chipWaves.dictionary["square"].samples,
+            Config.chipWaves.dictionary["1/4 pulse"].samples,
+            Config.chipWaves.dictionary["1/6 pulse"].samples,
+            Config.chipWaves.dictionary["1/8 pulse"].samples,
+            Config.chipWaves.dictionary["square"].samples,
+            Config.chipWaves.dictionary["1/4 pulse"].samples,
+            Config.chipWaves.dictionary["sawtooth"].samples,
+            Config.chipWaves.dictionary["double saw"].samples,
+            Config.chipWaves.dictionary["triangle"].samples,
+            Config.chipWaves.dictionary["rounded"].samples,
+            Config.chipWaves.dictionary["triangle"].samples,
+            Config.chipWaves.dictionary["sine"].samples,
+            Config.chipWaves.dictionary["triangle"].samples,
+            Config.chipWaves.dictionary["rounded"].samples,
+            Config.chipWaves.dictionary["glitch"].samples,
+            Config.chipWaves.dictionary["flute"].samples,
+            Config.chipWaves.dictionary["glitch"].samples,
+            Config.chipWaves.dictionary["pan flute"].samples,
+            Config.chipWaves.dictionary["electric guitar"].samples,
+            Config.chipWaves.dictionary["soft clarinet"].samples,
+            Config.chipWaves.dictionary["glitch"].samples,
+            Config.chipWaves.dictionary["double saw"].samples,
+            Config.chipWaves.dictionary["electric guitar"].samples,
+            Config.chipWaves.dictionary["sharp clarinet"].samples,
+            Config.chipWaves.dictionary["triangle"].samples,
+            Config.chipWaves.dictionary["rounded"].samples,
+            Config.chipWaves.dictionary["triangle"].samples,
+            Config.chipWaves.dictionary["sine"].samples,
+            Config.chipWaves.dictionary["triangle"].samples,
+            Config.chipWaves.dictionary["rounded"].samples,
+            Config.chipWaves.dictionary["glitch"].samples,
+            Config.chipWaves.dictionary["flute"].samples,
+        ];
+        this.wavetableWaves = [
+            Config.rawChipWaves.dictionary["square"].samples,
+            Config.rawChipWaves.dictionary["1/4 pulse"].samples,
+            Config.rawChipWaves.dictionary["1/6 pulse"].samples,
+            Config.rawChipWaves.dictionary["1/8 pulse"].samples,
+            Config.rawChipWaves.dictionary["square"].samples,
+            Config.rawChipWaves.dictionary["1/4 pulse"].samples,
+            Config.rawChipWaves.dictionary["sawtooth"].samples,
+            Config.rawChipWaves.dictionary["double saw"].samples,
+            Config.rawChipWaves.dictionary["triangle"].samples,
+            Config.rawChipWaves.dictionary["rounded"].samples,
+            Config.rawChipWaves.dictionary["triangle"].samples,
+            Config.rawChipWaves.dictionary["sine"].samples,
+            Config.rawChipWaves.dictionary["triangle"].samples,
+            Config.rawChipWaves.dictionary["rounded"].samples,
+            Config.rawChipWaves.dictionary["glitch"].samples,
+            Config.rawChipWaves.dictionary["flute"].samples,
+            Config.rawChipWaves.dictionary["glitch"].samples,
+            Config.rawChipWaves.dictionary["pan flute"].samples,
+            Config.rawChipWaves.dictionary["electric guitar"].samples,
+            Config.rawChipWaves.dictionary["soft clarinet"].samples,
+            Config.rawChipWaves.dictionary["glitch"].samples,
+            Config.rawChipWaves.dictionary["double saw"].samples,
+            Config.rawChipWaves.dictionary["electric guitar"].samples,
+            Config.rawChipWaves.dictionary["sharp clarinet"].samples,
+            Config.rawChipWaves.dictionary["triangle"].samples,
+            Config.rawChipWaves.dictionary["rounded"].samples,
+            Config.rawChipWaves.dictionary["triangle"].samples,
+            Config.rawChipWaves.dictionary["sine"].samples,
+            Config.rawChipWaves.dictionary["triangle"].samples,
+            Config.rawChipWaves.dictionary["rounded"].samples,
+            Config.rawChipWaves.dictionary["glitch"].samples,
+            Config.rawChipWaves.dictionary["flute"].samples,
+        ];
+
         for (let i = 0; i < 64; i++) {
             this.customChipWave[i] = 24 - Math.floor(i * (48 / 64));
         }
@@ -2077,7 +2146,7 @@ export class Instrument {
             this.stringSustain = 10;
         }
 
-        if (this.type == InstrumentType.wavetable) {
+        if (this.type == InstrumentType.wavetable && instrumentObject["wave"] != undefined) {
             // Something Something for the wavetable.
         }
 
@@ -4867,7 +4936,7 @@ export class Song {
             case SongTagCode.wavetable: {
                 const instrument: Instrument = this.channels[instrumentChannelIterator].instruments[instrumentIndexIterator];
                 if (instrument.type == InstrumentType.wavetable) {
-                    
+                    instrument.wavetableSpeed = clamp(0, Config.wavetableSpeedMax + 1, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                 }
             } break;
             default: {
@@ -5641,6 +5710,7 @@ class EnvelopeComputer {
                 lin = lin < 1.0 ? lin : 1.0;
                 return lin;
             }
+        //  case EnvelopeType.test: return 0.5 - Math.sin(envelope.speed ^ (-1.3) * 400) * 3;
             default: throw new Error("Unrecognized operator envelope type.");
         }
 
@@ -6751,7 +6821,7 @@ export class Synth {
                     // Instrument type specific
                     || (tgtInstrument.type != InstrumentType.fm && (str == "fm slider 1" || str == "fm slider 2" || str == "fm slider 3" || str == "fm slider 4" || str == "fm feedback"))
                     || ((tgtInstrument.type != InstrumentType.pwm && tgtInstrument.type != InstrumentType.supersaw) && (str == "pulse width"))
-                    || (tgtInstrument.type != InstrumentType.wavetable && (str == "cycle wave"))
+                    || (tgtInstrument.type != InstrumentType.wavetable && (str == "cycle wave" || str == "wavetable speed"))
                     // Arp check
                     || (!tgtInstrument.getChord().arpeggiates && (str == "arp speed" || str == "reset arp"))
                     // EQ Filter check
@@ -7686,7 +7756,15 @@ export class Synth {
                         let instrument: Instrument = this.song.channels[channel].instruments[instrumentIdx];
                         if (instrument.type == InstrumentType.wavetable) {
                             const wavetableSize: number = 32;
-                            const wavetableSpeed: number = Config.wavetableSpeedScale[instrument.wavetableSpeed];
+                            let wavetableSpeed: number = Config.wavetableSpeedScale[instrument.wavetableSpeed];
+                            if (this.isModActive(Config.modulators.dictionary["wavetable speed"].index, channel, instrumentIdx)) {
+                                const wavetableSpeedModValue: number = this.getModValue(Config.modulators.dictionary["wavetable speed"].index, channel, instrumentIdx, false);
+                                if (Number.isInteger(wavetableSpeedModValue)) {
+                                    wavetableSpeed = Config.wavetableSpeedScale[wavetableSpeedModValue];
+                                } else {
+                                    wavetableSpeed = (1 - (wavetableSpeedModValue % 1)) * Config.wavetableSpeedScale[Math.floor(wavetableSpeedModValue)] + (wavetableSpeedModValue % 1) * Config.wavetableSpeedScale[Math.ceil(wavetableSpeedModValue)];
+                                }
+                            }
                             instrument.currentWave = (instrument.currentWave + wavetableSpeed * (1.0 / (Config.ticksPerPart * Config.partsPerBeat))) % wavetableSize;
                         }
                         let useArpeggioSpeed: number = instrument.arpeggioSpeed;

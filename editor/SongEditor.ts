@@ -2522,6 +2522,7 @@ export class SongEditor {
                         }
                         if (tgtInstrumentTypes.includes(InstrumentType.wavetable)) {
                             settingList.push("cycle wave");
+                            settingList.push("wavetable speed")
                         }
                         if (anyInstrumentArps) {
                             settingList.push("arp speed");
