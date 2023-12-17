@@ -7758,11 +7758,11 @@ export class Synth {
                             const wavetableSize: number = 32;
                             let wavetableSpeed: number = Config.wavetableSpeedScale[instrument.wavetableSpeed];
                             if (this.isModActive(Config.modulators.dictionary["wavetable speed"].index, channel, instrumentIdx)) {
-                                const wavetableSpeedModValue: number = this.getModValue(Config.modulators.dictionary["wavetable speed"].index, channel, instrumentIdx, false);
+                                const wavetableSpeedModValue: number = Config.wavetableSpeedMax - this.getModValue(Config.modulators.dictionary["wavetable speed"].index, channel, instrumentIdx, false);
                                 if (Number.isInteger(wavetableSpeedModValue)) {
                                     wavetableSpeed = Config.wavetableSpeedScale[wavetableSpeedModValue];
                                 } else {
-                                    wavetableSpeed = (1 - (wavetableSpeedModValue % 1)) * Config.wavetableSpeedScale[Math.floor(wavetableSpeedModValue)] + (wavetableSpeedModValue % 1) * Config.wavetableSpeedScale[Math.ceil(wavetableSpeedModValue)];
+                                    wavetableSpeed = (1 - (wavetableSpeedModValue % 1)) * Config.wavetableSpeedScale[Math.floor(wavetableSpeedModValue)] + (wavetableSpeedModValue % 1) * Config.wavetableSpeedScale[Math.min(Config.wavetableSpeedScale.length - 1, Math.ceil(wavetableSpeedModValue))];
                                 }
                             }
                             instrument.currentWave = (instrument.currentWave + wavetableSpeed * (1.0 / (Config.ticksPerPart * Config.partsPerBeat))) % wavetableSize;

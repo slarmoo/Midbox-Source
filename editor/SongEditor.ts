@@ -722,9 +722,27 @@ export class SongEditor {
     );
     private readonly _customWaveZoom: HTMLButtonElement = button({ style: "margin-left:0.5em; height:1.5em; max-width: 20px;", onclick: () => this._openPrompt("customChipSettings") }, "+");
 
-    private readonly _customWaveDraw: HTMLDivElement = div({ style: "height:80px; margin-top:10px; margin-bottom:5px" }, [
+    private readonly _customWaveCopy: HTMLButtonElement = button({ style: "width:58px; height:1.5em; text-align: right;", class: "copyButton" }, [
+		_.copyLabel,
+		// Copy icon:
+		SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 0; top: 50%; margin-top: -0.75em; pointer-events: none;", width: "1.5em", height: "1.5em", viewBox: "-5 -21 26 26" }, [
+			SVG.path({ d: "M 0 -15 L 1 -15 L 1 0 L 13 0 L 13 1 L 0 1 L 0 -15 z M 2 -1 L 2 -17 L 10 -17 L 14 -13 L 14 -1 z M 3 -2 L 13 -2 L 13 -12 L 9 -12 L 9 -16 L 3 -16 z", fill: "currentColor" }),
+		]),
+	]);
+    private readonly _customWavePaste: HTMLButtonElement = button({ style: "width:58px; height:1.5em; text-align: right;", class: "pasteButton" }, [
+		_.pasteLabel,
+		// Paste icon:
+		SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 0; top: 50%; margin-top: -0.75em; pointer-events: none;", width: "1.5em", height: "1.5em", viewBox: "0 0 26 26" }, [
+			SVG.path({ d: "M 8 18 L 6 18 L 6 5 L 17 5 L 17 7 M 9 8 L 16 8 L 20 12 L 20 22 L 9 22 z", stroke: "currentColor", fill: "none" }),
+			SVG.path({ d: "M 9 3 L 14 3 L 14 6 L 9 6 L 9 3 z M 16 8 L 20 12 L 16 12 L 16 8 z", fill: "currentColor", }),
+		]),
+	]);
+    private readonly _customWaveCopyPasteContainer: HTMLDivElement = div({class: "selectRow", style: "width: 124px; align-content: space-between;" }, this._customWaveCopy, this._customWavePaste);
+
+    private readonly _customWaveDraw: HTMLDivElement = div({ style: "height:80px; margin-top:10px; margin-bottom:25px" }, [
         div({ style: "height:54px; display:flex; justify-content:center;" }, [this._customWaveDrawCanvas.canvas]),
         div({ style: "margin-top:5px; display:flex; justify-content:center;" }, [this._customWavePresetDrop, this._customWaveZoom]),
+        div({ style: "margin-top:5px; display:flex; justify-content:center;" }, [this._customWaveCopyPasteContainer]),
     ]);
 
     private readonly _songTitleInputBox: InputBox = new InputBox(input({ style: "font-weight:bold; border:none; width: 100%; background-color:${ColorConfig.editorBackground}; color:${ColorConfig.primaryText}; text-align:center", maxlength: "30", type: "text", value: EditorConfig.versionDisplayName }), this._doc, (oldValue: string, newValue: string) => new ChangeSongTitle(this._doc, oldValue, newValue));
@@ -1239,6 +1257,8 @@ export class SongEditor {
         this._pauseButton.addEventListener("click", this.togglePlay);
         this._recordButton.addEventListener("click", this._toggleRecord);
         this._stopButton.addEventListener("click", this._toggleRecord);
+        this._customWaveCopy.addEventListener("click", this._copyCustomWave);
+        this._customWavePaste.addEventListener("click", this._pasteCustomWave);
         // Start recording instead of opening context menu when control-clicking the record button on a Mac.
         this._recordButton.addEventListener("contextmenu", (event: MouseEvent) => {
             if (event.ctrlKey) {
@@ -1558,13 +1578,15 @@ export class SongEditor {
             case Config.modulators.dictionary["sustain"].index:
                 return this._stringSustainSlider;
             case Config.modulators.dictionary["dynamism"].index:
-                return this._supersawDynamismSlider
+                return this._supersawDynamismSlider;
             case Config.modulators.dictionary["spread"].index:
-                return this._supersawSpreadSlider
+                return this._supersawSpreadSlider;
             case Config.modulators.dictionary["shape"].index:
-                return this._supersawShapeSlider
+                return this._supersawShapeSlider;
             case Config.modulators.dictionary["slide speed"].index:
-                return this._slideSpeedSlider
+                return this._slideSpeedSlider;
+            case Config.modulators.dictionary["wavetable speed"].index:
+                return this._wavetableSpeedSlider;
             default:
                 return null;
         }
@@ -2007,8 +2029,12 @@ export class SongEditor {
             if (instrument.type == InstrumentType.wavetable) {
                 this._chipWaveSelectRow.style.display = "none";
                 this._wavetableSpeedRow.style.display = "";
+                this._customWaveDraw.style.display = "";
+            } else if (instrument.type == InstrumentType.customChipWave) {
+                this._customWaveDraw.style.display = "";
             } else {
                 this._wavetableSpeedRow.style.display = "none";
+                this._customWaveDraw.style.display = "none";
             }
             
 
@@ -3702,6 +3728,20 @@ export class SongEditor {
         } else {
             this._doc.performance.record();
         }
+    }
+
+    public _copyCustomWave = (): void => {
+        const chipCopy: Float32Array = CustomChipPrompt.customChipCanvas.chipData
+		window.localStorage.setItem("chipCopy", JSON.stringify(Array.from(chipCopy)));
+    }
+
+    public _pasteCustomWave = (): void => {
+        const storedChipWave: any = JSON.parse(String(window.localStorage.getItem("chipCopy")));
+		for (let i: number = 0; i < 64; i++) {
+            CustomChipPrompt.customChipCanvas.chipData[i] = storedChipWave[i];
+		}
+		CustomChipPrompt.customChipCanvas._storeChange();
+		new ChangeCustomWave(this._doc, CustomChipPrompt.customChipCanvas.chipData);
     }
 
     public _animate = (): void => {
