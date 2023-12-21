@@ -470,14 +470,6 @@ export class Config {
     public static readonly effectNames: ReadonlyArray<string> =     ["reverb", "chorus", "panning", "distortion", "bitcrusher", "note filter", "echo", "pitch shift", "detune", "vibrato", "transition type", "chord type", "percussion"];
     public static readonly effectOrder: ReadonlyArray<EffectType> = [EffectType.panning, EffectType.transition, EffectType.chord, EffectType.pitchShift, EffectType.detune, EffectType.vibrato, EffectType.noteFilter, EffectType.distortion, EffectType.bitcrusher, EffectType.chorus, EffectType.echo, EffectType.reverb, EffectType.percussion];
 
-/*  public static readonly dutyAfter: DictionaryArray<DutyAfter> = toNameMap([
-        { name: "after 3", value: 1 },
-        { name: "after 4", value: 2 },
-    ]);
-	public static readonly dutyAfterValue: number = 1;
-	public static readonly cycleTime:      number = 0;
-*/
-
     public static readonly noteSizeMax:         number = 6;
     public static readonly volumeRange:         number = 50;
     public static readonly volumeLogScale:      number = 0.1428;
@@ -856,7 +848,7 @@ export class Config {
         { name: "noteVolume",             computeIndex: EnvelopeComputeIndex.noteVolume,             displayName: "note volume",       interleave: false, isFilter: false, maxCount: 1,                       effect: null,                  compatibleInstruments: null },
         { name: "pulseWidth",             computeIndex: EnvelopeComputeIndex.pulseWidth,             displayName: "pulse width",       interleave: false, isFilter: false, maxCount: 1,                       effect: null,                  compatibleInstruments: [InstrumentType.pwm, InstrumentType.supersaw] },
         { name: "stringSustain",          computeIndex: EnvelopeComputeIndex.stringSustain,          displayName: "sustain",           interleave: false, isFilter: false, maxCount: 1,                       effect: null,                  compatibleInstruments: [InstrumentType.pickedString] },
-        { name: "unison",                 computeIndex: EnvelopeComputeIndex.unison,                 displayName: "unison",            interleave: false, isFilter: false, maxCount: 1,                       effect: null,                  compatibleInstruments: [InstrumentType.chip, InstrumentType.harmonics, InstrumentType.pickedString, InstrumentType.customChipWave, InstrumentType.spectrum, InstrumentType.pwm] },
+        { name: "unison",                 computeIndex: EnvelopeComputeIndex.unison,                 displayName: "unison",            interleave: false, isFilter: false, maxCount: 1,                       effect: null,                  compatibleInstruments: [InstrumentType.chip, InstrumentType.harmonics, InstrumentType.pickedString, InstrumentType.customChipWave, InstrumentType.spectrum, InstrumentType.pwm, InstrumentType.wavetable] },
         { name: "operatorFrequency",      computeIndex: EnvelopeComputeIndex.operatorFrequency0,     displayName: "fm# freq",          interleave: true,  isFilter: false, maxCount: Config.operatorCount,    effect: null,                  compatibleInstruments: [InstrumentType.fm] },
         { name: "operatorAmplitude",      computeIndex: EnvelopeComputeIndex.operatorAmplitude0,     displayName: "fm# volume",        interleave: false, isFilter: false, maxCount: Config.operatorCount,    effect: null,                  compatibleInstruments: [InstrumentType.fm] },
         { name: "feedbackAmplitude",      computeIndex: EnvelopeComputeIndex.feedbackAmplitude,      displayName: "fm feedback",       interleave: false, isFilter: false, maxCount: 1,                       effect: null,                  compatibleInstruments: [InstrumentType.fm] },

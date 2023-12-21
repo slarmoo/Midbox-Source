@@ -1320,7 +1320,9 @@ export class Instrument {
             this.drumsetSpectrumWaves[i] = new SpectrumWave(true);
         }
 
-        this.wavetableIntegralWaves = [
+        this.wavetableIntegralWaves = [];
+        this.wavetableWaves = [];
+        for (const chipWaveIntegral of [
             Config.chipWaves.dictionary["square"].samples,
             Config.chipWaves.dictionary["1/4 pulse"].samples,
             Config.chipWaves.dictionary["1/6 pulse"].samples,
@@ -1353,41 +1355,11 @@ export class Instrument {
             Config.chipWaves.dictionary["rounded"].samples,
             Config.chipWaves.dictionary["glitch"].samples,
             Config.chipWaves.dictionary["flute"].samples,
-        ];
-        this.wavetableWaves = [
-            Config.rawChipWaves.dictionary["square"].samples,
-            Config.rawChipWaves.dictionary["1/4 pulse"].samples,
-            Config.rawChipWaves.dictionary["1/6 pulse"].samples,
-            Config.rawChipWaves.dictionary["1/8 pulse"].samples,
-            Config.rawChipWaves.dictionary["square"].samples,
-            Config.rawChipWaves.dictionary["1/4 pulse"].samples,
-            Config.rawChipWaves.dictionary["sawtooth"].samples,
-            Config.rawChipWaves.dictionary["double saw"].samples,
-            Config.rawChipWaves.dictionary["triangle"].samples,
-            Config.rawChipWaves.dictionary["rounded"].samples,
-            Config.rawChipWaves.dictionary["triangle"].samples,
-            Config.rawChipWaves.dictionary["sine"].samples,
-            Config.rawChipWaves.dictionary["triangle"].samples,
-            Config.rawChipWaves.dictionary["rounded"].samples,
-            Config.rawChipWaves.dictionary["glitch"].samples,
-            Config.rawChipWaves.dictionary["flute"].samples,
-            Config.rawChipWaves.dictionary["glitch"].samples,
-            Config.rawChipWaves.dictionary["pan flute"].samples,
-            Config.rawChipWaves.dictionary["electric guitar"].samples,
-            Config.rawChipWaves.dictionary["soft clarinet"].samples,
-            Config.rawChipWaves.dictionary["glitch"].samples,
-            Config.rawChipWaves.dictionary["double saw"].samples,
-            Config.rawChipWaves.dictionary["electric guitar"].samples,
-            Config.rawChipWaves.dictionary["sharp clarinet"].samples,
-            Config.rawChipWaves.dictionary["triangle"].samples,
-            Config.rawChipWaves.dictionary["rounded"].samples,
-            Config.rawChipWaves.dictionary["triangle"].samples,
-            Config.rawChipWaves.dictionary["sine"].samples,
-            Config.rawChipWaves.dictionary["triangle"].samples,
-            Config.rawChipWaves.dictionary["rounded"].samples,
-            Config.rawChipWaves.dictionary["glitch"].samples,
-            Config.rawChipWaves.dictionary["flute"].samples,
-        ];
+        ]) {
+            const [raw, integral]: [Float32Array, Float32Array] = convertChipWaveToCustomChip(chipWaveIntegral);
+            this.wavetableIntegralWaves.push(integral);
+            this.wavetableWaves.push(raw);
+        }
 
         for (let i = 0; i < 64; i++) {
             this.customChipWave[i] = 24 - Math.floor(i * (48 / 64));
@@ -1594,74 +1566,6 @@ export class Instrument {
                         this.wavetableIntegralWaves.push(integral);
                         this.wavetableWaves.push(raw);
                     }
-                    this.wavetableIntegralWaves = [
-                        Config.chipWaves.dictionary["square"].samples,
-                        Config.chipWaves.dictionary["1/4 pulse"].samples,
-                        Config.chipWaves.dictionary["1/6 pulse"].samples,
-                        Config.chipWaves.dictionary["1/8 pulse"].samples,
-                        Config.chipWaves.dictionary["square"].samples,
-                        Config.chipWaves.dictionary["1/4 pulse"].samples,
-                        Config.chipWaves.dictionary["sawtooth"].samples,
-                        Config.chipWaves.dictionary["double saw"].samples,
-                        Config.chipWaves.dictionary["triangle"].samples,
-                        Config.chipWaves.dictionary["rounded"].samples,
-                        Config.chipWaves.dictionary["triangle"].samples,
-                        Config.chipWaves.dictionary["sine"].samples,
-                        Config.chipWaves.dictionary["triangle"].samples,
-                        Config.chipWaves.dictionary["rounded"].samples,
-                        Config.chipWaves.dictionary["glitch"].samples,
-                        Config.chipWaves.dictionary["flute"].samples,
-                        Config.chipWaves.dictionary["glitch"].samples,
-                        Config.chipWaves.dictionary["pan flute"].samples,
-                        Config.chipWaves.dictionary["electric guitar"].samples,
-                        Config.chipWaves.dictionary["soft clarinet"].samples,
-                        Config.chipWaves.dictionary["glitch"].samples,
-                        Config.chipWaves.dictionary["double saw"].samples,
-                        Config.chipWaves.dictionary["electric guitar"].samples,
-                        Config.chipWaves.dictionary["sharp clarinet"].samples,
-                        Config.chipWaves.dictionary["triangle"].samples,
-                        Config.chipWaves.dictionary["rounded"].samples,
-                        Config.chipWaves.dictionary["triangle"].samples,
-                        Config.chipWaves.dictionary["sine"].samples,
-                        Config.chipWaves.dictionary["triangle"].samples,
-                        Config.chipWaves.dictionary["rounded"].samples,
-                        Config.chipWaves.dictionary["glitch"].samples,
-                        Config.chipWaves.dictionary["flute"].samples,
-                    ];
-                    this.wavetableWaves = [
-                        Config.rawChipWaves.dictionary["square"].samples,
-                        Config.rawChipWaves.dictionary["1/4 pulse"].samples,
-                        Config.rawChipWaves.dictionary["1/6 pulse"].samples,
-                        Config.rawChipWaves.dictionary["1/8 pulse"].samples,
-                        Config.rawChipWaves.dictionary["square"].samples,
-                        Config.rawChipWaves.dictionary["1/4 pulse"].samples,
-                        Config.rawChipWaves.dictionary["sawtooth"].samples,
-                        Config.rawChipWaves.dictionary["double saw"].samples,
-                        Config.rawChipWaves.dictionary["triangle"].samples,
-                        Config.rawChipWaves.dictionary["rounded"].samples,
-                        Config.rawChipWaves.dictionary["triangle"].samples,
-                        Config.rawChipWaves.dictionary["sine"].samples,
-                        Config.rawChipWaves.dictionary["triangle"].samples,
-                        Config.rawChipWaves.dictionary["rounded"].samples,
-                        Config.rawChipWaves.dictionary["glitch"].samples,
-                        Config.rawChipWaves.dictionary["flute"].samples,
-                        Config.rawChipWaves.dictionary["glitch"].samples,
-                        Config.rawChipWaves.dictionary["pan flute"].samples,
-                        Config.rawChipWaves.dictionary["electric guitar"].samples,
-                        Config.rawChipWaves.dictionary["soft clarinet"].samples,
-                        Config.rawChipWaves.dictionary["glitch"].samples,
-                        Config.rawChipWaves.dictionary["double saw"].samples,
-                        Config.rawChipWaves.dictionary["electric guitar"].samples,
-                        Config.rawChipWaves.dictionary["sharp clarinet"].samples,
-                        Config.rawChipWaves.dictionary["triangle"].samples,
-                        Config.rawChipWaves.dictionary["rounded"].samples,
-                        Config.rawChipWaves.dictionary["triangle"].samples,
-                        Config.rawChipWaves.dictionary["sine"].samples,
-                        Config.rawChipWaves.dictionary["triangle"].samples,
-                        Config.rawChipWaves.dictionary["rounded"].samples,
-                        Config.rawChipWaves.dictionary["glitch"].samples,
-                        Config.rawChipWaves.dictionary["flute"].samples,
-                    ];
                     this.currentCycle = [];
                     for (let i: number = 0; i < this.wavetableWaves.length; i++) {
                         this.currentCycle.push(i);
@@ -1921,6 +1825,14 @@ export class Instrument {
         } else if (this.type == InstrumentType.wavetable) {
             instrumentObject["unison"] = Config.unisons[this.unison].name;
             instrumentObject["wavetableSpeed"] = this.wavetableSpeed;
+            instrumentObject["wavetableWaves"] = [];
+            for (const wave of this.wavetableWaves) {
+                const savedWave: Float32Array = new Float32Array(64);
+                for (let i: number = 0; i < wave.length; i++) {
+                    savedWave[i] = wave[i];
+                }
+                instrumentObject["wavetableWaves"].push(savedWave);
+            }
         } else if (this.type == InstrumentType.harmonics) {
             instrumentObject["unison"] = Config.unisons[this.unison].name;
         } else if (this.type == InstrumentType.fm) {
@@ -2222,8 +2134,30 @@ export class Instrument {
             this.stringSustain = 10;
         }
 
-        if (this.type == InstrumentType.wavetable && instrumentObject["wave"] != undefined) {
-            // Something Something for the wavetable.
+        if (this.type == InstrumentType.wavetable) {
+            if (instrumentObject["wavetableSpeed"] != undefined) {
+            this.wavetableSpeed = instrumentObject["wavetableSpeed"];
+            }
+            if (instrumentObject["wavetableWaves"] != undefined) {
+                for (let waveIndex: number = 0; waveIndex < instrumentObject["wavetableWaves"].length; waveIndex++) {
+                    for (let i: number = 0; i < 64; i++) {
+                        this.wavetableWaves[waveIndex][i] = instrumentObject["wavetableWaves"][waveIndex][i];
+                    }
+                let sum: number = 0.0;
+                    for (let i: number = 0; i < this.wavetableWaves[waveIndex].length; i++) {
+                        sum += this.wavetableWaves[waveIndex][i];
+                    }
+                const average: number = sum / this.wavetableWaves[waveIndex].length;
+                let cumulative: number = 0;
+                let wavePrev: number = 0;
+                    for (let i: number = 0; i < this.wavetableWaves[waveIndex].length; i++) {
+                    cumulative += wavePrev;
+                    wavePrev = this.wavetableWaves[waveIndex][i] - average;
+                    this.wavetableIntegralWaves[waveIndex][i] = cumulative;
+                    }
+                this.wavetableIntegralWaves[waveIndex][64] = 0.0;
+                }
+            }
         }
 
         if (this.type == InstrumentType.noise) {
@@ -3121,6 +3055,13 @@ export class Song {
                 } else if (instrument.type == InstrumentType.wavetable) {
                     buffer.push(SongTagCode.unison, base64IntToCharCode[instrument.unison]);
                     buffer.push(SongTagCode.wavetable, base64IntToCharCode[instrument.wavetableSpeed])
+                    const wavetableSize: number = instrument.wavetableWaves.length;
+                    buffer.push(base64IntToCharCode[wavetableSize]);
+                    for (const wave of instrument.wavetableWaves) {
+                        for (let j: number = 0; j < 64; j++) {
+                            buffer.push(base64IntToCharCode[(wave[j] + 24) as number]);
+                        }
+                    }
                 } else if (instrument.type == InstrumentType.mod) {
                     // Handled down below. Could be moved, but meh.
                 } else {
@@ -5013,6 +4954,25 @@ export class Song {
                 const instrument: Instrument = this.channels[instrumentChannelIterator].instruments[instrumentIndexIterator];
                 if (instrument.type == InstrumentType.wavetable) {
                     instrument.wavetableSpeed = clamp(0, Config.wavetableSpeedMax + 1, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
+                    const wavetableSize: number = clamp(0, 32 + 1, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
+                    for (let waveIndex: number = 0; waveIndex < wavetableSize; waveIndex++) {
+                        for (let j: number = 0; j < 64; j++) {
+                            instrument.wavetableWaves[waveIndex][j] = clamp(-24, 25, base64CharCodeToInt[compressed.charCodeAt(charIndex++)] - 24);
+                        }
+                        let sum: number = 0.0;
+                        for (let i: number = 0; i < instrument.wavetableWaves[waveIndex].length; i++) {
+                            sum += instrument.wavetableWaves[waveIndex][i];
+                        }
+                        const average: number = sum / instrument.wavetableWaves[waveIndex].length;
+                        let cumulative: number = 0;
+                        let wavePrev: number = 0;
+                        for (let i: number = 0; i < instrument.wavetableWaves[waveIndex].length; i++) {
+                            cumulative += wavePrev;
+                            wavePrev = instrument.wavetableWaves[waveIndex][i] - average;
+                            instrument.wavetableIntegralWaves[waveIndex][i] = cumulative;
+                        }
+                        instrument.wavetableIntegralWaves[waveIndex][64] = 0.0;
+                    }
                 }
             } break;
             default: {
@@ -6614,6 +6574,7 @@ class InstrumentState {
         } else if (instrument.type == InstrumentType.wavetable) {
             this.wave = null;
             this.wavetableWaves = this.aliases ? instrument.wavetableWaves : instrument.wavetableIntegralWaves;
+            this.volumeScale = 0.05;
         } else {
             this.wave = null;
         }

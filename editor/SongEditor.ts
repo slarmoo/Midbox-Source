@@ -8,6 +8,7 @@ import { Change, ChangeGroup } from "./Change";
 import { ChannelSettingsPrompt } from "./ChannelSettingsPrompt";
 import { ColorConfig, ChannelColors } from "./ColorConfig";
 import { CustomChipPrompt } from "./CustomChipPrompt";
+import { WavetablePrompt } from "./WavetablePrompt";
 //import { HarmonicsPrompt } from "./HarmonicsPrompt";
 import { KeybindSetupPrompt } from "./KeybindSetupPrompt";
 import { CustomFilterPrompt } from "./CustomFilterPrompt";
@@ -440,7 +441,7 @@ class WavetableCustomChipCanvas {
             for (let i: number = 0; i < this.newArray.length; i++) {
                 cumulative += wavePrev;
                 wavePrev = this.newArray[i] - average;
-                instrument.customChipWaveIntegral[i] = cumulative;
+                instrument.wavetableIntegralWaves[this.index][i] = cumulative;
             }
 
             instrument.wavetableIntegralWaves[this.index][64] = 0.0;
@@ -920,9 +921,12 @@ export class SongEditor {
     );
 
     private readonly _customWaveDrawCanvas: CustomChipCanvas = new CustomChipCanvas(canvas({ width: 128, height: 52, style: "border:2px solid " + ColorConfig.uiWidgetBackground, id: "customWaveDrawCanvas" }), this._doc, (newArray: Float32Array) => new ChangeCustomWave(this._doc, newArray));
-    private readonly _wavetableCustomWaveDrawCanvass: WavetableCustomChipCanvas = new WavetableCustomChipCanvas(canvas({ width: 128, height: 52, style: "border:2px solid " + ColorConfig.uiWidgetBackground, id: "customWaveDrawCanvas" }), this._doc, (newArray: Float32Array) => new ChangeWavetableCustomWave(this._doc, newArray, this._wavetableIndex));
+    private readonly _wavetableCustomWaveDrawCanvas: WavetableCustomChipCanvas = new WavetableCustomChipCanvas(canvas({ width: 128, height: 52, style: "border:2px solid " + ColorConfig.uiWidgetBackground, id: "customWaveDrawCanvas" }), this._doc, (newArray: Float32Array) => new ChangeWavetableCustomWave(this._doc, newArray, this._wavetableIndex));
 
     private readonly _customWavePresetDrop: HTMLSelectElement = buildHeaderedOptions(_.loadPresetLabel, select({ style: "width: 50%; height:1.5em; text-align: center; text-align-last: center;" }),
+        Config.chipWaves.map(wave => wave.name)
+    );
+    private readonly _wavetableCustomWavePresetDrop: HTMLSelectElement = buildHeaderedOptions(_.loadPresetLabel, select({ style: "width: 50%; height:1.5em; text-align: center; text-align-last: center;" }),
         Config.chipWaves.map(wave => wave.name)
     );
 
@@ -945,6 +949,22 @@ export class SongEditor {
 		]),
 	]);
     private readonly _customWaveCopyPasteContainer: HTMLDivElement = div({class: "selectRow", style: "width: 124px; align-content: space-between;" }, this._customWaveCopy, this._customWavePaste);
+    private readonly _wavetableCustomWaveCopy: HTMLButtonElement = button({ style: "width:58px; height:1.5em; text-align: right;", class: "copyButton" }, [
+		_.copyLabel,
+		// Copy icon:
+		SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 0; top: 50%; margin-top: -0.75em; pointer-events: none;", width: "1.5em", height: "1.5em", viewBox: "-5 -21 26 26" }, [
+			SVG.path({ d: "M 0 -15 L 1 -15 L 1 0 L 13 0 L 13 1 L 0 1 L 0 -15 z M 2 -1 L 2 -17 L 10 -17 L 14 -13 L 14 -1 z M 3 -2 L 13 -2 L 13 -12 L 9 -12 L 9 -16 L 3 -16 z", fill: "currentColor" }),
+		]),
+	]);
+    private readonly _wavetableCustomWavePaste: HTMLButtonElement = button({ style: "width:58px; height:1.5em; text-align: right;", class: "pasteButton" }, [
+		_.pasteLabel,
+		// Paste icon:
+		SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 0; top: 50%; margin-top: -0.75em; pointer-events: none;", width: "1.5em", height: "1.5em", viewBox: "0 0 26 26" }, [
+			SVG.path({ d: "M 8 18 L 6 18 L 6 5 L 17 5 L 17 7 M 9 8 L 16 8 L 20 12 L 20 22 L 9 22 z", stroke: "currentColor", fill: "none" }),
+			SVG.path({ d: "M 9 3 L 14 3 L 14 6 L 9 6 L 9 3 z M 16 8 L 20 12 L 16 12 L 16 8 z", fill: "currentColor", }),
+		]),
+	]);
+    private readonly _wavetableCustomWaveCopyPasteContainer: HTMLDivElement = div({class: "selectRow", style: "width: 124px; align-content: space-between;" }, this._wavetableCustomWaveCopy, this._wavetableCustomWavePaste);
 
     private readonly _customWaveDraw: HTMLDivElement = div({ style: "height:80px; margin-top:10px; margin-bottom:25px;" }, [
         div({ style: "height:54px; display:flex; justify-content:center;" }, [this._customWaveDrawCanvas.canvas]),
@@ -953,9 +973,9 @@ export class SongEditor {
     ]);
 
     private readonly _wavetableCustomWaveDraw: HTMLDivElement = div({ style: "height:80px; margin-top:10px; margin-bottom:25px;" }, [
-        div({ style: "height:54px; display:flex; justify-content:center;" }, [this._wavetableCustomWaveDrawCanvass.canvas]),
-        div({ style: "margin-top:5px; display:flex; justify-content:center;" }, [this._customWavePresetDrop, this._wavetableCustomWaveZoom]),
-        div({ style: "margin-top:5px; display:flex; justify-content:center;" }, [this._customWaveCopyPasteContainer]),
+        div({ style: "height:54px; display:flex; justify-content:center;" }, [this._wavetableCustomWaveDrawCanvas.canvas]),
+        div({ style: "margin-top:5px; display:flex; justify-content:center;" }, [this._wavetableCustomWavePresetDrop, this._wavetableCustomWaveZoom]),
+        div({ style: "margin-top:5px; display:flex; justify-content:center;" }, [this._wavetableCustomWaveCopyPasteContainer]),
     ]);
 
     private readonly _songTitleInputBox: InputBox = new InputBox(input({ style: "font-weight:bold; border:none; width: 100%; background-color:${ColorConfig.editorBackground}; color:${ColorConfig.primaryText}; text-align:center", maxlength: "30", type: "text", value: EditorConfig.versionDisplayName }), this._doc, (oldValue: string, newValue: string) => new ChangeSongTitle(this._doc, oldValue, newValue));
@@ -1818,7 +1838,7 @@ export class SongEditor {
         this._currentPromptName = promptName;
 
         if (this.prompt) {
-            if (this._wasPlaying && !(this.prompt instanceof TipPrompt || this.prompt instanceof LimiterPrompt || this.prompt instanceof CustomChipPrompt || this.prompt instanceof CustomFilterPrompt)) {
+            if (this._wasPlaying && !(this.prompt instanceof TipPrompt || this.prompt instanceof LimiterPrompt || this.prompt instanceof CustomChipPrompt || this.prompt instanceof CustomFilterPrompt || this.prompt instanceof WavetablePrompt)) {
                 this._doc.performance.play();
             }
             this._wasPlaying = false;
@@ -1865,6 +1885,9 @@ export class SongEditor {
                 case "customChipSettings":
                     this.prompt = new CustomChipPrompt(this._doc, this);
                     break;
+                case "wavetableCustomChipSettings":
+                    this.prompt = new WavetablePrompt(this._doc, this);
+                    break;
                 case "customEQFilterSettings":
                     this.prompt = new CustomFilterPrompt(this._doc, this, false);
                     break;
@@ -1892,7 +1915,7 @@ export class SongEditor {
             }
 
             if (this.prompt) {
-                if (!(this.prompt instanceof TipPrompt || this.prompt instanceof LimiterPrompt || this.prompt instanceof CustomChipPrompt || this.prompt instanceof CustomFilterPrompt)) {
+                if (!(this.prompt instanceof TipPrompt || this.prompt instanceof LimiterPrompt || this.prompt instanceof CustomChipPrompt || this.prompt instanceof CustomFilterPrompt || this.prompt instanceof WavetablePrompt)) {
                     this._wasPlaying = this._doc.synth.playing;
                     this._doc.performance.pause();
                 }
@@ -2164,14 +2187,6 @@ export class SongEditor {
                 setSelectedValue(this._chipWaveSelect, instrument.chipWave);
             }
 
-            if (instrument.type == InstrumentType.customChipWave) {
-                this._customWaveDraw.style.display = "";
-                this._chipWaveSelectRow.style.display = "none";
-            }
-            else {
-                this._customWaveDraw.style.display = "none";
-            }
-
             if (instrument.type == InstrumentType.pwm) {
                 this._chipWaveSelectRow.style.display = "none";
                 this._pulseWidthRow.style.display = "";
@@ -2246,10 +2261,18 @@ export class SongEditor {
                 this._wavetableSpeedRow.style.display = "";
                 this._wavetableCustomWaveDraw.style.display = "";
                 this._wavetableWaveButtons.style.display = "";
+                this._customWaveDraw.style.display = "none";
+            } else if (instrument.type == InstrumentType.customChipWave) {
+                this._chipWaveSelectRow.style.display = "none";
+                this._customWaveDraw.style.display = "";
+                this._wavetableSpeedRow.style.display = "none";
+                this._wavetableCustomWaveDraw.style.display = "none";
+                this._wavetableWaveButtons.style.display = "none";
             } else {
                 this._wavetableSpeedRow.style.display = "none";
                 this._wavetableCustomWaveDraw.style.display = "none";
                 this._wavetableWaveButtons.style.display = "none";
+                this._customWaveDraw.style.display = "none";
             }
             
 
@@ -2462,6 +2485,14 @@ export class SongEditor {
 
                 if (this.prompt instanceof CustomChipPrompt) {
                     this.prompt.customChipCanvas.render();
+                }
+            }
+
+            if (instrument.type == InstrumentType.wavetable) {
+                this._wavetableCustomWaveDrawCanvas.redrawCanvas();
+
+                if (this.prompt instanceof WavetablePrompt) {
+                    this.prompt.wavetableCanvas.render();
                 }
             }
 
@@ -3315,7 +3346,7 @@ export class SongEditor {
         this._ctrlHeld = event.ctrlKey;
 
         if (this.prompt) {
-            if (this.prompt instanceof CustomChipPrompt || this.prompt instanceof LimiterPrompt || this.prompt instanceof CustomFilterPrompt) {
+            if (this.prompt instanceof CustomChipPrompt || this.prompt instanceof LimiterPrompt || this.prompt instanceof CustomFilterPrompt || this.prompt instanceof WavetablePrompt) {
                 this.prompt.whenKeyPressed(event);
             }
             if (event.keyCode == 27) { // ESC key
@@ -4525,7 +4556,6 @@ export class SongEditor {
         this._doc.prefs.save();
     }
     private _wavetableIndex: number = 0;
-    private readonly _wavetableCustomWaveDrawCanvas: WavetableCustomChipCanvas
     private _changeWavetableIndex = (index: number): void => {
         this._wavetableIndex = index;
         this._wavetableCustomWaveDrawCanvas.index = this._wavetableIndex;
