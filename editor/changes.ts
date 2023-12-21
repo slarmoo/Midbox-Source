@@ -433,6 +433,46 @@ export class ChangeCustomWave extends Change {
     }
 }
 
+export class ChangeWavetableCustomWave extends Change {
+    constructor(doc: SongDocument, newArray: Float32Array, index: number) {
+        super();
+        const oldArray: Float32Array = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()].wavetableWaves[index];
+        var comparisonResult: boolean = true;
+        for (let i: number = 0; i < oldArray.length; i++) {
+            if (oldArray[i] != newArray[i]) {
+                comparisonResult = false;
+                i = oldArray.length;
+            }
+        }
+        if (comparisonResult == false) {
+            let instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+            for (let i: number = 0; i < newArray.length; i++) {
+                instrument.wavetableWaves[index][i] = newArray[i];
+            }
+
+            let sum: number = 0.0;
+            for (let i: number = 0; i < instrument.wavetableWaves[index].length; i++) {
+                sum += instrument.wavetableWaves[index][i];
+            }
+            const average: number = sum / instrument.wavetableWaves[index].length;
+
+            // Perform the integral on the wave. The chipSynth will perform the derivative to get the original wave back but with antialiasing.
+            let cumulative: number = 0;
+            let wavePrev: number = 0;
+            for (let i: number = 0; i < instrument.wavetableWaves[index].length; i++) {
+                cumulative += wavePrev;
+                wavePrev = instrument.wavetableWaves[index][i] - average;
+                instrument.wavetableIntegralWaves[index][i] = cumulative;
+            }
+
+            instrument.wavetableIntegralWaves[index][64] = 0.0;
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
 export class ChangePreset extends Change {
     constructor(doc: SongDocument, newValue: number) {
         super();

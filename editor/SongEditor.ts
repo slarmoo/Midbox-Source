@@ -44,7 +44,7 @@ import { ThemePrompt } from "./ThemePrompt";
 import { TipPrompt } from "./TipPrompt";
 import { LanguagePrompt } from "./LanguagePrompt";
 import { Localization as _ } from "./Localization";
-import { ChangeTempo, /*ChangeKeyOctave,*/ ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangeSupersawDynamism, ChangeSupersawSpread, ChangeSupersawShape, ChangeWavetableSpeed, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, pickRandomPresetValue, ChangeRandomGeneratedInstrument, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, ChangeChipWave, ChangeNoiseWave, ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeAddEnvelope, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeBounceArp, ChangeClicklessTransition, ChangeContinueThruPattern, ChangeAliasing, ChangePercussion, ChangeSDAffected, ChangeStrumSpeed, ChangeSlideSpeed, ChangeSongSubtitle } from "./changes";
+import { ChangeTempo, /*ChangeKeyOctave,*/ ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangeSupersawDynamism, ChangeSupersawSpread, ChangeSupersawShape, ChangeWavetableSpeed, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, pickRandomPresetValue, ChangeRandomGeneratedInstrument, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, ChangeChipWave, ChangeNoiseWave, ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeAddEnvelope, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeWavetableCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeBounceArp, ChangeClicklessTransition, ChangeContinueThruPattern, ChangeAliasing, ChangePercussion, ChangeSDAffected, ChangeStrumSpeed, ChangeSlideSpeed, ChangeSongSubtitle } from "./changes";
 import { oscilloscopeCanvas } from "../global/Oscilloscope"
 import { TrackEditor } from "./TrackEditor";
 
@@ -282,6 +282,168 @@ class CustomChipCanvas {
             }
 
             instrument.customChipWaveIntegral[64] = 0.0;
+        }
+
+    }
+
+    private _onMouseDown = (event: MouseEvent): void => {
+        this.mouseDown = true;
+
+        // Allow single-click edit
+        this._onMouseMove(event);
+    }
+    private _onMouseUp = (): void => {
+        this.mouseDown = false;
+        this.continuousEdit = false;
+
+        this._whenChange();
+    }
+
+    private _whenChange = (): void => {
+        this._change = this._getChange(this.newArray);
+
+        this._doc.record(this._change!);
+
+        this._change = null;
+    };
+
+}
+
+class WavetableCustomChipCanvas {
+    private mouseDown: boolean;
+    private continuousEdit: boolean;
+    private lastX: number;
+    private lastY: number;
+    public newArray: Float32Array;
+    public index: number = 0;
+
+    private _change: Change | null = null;
+
+    constructor(public readonly canvas: HTMLCanvasElement, private readonly _doc: SongDocument, private readonly _getChange: (newArray: Float32Array) => Change) {
+        //canvas.addEventListener("input", this._whenInput);
+        //canvas.addEventListener("change", this._whenChange);
+        canvas.addEventListener("mousemove", this._onMouseMove);
+        canvas.addEventListener("mousedown", this._onMouseDown);
+        canvas.addEventListener("mouseup", this._onMouseUp);
+        canvas.addEventListener("mouseleave", this._onMouseUp);
+
+        this.mouseDown = false;
+        this.continuousEdit = false;
+        this.lastX = 0;
+        this.lastY = 0;
+
+        this.newArray = new Float32Array(64);
+
+        // Init waveform
+        this.redrawCanvas();
+
+    }
+
+    public redrawCanvas(): void {
+        var ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
+
+        // Black BG
+        ctx.fillStyle = ColorConfig.getComputed("--editor-background");
+        ctx.fillRect(0, 0, 128, 52);
+
+        // Mid-bar
+        ctx.fillStyle = ColorConfig.getComputed("--ui-widget-background");
+        ctx.fillRect(0, 25, 128, 2);
+
+        // 25-75 bars
+        ctx.fillStyle = ColorConfig.getComputed("--track-editor-bg-pitch-dim");
+        ctx.fillRect(0, 13, 128, 1);
+        ctx.fillRect(0, 39, 128, 1);
+
+        // Waveform
+        ctx.fillStyle = ColorConfig.getComputedChannelColor(this._doc.song, this._doc.channel).primaryNote;
+
+        for (let x: number = 0; x < 64; x++) {
+            var y: number = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].wavetableWaves[this.index][x] + 26;
+            ctx.fillRect(x * 2, y - 2, 2, 4);
+
+            this.newArray[x] = y - 26;
+        }
+    }
+
+    private _onMouseMove = (event: MouseEvent): void => {
+        if (this.mouseDown) {
+
+            var x = (event.clientX || event.pageX) - this.canvas.getBoundingClientRect().left;
+            var y = Math.floor((event.clientY || event.pageY) - this.canvas.getBoundingClientRect().top);
+
+            if (y < 2) y = 2;
+            if (y > 50) y = 50;
+
+            var ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
+
+            if (this.continuousEdit == true && Math.abs(this.lastX - x) < 40) {
+
+                var lowerBound = (x < this.lastX) ? x : this.lastX;
+                var upperBound = (x < this.lastX) ? this.lastX : x;
+
+                for (let i = lowerBound; i <= upperBound; i += 2) {
+
+                    var progress = (Math.abs(x - this.lastX) > 2.0) ? ((x > this.lastX) ?
+                        1.0 - ((i - lowerBound) / (upperBound - lowerBound))
+                        : ((i - lowerBound) / (upperBound - lowerBound))) : 0.0;
+                    var j = Math.round(y + (this.lastY - y) * progress);
+
+                    ctx.fillStyle = ColorConfig.getComputed("--editor-background");
+                    ctx.fillRect(Math.floor(i / 2) * 2, 0, 2, 53);
+                    ctx.fillStyle = ColorConfig.getComputed("--ui-widget-background");
+                    ctx.fillRect(Math.floor(i / 2) * 2, 25, 2, 2);
+                    ctx.fillStyle = ColorConfig.getComputed("--track-editor-bg-pitch-dim");
+                    ctx.fillRect(Math.floor(i / 2) * 2, 13, 2, 1);
+                    ctx.fillRect(Math.floor(i / 2) * 2, 39, 2, 1);
+                    ctx.fillStyle = ColorConfig.getComputedChannelColor(this._doc.song, this._doc.channel).primaryNote;
+                    ctx.fillRect(Math.floor(i / 2) * 2, j - 2, 2, 4);
+
+                    // Actually update current instrument's custom waveform
+                    this.newArray[Math.floor(i / 2)] = (j - 26);
+                }
+
+            }
+            else {
+
+                ctx.fillStyle = ColorConfig.getComputed("--editor-background");
+                ctx.fillRect(Math.floor(x / 2) * 2, 0, 2, 52);
+                ctx.fillStyle = ColorConfig.getComputed("--ui-widget-background");
+                ctx.fillRect(Math.floor(x / 2) * 2, 25, 2, 2);
+                ctx.fillStyle = ColorConfig.getComputed("--track-editor-bg-pitch-dim");
+                ctx.fillRect(Math.floor(x / 2) * 2, 13, 2, 1);
+                ctx.fillRect(Math.floor(x / 2) * 2, 39, 2, 1);
+                ctx.fillStyle = ColorConfig.getComputedChannelColor(this._doc.song, this._doc.channel).primaryNote;
+                ctx.fillRect(Math.floor(x / 2) * 2, y - 2, 2, 4);
+
+                // Actually update current instrument's custom waveform
+                this.newArray[Math.floor(x / 2)] = (y - 26);
+
+            }
+
+            this.continuousEdit = true;
+            this.lastX = x;
+            this.lastY = y;
+
+            // Preview - update integral used for sound synthesis based on new array, not actual stored array. When mouse is released, real update will happen.
+            let instrument: Instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
+
+            let sum: number = 0.0;
+            for (let i: number = 0; i < this.newArray.length; i++) {
+                sum += this.newArray[i];
+            }
+            const average: number = sum / this.newArray.length;
+
+            // Perform the integral on the wave. The chipSynth will perform the derivative to get the original wave back but with antialiasing.
+            let cumulative: number = 0;
+            let wavePrev: number = 0;
+            for (let i: number = 0; i < this.newArray.length; i++) {
+                cumulative += wavePrev;
+                wavePrev = this.newArray[i] - average;
+                instrument.customChipWaveIntegral[i] = cumulative;
+            }
+
+            instrument.wavetableIntegralWaves[this.index][64] = 0.0;
         }
 
     }
@@ -576,16 +738,46 @@ export class SongEditor {
     private readonly _wavetableSpeedSlider: Slider = new Slider(input({style: "margin: 0;", type: "range", min: "0", max: Config.wavetableSpeedMax, value: "0", step: "1"}), this._doc, (oldValue: number, newValue: number) => new ChangeWavetableSpeed(this._doc, oldValue, newValue), false);
     private readonly _wavetableSpeedRow: HTMLDivElement = div({class: "selectRow"}, span({class: "tip", onclick: ()=>this._openPrompt("wavetableSpeed")}, span(_.wavetableSpeedLabel)), this._wavetableSpeedSlider.container);
     private readonly _wavetableWaveButtonRow1: HTMLButtonElement[] = [
-        button({style: "width: 12.5%"}),
-        button({style: "width: 12.5%"}),
-        button({style: "width: 12.5%"}),
-        button({style: "width: 12.5%"}),
-        button({style: "width: 12.5%"}),
-        button({style: "width: 12.5%"}),
-        button({style: "width: 12.5%"}),
-        button({style: "width: 12.5%"}),
-      ];
-    private readonly _wavetableWaveButtons: HTMLDivElement = div({style: "flex-wrap: wrap; height: initial;"}, this._wavetableWaveButtonRow1);
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: center;", onclick: () => this._changeWavetableIndex(0) }, span("1")),
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: center;", onclick: () => this._changeWavetableIndex(1) }, span("2")),
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: center;", onclick: () => this._changeWavetableIndex(2) }, span("3")),
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: center;", onclick: () => this._changeWavetableIndex(3) }, span("4")),
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: center;", onclick: () => this._changeWavetableIndex(4) }, span("5")),
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: center;", onclick: () => this._changeWavetableIndex(5) }, span("6")),
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: center;", onclick: () => this._changeWavetableIndex(6) }, span("7")),
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: center;", onclick: () => this._changeWavetableIndex(7) }, span("8")),
+        ];
+    private readonly _wavetableWaveButtonRow2: HTMLButtonElement[] = [
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: center;", onclick: () => this._changeWavetableIndex(8) }, span("9")),
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(9) }, span("10")),
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(10) }, span("11")),
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(11) }, span("12")),
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(12) }, span("13")),
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(13) }, span("14")),
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(14) }, span("15")),
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(15) }, span("16")),
+        ];
+    private readonly _wavetableWaveButtonRow3: HTMLButtonElement[] = [
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(16) }, span("17")),
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(17) }, span("18")),
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(18) }, span("19")),
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(19) }, span("20")),
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(20) }, span("21")),
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(21) }, span("22")),
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(22) }, span("23")),
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(23) }, span("24")),
+        ];
+    private readonly _wavetableWaveButtonRow4: HTMLButtonElement[] = [
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(24) }, span("25")),
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(25) }, span("26")),
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(26) }, span("27")),
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(27) }, span("28")),
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(28) }, span("29")),
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(29) }, span("30")),
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(30) }, span("31")),
+        button({style: "width: 17px; height: 17px; font-size: 70%; text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(31) }, span("32")),
+        ];
+    private readonly _wavetableWaveButtons: HTMLDivElement = div({style: "width: 136px; align-self: center; flex-wrap: wrap; height: initial; margin-top:10px; margin-bottom:2px;"}, this._wavetableWaveButtonRow1, this._wavetableWaveButtonRow2, this._wavetableWaveButtonRow3, this._wavetableWaveButtonRow4);
 
     private readonly _pulseWidthSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "1", max: Config.pulseWidthRange, value: "1", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangePulseWidth(this._doc, oldValue, newValue), false);
     private readonly _pulseWidthRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("pulseWidth") }, span(_.pwmLabel)), this._pulseWidthSlider.container);
@@ -728,10 +920,14 @@ export class SongEditor {
     );
 
     private readonly _customWaveDrawCanvas: CustomChipCanvas = new CustomChipCanvas(canvas({ width: 128, height: 52, style: "border:2px solid " + ColorConfig.uiWidgetBackground, id: "customWaveDrawCanvas" }), this._doc, (newArray: Float32Array) => new ChangeCustomWave(this._doc, newArray));
+    private readonly _wavetableCustomWaveDrawCanvass: WavetableCustomChipCanvas = new WavetableCustomChipCanvas(canvas({ width: 128, height: 52, style: "border:2px solid " + ColorConfig.uiWidgetBackground, id: "customWaveDrawCanvas" }), this._doc, (newArray: Float32Array) => new ChangeWavetableCustomWave(this._doc, newArray, this._wavetableIndex));
+
     private readonly _customWavePresetDrop: HTMLSelectElement = buildHeaderedOptions(_.loadPresetLabel, select({ style: "width: 50%; height:1.5em; text-align: center; text-align-last: center;" }),
         Config.chipWaves.map(wave => wave.name)
     );
+
     private readonly _customWaveZoom: HTMLButtonElement = button({ style: "margin-left:0.5em; height:1.5em; max-width: 20px;", onclick: () => this._openPrompt("customChipSettings") }, "+");
+    private readonly _wavetableCustomWaveZoom: HTMLButtonElement = button({ style: "margin-left:0.5em; height:1.5em; max-width: 20px;", onclick: () => this._openPrompt("wavetableCustomChipSettings") }, "+");
 
     private readonly _customWaveCopy: HTMLButtonElement = button({ style: "width:58px; height:1.5em; text-align: right;", class: "copyButton" }, [
 		_.copyLabel,
@@ -750,9 +946,15 @@ export class SongEditor {
 	]);
     private readonly _customWaveCopyPasteContainer: HTMLDivElement = div({class: "selectRow", style: "width: 124px; align-content: space-between;" }, this._customWaveCopy, this._customWavePaste);
 
-    private readonly _customWaveDraw: HTMLDivElement = div({ style: "height:80px; margin-top:10px; margin-bottom:25px" }, [
+    private readonly _customWaveDraw: HTMLDivElement = div({ style: "height:80px; margin-top:10px; margin-bottom:25px;" }, [
         div({ style: "height:54px; display:flex; justify-content:center;" }, [this._customWaveDrawCanvas.canvas]),
         div({ style: "margin-top:5px; display:flex; justify-content:center;" }, [this._customWavePresetDrop, this._customWaveZoom]),
+        div({ style: "margin-top:5px; display:flex; justify-content:center;" }, [this._customWaveCopyPasteContainer]),
+    ]);
+
+    private readonly _wavetableCustomWaveDraw: HTMLDivElement = div({ style: "height:80px; margin-top:10px; margin-bottom:25px;" }, [
+        div({ style: "height:54px; display:flex; justify-content:center;" }, [this._wavetableCustomWaveDrawCanvass.canvas]),
+        div({ style: "margin-top:5px; display:flex; justify-content:center;" }, [this._customWavePresetDrop, this._wavetableCustomWaveZoom]),
         div({ style: "margin-top:5px; display:flex; justify-content:center;" }, [this._customWaveCopyPasteContainer]),
     ]);
 
@@ -775,7 +977,9 @@ export class SongEditor {
         this._panDropdownGroup,
         this._chipWaveSelectRow,
         this._chipNoiseSelectRow,
+        this._wavetableWaveButtons,
         this._customWaveDraw,
+        this._wavetableCustomWaveDraw,
         this._eqFilterTypeRow,
         this._eqFilterRow,
         this._eqFilterSimpleCutRow,
@@ -793,7 +997,6 @@ export class SongEditor {
 		this._supersawShapeRow,
         this._pulseWidthRow,
         this._wavetableSpeedRow,
-        this._wavetableWaveButtons,
         this._stringSustainRow,
         this._unisonSelectRow,
         div({ style: `padding: 2px 0; margin-left: 2em; display: flex; align-items: center;` },
@@ -2041,13 +2244,11 @@ export class SongEditor {
             if (instrument.type == InstrumentType.wavetable) {
                 this._chipWaveSelectRow.style.display = "none";
                 this._wavetableSpeedRow.style.display = "";
-                this._customWaveDraw.style.display = "";
+                this._wavetableCustomWaveDraw.style.display = "";
                 this._wavetableWaveButtons.style.display = "";
-            } else if (instrument.type == InstrumentType.customChipWave) {
-                this._customWaveDraw.style.display = "";
             } else {
                 this._wavetableSpeedRow.style.display = "none";
-                this._customWaveDraw.style.display = "none";
+                this._wavetableCustomWaveDraw.style.display = "none";
                 this._wavetableWaveButtons.style.display = "none";
             }
             
@@ -2140,7 +2341,7 @@ export class SongEditor {
 
             if (effectsIncludeDistortion(instrument.effects)) {
                 this._distortionRow.style.display = "";
-                if (instrument.type == InstrumentType.chip || instrument.type == InstrumentType.customChipWave || instrument.type == InstrumentType.pwm)
+                if (instrument.type == InstrumentType.chip || instrument.type == InstrumentType.customChipWave || instrument.type == InstrumentType.pwm || instrument.type == InstrumentType.wavetable)
                     this._aliasingRow.style.display = "";
                 else
                     this._aliasingRow.style.display = "none";
@@ -4322,5 +4523,12 @@ export class SongEditor {
         this._customWavePresetDrop.selectedIndex = 0;
         this._doc.notifier.changed();
         this._doc.prefs.save();
+    }
+    private _wavetableIndex: number = 0;
+    private readonly _wavetableCustomWaveDrawCanvas: WavetableCustomChipCanvas
+    private _changeWavetableIndex = (index: number): void => {
+        this._wavetableIndex = index;
+        this._wavetableCustomWaveDrawCanvas.index = this._wavetableIndex;
+        this._wavetableCustomWaveDrawCanvas.redrawCanvas();
     }
 }
