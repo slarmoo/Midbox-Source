@@ -36,12 +36,13 @@ export class WavetablePromptCanvas {
 	);
 
 	public readonly container: HTMLElement = HTML.div({ class: "", style: "height: 294px; width: 768px; padding-bottom: 1.5em;" }, this._svg);
-    wavetableIndex: number; // Probably not right...
-    index: any; // Also probably not right...
 
-	constructor(doc: SongDocument) {
+	wavetableIndex: number;
+
+	constructor(doc: SongDocument, wavetableIndex: number) {
 
 		this._doc = doc;
+		this.wavetableIndex = wavetableIndex;
 
 		for (let i: number = 0; i <= 4; i += 2) {
 			this._ticks.appendChild(SVG.rect({ fill: ColorConfig.tonic, x: (i * this._editorWidth / 4) - 1, y: 0, width: 2, height: this._editorHeight }));
@@ -57,11 +58,10 @@ export class WavetablePromptCanvas {
 			this._subticks.appendChild(SVG.rect({ fill: ColorConfig.fifthNote, x: 0, y: this._editorHeight - 1 - i * 8 * (this._editorHeight / 49), width: this._editorWidth, height: 1 }));
 		}
 
-
 		let col: string = ColorConfig.getChannelColor(this._doc.song, this._doc.channel).primaryNote;
 
-		for (let i: number = 0; i <= 64; i++) {
-			let val: number = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].wavetableWaves[this.index][i];
+		for (let i: number = 0; i < 64; i++) {
+			let val: number = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].wavetableWaves[this.wavetableIndex][i];
 			this.chipData[i] = val;
 			this.startingChipData[i] = val;
 			this._blocks.appendChild(SVG.rect({ fill: col, x: (i * this._editorWidth / 64), y: (val + 24) * (this._editorHeight / 49), width: this._editorWidth / 64, height: this._editorHeight / 49 }));
@@ -249,7 +249,7 @@ export class WavetablePromptCanvas {
 
 export class WavetablePrompt implements Prompt {
 
-	public wavetableCanvas: WavetablePromptCanvas = new WavetablePromptCanvas(this._doc);
+	public wavetableCanvas: WavetablePromptCanvas = new WavetablePromptCanvas(this._doc, this._songEditor._wavetableIndex);
 
 	public readonly _playButton: HTMLButtonElement = button({ style: "width: 55%;", type: "button" });
 

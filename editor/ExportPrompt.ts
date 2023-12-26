@@ -162,8 +162,10 @@ export class ExportPrompt implements Prompt {
     }
 
     private _close = (): void => {
-        if (this.synth != null)
+        if (this.synth != null) {
             this.synth.renderingSong = false;
+            this._doc.synth.renderingSong = false;
+        }
         this.outputStarted = false;
         this._doc.undo();
     }
@@ -257,6 +259,7 @@ export class ExportPrompt implements Prompt {
         const tempSamplesR = new Float32Array(samplesInChunk);
 
         this.synth.renderingSong = true;
+        this._doc.synth.renderingSong = true;
         this.synth.synthesize(tempSamplesL, tempSamplesR, samplesInChunk);
 
         // Concatenate chunk data into final array
@@ -273,6 +276,7 @@ export class ExportPrompt implements Prompt {
         if (this.currentChunk >= this.totalChunks) {
             // Done, call final function
             this.synth.renderingSong = false;
+            this._doc.synth.renderingSong = false;
             this._outputProgressLabel.innerText = "Encoding...";
             if (this.thenExportTo == "wav") {
                 this._exportToWavFinish();

@@ -7478,6 +7478,7 @@ export class Synth {
     }
 
     private audioProcessCallback = (audioProcessingEvent: any): void => {
+        if (this.renderingSong) return;
         const outputBuffer = audioProcessingEvent.outputBuffer;
         const outputDataL: Float32Array = outputBuffer.getChannelData(0);
         const outputDataR: Float32Array = outputBuffer.getChannelData(1);
