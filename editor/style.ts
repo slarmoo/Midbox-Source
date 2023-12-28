@@ -1419,38 +1419,43 @@ document.head.appendChild(HTML.style({ type: "text/css" }, `
 }
 
 .beepboxEditor .wavetableButtonType1 {
-	line-height: 15px;
-    height: 15px;
+	line-height: 18px;
+    height: 18px;
 	font-size: 70%;
 	border-radius: 0px 0px 0px 0px
 }
 
 .beepboxEditor .wavetableButtonType2 {
-	line-height: 15px;
-    height: 15px;
+	line-height: 18px;
+    height: 18px;
 	font-size: 70%;
 	border-radius: 6px 0px 0px 0px
 }
 
 .beepboxEditor .wavetableButtonType3 {
-	line-height: 15px;
-    height: 15px;
+	line-height: 18px;
+    height: 18px;
 	font-size: 70%;
 	border-radius: 0px 6px 0px 0px
 }
 
 .beepboxEditor .wavetableButtonType4 {
-	line-height: 15px;
-    height: 15px;
+	line-height: 18px;
+    height: 18px;
 	font-size: 70%;
 	border-radius: 0px 0px 0px 6px
 }
 
 .beepboxEditor .wavetableButtonType5 {
-	line-height: 15px;
-    height: 15px;
+	line-height: 18px;
+    height: 18px;
 	font-size: 70%;
 	border-radius: 0px 0px 6px 0px
+}
+
+.beepboxEditor .wavetableButtons .selected-wave {
+	background: var(--background-color-lit);
+	color: ${ColorConfig.invertedText};
 }
 
 .beepboxEditor input[type=text], .beepboxEditor input[type=number] {

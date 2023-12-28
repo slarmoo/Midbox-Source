@@ -738,7 +738,7 @@ export class SongEditor {
 
     private readonly _wavetableSpeedSlider: Slider = new Slider(input({style: "margin: 0;", type: "range", min: "0", max: Config.wavetableSpeedMax, value: "0", step: "1"}), this._doc, (oldValue: number, newValue: number) => new ChangeWavetableSpeed(this._doc, oldValue, newValue), false);
     private readonly _wavetableSpeedRow: HTMLDivElement = div({class: "selectRow"}, span({class: "tip", onclick: ()=>this._openPrompt("wavetableSpeed")}, span(_.wavetableSpeedLabel)), this._wavetableSpeedSlider.container);
-    private readonly _wavetableWaveButtons: HTMLDivElement = div({ style: "display: grid; grid-template-columns: repeat(8, minmax(auto, 18px)); grid-gap: 2px 2px; grid-auto-rows: 13px; align-self: center; margin-top:10px; margin-bottom:2px; width: 136px;" },
+    private readonly _wavetableWaveButtons: HTMLButtonElement[] = [
         button({class: "wavetableButtonType2", style: "text-align: center;", onclick: () => this._changeWavetableIndex(0) }, span("1")),
         button({class: "wavetableButtonType1", style: "text-align: center;", onclick: () => this._changeWavetableIndex(1) }, span("2")),
         button({class: "wavetableButtonType1", style: "text-align: center;", onclick: () => this._changeWavetableIndex(2) }, span("3")),
@@ -771,7 +771,8 @@ export class SongEditor {
         button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(29) }, span("30")),
         button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(30) }, span("31")),
         button({class: "wavetableButtonType5", style: "text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(31) }, span("32")),
-    )
+    ];
+    private readonly _wavetableWaveButtonsContainer: HTMLDivElement = div({ style: "display: grid; grid-template-columns: repeat(8, minmax(auto, 18px)); grid-gap: 2px 2px; grid-auto-rows: 18px; align-self: center; margin-top:10px; margin-bottom:2px; width: 136px;"}, this._wavetableWaveButtons);
 
     private readonly _pulseWidthSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "1", max: Config.pulseWidthRange, value: "1", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangePulseWidth(this._doc, oldValue, newValue), false);
     private readonly _pulseWidthRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("pulseWidth") }, span(_.pwmLabel)), this._pulseWidthSlider.container);
@@ -990,7 +991,7 @@ export class SongEditor {
         this._panDropdownGroup,
         this._chipWaveSelectRow,
         this._chipNoiseSelectRow,
-        this._wavetableWaveButtons,
+        this._wavetableWaveButtonsContainer,
         this._customWaveDraw,
         this._wavetableCustomWaveDraw,
         this._eqFilterTypeRow,
@@ -1199,6 +1200,7 @@ export class SongEditor {
     private _wasPlaying: boolean = false;
     private _currentPromptName: string | null = null;
     private _highlightedInstrumentIndex: number = -1;
+    private _highlightedWavetableIndex: number = -1;
     private _renderedInstrumentCount: number = 0;
     private _renderedIsPlaying: boolean = false;
     private _renderedIsRecording: boolean = false;
@@ -2253,18 +2255,27 @@ export class SongEditor {
                 this._chipWaveSelectRow.style.display = "none";
                 this._wavetableSpeedRow.style.display = "";
                 this._wavetableCustomWaveDraw.style.display = "";
-                this._wavetableWaveButtons.style.display = "";
+                this._wavetableWaveButtonsContainer.style.display = "grid";
+                this._wavetableWaveButtonsContainer.style.setProperty("--background-color-lit", colors.primaryChannel);
+                this._wavetableWaveButtonsContainer.style.setProperty("--background-color-dim", colors.secondaryChannel);
+                if (this._highlightedWavetableIndex != this._wavetableIndex) {
+                    const oldButton: HTMLButtonElement = this._wavetableWaveButtons[this._highlightedWavetableIndex];
+                    if (oldButton != null) oldButton.classList.remove("selected-wave");
+                    const newButton: HTMLButtonElement = this._wavetableWaveButtons[this._wavetableIndex];
+                    newButton.classList.add("selected-wave");
+                    this._highlightedWavetableIndex = this._wavetableIndex;
+                }
                 this._customWaveDraw.style.display = "none";
             } else if (instrument.type == InstrumentType.customChipWave) {
                 this._chipWaveSelectRow.style.display = "none";
                 this._customWaveDraw.style.display = "";
                 this._wavetableSpeedRow.style.display = "none";
                 this._wavetableCustomWaveDraw.style.display = "none";
-                this._wavetableWaveButtons.style.display = "none";
+                this._wavetableWaveButtonsContainer.style.display = "none";
             } else {
                 this._wavetableSpeedRow.style.display = "none";
                 this._wavetableCustomWaveDraw.style.display = "none";
-                this._wavetableWaveButtons.style.display = "none";
+                this._wavetableWaveButtonsContainer.style.display = "none";
                 this._customWaveDraw.style.display = "none";
             }
             
