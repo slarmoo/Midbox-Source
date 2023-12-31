@@ -200,8 +200,8 @@ export class ColorConfig {
 					--pitch6-primary-note:      #d0d0ff;
 					--pitch7-secondary-channel: #8AA100;
 					--pitch7-primary-channel:   #DEFF25;
-					--pitch7-secondary-note:	  #AAC700;
-					--pitch7-primary-note:			#E6FF92;
+					--pitch7-secondary-note:	#AAC700;
+					--pitch7-primary-note:		#E6FF92;
 					--pitch8-secondary-channel: #DF0019;
 					--pitch8-primary-channel:   #FF98A4;
 					--pitch8-secondary-note:    #FF4E63;
@@ -209,7 +209,7 @@ export class ColorConfig {
 					--pitch9-secondary-channel: #00A170;
 					--pitch9-primary-channel:   #50FFC9;
 					--pitch9-secondary-note:    #00C78A;
-					--pitch9-primary-note:			#83FFD9;
+					--pitch9-primary-note:		#83FFD9;
 					--pitch10-secondary-channel:#A11FFF;
 					--pitch10-primary-channel:  #CE8BFF;
 					--pitch10-secondary-note:   #B757FF;
@@ -229,6 +229,7 @@ export class ColorConfig {
 					--noise4-secondary-channel: #6B3E8E;
 					--noise4-primary-channel:   #AF82D2;
 					--noise4-secondary-note:    #9E71C1;
+					--noise4-primary-note:      #D4C1EA;
 					--noise5-secondary-channel: #607837;
 					--noise5-primary-channel:   #A2BB77;
 					--noise5-secondary-note:    #91AA66;

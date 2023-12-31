@@ -1473,6 +1473,7 @@ export class SongEditor {
         //this._drumPresetSelect.addEventListener("change", this._whenSetDrumPreset);
         this._algorithmSelect.addEventListener("change", this._whenSetAlgorithm);
         this._instrumentsButtonBar.addEventListener("click", this._whenSelectInstrument);
+        this._wavetableWaveButtonsContainer.addEventListener("click", this._whenSelectWavetableWave);
         //this._customizeInstrumentButton.addEventListener("click", this._whenCustomizePressed);
         this._feedbackTypeSelect.addEventListener("change", this._whenSetFeedbackType);
         this._chipWaveSelect.addEventListener("change", this._whenSetChipWave);
@@ -2255,16 +2256,7 @@ export class SongEditor {
                 this._chipWaveSelectRow.style.display = "none";
                 this._wavetableSpeedRow.style.display = "";
                 this._wavetableCustomWaveDraw.style.display = "";
-                //this._wavetableWaveButtonsContainer.style.display = "grid";
-                //this._wavetableWaveButtonsContainer.style.setProperty("--background-color-lit", colors.primaryChannel);
-                //this._wavetableWaveButtonsContainer.style.setProperty("--background-color-dim", colors.secondaryChannel);
-                if (this._highlightedWavetableIndex != this._wavetableIndex) {
-                    const oldButton: HTMLButtonElement = this._wavetableWaveButtons[this._highlightedWavetableIndex];
-                    if (oldButton != null) oldButton.classList.remove("selected-wave");
-                    const newButton: HTMLButtonElement = this._wavetableWaveButtons[this._wavetableIndex];
-                    newButton.classList.add("selected-wave");
-                    this._highlightedWavetableIndex = this._wavetableIndex;
-                }
+                this._wavetableWaveButtonsContainer.style.display = "grid";
                 this._customWaveDraw.style.display = "none";
             } else if (instrument.type == InstrumentType.customChipWave) {
                 this._chipWaveSelectRow.style.display = "none";
@@ -3168,14 +3160,25 @@ export class SongEditor {
         }
     }
 
-    private _renderWavetableWaveButtons(channel: Channel, instrument: Instrument, wavetableIndex: number, colors: ChannelColors) {
+    private _renderWavetableWaveButtons(channel: Channel, wavetableIndex: number, colors: ChannelColors) {
         wavetableIndex = this._wavetableIndex
+        let instrument: Instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
         if (instrument.type == InstrumentType.wavetable) {
-            this._wavetableWaveButtonsContainer.style.display = "grid";
             this._wavetableWaveButtonsContainer.style.setProperty("--text-color-lit", colors.primaryNote);
             this._wavetableWaveButtonsContainer.style.setProperty("--text-color-dim", colors.secondaryNote);
             this._wavetableWaveButtonsContainer.style.setProperty("--background-color-lit", colors.primaryChannel);
             this._wavetableWaveButtonsContainer.style.setProperty("--background-color-dim", colors.secondaryChannel);
+            if (this._highlightedWavetableIndex != this._wavetableIndex) {
+                const oldButton: HTMLButtonElement = this._wavetableWaveButtons[this._highlightedWavetableIndex];
+                if (oldButton != null) oldButton.classList.remove("selected-wave");
+                const newButton: HTMLButtonElement = this._wavetableWaveButtons[this._wavetableIndex];
+                newButton.classList.add("selected-wave");
+                this._highlightedWavetableIndex = this._wavetableIndex;
+            } else {
+                const oldButton: HTMLButtonElement = this._wavetableWaveButtons[this._highlightedWavetableIndex];
+                if (oldButton != null) oldButton.classList.remove("selected-wave");
+                this._highlightedWavetableIndex = -1;
+            }
         }
     }
 
@@ -4210,7 +4213,7 @@ export class SongEditor {
             if (index != -1) {
                 this._doc.selection.selectInstrument(index);
             }
-            this._renderWavetableWaveButtons(this._doc.song.channels[this._doc.channel], Instrument, index, ColorConfig.getChannelColor(this._doc.song, this._doc.channel));
+            this._renderWavetableWaveButtons(this._doc.song.channels[this._doc.channel], index, ColorConfig.getChannelColor(this._doc.song, this._doc.channel));
         }
 
         this.refocusStage();
