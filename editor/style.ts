@@ -1453,7 +1453,7 @@ document.head.appendChild(HTML.style({ type: "text/css" }, `
 	border-radius: 0px 0px 6px 0px
 }
 
-.beepboxEditor .wavetableButtons .selected-wave {
+.beepboxEditor .selected-wave {
 	background: var(--background-color-lit);
 	color: ${ColorConfig.invertedText};
 }

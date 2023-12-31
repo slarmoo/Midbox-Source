@@ -772,7 +772,7 @@ export class SongEditor {
         button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(30) }, span("31")),
         button({class: "wavetableButtonType5", style: "text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(31) }, span("32")),
     ];
-    private readonly _wavetableWaveButtonsContainer: HTMLDivElement = div({ style: "display: grid; grid-template-columns: repeat(8, minmax(auto, 18px)); grid-gap: 2px 2px; grid-auto-rows: 18px; align-self: center; margin-top:10px; margin-bottom:2px; width: 136px;"}, this._wavetableWaveButtons);
+    private readonly _wavetableWaveButtonsContainer: HTMLDivElement = div({ style: "display: grid; grid-template-columns: repeat(8, minmax(auto, 18px)); grid-gap: 2px 2px; grid-auto-rows: 18px; margin-left: 15px; margin-top:10px; margin-bottom:2px; width: 136px;"}, this._wavetableWaveButtons);
 
     private readonly _pulseWidthSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "1", max: Config.pulseWidthRange, value: "1", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangePulseWidth(this._doc, oldValue, newValue), false);
     private readonly _pulseWidthRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("pulseWidth") }, span(_.pwmLabel)), this._pulseWidthSlider.container);
@@ -2255,9 +2255,9 @@ export class SongEditor {
                 this._chipWaveSelectRow.style.display = "none";
                 this._wavetableSpeedRow.style.display = "";
                 this._wavetableCustomWaveDraw.style.display = "";
-                this._wavetableWaveButtonsContainer.style.display = "grid";
-                this._wavetableWaveButtonsContainer.style.setProperty("--background-color-lit", colors.primaryChannel);
-                this._wavetableWaveButtonsContainer.style.setProperty("--background-color-dim", colors.secondaryChannel);
+                //this._wavetableWaveButtonsContainer.style.display = "grid";
+                //this._wavetableWaveButtonsContainer.style.setProperty("--background-color-lit", colors.primaryChannel);
+                //this._wavetableWaveButtonsContainer.style.setProperty("--background-color-dim", colors.secondaryChannel);
                 if (this._highlightedWavetableIndex != this._wavetableIndex) {
                     const oldButton: HTMLButtonElement = this._wavetableWaveButtons[this._highlightedWavetableIndex];
                     if (oldButton != null) oldButton.classList.remove("selected-wave");
@@ -3165,6 +3165,17 @@ export class SongEditor {
             }
         } else {
             this._instrumentsButtonRow.style.display = "none";
+        }
+    }
+
+    private _renderWavetableWaveButtons(channel: Channel, instrument: Instrument, wavetableIndex: number, colors: ChannelColors) {
+        wavetableIndex = this._wavetableIndex
+        if (instrument.type == InstrumentType.wavetable) {
+            this._wavetableWaveButtonsContainer.style.display = "grid";
+            this._wavetableWaveButtonsContainer.style.setProperty("--text-color-lit", colors.primaryNote);
+            this._wavetableWaveButtonsContainer.style.setProperty("--text-color-dim", colors.secondaryNote);
+            this._wavetableWaveButtonsContainer.style.setProperty("--background-color-lit", colors.primaryChannel);
+            this._wavetableWaveButtonsContainer.style.setProperty("--background-color-dim", colors.secondaryChannel);
         }
     }
 
@@ -4188,6 +4199,18 @@ export class SongEditor {
                 this._piano.forceRender();
             }
             this._renderInstrumentBar(this._doc.song.channels[this._doc.channel], index, ColorConfig.getChannelColor(this._doc.song, this._doc.channel));
+        }
+
+        this.refocusStage();
+    }
+
+    private _whenSelectWavetableWave = (event: MouseEvent): void => {
+        if (event.target == this._wavetableWaveButtonsContainer) {
+            const index: number = this._wavetableWaveButtons.indexOf(<any>event.target);
+            if (index != -1) {
+                this._doc.selection.selectInstrument(index);
+            }
+            this._renderWavetableWaveButtons(this._doc.song.channels[this._doc.channel], Instrument, index, ColorConfig.getChannelColor(this._doc.song, this._doc.channel));
         }
 
         this.refocusStage();
