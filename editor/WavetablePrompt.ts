@@ -81,7 +81,6 @@ export class WavetablePromptCanvas {
 
 		this._svg.addEventListener("keydown", this._whenKeyPressed);
 		this.container.addEventListener("keydown", this._whenKeyPressed);
-
 	}
 
 	public _storeChange = (): void => {
@@ -273,11 +272,15 @@ export class WavetablePrompt implements Prompt {
 	]);
 	private readonly copyPasteContainer: HTMLDivElement = div({ style: "width: 185px;" }, this.copyButton, this.pasteButton);
 
+	public readonly _wavetableWaveButtons: HTMLButtonElement[] = [];
+	public readonly _wavetableWaveButtonContainer: HTMLDivElement = div({class: "instrument-bar", style: "justify-content: center;"});
+
 	public readonly container: HTMLDivElement = div({ class: "prompt noSelection", style: "width: 600px;" },
 		h2("Edit Wavetable Waves"),
 		div({ style: "display: flex; width: 55%; align-self: center; flex-direction: row; align-items: center; justify-content: center;" },
 			this._playButton,
 		),
+		this._wavetableWaveButtonContainer,
 		div({ style: "display: flex; flex-direction: row; align-items: center; justify-content: center;" },
 			this.wavetableCanvas.container,
 		),
@@ -298,11 +301,32 @@ export class WavetablePrompt implements Prompt {
 		this._playButton.addEventListener("click", this._togglePlay);
 		this.updatePlayButton();
 
-		setTimeout(() => this._playButton.focus());
+		let colors = ColorConfig.getChannelColor(this._doc.song, this._doc.channel);
 
+		for (let i: number = this.wavetableCanvas.wavetableIndex; i < 32; i++) {
+			let newSubButton: HTMLButtonElement = button({ class: "no-underline", style: "font-size: 92%; max-width: 2em;"}, "" + (i + 1));
+			this._wavetableWaveButtons.push(newSubButton);
+			this._wavetableWaveButtonContainer.appendChild(newSubButton);
+			newSubButton.addEventListener("click", () => { this._changeWavetableIndex(this.wavetableCanvas.wavetableIndex); });
+		}
+		this._wavetableWaveButtons[31].classList.add("last-button");
+		this._wavetableWaveButtons[0].classList.add("selected-instrument");
+
+		this._wavetableWaveButtonContainer.style.setProperty("--text-color-lit", colors.primaryNote);
+		this._wavetableWaveButtonContainer.style.setProperty("--text-color-dim", colors.secondaryNote);
+		this._wavetableWaveButtonContainer.style.setProperty("--background-color-lit", colors.primaryChannel);
+		this._wavetableWaveButtonContainer.style.setProperty("--background-color-dim", colors.secondaryChannel);
+
+		setTimeout(() => this._playButton.focus());
 
 		this.wavetableCanvas.render();
 	}
+
+	private _changeWavetableIndex = (index: number): void => {
+		this._wavetableWaveButtons[this.wavetableCanvas.wavetableIndex].classList.remove("selected-instrument");
+		this.wavetableCanvas.wavetableIndex = index;
+		this._wavetableWaveButtons[index].classList.add("selected-instrument");
+    }
 
 	private _togglePlay = (): void => {
 		this._songEditor.togglePlay();

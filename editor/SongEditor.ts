@@ -4587,7 +4587,7 @@ export class SongEditor {
     }
 
     public _wavetableIndex: number = 0;
-    private _changeWavetableIndex = (index: number): void => {
+    public _changeWavetableIndex = (index: number): void => {
         this._wavetableIndex = index;
         this._wavetableCustomWaveDrawCanvas.index = this._wavetableIndex;
         this._wavetableCustomWaveDrawCanvas.redrawCanvas();
