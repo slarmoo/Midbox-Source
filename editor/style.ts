@@ -1453,6 +1453,14 @@ document.head.appendChild(HTML.style({ type: "text/css" }, `
 	border-radius: 0px 0px 6px 0px
 }
 
+.beepboxEditor .wavetableButtonType1 span,
+.beepboxEditor .wavetableButtonType2 span,
+.beepboxEditor .wavetableButtonType3 span,
+.beepboxEditor .wavetableButtonType4 span,
+.beepboxEditor .wavetableButtonType5 span {
+    pointer-events: none;
+}
+
 .beepboxEditor .selected-wave {
 	background: var(--background-color-lit);
 	color: ${ColorConfig.invertedText};

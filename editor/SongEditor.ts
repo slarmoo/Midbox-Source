@@ -739,38 +739,38 @@ export class SongEditor {
     private readonly _wavetableSpeedSlider: Slider = new Slider(input({style: "margin: 0;", type: "range", min: "0", max: Config.wavetableSpeedMax, value: "0", step: "1"}), this._doc, (oldValue: number, newValue: number) => new ChangeWavetableSpeed(this._doc, oldValue, newValue), false);
     private readonly _wavetableSpeedRow: HTMLDivElement = div({class: "selectRow"}, span({class: "tip", onclick: ()=>this._openPrompt("wavetableSpeed")}, span(_.wavetableSpeedLabel)), this._wavetableSpeedSlider.container);
     private readonly _wavetableWaveButtons: HTMLButtonElement[] = [
-        button({class: "wavetableButtonType2", style: "text-align: center;", onclick: () => this._changeWavetableIndex(0) }, span("1")),
-        button({class: "wavetableButtonType1", style: "text-align: center;", onclick: () => this._changeWavetableIndex(1) }, span("2")),
-        button({class: "wavetableButtonType1", style: "text-align: center;", onclick: () => this._changeWavetableIndex(2) }, span("3")),
-        button({class: "wavetableButtonType1", style: "text-align: center;", onclick: () => this._changeWavetableIndex(3) }, span("4")),
-        button({class: "wavetableButtonType1", style: "text-align: center;", onclick: () => this._changeWavetableIndex(4) }, span("5")),
-        button({class: "wavetableButtonType1", style: "text-align: center;", onclick: () => this._changeWavetableIndex(5) }, span("6")),
-        button({class: "wavetableButtonType1", style: "text-align: center;", onclick: () => this._changeWavetableIndex(6) }, span("7")),
-        button({class: "wavetableButtonType3", style: "text-align: center;", onclick: () => this._changeWavetableIndex(7) }, span("8")),
-        button({class: "wavetableButtonType1", style: "text-align: center;", onclick: () => this._changeWavetableIndex(8) }, span("9")),
-        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(9) }, span("10")),
-        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(10) }, span("11")),
-        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(11) }, span("12")),
-        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(12) }, span("13")),
-        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(13) }, span("14")),
-        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(14) }, span("15")),
-        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(15) }, span("16")),
-        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(16) }, span("17")),
-        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(17) }, span("18")),
-        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(18) }, span("19")),
-        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(19) }, span("20")),
-        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(20) }, span("21")),
-        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(21) }, span("22")),
-        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(22) }, span("23")),
-        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(23) }, span("24")),
-        button({class: "wavetableButtonType4", style: "text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(24) }, span("25")),
-        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(25) }, span("26")),
-        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(26) }, span("27")),
-        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(27) }, span("28")),
-        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(28) }, span("29")),
-        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(29) }, span("30")),
-        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(30) }, span("31")),
-        button({class: "wavetableButtonType5", style: "text-align: left; text-indent: -0.25em;", onclick: () => this._changeWavetableIndex(31) }, span("32")),
+        button({class: "wavetableButtonType2", style: "text-align: center;", }, span("1")),
+        button({class: "wavetableButtonType1", style: "text-align: center;", }, span("2")),
+        button({class: "wavetableButtonType1", style: "text-align: center;", }, span("3")),
+        button({class: "wavetableButtonType1", style: "text-align: center;", }, span("4")),
+        button({class: "wavetableButtonType1", style: "text-align: center;", }, span("5")),
+        button({class: "wavetableButtonType1", style: "text-align: center;", }, span("6")),
+        button({class: "wavetableButtonType1", style: "text-align: center;", }, span("7")),
+        button({class: "wavetableButtonType3", style: "text-align: center;", }, span("8")),
+        button({class: "wavetableButtonType1", style: "text-align: center;", }, span("9")),
+        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", }, span("10")),
+        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", }, span("11")),
+        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", }, span("12")),
+        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", }, span("13")),
+        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", }, span("14")),
+        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", }, span("15")),
+        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", }, span("16")),
+        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", }, span("17")),
+        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", }, span("18")),
+        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", }, span("19")),
+        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", }, span("20")),
+        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", }, span("21")),
+        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", }, span("22")),
+        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", }, span("23")),
+        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", }, span("24")),
+        button({class: "wavetableButtonType4", style: "text-align: left; text-indent: -0.25em;", }, span("25")),
+        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", }, span("26")),
+        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", }, span("27")),
+        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", }, span("28")),
+        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", }, span("29")),
+        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", }, span("30")),
+        button({class: "wavetableButtonType1", style: "text-align: left; text-indent: -0.25em;", }, span("31")),
+        button({class: "wavetableButtonType5", style: "text-align: left; text-indent: -0.25em;", }, span("32")),
     ];
     private readonly _wavetableWaveButtonsContainer: HTMLDivElement = div({ style: "display: grid; grid-template-columns: repeat(8, minmax(auto, 18px)); grid-gap: 2px 2px; grid-auto-rows: 18px; margin-left: 15px; margin-top:10px; margin-bottom:2px; width: 136px;"}, this._wavetableWaveButtons);
 
@@ -1569,11 +1569,12 @@ export class SongEditor {
         this._percussionBox.addEventListener("input", () => { this._doc.record(new ChangePercussion(this._doc, this._percussionBox.checked)) });
         this._songDetuneEffectedBox.addEventListener("input", () => { this._doc.record(new ChangeSDAffected(this._doc, this._songDetuneEffectedBox.checked)) });
 
-        this._promptContainer.addEventListener("click", (event) => {
+        /*(this._promptContainer.addEventListener("click", (event) => {
             if (event.target == this._promptContainer) {
                 this._doc.undo();
             }
-        });
+        });*/
+        // Commented out because it is really annoying to misclick and get thrown out the prompt as a result.
 
         if (isMobile) {
             const autoPlayOption: HTMLOptionElement = <HTMLOptionElement>this._optionsMenu.querySelector("[value=autoPlay]");
@@ -4208,14 +4209,13 @@ export class SongEditor {
     }
 
     private _whenSelectWavetableWave = (event: MouseEvent): void => {
-        if (event.target == this._wavetableWaveButtonsContainer) {
-            const index: number = this._wavetableWaveButtons.indexOf(<any>event.target);
-            if (index != -1) {
-                this._doc.selection.selectInstrument(index);
-            }
+        const index: number = this._wavetableWaveButtons.indexOf(<any>event.target);
+        if (index != -1) {
+            this._wavetableIndex = index;
+            this._wavetableCustomWaveDrawCanvas.index = this._wavetableIndex;
+            this._wavetableCustomWaveDrawCanvas.redrawCanvas();
             this._renderWavetableWaveButtons(this._doc.song.channels[this._doc.channel], index, ColorConfig.getChannelColor(this._doc.song, this._doc.channel));
         }
-
         this.refocusStage();
     }
 
@@ -4587,9 +4587,9 @@ export class SongEditor {
     }
 
     public _wavetableIndex: number = 0;
-    public _changeWavetableIndex = (index: number): void => {
+    /*public _changeWavetableIndex = (index: number): void => {
         this._wavetableIndex = index;
         this._wavetableCustomWaveDrawCanvas.index = this._wavetableIndex;
         this._wavetableCustomWaveDrawCanvas.redrawCanvas();
-    }
+    }*/
 }

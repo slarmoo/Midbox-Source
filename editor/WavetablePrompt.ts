@@ -253,7 +253,7 @@ export class WavetablePrompt implements Prompt {
 	public readonly _playButton: HTMLButtonElement = button({ style: "width: 55%;", type: "button" });
 
 	private readonly _cancelButton: HTMLButtonElement = button({ class: "cancelButton" });
-	private readonly _okayButton: HTMLButtonElement = button({ class: "okayButton", style: "width:45%;" }, "Okay");
+	private readonly _okayButton: HTMLButtonElement = button({ class: "okayButton", style: "width:45%;" }, _.confirmLabel);
 
 	private readonly copyButton: HTMLButtonElement = button({ style: "width:86px; margin-right: 5px;", class: "copyButton" }, [
 		_.copyLabel,
@@ -275,12 +275,17 @@ export class WavetablePrompt implements Prompt {
 	public readonly _wavetableWaveButtons: HTMLButtonElement[] = [];
 	public readonly _wavetableWaveButtonContainer: HTMLDivElement = div({class: "instrument-bar", style: "justify-content: center;"});
 
+	public readonly _cycleEditorButtons: HTMLButtonElement[] = [];
+	public readonly _cycleEditorButtonContainer: HTMLDivElement = div({class: "instrument-bar", style: "justify-content: center;"});
+	public _buttonOn: Boolean[] = [];
+
 	public readonly container: HTMLDivElement = div({ class: "prompt noSelection", style: "width: 600px;" },
 		h2("Edit Wavetable Waves"),
 		div({ style: "display: flex; width: 55%; align-self: center; flex-direction: row; align-items: center; justify-content: center;" },
 			this._playButton,
 		),
 		this._wavetableWaveButtonContainer,
+		this._cycleEditorButtonContainer,
 		div({ style: "display: flex; flex-direction: row; align-items: center; justify-content: center;" },
 			this.wavetableCanvas.container,
 		),
@@ -303,19 +308,31 @@ export class WavetablePrompt implements Prompt {
 
 		let colors = ColorConfig.getChannelColor(this._doc.song, this._doc.channel);
 
-		for (let i: number = this.wavetableCanvas.wavetableIndex; i < 32; i++) {
+		for (let i: number = 0; i < 32; i++) {
 			let newSubButton: HTMLButtonElement = button({ class: "no-underline", style: "font-size: 92%; max-width: 2em;"}, "" + (i + 1));
 			this._wavetableWaveButtons.push(newSubButton);
 			this._wavetableWaveButtonContainer.appendChild(newSubButton);
-			newSubButton.addEventListener("click", () => { this._changeWavetableIndex(this.wavetableCanvas.wavetableIndex); });
+			newSubButton.addEventListener("click", () => { this._changeWavetableIndex(i); });
 		}
 		this._wavetableWaveButtons[31].classList.add("last-button");
-		this._wavetableWaveButtons[0].classList.add("selected-instrument");
+		this._wavetableWaveButtons[this._songEditor._wavetableIndex].classList.add("selected-instrument");
 
 		this._wavetableWaveButtonContainer.style.setProperty("--text-color-lit", colors.primaryNote);
 		this._wavetableWaveButtonContainer.style.setProperty("--text-color-dim", colors.secondaryNote);
 		this._wavetableWaveButtonContainer.style.setProperty("--background-color-lit", colors.primaryChannel);
 		this._wavetableWaveButtonContainer.style.setProperty("--background-color-dim", colors.secondaryChannel);
+
+		for (let i: number = 0; i < 32; i++) {
+			let newSubButton: HTMLButtonElement = button({ class: "no-underline", style: "font-size: 130%; max-width: 2em;"}, "●");
+			this._cycleEditorButtons.push(newSubButton);
+			this._cycleEditorButtonContainer.appendChild(newSubButton);
+			newSubButton.addEventListener("click", () => { this._changeCycleEditorButton(i); });
+		}
+		this._cycleEditorButtons[31].classList.add("last-button");
+
+		let cycle = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].currentCycle;
+		for (let i: number = 0; i < 32; i++) this._buttonOn.push(false);
+		for (let i: number = 0; i < cycle.length; i++) this._buttonOn[cycle[i]] = true;
 
 		setTimeout(() => this._playButton.focus());
 
@@ -325,8 +342,30 @@ export class WavetablePrompt implements Prompt {
 	private _changeWavetableIndex = (index: number): void => {
 		this._wavetableWaveButtons[this.wavetableCanvas.wavetableIndex].classList.remove("selected-instrument");
 		this.wavetableCanvas.wavetableIndex = index;
+		for (let i: number = 0; i < 64; i++) {
+			let val: number = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].wavetableWaves[index][i];
+			this.wavetableCanvas.chipData[i] = val;
+		}
+		this.wavetableCanvas._storeChange();
+		this.wavetableCanvas.render();
 		this._wavetableWaveButtons[index].classList.add("selected-instrument");
-    }
+	}
+
+	private _changeCycleEditorButton = (index: number): void => {
+		if (this._buttonOn[index] == true) {
+			this._buttonOn[index] = false;
+		} else {
+			this._buttonOn[index] = true;
+		}
+		this._cycleEditorButtons[index].innerHTML = (this._buttonOn[index]) ? "●" : "○";
+		this.wavetableCanvas._storeChange();
+		this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].currentCycle = [];
+		for (let i: number = 0; i < this._buttonOn.length; i++) {
+			if (this._buttonOn[i]) {
+				this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].currentCycle.push(i);
+			}
+		}
+	}
 
 	private _togglePlay = (): void => {
 		this._songEditor.togglePlay();
@@ -337,13 +376,13 @@ export class WavetablePrompt implements Prompt {
 		if (this._doc.synth.playing) {
 			this._playButton.classList.remove("playButton");
 			this._playButton.classList.add("pauseButton");
-			this._playButton.title = "Pause (Space)";
-			this._playButton.innerText = "Pause";
+			this._playButton.title = _.pauseSpaceLabel;
+			this._playButton.innerText = _.pauseLabel;
 		} else {
 			this._playButton.classList.remove("pauseButton");
 			this._playButton.classList.add("playButton");
-			this._playButton.title = "Play (Space)";
-			this._playButton.innerText = "Play";
+			this._playButton.title = _.playSpaceLabel;
+			this._playButton.innerText = _.playLabel;
 		}
 	}
 
