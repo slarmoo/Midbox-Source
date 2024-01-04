@@ -333,7 +333,7 @@ export class WavetablePrompt implements Prompt {
 		for (let i: number = 0; i < cycle.length; i++) this._buttonOn[cycle[i]] = true;
 
 		for (let i: number = 0; i < 32; i++) {
-			let newSubButton: HTMLButtonElement = button({ class: "no-underline", style: "font-size: 130%; max-width: 2em;"}, "●");
+			let newSubButton: HTMLButtonElement = button({ class: "no-underline", style: "font-size: 130%; max-width: 2em;"}, (this._buttonOn[i]) ? "●" : "○");
 			this._cycleEditorButtons.push(newSubButton);
 			this._cycleEditorButtonContainer.appendChild(newSubButton);
 			newSubButton.addEventListener("click", () => { this._changeCycleEditorButton(i); });
