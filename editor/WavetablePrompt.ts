@@ -325,6 +325,13 @@ export class WavetablePrompt implements Prompt {
 		this._wavetableWaveButtonContainer.style.setProperty("--background-color-lit", colors.primaryChannel);
 		this._wavetableWaveButtonContainer.style.setProperty("--background-color-dim", colors.secondaryChannel);
 
+		const instrument = _doc.song.channels[_doc.channel].instruments[_doc.getCurrentInstrument()];
+		this.startingCurrentCycle = instrument.currentCycle;
+
+		let cycle = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].currentCycle;
+		for (let i: number = 0; i < 32; i++) this._buttonOn.push(false);
+		for (let i: number = 0; i < cycle.length; i++) this._buttonOn[cycle[i]] = true;
+
 		for (let i: number = 0; i < 32; i++) {
 			let newSubButton: HTMLButtonElement = button({ class: "no-underline", style: "font-size: 130%; max-width: 2em;"}, "●");
 			this._cycleEditorButtons.push(newSubButton);
@@ -332,13 +339,6 @@ export class WavetablePrompt implements Prompt {
 			newSubButton.addEventListener("click", () => { this._changeCycleEditorButton(i); });
 		}
 		this._cycleEditorButtons[31].classList.add("last-button");
-
-		const instrument = _doc.song.channels[_doc.channel].instruments[_doc.getCurrentInstrument()];
-		this.startingCurrentCycle = instrument.currentCycle;
-
-		let cycle = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].currentCycle;
-		for (let i: number = 0; i < 32; i++) this._buttonOn.push(false);
-		for (let i: number = 0; i < cycle.length; i++) this._buttonOn[cycle[i]] = true;
 
 		setTimeout(() => this._playButton.focus());
 
@@ -365,13 +365,13 @@ export class WavetablePrompt implements Prompt {
 		}
 		this._cycleEditorButtons[index].innerHTML = (this._buttonOn[index]) ? "●" : "○";
 		this.wavetableCanvas._storeChange();
-		this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].currentCycle = [];
+		this.cycle = [];
+		this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].currentCycle = this.cycle;
 		for (let i: number = 0; i < this._buttonOn.length; i++) {
 			if (this._buttonOn[i]) {
 				this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].currentCycle.push(i);
 			}
 		}
-		new ChangeCycleWaves(this._doc, this.startingCurrentCycle);
 	}
 
 	private _togglePlay = (): void => {

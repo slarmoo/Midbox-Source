@@ -2167,6 +2167,11 @@ export class Instrument {
                 for (const wave of instrumentObject["wavetableCycle"]) {
                     this.currentCycle.push(wave);
                 }
+            } else {
+                this.currentCycle = [];
+                for (let i: number = 0; i < 32; i++) {
+                    this.currentCycle.push(i);
+                }
             }
         }
 
