@@ -4,7 +4,7 @@ import { HTML, SVG } from "imperative-html/dist/esm/elements-strict";
 import { Prompt } from "./Prompt";
 import { SongDocument } from "./SongDocument";
 import { ColorConfig } from "./ColorConfig";
-import { ChangeWavetableCustomWave } from "./changes";
+import { ChangeWavetableCustomWave, ChangeCycleWaves } from "./changes";
 import { SongEditor } from "./SongEditor";
 import { Localization as _ } from "./Localization";
 
@@ -296,6 +296,9 @@ export class WavetablePrompt implements Prompt {
 		this._cancelButton,
 	);
 
+	public startingCurrentCycle: number[];
+	public cycle = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].currentCycle;
+
 	constructor(private _doc: SongDocument, private _songEditor: SongEditor) {
 
 		this._okayButton.addEventListener("click", this._saveChanges);
@@ -329,6 +332,9 @@ export class WavetablePrompt implements Prompt {
 			newSubButton.addEventListener("click", () => { this._changeCycleEditorButton(i); });
 		}
 		this._cycleEditorButtons[31].classList.add("last-button");
+
+		const instrument = _doc.song.channels[_doc.channel].instruments[_doc.getCurrentInstrument()];
+		this.startingCurrentCycle = instrument.currentCycle;
 
 		let cycle = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].currentCycle;
 		for (let i: number = 0; i < 32; i++) this._buttonOn.push(false);
@@ -365,6 +371,7 @@ export class WavetablePrompt implements Prompt {
 				this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].currentCycle.push(i);
 			}
 		}
+		new ChangeCycleWaves(this._doc, this.startingCurrentCycle);
 	}
 
 	private _togglePlay = (): void => {
@@ -443,5 +450,7 @@ export class WavetablePrompt implements Prompt {
 		// Restore wavetable to starting values
 		new ChangeWavetableCustomWave(this._doc, this.wavetableCanvas.startingChipData, this.wavetableCanvas.wavetableIndex);
 		this._doc.record(new ChangeWavetableCustomWave(this._doc, this.wavetableCanvas.chipData, this.wavetableCanvas.wavetableIndex), true);
+		new ChangeCycleWaves(this._doc, this.startingCurrentCycle);
+		this._doc.record(new ChangeCycleWaves(this._doc, this.cycle));
 	}
 }

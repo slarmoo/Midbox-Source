@@ -473,6 +473,34 @@ export class ChangeWavetableCustomWave extends Change {
     }
 }
 
+export class ChangeCycleWaves extends Change {
+    constructor(doc: SongDocument, newArray: number[]) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        const oldArray: number[] = instrument.currentCycle;
+        let comparisonResult: boolean = true;
+        if (oldArray.length !== newArray.length) {
+            comparisonResult = false;
+        } else {
+            for (let i: number = 0; i < oldArray.length; i++) {
+                if (oldArray[i] != newArray[i]) {
+                    comparisonResult = false;
+                    break;
+                }
+            }
+        }
+        if (comparisonResult == false) {
+            instrument.currentCycle = [];
+            for (let i: number = 0; i < newArray.length; i++) {
+                instrument.currentCycle.push(newArray[i]);
+            }
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
 export class ChangePreset extends Change {
     constructor(doc: SongDocument, newValue: number) {
         super();

@@ -1833,6 +1833,10 @@ export class Instrument {
                 }
                 instrumentObject["wavetableWaves"].push(savedWave);
             }
+            instrumentObject["wavetableCycle"] = [];
+            for (const wave of this.currentCycle) {
+                instrumentObject["wavetableCycle"].push(wave);
+            }
         } else if (this.type == InstrumentType.harmonics) {
             instrumentObject["unison"] = Config.unisons[this.unison].name;
         } else if (this.type == InstrumentType.fm) {
@@ -2156,6 +2160,12 @@ export class Instrument {
                     this.wavetableIntegralWaves[waveIndex][i] = cumulative;
                     }
                 this.wavetableIntegralWaves[waveIndex][64] = 0.0;
+                }
+            }
+            if (instrumentObject["wavetableCycle"] != undefined) {
+                this.currentCycle = [];
+                for (const wave of instrumentObject["wavetableCycle"]) {
+                    this.currentCycle.push(wave);
                 }
             }
         }
@@ -3061,6 +3071,10 @@ export class Song {
                         for (let j: number = 0; j < 64; j++) {
                             buffer.push(base64IntToCharCode[(wave[j] + 24) as number]);
                         }
+                    }
+                    buffer.push(base64IntToCharCode[instrument.currentCycle.length]);
+                    for (const wave of instrument.currentCycle) {
+                        buffer.push(base64IntToCharCode[wave as number]);
                     }
                 } else if (instrument.type == InstrumentType.mod) {
                     // Handled down below. Could be moved, but meh.
@@ -4972,6 +4986,11 @@ export class Song {
                             instrument.wavetableIntegralWaves[waveIndex][i] = cumulative;
                         }
                         instrument.wavetableIntegralWaves[waveIndex][64] = 0.0;
+                    }
+                    const wavetableCycleSize: number = clamp(0, 63 + 1, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
+                    instrument.currentCycle = [];
+                    for (let cycleIndex: number = 0; cycleIndex < wavetableCycleSize; cycleIndex++) {
+                        instrument.currentCycle.push(clamp(0, 31 + 1, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]));
                     }
                 }
             } break;
@@ -7793,7 +7812,7 @@ export class Synth {
                     for (let instrumentIdx: number = 0; instrumentIdx < this.song.channels[channel].instruments.length; instrumentIdx++) {
                         let instrument: Instrument = this.song.channels[channel].instruments[instrumentIdx];
                         if (instrument.type == InstrumentType.wavetable) {
-                            const wavetableSize: number = 32;
+                            const wavetableSize: number = instrument.currentCycle.length;
                             let wavetableSpeed: number = Config.wavetableSpeedScale[instrument.wavetableSpeed];
                             if (this.isModActive(Config.modulators.dictionary["wavetable speed"].index, channel, instrumentIdx)) {
                                 const wavetableSpeedModValue: number = Config.wavetableSpeedMax - this.getModValue(Config.modulators.dictionary["wavetable speed"].index, channel, instrumentIdx, false);
