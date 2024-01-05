@@ -1240,6 +1240,28 @@ document.head.appendChild(HTML.style({ type: "text/css" }, `
 	border-color: var(--background-color-dim);
 }
 
+.beepboxEditor .instrument-bar .rounded-bottom-left {
+	border-top-left-radius: 0;
+	border-bottom: inset;
+	border-color: var(--background-color-dim);
+}
+
+.beepboxEditor .instrument-bar .rounded-top-right {
+	border-top-right-radius: 15%;
+	border-bottom: inset;
+	border-color: var(--background-color-dim);
+}
+
+.beepboxEditor .instrument-bar .rounded-top-left {
+	border-bottom-left-radius: 0;
+	border-color: var(--background-color-dim);
+}
+
+.beepboxEditor .instrument-bar .rounded-bottom-right {
+	border-bottom-right-radius: 15%;
+	border-color: var(--background-color-dim);
+}
+
 .beepboxEditor .instrument-bar .selected-instrument {
 	background: var(--background-color-lit);
 	color: ${ColorConfig.invertedText};

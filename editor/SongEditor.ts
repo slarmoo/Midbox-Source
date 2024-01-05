@@ -969,7 +969,7 @@ export class SongEditor {
     private readonly _wavetableCustomWaveDraw: HTMLDivElement = div({ style: "height:80px; margin-top:10px; margin-bottom:25px;" }, [
         div({ style: "height:54px; display:flex; justify-content:center;" }, [this._wavetableCustomWaveDrawCanvas.canvas]),
         div({ style: "margin-top:5px; display:flex; justify-content:center;" }, [this._wavetableCustomWavePresetDrop, this._wavetableCustomWaveZoom]),
-        div({ style: "margin-top:5px; display:flex; justify-content:center;" }, [this._wavetableCustomWaveCopyPasteContainer]),
+        div({ style: "margin-top:2px; display:flex; justify-content:center;" }, [this._wavetableCustomWaveCopyPasteContainer]),
     ]);
 
     private readonly _songTitleInputBox: InputBox = new InputBox(input({ style: "font-weight:bold; border:none; width: 100%; background-color:${ColorConfig.editorBackground}; color:${ColorConfig.primaryText}; text-align:center", maxlength: "30", type: "text", value: EditorConfig.versionDisplayName }), this._doc, (oldValue: string, newValue: string) => new ChangeSongTitle(this._doc, oldValue, newValue));

@@ -2138,40 +2138,39 @@ export class Instrument {
             this.stringSustain = 10;
         }
 
-        if (this.type == InstrumentType.wavetable) {
-            if (instrumentObject["wavetableSpeed"] != undefined) {
+        
+        if (instrumentObject["wavetableSpeed"] != undefined) {
             this.wavetableSpeed = instrumentObject["wavetableSpeed"];
-            }
-            if (instrumentObject["wavetableWaves"] != undefined) {
-                for (let waveIndex: number = 0; waveIndex < instrumentObject["wavetableWaves"].length; waveIndex++) {
-                    for (let i: number = 0; i < 64; i++) {
-                        this.wavetableWaves[waveIndex][i] = instrumentObject["wavetableWaves"][waveIndex][i];
-                    }
+        }
+        if (instrumentObject["wavetableWaves"] != undefined) {
+            for (let waveIndex: number = 0; waveIndex < instrumentObject["wavetableWaves"].length; waveIndex++) {
+                for (let i: number = 0; i < 64; i++) {
+                    this.wavetableWaves[waveIndex][i] = instrumentObject["wavetableWaves"][waveIndex][i];
+                }
                 let sum: number = 0.0;
-                    for (let i: number = 0; i < this.wavetableWaves[waveIndex].length; i++) {
-                        sum += this.wavetableWaves[waveIndex][i];
-                    }
+                for (let i: number = 0; i < this.wavetableWaves[waveIndex].length; i++) {
+                    sum += this.wavetableWaves[waveIndex][i];
+                }
                 const average: number = sum / this.wavetableWaves[waveIndex].length;
                 let cumulative: number = 0;
                 let wavePrev: number = 0;
-                    for (let i: number = 0; i < this.wavetableWaves[waveIndex].length; i++) {
+                for (let i: number = 0; i < this.wavetableWaves[waveIndex].length; i++) {
                     cumulative += wavePrev;
                     wavePrev = this.wavetableWaves[waveIndex][i] - average;
                     this.wavetableIntegralWaves[waveIndex][i] = cumulative;
-                    }
-                this.wavetableIntegralWaves[waveIndex][64] = 0.0;
                 }
+            this.wavetableIntegralWaves[waveIndex][64] = 0.0;
             }
-            if (instrumentObject["wavetableCycle"] != undefined) {
-                this.currentCycle = [];
-                for (const wave of instrumentObject["wavetableCycle"]) {
-                    this.currentCycle.push(wave);
-                }
-            } else {
-                this.currentCycle = [];
-                for (let i: number = 0; i < 32; i++) {
-                    this.currentCycle.push(i);
-                }
+        }
+        if (instrumentObject["wavetableCycle"] != undefined) {
+            this.currentCycle = [];
+            for (const wave of instrumentObject["wavetableCycle"]) {
+                this.currentCycle.push(wave);
+            }
+        } else {
+            this.currentCycle = [];
+            for (let i: number = 0; i < 32; i++) {
+                this.currentCycle.push(i);
             }
         }
 

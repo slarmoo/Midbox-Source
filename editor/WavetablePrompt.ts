@@ -285,7 +285,9 @@ export class WavetablePrompt implements Prompt {
 			this._playButton,
 		),
 		this._wavetableWaveButtonContainer,
-		this._cycleEditorButtonContainer,
+		div({ style: "margin-top: 2px;" },
+			this._cycleEditorButtonContainer,
+		),
 		div({ style: "display: flex; flex-direction: row; align-items: center; justify-content: center;" },
 			this.wavetableCanvas.container,
 		),
@@ -317,7 +319,8 @@ export class WavetablePrompt implements Prompt {
 			this._wavetableWaveButtonContainer.appendChild(newSubButton);
 			newSubButton.addEventListener("click", () => { this._changeWavetableIndex(i); });
 		}
-		this._wavetableWaveButtons[31].classList.add("last-button");
+		this._wavetableWaveButtons[0].classList.add("rounded-top-left");
+		this._wavetableWaveButtons[31].classList.add("rounded-top-right");
 		this._wavetableWaveButtons[this._songEditor._wavetableIndex].classList.add("selected-instrument");
 
 		this._wavetableWaveButtonContainer.style.setProperty("--text-color-lit", colors.primaryNote);
@@ -338,7 +341,8 @@ export class WavetablePrompt implements Prompt {
 			this._cycleEditorButtonContainer.appendChild(newSubButton);
 			newSubButton.addEventListener("click", () => { this._changeCycleEditorButton(i); });
 		}
-		this._cycleEditorButtons[31].classList.add("last-button");
+		this._cycleEditorButtons[0].classList.add("rounded-bottom-left");
+		this._cycleEditorButtons[31].classList.add("rounded-bottom-right");
 
 		setTimeout(() => this._playButton.focus());
 
