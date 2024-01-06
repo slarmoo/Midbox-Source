@@ -7825,8 +7825,13 @@ export class Synth {
                                 } else {
                                     wavetableSpeed = (1 - (wavetableSpeedModValue % 1)) * Config.wavetableSpeedScale[Math.floor(wavetableSpeedModValue)] + (wavetableSpeedModValue % 1) * Config.wavetableSpeedScale[Math.min(Config.wavetableSpeedScale.length - 1, Math.ceil(wavetableSpeedModValue))];
                                 }
+                            } else {
+                                if (wavetableSpeed == 0) {
+                                    // Nothing. Skip.
+                                } else {
+                                    instrument.currentWave = (instrument.currentWave + wavetableSpeed * (1.0 / (Config.ticksPerPart * Config.partsPerBeat))) % wavetableSize;
+                                }
                             }
-                            instrument.currentWave = (instrument.currentWave + wavetableSpeed * (1.0 / (Config.ticksPerPart * Config.partsPerBeat))) % wavetableSize;
                         }
                         let useArpeggioSpeed: number = instrument.arpeggioSpeed;
                         if (this.isModActive(Config.modulators.dictionary["arp speed"].index, channel, instrumentIdx)) {
@@ -9182,7 +9187,12 @@ export class Synth {
                 tone.pulseWidthDelta = (pulseWidthEnd - pulseWidthStart) / roundedSamplesPerTick;
             }
             if (instrument.type == InstrumentType.wavetable) {
+                let wavetableSpeed: number = Config.wavetableSpeedScale[instrument.wavetableSpeed];
+                if (wavetableSpeed == 0 && this.isModActive(Config.modulators.dictionary["cycle wave"].index, channelIndex, tone.instrumentIndex)) {
+                    tone.currentWave = this.getModValue(Config.modulators.dictionary["cycle wave"].index, channelIndex, tone.instrumentIndex, false)
+                } else {
                 tone.currentWave = instrument.currentCycle[Math.floor(instrument.currentWave) % instrument.currentCycle.length];
+                }
             }
             if (instrument.type == InstrumentType.pickedString) {
                 // Check for sustain mods

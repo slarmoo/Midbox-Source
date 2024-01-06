@@ -5,6 +5,7 @@ import { Prompt } from "./Prompt";
 import { SongDocument } from "./SongDocument";
 import { ColorConfig } from "./ColorConfig";
 import { ChangeWavetableCustomWave, ChangeCycleWaves } from "./changes";
+import { ChangeGroup } from "./Change";
 import { SongEditor } from "./SongEditor";
 import { Localization as _ } from "./Localization";
 
@@ -450,11 +451,18 @@ export class WavetablePrompt implements Prompt {
 	}
 
 	private _saveChanges = (): void => {
-		this._doc.prompt = null;
+		/*this._doc.prompt = null;
 		// Restore wavetable to starting values
 		new ChangeWavetableCustomWave(this._doc, this.wavetableCanvas.startingChipData, this.wavetableCanvas.wavetableIndex);
 		this._doc.record(new ChangeWavetableCustomWave(this._doc, this.wavetableCanvas.chipData, this.wavetableCanvas.wavetableIndex), true);
 		new ChangeCycleWaves(this._doc, this.startingCurrentCycle);
-		this._doc.record(new ChangeCycleWaves(this._doc, this.cycle));
+		this._doc.record(new ChangeCycleWaves(this._doc, this.cycle), true);*/
+		const group: ChangeGroup = new ChangeGroup();
+		new ChangeWavetableCustomWave(this._doc, this.wavetableCanvas.startingChipData, this.wavetableCanvas.wavetableIndex);
+		new ChangeCycleWaves(this._doc, this.startingCurrentCycle);
+		group.append(new ChangeWavetableCustomWave(this._doc, this.wavetableCanvas.chipData, this.wavetableCanvas.wavetableIndex));
+		group.append(new ChangeCycleWaves(this._doc, this.cycle));
+		this._doc.prompt = null;
+		this._doc.record(group, true);
 	}
 }
