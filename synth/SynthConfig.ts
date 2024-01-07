@@ -439,7 +439,8 @@ export class Config {
     public static readonly arpSpeedScale:       ReadonlyArray<number> = [0, 0.0625, 0.125, 0.2, 0.25, 1 / 3, 0.4, 0.5, 2 / 3, 0.75, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 4, 4.15, 4.3, 4.5, 4.8, 5, 5.5, 6, 8];
     public static readonly strumSpeedScale:     ReadonlyArray<number> = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24];
     public static readonly slideSpeedScale:     ReadonlyArray<number> = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24];
-    public static readonly wavetableSpeedScale: ReadonlyArray<number> = [24, 22, 20, 18, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2.5, 2, 1.5, 1, 0.5, 0.25, 0];
+  //public static readonly wavetableSpeedScale: ReadonlyArray<number> = [24, 22, 20, 18, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2.5, 2, 1.5, 1, 0.5, 0.25, 0];
+    public static readonly wavetableSpeedScale: ReadonlyArray<number> = [0, 0.25, 0.5, 1, 1.5, 2, 2.5, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 24];
 
     public static readonly unisons: DictionaryArray<Unison> = toNameMap([
         { name: "none",            voices: 1, spread: 0.0,      offset:  0.0,    expression: 1.4,  sign:  1.0 },
@@ -1052,7 +1053,7 @@ export class Config {
             promptName: "Slide Speed",                  promptDesc: ["This setting controls the speed at which your instrument 'slides' between notes.", "Note that the lower numbers will slide faster, while the higher numbers will slide slower.", "[OVERWRITING] [$HI - $LO]"]},
 
         { name: "cycle wave",      pianoName: "Cycle Wave",             maxRawVol: 31,                                                     newNoteVol: 0,                                                            forSong: false,   convertRealFactor: 1,                                    associatedEffect: EffectType.length,
-            promptName: "Cycle Wave",                   promptDesc: ["This setting sets the current position in the cycle your wavetable instrument is in according to the value you put.", "Note that only the value at the beginning of the note will count.", "[$LO - $HI]"]},
+            promptName: "Cycle Wave",                   promptDesc: ["This setting sets the current position in the cycle your wavetable instrument is in according to the value you put.", "Note that only the value at the beginning of the note will count.", "A little hidden function of this modulator also exists. If the wavetable speed is 0, whether that be set by its modulator or the slider itself, and certain waves are removed from the cycle, using this modulator will ignore what waves are not in the cycle and play it anyways. If this isn't the case, then it will loop around the cycle depending on the number (Example: If only 9 waves are in the cycle, 23 on this modulator would set the current wave to wave 5.)", "[$LO - $HI]"]},
 
         { name: "wavetable speed", pianoName: "Wavetable Speed",        maxRawVol: Config.wavetableSpeedMax,                               newNoteVol: 0,                                                            forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.length,
             promptName: "Wavetable Speed",              promptDesc: ["This setting controls the speed at which your wavetable instrument swaps between waves.", "[OVERWRITING] [$LO - $HI]"]}

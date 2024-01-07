@@ -1289,7 +1289,7 @@ export class Instrument {
     public wavetableWaves: Float32Array[];
     public wavetableIntegralWaves: Float32Array[];
     public currentWave: number = 0;
-    public wavetableSpeed: number = 12;
+    public wavetableSpeed: number = 8;
     public currentCycle: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31];
     public readonly operators: Operator[] = [];
     public readonly spectrumWave: SpectrumWave;
@@ -7819,18 +7819,17 @@ export class Synth {
                             const wavetableSize: number = instrument.currentCycle.length;
                             let wavetableSpeed: number = Config.wavetableSpeedScale[instrument.wavetableSpeed];
                             if (this.isModActive(Config.modulators.dictionary["wavetable speed"].index, channel, instrumentIdx)) {
-                                const wavetableSpeedModValue: number = Config.wavetableSpeedMax - this.getModValue(Config.modulators.dictionary["wavetable speed"].index, channel, instrumentIdx, false);
+                                const wavetableSpeedModValue: number = this.getModValue(Config.modulators.dictionary["wavetable speed"].index, channel, instrumentIdx, false);
                                 if (Number.isInteger(wavetableSpeedModValue)) {
                                     wavetableSpeed = Config.wavetableSpeedScale[wavetableSpeedModValue];
                                 } else {
                                     wavetableSpeed = (1 - (wavetableSpeedModValue % 1)) * Config.wavetableSpeedScale[Math.floor(wavetableSpeedModValue)] + (wavetableSpeedModValue % 1) * Config.wavetableSpeedScale[Math.min(Config.wavetableSpeedScale.length - 1, Math.ceil(wavetableSpeedModValue))];
                                 }
+                            }
+                            if (wavetableSpeed == 0) {
+                            // Nothing. Skip.
                             } else {
-                                if (wavetableSpeed == 0) {
-                                    // Nothing. Skip.
-                                } else {
-                                    instrument.currentWave = (instrument.currentWave + wavetableSpeed * (1.0 / (Config.ticksPerPart * Config.partsPerBeat))) % wavetableSize;
-                                }
+                            instrument.currentWave = (instrument.currentWave + wavetableSpeed * (1.0 / (Config.ticksPerPart * Config.partsPerBeat))) % wavetableSize;
                             }
                         }
                         let useArpeggioSpeed: number = instrument.arpeggioSpeed;
@@ -9188,8 +9187,16 @@ export class Synth {
             }
             if (instrument.type == InstrumentType.wavetable) {
                 let wavetableSpeed: number = Config.wavetableSpeedScale[instrument.wavetableSpeed];
+                if (this.isModActive(Config.modulators.dictionary["wavetable speed"].index, channelIndex, tone.instrumentIndex)) {
+                    const wavetableSpeedModValue: number = Config.wavetableSpeedMax - this.getModValue(Config.modulators.dictionary["wavetable speed"].index, channelIndex, tone.instrumentIndex, false);
+                    if (Number.isInteger(wavetableSpeedModValue)) {
+                        wavetableSpeed = Config.wavetableSpeedScale[wavetableSpeedModValue];
+                    } else {
+                        wavetableSpeed = (1 - (wavetableSpeedModValue % 1)) * Config.wavetableSpeedScale[Math.floor(wavetableSpeedModValue)] + (wavetableSpeedModValue % 1) * Config.wavetableSpeedScale[Math.min(Config.wavetableSpeedScale.length - 1, Math.ceil(wavetableSpeedModValue))];
+                    }
+                }
                 if (wavetableSpeed == 0 && this.isModActive(Config.modulators.dictionary["cycle wave"].index, channelIndex, tone.instrumentIndex)) {
-                    tone.currentWave = this.getModValue(Config.modulators.dictionary["cycle wave"].index, channelIndex, tone.instrumentIndex, false)
+                    tone.currentWave = Math.max(0, Math.floor(this.getModValue(Config.modulators.dictionary["cycle wave"].index, channelIndex, tone.instrumentIndex, false) - Config.modulators.dictionary["cycle wave"].convertRealFactor));
                 } else {
                 tone.currentWave = instrument.currentCycle[Math.floor(instrument.currentWave) % instrument.currentCycle.length];
                 }

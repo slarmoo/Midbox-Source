@@ -20,9 +20,9 @@ export class WavetablePromptCanvas {
 	private _lastAmp: number = 0;
 	private _mouseDown: boolean = false;
 	public chipData: Float32Array = new Float32Array(64);
-	public startingChipData: Float32Array = new Float32Array(64);
-	private _undoHistoryState: number = 0;
-	private _changeQueue: Float32Array[] = [];
+	public startingChipData: Float32Array[];
+	private _undoHistoryState: number[];
+	private _changeQueue: Float32Array[][];
 	private readonly _editorWidth: number = 768; // 64*12
 	private readonly _editorHeight: number = 294; // 49*6
 	private readonly _fill: SVGPathElement = SVG.path({ fill: ColorConfig.uiWidgetBackground, "pointer-events": "none" });
@@ -60,12 +60,26 @@ export class WavetablePromptCanvas {
 		}
 
 		let col: string = ColorConfig.getChannelColor(this._doc.song, this._doc.channel).primaryNote;
+		let instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
+		let wavetableSize: number = instrument.wavetableWaves.length;
+		this.startingChipData = []
+		this._undoHistoryState = []
+		this._changeQueue = []
+
+		for (let i: number = 0; i < wavetableSize; i++) this.startingChipData.push(new Float32Array(64));
+		for (let i: number = 0; i < wavetableSize; i++) this._undoHistoryState.push(0);
+		for (let i: number = 0; i < wavetableSize; i++) this._changeQueue.push([]);
 
 		for (let i: number = 0; i < 64; i++) {
 			let val: number = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].wavetableWaves[this.wavetableIndex][i];
 			this.chipData[i] = val;
-			this.startingChipData[i] = val;
 			this._blocks.appendChild(SVG.rect({ fill: col, x: (i * this._editorWidth / 64), y: (val + 24) * (this._editorHeight / 49), width: this._editorWidth / 64, height: this._editorHeight / 49 }));
+		}
+
+		for (let wavetableIndex: number = 0; wavetableIndex < wavetableSize; wavetableIndex++) {
+			for (let i: number = 0; i < 64; i++) {
+				this.startingChipData[wavetableIndex][i] = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].wavetableWaves[wavetableIndex][i];
+			}
 		}
 
 		// Record initial state of the chip data queue
@@ -87,26 +101,26 @@ export class WavetablePromptCanvas {
 	public _storeChange = (): void => {
 		// Check if change is unique compared to the current history state
 		var sameCheck = true;
-		if (this._changeQueue.length > 0) {
+		if (this._changeQueue[this.wavetableIndex].length > 0) {
 			for (var i = 0; i < 64; i++) {
-				if (this._changeQueue[this._undoHistoryState][i] != this.chipData[i]) {
-					sameCheck = false; i = 64;
+				if (this._changeQueue[this.wavetableIndex][this._undoHistoryState[this.wavetableIndex]][i] != this.chipData[i]) {
+					sameCheck = false; break;
 				}
 			}
 		}
 
-		if (sameCheck == false || this._changeQueue.length == 0) {
+		if (sameCheck == false || this._changeQueue[this.wavetableIndex].length == 0) {
 
 			// Create new branch in history, removing all after this in time
-			this._changeQueue.splice(0, this._undoHistoryState);
+			this._changeQueue[this.wavetableIndex].splice(0, this._undoHistoryState[this.wavetableIndex]);
 
-			this._undoHistoryState = 0;
+			this._undoHistoryState[this.wavetableIndex] = 0;
 
-			this._changeQueue.unshift(this.chipData.slice());
+			this._changeQueue[this.wavetableIndex].unshift(this.chipData.slice());
 
 			// 32 undo max
-			if (this._changeQueue.length > 32) {
-				this._changeQueue.pop();
+			if (this._changeQueue[this.wavetableIndex].length > 32) {
+				this._changeQueue[this.wavetableIndex].pop();
 			}
 
 		}
@@ -115,9 +129,9 @@ export class WavetablePromptCanvas {
 
 	public undo = (): void => {
 		// Go backward, if there is a change to go back to
-		if (this._undoHistoryState < this._changeQueue.length - 1) {
-			this._undoHistoryState++;
-			this.chipData = this._changeQueue[this._undoHistoryState].slice();
+		if (this._undoHistoryState[this.wavetableIndex] < this._changeQueue[this.wavetableIndex].length - 1) {
+			this._undoHistoryState[this.wavetableIndex]++;
+			this.chipData = this._changeQueue[this.wavetableIndex][this._undoHistoryState[this.wavetableIndex]].slice();
 			new ChangeWavetableCustomWave(this._doc, this.chipData, this.wavetableIndex);
 			this.render();
 		}
@@ -126,9 +140,9 @@ export class WavetablePromptCanvas {
 
 	public redo = (): void => {
 		// Go forward, if there is a change to go to
-		if (this._undoHistoryState > 0) {
-			this._undoHistoryState--;
-			this.chipData = this._changeQueue[this._undoHistoryState].slice();
+		if (this._undoHistoryState[this.wavetableIndex] > 0) {
+			this._undoHistoryState[this.wavetableIndex]--;
+			this.chipData = this._changeQueue[this.wavetableIndex][this._undoHistoryState[this.wavetableIndex]].slice();
 			new ChangeWavetableCustomWave(this._doc, this.chipData, this.wavetableIndex);
 			this.render();
 		}
@@ -458,7 +472,7 @@ export class WavetablePrompt implements Prompt {
 		new ChangeCycleWaves(this._doc, this.startingCurrentCycle);
 		this._doc.record(new ChangeCycleWaves(this._doc, this.cycle), true);*/
 		const group: ChangeGroup = new ChangeGroup();
-		new ChangeWavetableCustomWave(this._doc, this.wavetableCanvas.startingChipData, this.wavetableCanvas.wavetableIndex);
+		new ChangeWavetableCustomWave(this._doc, this.wavetableCanvas.startingChipData[this.wavetableCanvas.wavetableIndex], this.wavetableCanvas.wavetableIndex);
 		new ChangeCycleWaves(this._doc, this.startingCurrentCycle);
 		group.append(new ChangeWavetableCustomWave(this._doc, this.wavetableCanvas.chipData, this.wavetableCanvas.wavetableIndex));
 		group.append(new ChangeCycleWaves(this._doc, this.cycle));
