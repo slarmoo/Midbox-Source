@@ -44,6 +44,7 @@ export class Preferences {
 	public FMOnRandomization: boolean;
 	public customChipOnRandomization: boolean;
 	public noiseOnRandomization: boolean;
+	public wavetableOnRandomization: boolean;
 	public drumSpectrumOnRandomization: boolean;
 	public drumNoiseOnRandomization: boolean;
 	public drumsetOnRandomization: boolean;
@@ -96,6 +97,7 @@ export class Preferences {
 		this.FMOnRandomization = window.localStorage.getItem("FMOnRandomization") != "false";
 		this.customChipOnRandomization = window.localStorage.getItem("customChipOnRandomization") != "false";
 		this.noiseOnRandomization = window.localStorage.getItem("noiseOnRandomization") != "false";
+		this.wavetableOnRandomization = window.localStorage.getItem("wavetableOnRandomization") != "false";
 		this.drumSpectrumOnRandomization = window.localStorage.getItem("drumSpectrumOnRandomization") != "false";
 		this.drumNoiseOnRandomization = window.localStorage.getItem("drumNoiseOnRandomization") != "false";
 		this.drumsetOnRandomization = window.localStorage.getItem("drumsetOnRandomization") == "true";
@@ -159,6 +161,7 @@ export class Preferences {
 		window.localStorage.setItem("FMOnRandomization", this.FMOnRandomization ? "true" : "false");
 		window.localStorage.setItem("customChipOnRandomization", this.customChipOnRandomization ? "true" : "false");
 		window.localStorage.setItem("noiseOnRandomization", this.noiseOnRandomization ? "true" : "false");
+		window.localStorage.setItem("wavetableOnRandomization", this.wavetableOnRandomization ? "true" : "false");
 		window.localStorage.setItem("drumSpectrumOnRandomization", this.drumSpectrumOnRandomization ? "true" : "false");
 		window.localStorage.setItem("drumNoiseOnRandomization", this.drumNoiseOnRandomization ? "true" : "false");
 		window.localStorage.setItem("drumsetOnRandomization", this.drumsetOnRandomization ? "true" : "false");

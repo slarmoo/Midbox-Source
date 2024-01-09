@@ -15,6 +15,7 @@ export class RandomGenPrompt implements Prompt {
     private readonly _FMBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _customChipBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _noiseBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _wavetableBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
 
     private readonly _drumSpectrumBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _drumNoiseBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
@@ -43,6 +44,7 @@ export class RandomGenPrompt implements Prompt {
     private readonly _supersawPWMBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _harmonicsEditorBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _sustainBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _sustainTypeBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _spectrumEditorBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _customChipWaveBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _customChipGenerationType: HTMLSelectElement = select({style: "width: 70%; margin-left: 1em;"},
@@ -53,6 +55,13 @@ export class RandomGenPrompt implements Prompt {
     private readonly _noiseTypeBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _drumsetSpectrumBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _drumsetEnvelopeBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _wavetableSpeedBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _wavetableCustomChipWavesBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _wavetableCustomChipGenerationType: HTMLSelectElement = select({style: "width: 70%; margin-left: 1em;"},
+    option({value: "wavetableCustomChipGeneratePreset"}, "Random Waveform Preset"),
+    option({value: "wavetableCustomChipGenerateAlgorithm"}, "Algorithmic Generation"),
+    option({value: "wavetableCustomChipGenerateFully"}, "Fully Random"),
+    );
 
     private readonly _FMAlgorithmBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _FMOpFrequencyBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
@@ -62,11 +71,14 @@ export class RandomGenPrompt implements Prompt {
     private readonly _FMFeedbackVolumeBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
 
     private readonly _transitionTypeBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _slideSpeedBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _clicklessBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _continueThruPatternBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _chordTypeBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _strumSpeedBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _arpeggioSpeedBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _arpeggioFastTwoNoteBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _bounceArpeggioBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _pitchShiftBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _detuneBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _vibratoBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
@@ -86,6 +98,8 @@ export class RandomGenPrompt implements Prompt {
     private readonly _SDAffectedBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
 
     private readonly _envelopeBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _envelopeSpeedBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _discreteEnvelopeBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
 
     private readonly _cancelButton: HTMLButtonElement = button({class: "cancelButton"});
 	private readonly _okayButton: HTMLButtonElement = button({class: "okayButton", style: "width:45%;"}, _.confirmLabel);
@@ -134,6 +148,10 @@ public readonly container: HTMLDivElement = div({class: "prompt noSelection", st
     label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
             "Noise:",
             this._noiseBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+            "Wavetable:",
+            this._wavetableBox,
         ),
     h4({style: "display: flex; flex-direction: row; text-align: center; align-items: center; height: 0.5em; justify-content: flex-end;"},
         "Drum Types",
@@ -244,6 +262,10 @@ public readonly container: HTMLDivElement = div({class: "prompt noSelection", st
 			this._sustainBox,
         ),
     label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+            "Picked String Sustain Type:",
+            this._sustainTypeBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
 			"Spectrum (Shape):",
 			this._spectrumEditorBox,
         ),
@@ -266,6 +288,18 @@ public readonly container: HTMLDivElement = div({class: "prompt noSelection", st
     label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
 			"Drumset Envelopes:",
 			this._drumsetEnvelopeBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Wavetable Custom Chip Waveforms:",
+			this._wavetableCustomChipWavesBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Wavetable Custom Chips Gen Type:",
+			this._wavetableCustomChipGenerationType,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Wavetable Speed:",
+			this._wavetableSpeedBox,
         ),
     h4({style: "display: flex; flex-direction: row; text-align: center; align-items: center; height: 0.5em; justify-content: flex-end;"},
         "FM-Centric",
@@ -302,8 +336,16 @@ public readonly container: HTMLDivElement = div({class: "prompt noSelection", st
 			this._transitionTypeBox,
         ),
     label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Slide Speed:",
+			this._slideSpeedBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
 			"Clickless Transition:",
 			this._clicklessBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Continue Through Pattern:",
+			this._continueThruPatternBox,
         ),
     label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
 			"Chord Type:",
@@ -320,6 +362,10 @@ public readonly container: HTMLDivElement = div({class: "prompt noSelection", st
     label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
 			"Fast Two-Note Arpeggio:",
 			this._arpeggioFastTwoNoteBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Bounce Arpeggio:",
+			this._bounceArpeggioBox,
         ),
     label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
 			"Pitch Shift:",
@@ -396,6 +442,14 @@ public readonly container: HTMLDivElement = div({class: "prompt noSelection", st
 			"All Envelopes:",
 			this._envelopeBox,
         ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Envelope Speed:",
+			this._envelopeSpeedBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Discrete Envelopes:",
+			this._discreteEnvelopeBox,
+        ),
     label({style: "display: flex; flex-direction: row-reverse; justify-content: space-between;"},
 			this._okayButton,
 		),
@@ -412,6 +466,7 @@ constructor(private _doc: SongDocument) {
     this._FMBox.checked = this._doc.prefs.FMOnRandomization;
     this._customChipBox.checked = this._doc.prefs.customChipOnRandomization;
     this._noiseBox.checked = this._doc.prefs.noiseOnRandomization;
+    this._wavetableBox.checked = this._doc.wavetableOnRandomization;
     this._drumSpectrumBox.checked = this._doc.prefs.drumSpectrumOnRandomization;
     this._drumNoiseBox.checked = this._doc.prefs.drumNoiseOnRandomization;
     this._drumsetBox.checked = this._doc.prefs.drumsetOnRandomization;
@@ -436,12 +491,16 @@ constructor(private _doc: SongDocument) {
     this._supersawPWMBox.checked = this._doc.supersawPulseWidthOnRandomization;
     this._harmonicsEditorBox.checked = this._doc.harmonicsShapeOnRandomization;
     this._sustainBox.checked = this._doc.sustainOnRandomization;
+    this._sustainTypeBox.checked = this._doc.sustainTypeOnRandomization;
     this._spectrumEditorBox.checked = this._doc.spectrumEditorOnRandomization;
     this._customChipWaveBox.checked = this._doc.customChipWaveOnRandomization;
     this._customChipGenerationType.value = this._doc.customChipGenerationType;
     this._noiseTypeBox.checked = this._doc.noiseTypeOnRandomization;
     this._drumsetSpectrumBox.checked = this._doc.drumsetSpectrumOnRandomization;
     this._drumsetEnvelopeBox.checked = this._doc.drumsetEnvelopeOnRandomization;
+    this._wavetableCustomChipWavesBox.checked = this._doc.wavetableCustomChipWavesOnRandomization;
+    this._wavetableCustomChipGenerationType.value = this._doc.wavetableCustomChipGenerationType;
+    this._wavetableSpeedBox.checked = this._doc.wavetableSpeedOnRandomization;
     this._FMAlgorithmBox.checked = this._doc.FMAlgorithmOnRandomization;
     this._FMOpFrequencyBox.checked = this._doc.FMOpFrequencyOnRandomization;
     this._FMOpVolumeBox.checked = this._doc.FMOpVolumeOnRandomization;
@@ -449,11 +508,14 @@ constructor(private _doc: SongDocument) {
     this._FMFeedbackBox.checked = this._doc.FMFeedbackOnRandomization;
     this._FMFeedbackVolumeBox.checked = this._doc.FMFeedbackVolumeOnRandomization;
     this._transitionTypeBox.checked = this._doc.transitionTypeOnRandomization;
+    this._slideSpeedBox.checked = this._doc.slideSpeedOnRandomization;
     this._clicklessBox.checked = this._doc.clicklessTransitionOnRandomization;
+    this._continueThruPatternBox.checked = this._doc.continueThruPatternOnRandomization;
     this._chordTypeBox.checked = this._doc.chordTypeOnRandomization;
     this._strumSpeedBox.checked = this._doc.strumSpeedOnRandomization;
     this._arpeggioSpeedBox.checked = this._doc.arpeggioSpeedOnRandomization;
     this._arpeggioFastTwoNoteBox.checked = this._doc.arpeggioFastTwoNoteOnRandomization;
+    this._bounceArpeggioBox.checked = this._doc.bounceArpeggioOnRandomization;
     this._pitchShiftBox.checked = this._doc.pitchShiftOnRandomization;
     this._detuneBox.checked = this._doc.detuneOnRandomization;
     this._vibratoBox.checked = this._doc.vibratoOnRandomization;
@@ -472,6 +534,8 @@ constructor(private _doc: SongDocument) {
     this._keyAffectedBox.checked = this._doc.keyAffectedOnRandomization;
     this._SDAffectedBox.checked = this._doc.SDAffectedOnRandomization;
     this._envelopeBox.checked = this._doc.envelopesOnRandomization;
+    this._envelopeSpeedBox.checked = this._doc.envelopeSpeedOnRandomization;
+    this._discreteEnvelopeBox.checked = this._doc.discreteEnvelopesOnRandomization;
 
     this._okayButton.addEventListener("click", this._confirm);
 	this._cancelButton.addEventListener("click", this._close);
@@ -492,6 +556,7 @@ private _confirm = (): void => {
     this._doc.prefs.FMOnRandomization = this._FMBox.checked;
     this._doc.prefs.customChipOnRandomization = this._customChipBox.checked;
     this._doc.prefs.noiseOnRandomization = this._noiseBox.checked;
+    this._doc.prefs.wavetableOnRandomization = this._wavetableBox.checked;
 
     this._doc.prefs.drumSpectrumOnRandomization = this._drumSpectrumBox.checked;
     this._doc.prefs.drumNoiseOnRandomization = this._drumNoiseBox.checked;

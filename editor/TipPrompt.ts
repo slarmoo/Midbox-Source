@@ -409,6 +409,7 @@ export class TipPrompt implements Prompt {
 				message = div(
 					h2("Use Discrete Envelopes?"),
 					p("Envelopes are usually interpolated, meaning they change continuously and smoothly. This setting, when ticked, makes envelopes not interpolate. It's a small difference, but can be helpful for some chip-like sounds."),
+					p("For understandability, imagine this: Each envelope is a function, and every tick, or 48ths of a second, the envelope is updated to have the current value of the function. Imagine this as many /48th notes that fade in volume. When this checkbox is enabled, those notes will be flat rather than faded. Very small change, but can have a difference on faster envelopes.")
 				);
 			} break;
 			case "envelopeSpeed": {
@@ -541,6 +542,27 @@ export class TipPrompt implements Prompt {
 				message = div(
 					h2("Wavetable Speed"),
 					p("The wavetable consists of multiple custom chipwaves that constantly cycle between each other. This slider controls how fast they cycle."),
+				);
+			} break;
+			case "x": {
+				message = div(
+					h2("Speed Display"),
+					p("This is a little number that shows you how fast/slow a speed is. This display is measured in a multiplier."),
+					p("Key: 'x2' means twice as fast as standard. 'x0.5' means half as fast..")
+				);
+			} break;
+			case "tk": {
+				message = div(
+					h2("Speed Display"),
+					p("This is a little number that shows you how fast/slow a speed is. This display is measured in ticks."),
+					p("Key: '2 tk' means the duration is for two 'ticks'.")
+				);
+			} break;
+			case "wps": {
+				message = div(
+					h2("Speed Display"),
+					p("This is a little number that shows you how fast/slow a speed is. This display is measured in waves per second."),
+					p("Key: '4wps' means the speed is four waves per second. '0.5wps' means the speed is one wave per two seconds, or 1/2 wave per second.")
 				);
 			} break;
 

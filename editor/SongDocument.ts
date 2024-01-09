@@ -70,6 +70,7 @@ export class SongDocument {
 	public FMOnRandomization: boolean = true;
 	public customChipOnRandomization: boolean = true;
 	public noiseOnRandomization: boolean = true;
+	public wavetableOnRandomization: boolean = true;
 	public drumSpectrumOnRandomization: boolean = true;
 	public drumNoiseOnRandomization: boolean = true;
 	public drumsetOnRandomization: boolean = false;
@@ -94,12 +95,16 @@ export class SongDocument {
     public supersawPulseWidthOnRandomization: boolean = true;
     public harmonicsShapeOnRandomization: boolean = true;
     public sustainOnRandomization: boolean = true;
+	public sustainTypeOnRandomization: boolean = false;
     public spectrumEditorOnRandomization: boolean = true;
     public customChipWaveOnRandomization: boolean = true;
     public customChipGenerationType: string = "customChipGenerateAlgorithm";
 	public noiseTypeOnRandomization: boolean = true;
 	public drumsetSpectrumOnRandomization: boolean = true;
 	public drumsetEnvelopeOnRandomization: boolean = true;
+	public wavetableCustomChipWavesOnRandomization: boolean = true;
+    public wavetableCustomChipGenerationType: string = "wavetableCustomChipGenerateAlgorithm";
+	public wavetableSpeedOnRandomization: boolean = true;
 	public FMAlgorithmOnRandomization: boolean = true;
 	public FMOpFrequencyOnRandomization: boolean = true;
 	public FMOpVolumeOnRandomization: boolean = true;
@@ -107,11 +112,14 @@ export class SongDocument {
 	public FMFeedbackOnRandomization: boolean = true;
 	public FMFeedbackVolumeOnRandomization: boolean = true;
 	public transitionTypeOnRandomization: boolean = true;
+	public slideSpeedOnRandomization: boolean = false;
 	public clicklessTransitionOnRandomization: boolean = false;
+	public continueThruPatternOnRandomization: boolean = false;
 	public chordTypeOnRandomization: boolean = true;
 	public strumSpeedOnRandomization: boolean = false;
 	public arpeggioSpeedOnRandomization: boolean = false;
 	public arpeggioFastTwoNoteOnRandomization: boolean = false;
+	public bounceArpeggioOnRandomization: boolean = false;
 	public pitchShiftOnRandomization: boolean = true;
 	public detuneOnRandomization: boolean = false;
 	public vibratoOnRandomization: boolean = true;
@@ -130,6 +138,8 @@ export class SongDocument {
 	public keyAffectedOnRandomization: boolean = false;
 	public SDAffectedOnRandomization: boolean = false;
 	public envelopesOnRandomization: boolean = true;
+	public envelopeSpeedOnRandomization: boolean = false;
+	public discreteEnvelopesOnRandomization: boolean = false;
 
 	public deactivateCapsLock: boolean = true;
 	public CTRLrEvent: string = "ctrlRtoRandomGenPrompt";

@@ -1235,11 +1235,11 @@ export class Instrument {
     public arpeggioSpeed: number = 12;
     public fastTwoNoteArp: boolean = false;
     public bounceArp: boolean = false;
-    public strumSpeed: number = 1;
-    public slideSpeed: number = 2;
+    public strumSpeed: number = 23;
+    public slideSpeed: number = 21;
     public legacyTieOver: boolean = false;
     public clicklessTransition: boolean = false;
-    public continueThruPattern: boolean = true;
+    public continueThruPattern: boolean = false;
     public aliases: boolean = false;
     public percussion: boolean = true;
     public songDetuneEffected: boolean = true;
@@ -1413,12 +1413,12 @@ export class Instrument {
         this.stringSustain = 10;
         this.stringSustainType = Config.enableAcousticSustain ? SustainType.acoustic : SustainType.bright;
         this.clicklessTransition = false;
-        this.continueThruPattern = true;
+        this.continueThruPattern = false;
         this.arpeggioSpeed = 12;
         this.envelopeSpeed = 12;
         this.discreteEnvelope = false;
-        this.strumSpeed = 1;
-        this.slideSpeed = 2;
+        this.strumSpeed = 23;
+        this.slideSpeed = 21;
         this.legacyTieOver = false;
         this.aliases = false;
         this.percussion = true;
@@ -2330,14 +2330,14 @@ export class Instrument {
                 this.strumSpeed = instrumentObject["strumSpeed"];
             }
             else {
-                this.strumSpeed = 1;
+                this.strumSpeed = 23;
             } 
 
             if (instrumentObject["slideSpeed"] != undefined) {
                 this.slideSpeed = instrumentObject["slideSpeed"];
             }
             else {
-                this.slideSpeed = 2;
+                this.slideSpeed = 21;
             } 
 
             if (instrumentObject["clicklessTransition"] != undefined) {
@@ -2351,7 +2351,7 @@ export class Instrument {
                 this.continueThruPattern = instrumentObject["continueThruPattern"];
             }
             else {
-                this.continueThruPattern = true;
+                this.continueThruPattern = false;
             }
 
             if (instrumentObject["aliases"] != undefined) {
@@ -5920,8 +5920,6 @@ class EnvelopeComputer {
                 const b: number = 0.5 + smoothness;
                 const x1: number = x * steps - 0.5 + smoothness;
                 const x1i: number = x1 | 0;
-                // https://en.wikipedia.org/wiki/Smoothstep
-                // Shows this whole equation for making stair-like stuff.
                 let x2: number = ((x1 - x1i) - a) / (b - a);
                 x2 = x2 > 1.0 ? 1.0 : x2 < 0.0 ? 0.0 : x2;
                 const x3: number = x2 * x2 * (3.0 - 2.0 * x2) + x1i;

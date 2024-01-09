@@ -746,7 +746,7 @@ export class SongEditor {
     ]);
     private readonly _transitionDropdown: HTMLButtonElement = button({ style: "margin-left:0em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.Transition) }, "▼");
     private readonly _transitionRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("transition") }, span(_.transitionLabel)), this._transitionDropdown, div({ class: "selectContainer", style: "width: 52.5%;" }, this._transitionSelect));
-    private readonly _slideSpeedDisplay: HTMLSpanElement = span({ style: `color: ${ColorConfig.secondaryText}; font-size: smaller; text-overflow: clip;` }, "x1");
+    private readonly _slideSpeedDisplay: HTMLSpanElement = span({ style: `color: ${ColorConfig.secondaryText}; font-size: 11px; text-overflow: clip;`, class: "tip", onclick: () => this._openPrompt("tk") }, "1 tk");
     private readonly _slideSpeedSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.modulators.dictionary["slide speed"].maxRawVol, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeSlideSpeed(this._doc, oldValue, newValue), false);
     private readonly _slideSpeedRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ style: "font-size: smaller; margin-left:4px;", class: "tip", onclick: () => this._openPrompt("slideSpeed") }, span(_.slideSpeedLabel)), this._slideSpeedDisplay, this._slideSpeedSlider.container);
     private readonly _clicklessTransitionBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
@@ -785,7 +785,7 @@ export class SongEditor {
 	private readonly _supersawShapeSlider: Slider = new Slider(input({style: "margin: 0;", type: "range", min: "0", max: Config.supersawShapeMax, value: "0", step: "1"}), this._doc, (oldValue: number, newValue: number) => new ChangeSupersawShape(this._doc, oldValue, newValue), false);
 	private readonly _supersawShapeRow: HTMLDivElement = div({class: "selectRow"}, span({class: "tip", onclick: ()=>this._openPrompt("supersawShape")}, span(_.sawToPulseLabel)), this._supersawShapeSlider.container);
 
-    private readonly _wavetableSpeedDisplay: HTMLSpanElement = span({ style: `color: ${ColorConfig.secondaryText}; font-size: smaller; text-overflow: clip;` }, "x1");
+    private readonly _wavetableSpeedDisplay: HTMLSpanElement = span({ style: `color: ${ColorConfig.secondaryText}; font-size: smaller; text-overflow: clip;`, class: "tip", onclick: () => this._openPrompt("wps") }, "1wps");
     private readonly _wavetableSpeedSlider: Slider = new Slider(input({style: "margin: 0;", type: "range", min: "0", max: Config.wavetableSpeedMax, value: "0", step: "1"}), this._doc, (oldValue: number, newValue: number) => new ChangeWavetableSpeed(this._doc, oldValue, newValue), false);
     private readonly _wavetableSpeedRow: HTMLDivElement = div({class: "selectRow"}, span({class: "tip", onclick: ()=>this._openPrompt("wavetableSpeed")}, span(_.wavetableSpeedLabel)), this._wavetableSpeedDisplay, this._wavetableSpeedSlider.container);
     private readonly _wavetableWaveButtons: HTMLButtonElement[] = [
@@ -894,10 +894,10 @@ export class SongEditor {
     private readonly _chordDropdown2: HTMLButtonElement = button({ style: "margin-left:0em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.Strum) }, "▼");
 
     private readonly _chordSelectRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("chords") }, span(_.chordLabel)), this._chordDropdown, this._chordDropdown2, div({ class: "selectContainer" }, this._chordSelect));
-    private readonly _strumSpeedDisplay: HTMLSpanElement = span({ style: `color: ${ColorConfig.secondaryText}; font-size: smaller; text-overflow: clip;` }, "x1");
+    private readonly _strumSpeedDisplay: HTMLSpanElement = span({ style: `color: ${ColorConfig.secondaryText}; font-size: 11px; text-overflow: clip;`, class: "tip", onclick: () => this._openPrompt("tk") }, "1 tk");
     private readonly _strumSpeedSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.modulators.dictionary["strum speed"].maxRawVol, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeStrumSpeed(this._doc, oldValue, newValue), false);
     private readonly _strumSpeedRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ style: "font-size: smaller; margin-left:4px;", class: "tip", onclick: () => this._openPrompt("strumSpeed") }, span(_.strumSpeedLabel)), this._strumSpeedDisplay, this._strumSpeedSlider.container);
-    private readonly _arpeggioSpeedDisplay: HTMLSpanElement = span({ style: `color: ${ColorConfig.secondaryText}; font-size: smaller; text-overflow: clip;` }, "x1");
+    private readonly _arpeggioSpeedDisplay: HTMLSpanElement = span({ style: `color: ${ColorConfig.secondaryText}; font-size: smaller; text-overflow: clip;`, class: "tip", onclick: () => this._openPrompt("x") }, "x1");
     private readonly _arpeggioSpeedSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.modulators.dictionary["arp speed"].maxRawVol, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeArpeggioSpeed(this._doc, oldValue, newValue), false);
     private readonly _arpeggioSpeedRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ style: "font-size: smaller; margin-left:4px;", class: "tip", onclick: () => this._openPrompt("arpeggioSpeed") }, span(_.arpSpeedLabel)), this._arpeggioSpeedDisplay, this._arpeggioSpeedSlider.container);
     private readonly _twoNoteArpBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
@@ -919,7 +919,7 @@ export class SongEditor {
     private readonly _vibratoSelectRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("vibrato") }, span(_.vibratoLabel)), this._vibratoDropdown, div({ class: "selectContainer", style: "width: 61.5%;" }, this._vibratoSelect));
     private readonly _vibratoDepthSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.modulators.dictionary["vibrato depth"].maxRawVol, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeVibratoDepth(this._doc, oldValue, newValue), false);
     private readonly _vibratoDepthRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:4px; font-size: x-small;", onclick: () => this._openPrompt("vibratoDepth") }, span(_.vibratoDepthLabel)), this._vibratoDepthSlider.container);
-    private readonly _vibratoSpeedDisplay: HTMLSpanElement = span({ style: `color: ${ColorConfig.secondaryText}; font-size: smaller; text-overflow: clip;` }, "x1");
+    private readonly _vibratoSpeedDisplay: HTMLSpanElement = span({ style: `color: ${ColorConfig.secondaryText}; font-size: smaller; text-overflow: clip;`, class: "tip", onclick: () => this._openPrompt("x") }, "x1");
     private readonly _vibratoSpeedSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.modulators.dictionary["vibrato speed"].maxRawVol, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeVibratoSpeed(this._doc, oldValue, newValue), false);
     private readonly _vibratoSpeedRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:4px; font-size: smaller;", onclick: () => this._openPrompt("vibratoSpeed") }, span(_.vibratoSpeedLabel)), this._vibratoSpeedDisplay, this._vibratoSpeedSlider.container);
     private readonly _vibratoDelaySlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.modulators.dictionary["vibrato delay"].maxRawVol, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeVibratoDelay(this._doc, oldValue, newValue), false);
@@ -943,7 +943,7 @@ export class SongEditor {
     private readonly _envelopeEditor: EnvelopeEditor = new EnvelopeEditor(this._doc);
     private readonly _discreteEnvelopeBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
     private readonly _discreteEnvelopeRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:4px;", onclick: () => this._openPrompt("discreteEnvelope") }, _.discreteEnvelopeLabel), this._discreteEnvelopeBox);
-    private readonly _envelopeSpeedDisplay: HTMLSpanElement = span({ style: `color: ${ColorConfig.secondaryText}; font-size: smaller; text-overflow: clip;` }, "x1");
+    private readonly _envelopeSpeedDisplay: HTMLSpanElement = span({ style: `color: ${ColorConfig.secondaryText}; font-size: smaller; text-overflow: clip;`, class: "tip", onclick: () => this._openPrompt("x") }, "x1");
     private readonly _envelopeSpeedSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.modulators.dictionary["envelope speed"].maxRawVol, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeEnvelopeSpeed(this._doc, oldValue, newValue), false);
     private readonly _envelopeSpeedRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:4px;", onclick: () => this._openPrompt("envelopeSpeed") }, _.envelopeSpeedLabel), this._envelopeSpeedDisplay, this._envelopeSpeedSlider.container);
     private readonly _envelopeDropdownGroup: HTMLElement = div({ class: "editor-controls", style: "display: none;" }, this._discreteEnvelopeRow, this._envelopeSpeedRow);
@@ -2576,7 +2576,7 @@ export class SongEditor {
             this._arpeggioSpeedSlider.updateValue(instrument.arpeggioSpeed);
             this._strumSpeedSlider.updateValue(instrument.strumSpeed);
             this._slideSpeedSlider.updateValue(instrument.slideSpeed);
-            this._wavetableSpeedSlider.updateValue(instrument.wavetableSpeed)
+            this._wavetableSpeedSlider.updateValue(instrument.wavetableSpeed);
             this._panDelaySlider.updateValue(instrument.panDelay);
             this._vibratoDelaySlider.input.title = "" + Math.round(instrument.vibratoDelay);
             this._vibratoDepthSlider.input.title = "" + instrument.vibratoDepth;
@@ -2586,11 +2586,11 @@ export class SongEditor {
             this._arpeggioSpeedSlider.input.title = "x" + prettyNumber(Config.arpSpeedScale[instrument.arpeggioSpeed]);
             this._arpeggioSpeedDisplay.textContent = "x" + prettyNumber(Config.arpSpeedScale[instrument.arpeggioSpeed]);
             this._strumSpeedSlider.input.title = prettyNumber(Config.strumSpeedScale[instrument.strumSpeed]);
-            this._strumSpeedDisplay.textContent = "x" + prettyNumber(Config.strumSpeedScale[instrument.strumSpeed]);
+            this._strumSpeedDisplay.textContent = prettyNumber(Config.strumSpeedScale[instrument.strumSpeed]) + " tk";
             this._slideSpeedSlider.input.title = prettyNumber(Config.slideSpeedScale[instrument.slideSpeed]);
-            this._slideSpeedDisplay.textContent = "x" + prettyNumber(Config.slideSpeedScale[instrument.slideSpeed]);
+            this._slideSpeedDisplay.textContent = prettyNumber(Config.slideSpeedScale[instrument.slideSpeed]) + " tk";
             this._wavetableSpeedSlider.input.title = prettyNumber(Config.wavetableSpeedScale[instrument.wavetableSpeed]);
-            this._wavetableSpeedDisplay.textContent = "x" + prettyNumber(Config.wavetableSpeedScale[instrument.wavetableSpeed]);
+            this._wavetableSpeedDisplay.textContent = prettyNumber(Config.wavetableSpeedScale[instrument.wavetableSpeed]) + "wps";
             this._eqFilterSimpleCutSlider.updateValue(instrument.eqFilterSimpleCut);
             this._eqFilterSimplePeakSlider.updateValue(instrument.eqFilterSimplePeak);
             this._noteFilterSimpleCutSlider.updateValue(instrument.noteFilterSimpleCut);
