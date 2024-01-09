@@ -24,7 +24,7 @@ export function prettyNumber(value: number): string {
 }
 
 export class EditorConfig {
-    public static readonly version: string = "0.3"; // Not using patch versions in display right now, maybe someday.
+    public static readonly version: string = "0.3";
     public static readonly versionDisplayName: string = "Midbox " + EditorConfig.version;
 
     public static readonly releaseNotesURL: string = "https://jummbus.bitbucket.io/patch_notes/" + EditorConfig.version + ".html";
@@ -35,6 +35,7 @@ export class EditorConfig {
 
     public static readonly presetCategories: DictionaryArray<PresetCategory> = toNameMap([
         {
+            // The order of this array needs to line up with the order of the InstrumentType declarations in SynthConfig.ts. (changes.ts' random instrument generation relies on this, for one.)
             name: (_.customInstrumentsLabel), presets: <DictionaryArray<Preset>>toNameMap([
                 { name: (_.chipWaveInstLabel), customType: InstrumentType.chip },
                 { name: (_.FMInstLabel), customType: InstrumentType.fm },
@@ -42,9 +43,9 @@ export class EditorConfig {
                 { name: (_.spectrumInstDrumLabel), customType: InstrumentType.spectrum },
                 { name: (_.drumsetDrumLabel), customType: InstrumentType.drumset },
                 { name: (_.harmonicsInstLabel), customType: InstrumentType.harmonics },
-                { name: (_.supersawInstLabel), customType: InstrumentType.supersaw },
                 { name: (_.pwmInstLabel), customType: InstrumentType.pwm },
                 { name: (_.pickedStringInstLabel), customType: InstrumentType.pickedString },
+                { name: (_.supersawInstLabel), customType: InstrumentType.supersaw },
                 { name: (_.customChipInstLabel), customType: InstrumentType.customChipWave },
                 { name: (_.wavetableInstLabel), customType: InstrumentType.wavetable},
             ])

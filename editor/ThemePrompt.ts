@@ -14,6 +14,7 @@ export class ThemePrompt implements Prompt {
 		option({ value: "dark classic" }, (_.theme1Label)),
 		option({ value: "light classic" }, (_.theme2Label)),
 		option({ value: "dark competition" }, (_.theme3Label)),
+		option({ value: "old jummbox classic" }, (_.theme25Label)),
 		option({ value: "jummbox classic" }, (_.theme4Label)),
 		// option({ value: "jummbox light" }, "JummBox Light"), // It's not ready to see the world yet...
 		option({ value: "forest" }, (_.theme5Label)),
@@ -34,7 +35,9 @@ export class ThemePrompt implements Prompt {
 		option({ value: "roe light" }, (_.theme20Label)),
 		option({ value: "energized" }, (_.theme21Label)),
 		option({ value: "neapolitan" }, (_.theme22Label)),
-		option({ value: "mono" }, (_.theme23Label)),
+		option({ value: "mono" }, (_.theme26Label)),
+		option({ value: "poly" }, (_.theme23Label)),
+		option({ value: "blutonium" }, (_.theme27Label)),
 		option({ value: "midbox" }, (_.theme24Label))
 	);
 	private readonly _cancelButton: HTMLButtonElement = button({ class: "cancelButton" });
@@ -66,7 +69,7 @@ export class ThemePrompt implements Prompt {
 		if (this.lastTheme != null) {
 			ColorConfig.setTheme(this.lastTheme);
 		} else {
-			ColorConfig.setTheme("dark classic");
+			ColorConfig.setTheme("jummbox classic");
 		}
 		this._doc.undo();
 	}

@@ -25,6 +25,11 @@ export class RecordingSetupPrompt implements Prompt {
 		option({value: "pianoTransposingC"}, _.noteRecordingPrompt8Label),
 		option({value: "pianoTransposingA"}, _.noteRecordingPrompt9Label),
 	);
+	private readonly _bassOffset: HTMLSelectElement = select({style: "width: 100%;"},
+		option({value: "0"}, _.noteRecordingPrompt18Label),
+		option({value: "-1"}, _.noteRecordingPrompt19Label),
+		option({value: "1"}, _.noteRecordingPrompt20Label),
+	);
 	private readonly _keyboardLayoutPreview: HTMLDivElement = div({style: "display: grid; row-gap: 4px; margin: 4px auto; font-size: 10px;"});
 	private readonly _enableMidi: HTMLInputElement = input({style: "width: 2em; margin-left: 1em;", type: "checkbox"});
 	private readonly _showRecordButton: HTMLInputElement = input({style: "width: 2em; margin-left: 1em;", type: "checkbox"});
@@ -35,51 +40,58 @@ export class RecordingSetupPrompt implements Prompt {
 	
 	private readonly _okayButton: HTMLButtonElement = button({class: "okayButton", style: "width:100%;"}, (_.confirmLabel));
 	private readonly _cancelButton: HTMLButtonElement = button({class: "cancelButton"});
-	public readonly container: HTMLDivElement = div({class: "prompt noSelection recordingSetupPrompt", style: "width: 333px; text-align: right; max-height: 90%;"},
-		h2({style: "text-align: center;"},
+	public readonly container: HTMLDivElement = div({class: "prompt noSelection recordingSetupPrompt", style: "width: 600px; text-align: right; max-height: 90%;"},
+		h2({style: "align-self: center;"},
 			_.noteRecordingPrompt10Label),
 		div({style: "display: grid; overflow-y: auto; overflow-x: hidden; flex-shrink: 1;"},
 			p(_.noteRecordingPromptLargeText1Part1Label + EditorConfig.ctrlSymbol + _.noteRecordingPromptLargeText1Part2Label),
-			label({style: "display: flex; flex-direction: row; align-items: center; height: 2em; justify-content: flex-end;"},
+			label({style: "display: flex; flex-direction: row; align-items: center; height: 2em; justify-content: center;"},
 				_.noteRecordingPrompt11Label,
 				this._showRecordButton,
 			),
-			label({style: "display: flex; flex-direction: row; align-items: center; height: 2em; justify-content: flex-end;"},
+			label({style: "display: flex; flex-direction: row; align-items: center; height: 2em; justify-content: center;"},
 				_.noteRecordingPrompt12Label,
 				this._snapRecordedNotesToRhythm,
 			),
-			label({style: "display: flex; flex-direction: row; align-items: center; height: 2em; justify-content: flex-end;"},
+			label({style: "display: flex; flex-direction: row; align-items: center; height: 2em; justify-content: center;"},
 				_.noteRecordingPrompt13Label,
 				this._ignorePerformedNotesNotInScale,
 			),
 			p(_.noteRecordingPromptLargeText2Label),
-			label({style: "display: flex; flex-direction: row; align-items: center; height: 2em; justify-content: flex-end;"},
+			label({style: "display: flex; flex-direction: row; align-items: center; margin-top: 0.5em; margin-bottom: 0.5em; height: 2em; justify-content: center;"},
 				_.noteRecordingPrompt14Label,
-				div({class: "selectContainer", style: "width: 65%; margin-left: 1em;"}, this._keyboardLayout),
+				div({class: "selectContainer", style: "width: 50%; margin-left: 1em;"}, this._keyboardLayout),
 			),
 			this._keyboardLayoutPreview,
 			p(_.noteRecordingPromptLargeText3Label),
-			label({style: "display: flex; flex-direction: row; align-items: center; height: 2em; justify-content: flex-end;"},
-				div({class: "selectContainer", style: "width: 100%;"}, this._keyboardMode),
+			label({style: "display: flex; flex-direction: row; align-items: center; margin-top: 0.5em; margin-bottom: 0.5em; height: 2em; justify-content: center;"},
+				div({class: "selectContainer", style: "width: 50%;"}, this._keyboardMode),
 			),
 			p(_.noteRecordingPromptLargeText4Label),
-			label({style: "display: flex; flex-direction: row; align-items: center; height: 2em; justify-content: flex-end;"},
+			label({style: "display: flex; flex-direction: row; align-items: center; height: 2em; justify-content: center;"},
 				_.noteRecordingPrompt15Label,
 				this._metronomeWhileRecording,
 			),
-			label({style: "display: flex; flex-direction: row; align-items: center; height: 2em; justify-content: flex-end;"},
+			label({style: "display: flex; flex-direction: row; align-items: center; height: 2em; justify-content: center;"},
 				_.noteRecordingPrompt16Label,
 				this._metronomeCountIn,
 			),
 			p(_.noteRecordingPromptLargeText5Part1Label, a({href: "https://caniuse.com/midi", target: "_blank"}, _.noteRecordingPromptLargeText5Part2Label), _.noteRecordingPromptLargeText5Part3Label),
-			label({style: "display: flex; flex-direction: row; align-items: center; height: 2em; justify-content: flex-end;"},
+			label({style: "display: flex; flex-direction: row; align-items: center; height: 2em; margin-top: 0.5em; justify-content: center;"},
 				_.noteRecordingPrompt17Label,
 				this._enableMidi,
 			),
 			p(_.noteRecordingPromptLargeText6Label),
+			p(_.noteRecordingPromptLargeText7Label),
+			label({style: "display: flex; flex-direction: row; align-items: center; margin-top: 0.5em; margin-bottom: 0.5em; height: 2em; justify-content: center;"},
+				_.noteRecordingPrompt21Label,
+				div({class: "selectContainer", style: "width: 50%; margin-left: 1em;"}, this._bassOffset),
+			),
+			p(_.noteRecordingPromptLargeText8Label),
+			p(_.noteRecordingPromptLargeText9Label),
 			div({style: `width: 100%; height: 80px; background: linear-gradient(rgba(0,0,0,0), ${ColorConfig.editorBackground}); position: sticky; bottom: 0; pointer-events: none;`}),
 		),
-		label({style: "display: flex; flex-direction: row-reverse; justify-content: space-between;"},
+		div({style: "display: flex; flex-direction: row-reverse; justify-content: space-between;"},
 			this._okayButton,
 		),
 		this._cancelButton,
@@ -88,6 +100,7 @@ export class RecordingSetupPrompt implements Prompt {
 	constructor(private _doc: SongDocument) {
 		this._keyboardMode.value = this._doc.prefs.pressControlForShortcuts ? "pressControlForShortcuts" : "useCapsLockForNotes";
 		this._keyboardLayout.value = this._doc.prefs.keyboardLayout;
+		this._bassOffset.value = String(this._doc.prefs.bassOffset);
 		this._enableMidi.checked = this._doc.prefs.enableMidi;
 		this._showRecordButton.checked = this._doc.prefs.showRecordButton;
 		this._snapRecordedNotesToRhythm.checked = this._doc.prefs.snapRecordedNotesToRhythm;
@@ -103,6 +116,7 @@ export class RecordingSetupPrompt implements Prompt {
 		
 		this._renderKeyboardLayoutPreview();
 		this._keyboardLayout.addEventListener("change", this._renderKeyboardLayoutPreview);
+		this._bassOffset.addEventListener("change", this._renderKeyboardLayoutPreview);
 	}
 	
 	private _close = (): void => { 
@@ -124,6 +138,7 @@ export class RecordingSetupPrompt implements Prompt {
 	private _confirm = (): void => { 
 		this._doc.prefs.pressControlForShortcuts = (this._keyboardMode.value == "pressControlForShortcuts");
 		this._doc.prefs.keyboardLayout = this._keyboardLayout.value;
+		this._doc.prefs.bassOffset = Number(this._bassOffset.value);
 		this._doc.prefs.enableMidi = this._enableMidi.checked;
 		this._doc.prefs.showRecordButton = this._showRecordButton.checked;
 		this._doc.prefs.snapRecordedNotesToRhythm = this._snapRecordedNotesToRhythm.checked;
@@ -161,6 +176,13 @@ export class RecordingSetupPrompt implements Prompt {
 						}
 					} else {
 						key.style.border = "2px solid " + ColorConfig.pitchBackground;
+					}
+
+					if (this._bassOffset.selectedIndex != 0 && pitch <= Piano.getBassCutoffPitch(this._doc)) {
+						key.style.setProperty("filter", "hue-rotate(60deg) brightness(0.5)");
+					}
+					else {
+						key.style.setProperty("filter", "");
 					}
 					
 					const pitchNameIndex: number = (scalePitch + Config.keys[this._doc.song.key].basePitch) % Config.pitchesPerOctave;

@@ -53,7 +53,7 @@ export class TipPrompt implements Prompt {
 			case "instrumentIndex": {
 				message = div(
 					h2("Instrument Number"),
-					p("In the \"Channel Settings\" option from Midbox's \"File\" menu (If you are using keyboard, the keybind would be Q.), there are a few ways to enable multiple instruments per channel."),
+					p("In the \"Channel Settings\" option from Midbox's \"Edit\" menu (If you are using keyboard, the keybind would be Q.), there are a few ways to enable multiple instruments per channel."),
 					p("First, you could enable multiple simultaneous instruments per channel. All of the channel's instruments will play all of the notes in the channel at the same time, and you can click an instrument number to view and edit its settings."),
 					p("Second, you could enable different instruments per pattern. Only one of the instruments will play at any given time, but you can click the instrument number to change which instrument is used for the currently selected pattern(s)."),
 					p("Finally, you can enable them both, in which case you can click an instrument number once to view it, and again to toggle whether the instrument is used for the currently selected pattern(s)."),
@@ -136,13 +136,9 @@ export class TipPrompt implements Prompt {
 			case "instrumentType": {
 				message = div(
 					h2("Instrument Type"),
-					p("Midbox comes with many instrument presets, try them out! You can also create your own custom instruments!"),
-					p("There are also options for copying and pasting instrument settings and for generating random instruments at the top of the instrument type menu. Get a feel of what every setting changes before you start attempting to master instrument design however."),
-					p("There are seven types of instrument types. Chip Wave is the most basic one. It consists of a certain waveform, and a unison. Custom Chip is a bit similar, but you get to create your own waveform!"),
-					p("Harmonics is a series of sine waves combined at multiple frequencies. Harmonics is commonly used for string-like instruments, and Picked String uses harmonics with a sustain to help build such sounds faster. This instrument type also comes with a unison."),
-					p("Pulse Width uses a pulse, like a square wave, and that pulse's duration can be configured manually."),
-					p("Spectrum is an instrument type that makes sounds more for drums, wind, and vocals. It obviously, uses a spectrum to do this."),
-					p("Finally, there is FM. It's a very complex instrument type that consists of waveforms at different frequencies with those waveforms having the ability to operated theirself. This instrument was used a lot by old consoles like the Sega Genisis."),
+					p("Beepbox and Jummbox add many instrument presets, with so many more from Midbox. Check them out! You can also create your own custom instruments."),
+					p("There are also options for copying and pasting instrument settings and for generating random instruments at the top of the instrument type menu. However, you should at least get a decent understanding of what every setting does before you start attempting to master instrument design."),
+					p("There are many instrument/drum types to pick from, each with their own properties that separate them from one another. Try them out!"),
 				);
 			} break;
 			case "eqFilter": {
@@ -194,7 +190,7 @@ export class TipPrompt implements Prompt {
 				message = div(
 					h2("Noise"),
 					p("Midbox comes with several basic noise sounds. These do not have any distinct musical pitch, and can be used like drums to create beats and emphasize your song's rhythm."),
-					p("Fun fact: Each placement in the drum channel slots is 6 pitches above the one below it."),
+					p("Fun fact: Each note in the drum channel slots is 6 pitches/semitones above the one below it."),
 				);
 			} break;
 			case "supersawDynamism": {
@@ -401,19 +397,25 @@ export class TipPrompt implements Prompt {
 					p("Every other notch on this slider is aligned with the currently selected key of the song, and the in-between notches are aligned with the tritones of the key. High amounts of this settings will typically make your instrument sound more retro, but don't always expect the same results!"),
 				);
 			} break;
-			case "stringSustain": {
-				message = div(
-					h2("String sustain"),
-					p("This setting controls how quickly the picked string vibration decays."),
-					p("Unlike most of Midbox's instrument synthesizer features, a picked string cannot change frequency suddenly while maintaining its decay. If a tone's pitch changes suddenly (e.g. if the chord type is set to \"arpeggio\" or the transition type is set to \"continues\") then the string will be re-picked and start decaying from the beginning again, even if the envelopes don't otherwise restart."),
-				);
-			} break;
 			case "envelopes": {
 				message = div(
 					h2("Envelopes"),
 					p("Envelopes are a way to dynamically adjust various other settings over time, usually based on how long the note lasts. Press the + button to add an envelope, then use the menus below to select which setting to control and the curve of the envelope. Try different combinations to see how they sound!"),
 					p("Most envelope curves restart from the beginning every time a new note plays. The \"note size\" option is based on the note width as drawn in the pattern editor."),
 					p("Envelope curves move in the range from 0 to 1 (or vice versa), where 0 means as quiet as possible and 1 is the same as the corresponding position selected in the instrument settings above. If multiple envelopes are targetting the same setting, they are multiplied before applying to the setting."),
+				);
+			} break;
+			case "discreteEnvelope": {
+				message = div(
+					h2("Use Discrete Envelopes?"),
+					p("Envelopes are usually interpolated, meaning they change continuously and smoothly. This setting, when ticked, makes envelopes not interpolate. It's a small difference, but can be helpful for some chip-like sounds."),
+				);
+			} break;
+			case "envelopeSpeed": {
+				message = div(
+					h2("Envelope Speed"),
+					p("This setting controls the speed of ALL envelopes for the instrument. Each envelope 'plays' at a certain speed, and this slider can scale it to play faster or slower. Use this to fine-tune your tremolo or how fast something decays to get just the right effect."),
+					p("Note that, while this setting is limited in the sense that it controls all envelopes at once, you can still achieve a variety of outcomes by trying combinations of modes of each envelope type, which typically differ only in speed."),
 				);
 			} break;
 			case "usedInstrument": {

@@ -321,6 +321,7 @@ export class ExportPrompt implements Prompt {
             }
         }
 
+        this.synth.initModFilters(this._doc.song);
         this.synth.computeLatestModValues();
         this.synth.warmUpSynthesizer(this._doc.song);
 
@@ -519,7 +520,7 @@ export class ExportPrompt implements Prompt {
                 writeEventTime(0);
                 writer.writeUint8(MidiEventType.meta);
                 writer.writeMidi7Bits(MidiMetaEventMessage.text);
-                writer.writeMidiAscii("Composed with jummbus.bitbucket.io");
+                writer.writeMidiAscii("Composed with mid-the-modder.github.io/Midbox/");
 
                 writeEventTime(0);
                 writer.writeUint8(MidiEventType.meta);
@@ -617,7 +618,7 @@ export class ExportPrompt implements Prompt {
                                     if (ExportPrompt.midiChipInstruments.length > instrument.chipWave) {
                                         instrumentProgram = ExportPrompt.midiChipInstruments[instrument.chipWave];
                                     }
-                                } else if (instrument.type == InstrumentType.pwm || instrument.type == InstrumentType.fm || instrument.type == InstrumentType.harmonics) {
+                                } else if (instrument.type == InstrumentType.pwm || instrument.type == InstrumentType.fm || instrument.type == InstrumentType.harmonics || InstrumentType.supersaw) {
                                     instrumentProgram = 81; // sawtooth
                                 } else if (instrument.type == InstrumentType.pickedString) {
                                     instrumentProgram = 0x19; // steel guitar
