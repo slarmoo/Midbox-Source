@@ -6077,7 +6077,7 @@ class InstrumentState {
     public vibratoTime: number = 0;
     public nextVibratoTime: number = 0;
     public envelopeTime: number = 0;
-    public currentWaveTime: number = 0;
+    public currentWave: number = 0;
 
     public eqFilterVolume: number = 1.0;
     public eqFilterVolumeDelta: number = 0.0;
@@ -6266,7 +6266,7 @@ class InstrumentState {
         this.nextVibratoTime = 0.0;
         this.arpTime = 0.0;
         this.envelopeTime = 0.0;
-        this.currentWaveTime = 0.0;
+        this.currentWave = 0.0;
 
         this.awake = false;
         this.flushingDelayLines = false;
@@ -6845,7 +6845,7 @@ export class Synth {
                     instrumentState.nextVibratoTime = 0;
                     instrumentState.envelopeTime = 0;
                     instrumentState.arpTime = 0;
-                    instrumentState.currentWaveTime = 0;
+                    instrumentState.currentWave = 0;
                     instrumentState.updateWaves(instrument, this.samplesPerSecond);
                     instrumentState.allocateNecessaryBuffers(this, instrument, samplesPerTick);
                 }
@@ -8085,7 +8085,7 @@ export class Synth {
                             if (wavetableSpeed == 0) {
                             // Nothing. Skip.
                             } else {
-                            instrumentState.currentWaveTime = (instrumentState.currentWaveTime + wavetableSpeed * (1.0 / (Config.ticksPerPart * Config.partsPerBeat))) % wavetableSize;
+                            instrumentState.currentWave = (instrumentState.currentWave + wavetableSpeed * (1.0 / (Config.ticksPerPart * Config.partsPerBeat))) % wavetableSize;
                             }
                         }
                         let useArpeggioSpeed: number = instrument.arpeggioSpeed;
@@ -8203,7 +8203,6 @@ export class Synth {
                     instrumentState.nextVibratoTime = (instrumentState.nextVibratoTime % (Config.vibratoTypes[instrument.vibratoType].period / (Config.ticksPerPart * samplesPerTick / this.samplesPerSecond)));
                     instrumentState.arpTime = (instrumentState.arpTime % (2520 * Config.ticksPerArpeggio)); // 2520 = LCM of 4, 5, 6, 7, 8, 9 (arp sizes)
                     instrumentState.envelopeTime = (instrumentState.envelopeTime % (Config.partsPerBeat * Config.ticksPerPart * this.song.beatsPerBar));
-                    instrumentState.currentWaveTime = (instrumentState.currentWaveTime);
                 }
             }
 

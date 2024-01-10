@@ -642,6 +642,7 @@ export class Localization {
     public static midboxDrumPresets4Label: string = "tight kick";
     public static midboxDrumPresets5Label: string = "odd snare";
     public static midboxDrumPresets6Label: string = "spectrum hi-hat";
+    public static midboxDrumPresets7Label: string = "generic kick";
     public static midboxPianoPresets1Label: string = "blessed piano";
     public static midboxPianoPresets2Label: string = "desolated piano";
     public static midboxPianoPresets3Label: string = "rough glistening piano";
@@ -649,11 +650,12 @@ export class Localization {
     public static midboxPianoPresets5Label: string = "bit-crushed piano";
     public static midboxPianoPresets6Label: string = "another piano";
     public static midboxPianoPresets7Label: string = "mellow piano";
+    public static midboxPianoPresets8Label: string = "pandorasbox pianoC4";
     public static midboxLeadPresets1Label: string = "disco vocal lead";
     public static midboxLeadPresets2Label: string = "distorted lead 1";
     public static midboxLeadPresets3Label: string = "scratch lead";
     public static midboxLeadPresets4Label: string = "future lead";
-    public static midboxLeadPresets5Label: string = "echo pulse lead";
+    public static midboxLeadPresets5Label: string = "echo pulse lead 1";
     public static midboxLeadPresets6Label: string = "random lead";
     public static midboxLeadPresets7Label: string = "retro ghostly lead";
     public static midboxLeadPresets8Label: string = "industrial lead";
@@ -663,6 +665,9 @@ export class Localization {
     public static midboxLeadPresets12Label: string = "random lead distortion";
     public static midboxLeadPresets13Label: string = "harmonized chipwave";
     public static midboxLeadPresets14Label: string = "freq-crushed sawtooth lead";
+    public static midboxLeadPresets15Label: string = "retro pulse";
+    public static midboxLeadPresets16Label: string = "square wave harp";
+    public static midboxLeadPresets17Label: string = "echo pulse lead 2";
     public static midboxFMPresets1Label: string = "FM electronic guitar";
     public static midboxFMPresets2Label: string = "FM electronic bass";
     public static midboxFMPresets3Label: string = "FM guitar";

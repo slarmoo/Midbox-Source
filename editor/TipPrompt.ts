@@ -20,34 +20,36 @@ export class TipPrompt implements Prompt {
 				message = div(
 					h2("Scale"),
 					p("This setting limits the available pitches for adding notes. You may think that there's no point in limiting your choices, but the set of pitches you use has a strong influence on the mood and feel of your song, and these scales serve as guides to help you choose appropriate pitches. Don't worry, you can change the scale at any time, so you're not locked into it. Try making little melodies using all the available pitches of a scale to get a sense for how it sounds."),
-					p("The most common scales are major and minor. Assuming your song uses all pitches in the scale and especially \"tonic\" pitches (the purple rows in the pattern editor) then major scales tend to sound more playful or optimistic, whereas minor scales sound more serious or sad."),
+					p("The most common scales are major and minor. Assuming your song uses all pitches in the scale and especially \"tonic\" pitches (the highlighted row for octaves in the pattern editor) then major scales tend to sound more playful or optimistic, whereas minor scales sound more serious or sad."),
 				);
 			} break;
 			case "key": {
 				message = div(
 					h2("Song Key"),
-					p("This setting can shift the frequency of every note in your entire song up or down, keeping the \"tonic\" pitches (the brown rows in the pattern editor) aligned with the selected \"key\" pitch."),
+					p("This setting can shift the frequency of every note in your entire song up or down, keeping the \"tonic\" pitches (the highlighted row for octaves in the pattern editor) aligned with the selected \"key\" pitch."),
 					p("If you've already placed some notes but they don't emphasize \"tonic\" pitches then the selected key isn't very meaningful. You can select the \"Detect Key\" option in the key menu to automatically align the most emphasized notes with \"tonic\" pitches."),
+					p("If you don't want specific instruments to be affected by this setting, go to that instrument's effects and check out Midbox's percussion effect!"),
 				);
 			} break;
 			case "tempo": {
 				message = div(
 					h2("Song Tempo"),
-					p("This setting controls the speed of your song, measured in beats-per-minute. A \"beat\" is the duration of the little gray rectangles in the pattern editor. (In conventional music notation, a \"quarter note\" is usually equivalent to \"beat\".)"),
-					p("Tip: Alternating between two different tempos using a mod channel can create rhythm too! This can allow for easily creating songs with swing."),
+					p("This setting controls the speed of your song, measured in beats-per-minute. A \"beat\" is the duration of the little rectangles in the pattern editor. (In conventional music notation, a \"quarter note\" is usually equivalent to \"beat\".)"),
+					p("Tip: Alternating between two different tempos using a mod channel can create rhythm too! This can allow the creation of swing."),
 				);
 			} break;
 			case "reverb": {
 				message = div(
 					h2("Reverb"),
 					p("Reverb is like a continuous echo effect. A little bit helps instruments sound more natural. Adding a lot of reverb can add sense of depth or mystery, but too much reverb can kinda \"smear\" sounds so that it's harder to distinguish notes or instruments, especially for lower \"bass\" notes."),
+					p("Tip: If you want to apply reverb to your instrument but reverb doesn't sound good with it, make a copy of that instrument, give it some \"EQ filter\" changes (more on the EQ filter in its own tip prompt) and lower the instrument volume so reverb sounds good on it, and then layer it with the beginning instrument that has no reverb. This allows adding reverb while keeping all of the original instrument's qualities."),
 				);
 			} break;
 			case "rhythm": {
 				message = div(
 					h2("Rhythm"),
 					p("This setting determines how beats are divided. The pattern editor helps you align notes to fractions of a beat based on this setting."),
-					p("If you've already placed some notes but they don't align with the selected rhythm, you can select the \"Snap Notes To Rhythm\" option in the rhythm menu to force the notes in the currently selected pattern(s) to align with the selected rhythm."),
+					p("If you've already placed some notes but they don't align with the selected rhythm, you can select the \"Snap Notes To Rhythm\" option in the rhythm menu to force the notes in the currently selected pattern(s) to align with the selected rhythm. To apply this change to the whole song, press 'A' if you are on a keyboard to select all patterns in the song (For mobile, this option can be found in the \"Edit\" menu) and then press the \"Snap Notes To Rhythm\" option."),
 				);
 			} break;
 			case "instrumentIndex": {
@@ -65,7 +67,7 @@ export class TipPrompt implements Prompt {
 					h2("Instrument Volume"),
 					p("This setting controls the volume of the selected instrument without affecting the volume of the other instruments. This allows you to balance the loudness of each instrument relative to each other."),
 					p("Please be careful when using volume settings above 0. This indicates amplification and too much of that can trip the audio limiter built into this tool. This can lead to your song sounding muffled if overused. But when used carefully, amplification can be a powerful tool!"),
-					p("Here is a small tip from Mid himself for mixing: Refrain from having any instrument's volume from being above 10, and keep every instrument volume around 0 for the best results. If your song doesn't sound loud enough, you can press Shift + L if you are on keyboard, or got to files > limiter settings to open up the limiter settings. This is a very powerful mixing tool to help mix your songs with more potency. Mess with the master gain to give a boost to your song volume."),
+					p("Tip: Refrain from having any instrument's volume from being above 10, and keep every instrument volume around 0 for the best results. If your song doesn't sound loud enough, you can press Shift + L if you are on keyboard, or got to the \"Edit\" menu, then to \"Limiter Settings...\" to open up the limiter settings. This is a very powerful mixing tool to help mix your songs with more potency. Mess with the master gain to give a boost to your song volume."),
 				);
 			} break;
 			case "pan": {
@@ -73,7 +75,7 @@ export class TipPrompt implements Prompt {
 					h2("Instrument Panning"),
 					p("If you're listening through headphones or some other stereo sound system, this controls the position of the instrument and where the sound is coming from, ranging from left to right."),
 					p("As a suggestion, composers often put lead melodies, drums, and basses in the center, and spread other instruments toward either side. If too many instruments seem like they're coming from the same place, it can feel crowded and harder to distinguish individual sounds, especially if they cover a similar pitch range."),
-					p("Tip: If you have multiple of the same instrument, it is best to use panning to spread them out. You may also use panning to grab the feeling that a sound or ambience is coming from a certain direction, which, if performed correctly, can sound great."),
+					p("Tip: If you have multiple of the same instrument, it is best to use panning to spread them out. You may also use panning to grab the feeling that a sound or piece of ambience is coming from a certain direction, which, if performed correctly, can be powerful."),
 				);
 			} break;
 			case "panDelay":
@@ -89,7 +91,8 @@ export class TipPrompt implements Prompt {
 				{
 					message = div(
 						h2("Arpeggio Speed"),
-						p("This setting affects how fast your chord will 'arpeggiate', or cycle between notes. With a fast arpeggio speed it will sound rapid-fire, with a slow speed you can hear each note one after another. If you maintain the arpeggio at a relatively slow pace, you could even lay them out like a normal melody! Although, don't do this. It is very impractical."),
+						p("This setting affects how fast your chord will 'arpeggiate', or cycle between notes. With a fast arpeggio speed it will sound rapid-fire, whereas with a slow speed you can hear each note one after another. If you maintain the arpeggio at a relatively slow pace, you could even lay them out like a normal melody! Although, don't do this. It is very impractical."),
+						p("When placing multiple notes on each other in the pattern editor (called a chord) with a chord like \"arpeggio\" or \"strum\", numbers will appear on the very left-side of the note. This shows the order in which the arpeggio will 'arpeggiate' notes. You can place the notes in different orders to change the order of note travelling."),
 					);
 				}
 				break;
@@ -98,6 +101,7 @@ export class TipPrompt implements Prompt {
 					message = div(
 						h2("Strum Speed"),
 						p("This setting affects how fast/slow your chord will strum. Strum chords rapidly play all notes in a chord, but not simultaneously. This gives the effect of an instrument sounding manually played on an instrument like a piano or guitar."),
+						p("When placing multiple notes on each other in the pattern editor (called a chord) with a chord like \"arpeggio\" or \"strum\", numbers will appear on the very left-side of the note. This shows the order in which the strum will 'strum' notes. You can place the notes in different orders to change the order of note travelling."),
 					);
 				}
 				break;
@@ -105,7 +109,7 @@ export class TipPrompt implements Prompt {
 				{
 					message = div(
 						h2("Slide Speed"),
-						p("This setting affects how fast/slow notes will 'slide'. Slower speeds tend to not work well with small note durations."),
+						p("This setting affects how fast/slow notes will 'slide'. Slower speeds tend to not work well with small note durations, whereas faster speeds act more simultaneous."),
 					);
 				}
 				break;
@@ -113,7 +117,7 @@ export class TipPrompt implements Prompt {
 				{
 					message = div(
 						h2("Faster Two-Note Arpeggio"),
-						p("This setting makes arpeggios with only two notes in them happen twice as fast. Arpeggios with more notes in them are unaffected."),
+						p("This setting makes arpeggios with only two notes in them happen twice as fast. Arpeggio chords with more than 2 notes in them are unaffected."),
 					);
 				}
 				break;
@@ -121,7 +125,7 @@ export class TipPrompt implements Prompt {
 				{
 					message = div(
 						h2("Bouncing Arpeggio"),
-						p("Arpeggios tend to go from the first placed note, to the next note that was placed, and rapidly does this process until the last note, which it then loops back to the first note."),
+						p("Arpeggios will 'arpeggiate' notes from the first placed note, to the next note that was placed, and rapidly does this process until the last note, which it then loops back to the first note. This order is marked by the numbers on the left-side of the notes in an arpeggio chord."),
 						p("When this setting is ticked, the arpeggio will instead 'bounce' off the last note, going backwards rather than looping."),
 					);
 				}
@@ -129,16 +133,16 @@ export class TipPrompt implements Prompt {
 			case "detune": {
 				message = div(
 					h2("Detune"),
-					p("This setting can be used to finely control the pitch of your instrument. It is in units of 'cents', 100 of which equal a pitch shift of one semitone."),
-					p("Careful - you can quickly get very dissonant sounding songs by using this setting. If used well, you can detune your whole song and give it a whole new vibe! If used very slightly, it can give your instrument a shimmer effect with other instruments around that very amount of cents."),
+					p("This setting can be used to finely control the pitch of your instrument. It is in units of 'cents', 100 of which equal one semitone."),
+					p("Careful - you can quickly get very dissonant sounding songs by using this setting. You can detune your whole song and give it a whole new feel. If used very slightly, it can give your instrument a shimmer effect with other instruments that have close to that amount of cents."),
 				);
 			} break;
 			case "instrumentType": {
 				message = div(
-					h2("Instrument Type"),
+					h2("Instrument Presets/Type"),
 					p("Beepbox and Jummbox add many instrument presets, with so many more from Midbox. Check them out! You can also create your own custom instruments."),
-					p("There are also options for copying and pasting instrument settings and for generating random instruments at the top of the instrument type menu. However, you should at least get a decent understanding of what every setting does before you start attempting to master instrument design."),
 					p("There are many instrument/drum types to pick from, each with their own properties that separate them from one another. Try them out!"),
+					p("There are also options for copying and pasting instrument settings at the bottom of the instrument settings, as well as for generating random instruments at the top of the instrument type menu. However, you should at least get a decent understanding of what every setting does before you start attempting to master instrument design."),
 				);
 			} break;
 			case "eqFilter": {
@@ -147,18 +151,18 @@ export class TipPrompt implements Prompt {
 					p("Filters are a way of emphasizing or diminishing different parts of a sound. Musical notes have a fundamental (base) frequency, but the sound of a musical note also has parts at higher frequencies and filters can adjust the volume of each of these parts based on their frequency."),
 					p("Click in the filter editor to insert, delete, or drag a filter control point. The horizontal position of the point determines which frequencies it affects, and the vertical position determines how the volume is affected at that frequency."),
 					p("Insert a new point on the left side of the filter editor to add a \"high-pass\" filter point, which additionally reduces the volume of lower frequencies, or insert a new point on the right side to add a \"low-pass\" filter point which reduces the volume of higher frequencies."),
-					p("You can also enable a \"Note Filter\" as an effect. EQ and note filters are mostly the same, but have different purposes. EQ filters are for overall adjustments, whereas note filters are for dynamic control and can be moved with envelopes. Note filters also change how the distortion effect sounds."),
-					p("Tip: If say, one of your instruments are too loud, yet when you turn down the volume, the best parts of that instrument are too silent, you can put a point on the EQ filter to decrease the volume of the loud part, while keeping that juicy part at normal volume. If you are on keyboard, press Shift + E to open an enhanced view of the EQ filter."),
+					p("You can also enable a \"Note Filter\" as an effect. EQ and note filters are mostly the same, but have different purposes. EQ filters are for overall adjustments, whereas note filters are for dynamic control and can be moved with envelopes. Note filters come before things like effect while the EQ filter comes after all instrument processing, which causes note filters to make effects like distortion behave differently."),
+					p("Tip: If say, one of your instruments are too loud, yet when you turn down the volume, the best parts of that instrument are too silent, you can put a point on the EQ filter to decrease the volume of the unwanted frequencies, while keeping that wanted part at normal volume. If you are on keyboard, press Shift + E to open an enhanced view of the EQ filter. It is also worth to know that not all instruments have to be perfect. It is likely that certain aspects of an instrument will be buried in the mix of the rest."),
 				);
 			} break;
 			case "noteFilter": {
 				message = div(
 					h2("Note Filter"),
-					p("Note filters are mostly the same as EQ filters, but have a different purpose. EQ filters are for overall adjustments, whereas note filters are for dynamic control and can be moved with envelopes. Note filters also change how the distortion effect sounds."),
+					p("Note filters are mostly the same as EQ filters, but have a different purpose. EQ filters are for overall adjustments, whereas note filters are for dynamic control and can be moved with envelopes. Note filters also change how the effects like distortion, bit crusher, and freq crusher sound."),
 					p("Filters are a way of emphasizing or diminishing different parts of a sound. Musical notes have a fundamental (base) frequency, but the sound of a musical note also has parts at higher frequencies and filters can adjust the volume of each of these parts based on their frequency."),
 					p("Click in the filter editor to insert, delete, or drag a filter control point. The horizontal position of the point determines which frequencies it affects, and the vertical position determines how the volume is affected at that frequency."),
 					p("Insert a new point on the left side of the filter editor to add a \"high-pass\" filter point, which additionally reduces the volume of lower frequencies, or insert a new point on the right side to add a \"low-pass\" filter point which reduces the volume of higher frequencies."),
-					p("Tip: Note filters can also make interesting noises when combined with bit crush and frequency crush effects. If you create an envelope that changes the note filter points by note size, and then add a low-pass point somewhere between the top left and top center of the note filter hud, you can create dubstep-like sounds by using note size. If you are on keyboard and have the effect enabled, press Shift + N to open an enhanced view of the note filter."),
+					p("Tip: Note filters can also make interesting noises when combined with bit crush and frequency crush effects. If you create an envelope that changes the note filter points by note size, and then add a low-pass/high-pass point somewhere between the top left and top center of the note filter hud, you can create dubstep-like sounds by using note size. If you are on keyboard and have the effect enabled, press Shift + N to open an enhanced view of the note filter."),
 				);
 			} break;
 			case "fadeInOut": {
@@ -174,30 +178,30 @@ export class TipPrompt implements Prompt {
 				message = div(
 					h2("Transition"),
 					p("Usually, when one note ends at the same time another begins, the old note will fade out and the new note will fade in based on the fade in/out settings, but this setting can override that, connecting the end of one note to the beginning of the next."),
-					p("The \"interrupt\" transition makes the wave suddenly change from the old note's frequency to the new note's frequency without any fading, but still restarts envelopes at the beginning of the new note. The \"continue\" transition is similar but it doesn't even restart envelopes, and can be used to make each of the notes in a chord start or stop at different times!"),
-					p("The \"slide\" transition makes the pitch shift quickly but not instantaneously from the old note's frequency to the new note's frequency, and softly restarts envelopes. The \"slide in pattern\" transition is the same except it doesn't connect the last note in a pattern to the first note in the next pattern."),
-					p("The \"insta-slide\" transition is similar to slide, but slides across one note to another almost simultaneously, and the \"continue in pattern\" transition is like a combo of slide in pattern and continue, but the continue effect ends at the end of a pattern."),
+					p("The \"interrupt\" transition makes the wave suddenly change from the old note's frequency to the new note's frequency without any fading, but still restarts envelopes at the beginning of the new note. The \"continue\" transition is similar but it doesn't restart envelopes."),
+					p("The \"slide\" transition makes the pitch shift quickly but not instantaneously from the old note's frequency to the new note's frequency, and softly restarts envelopes."),
+					p("Tip: Although you cannot place notes of different sizes on top of each other due to how the pattern editor of Midbox works, you can use the \"continue\" transition to replicate the effect."),
 				);
 			} break;
 			case "chipWave": {
 				message = div(
 					h2("Chip Wave"),
 					p("Midbox comes with some sound waves based on classic electronic sound chips, as well as several unique waves. This is the basic source of the sound of the instrument, which is modified by the other instrument settings."),
-					p("Take note that if you want completely accurate waves that aren't chips, you can use the FM ones for more perfect sounds."),
+					p("Take note that if you want waves that are more high quality and accurate, you can use the FM operator waveforms for more accurate waves."),
 				);
 			} break;
 			case "chipNoise": {
 				message = div(
 					h2("Noise"),
 					p("Midbox comes with several basic noise sounds. These do not have any distinct musical pitch, and can be used like drums to create beats and emphasize your song's rhythm."),
-					p("Fun fact: Each note in the drum channel slots is 6 pitches/semitones above the one below it."),
+					p("In most other mods of Beepbox, noise is typically in drum channels. However, Midbox allows noise types in instrument channels as well."),
 				);
 			} break;
 			case "supersawDynamism": {
 				message = div(
 					h2("Supersaw Dynamism"),
 					p("A supersaw is a combination of many sawtooth waves, and this setting controls the contribution of extra sawtooth waves."),
-					p("At the low end of the slider, only the first wave is contributing to the sound, which sounds like an ordinary static sawtooth wave. At the maximum setting, all of the waves are contributing equally and the resulting tone can randomly shift depending on how the waves line up with each other, similar to the \"unison\" and \"chorus\" settings."),
+					p("At the low end of the slider, only the first wave is contributing to the sound, which sounds like an ordinary static sawtooth wave. At the maximum setting, all of the waves are contributing equally and the resulting tone can randomly shift depending on how the waves line up with each other, similar to the \"unison\" setting and \"chorus\" effect."),
 				);
 			} break;
 			case "supersawSpread": {
@@ -217,7 +221,7 @@ export class TipPrompt implements Prompt {
 			case "pulseWidth": {
 				message = div(
 					h2("Pulse Wave Width"),
-					p("This setting controls the shape and sound of a pulse wave. At the minimum width, it sounds light and buzzy. At the maximum width, it is shaped like a classic square wave. Add some envelopes to manipulate the pulse width based on note size to manually be able to make chiptune-ish songs!"),
+					p("This setting controls the shape and sound of a pulse wave. At the minimum width, it sounds light and buzzy. At the maximum width, it is shaped like a classic square wave. Add some envelopes to manipulate the pulse width based on note size to manually control the pulse width. This can allow for chiptune-ish songs!"),
 				);
 			} break;
 			case "unison": {
@@ -231,14 +235,14 @@ export class TipPrompt implements Prompt {
 				message = div(
 					h2("Chords"),
 					p("When multiple different notes occur at the same time, this is called a chord. Chords can be created in Midbox's pattern editor by adding notes above or below another note."),
-					p("This setting determines how chords are played. The standard option is \"simultaneous\" which starts playing all of the pitches in a chord at the same time. The \"strum\" option is similar, but plays the notes starting at slightly different times. Midbox currently offers a bunch of different strum settings that strum at different speeds and even different rhythms. Soon, these may be removed and replaced with a custom strum slider similar to the custom arpeggio one. The \"arpeggio\" option is used in chiptune style music and plays a single tone that rapidly alternates between all of the pitches in the chord. This setting may also be customized to your favor."),
+					p("This setting determines how chords are played. The default option is \"simultaneous\", which starts playing all of the pitches in a chord at the same time. The \"strum\" option is similar, but plays the notes starting at slightly different times. Midbox offers a strum speed slider for adjusting how fast each note of the chord 'strums'. The \"arpeggio\" option is used in chiptune style music and plays a single tone that rapidly alternates between all of the pitches in the chord. This setting may also be customized to your favor."),
 					p("Some Midbox instruments have an option called \"custom interval\" which uses the chord notes to control the interval between the waves of a single tone. This can create strange sound effects when combined with FM modulators."),
 				);
 			} break;
 			case "vibrato": {
 				message = div(
 					h2("Vibrato"),
-					p("This setting causes the frequency of a note to wobble slightly. Singers and violinists often use vibrato."),
+					p("This setting causes the frequency (pitch) of a note to wobble slightly. Singers and violinists often use vibrato. Beside this setting lies an arrow you may press to view and customize each aspect of the vibrato."),
 				);
 			} break;
 			case "vibratoDepth":
@@ -267,8 +271,7 @@ export class TipPrompt implements Prompt {
 				{
 					message = div(
 						h2("Vibrato Type"),
-						p("This determines the way vibrato causes your instrument's pitch to wobble. The normal type is a smooth up and down, the shaky type is chaotic."),
-						p("Tip: When making wind sounds, you should enable the shaky vibrato type, along with slow vibrato speed and moderate-high vibrato depth."),
+						p("This determines the way vibrato causes your instrument's pitch to wobble. The normal type is a smooth up and down, whereas the shaky type is chaotic."),
 					);
 				}
 				break;
@@ -296,7 +299,7 @@ export class TipPrompt implements Prompt {
 			case "operatorFrequency": {
 				message = div(
 					h2("Operator Frequency"),
-					p('This setting controls the frequency of an individual FM wave, relative to the fundamental frequency of the note. The multiplier 1× is the same as the fundamental frequency, whereas 2x would be an octave (12 semitones) above it. The frequencies with a "~" are slightly detuned and shift in and out of phase over time compared to the other frequencies.'),
+					p('This setting controls the frequency of an individual FM wave, relative to the fundamental frequency of the note. The multiplier 1× is the same as the fundamental frequency, whereas 2× would be an octave (12 semitones) above it, and this keeps going similar to how "harmonics" work. The frequencies with a "~" are slightly detuned and shift in and out of phase over time compared to the other frequencies.'),
 					p('Try different combinations of a "carrier" wave and a "modulator" wave with different frequencies to get a feel for how they sound together.'),
 				);
 			} break;
@@ -312,7 +315,7 @@ export class TipPrompt implements Prompt {
 					p("This setting allows you to draw your own noise spectrum! This is good for making drum sounds."),
 					p("If you only use certain frequencies and a soft fade in/out, it's also possible to make howling wind sounds or even musical wind instruments."),
 					p("The left side of the spectrum editor controls the noise energy at lower frequencies, and the right side controls higher frequencies."),
-					p("Adding effects to the spectrum usually has really cool effects. Try plotting out your own spectrum and then putting heavy distortion on it!"),
+					p("Adding effects to the spectrum usually has really cool effects. Try plotting out your own spectrum and then putting distortion on it!"),
 				);
 			} break;
 			case "harmonics": {
@@ -358,6 +361,7 @@ export class TipPrompt implements Prompt {
 				message = div(
 					h2("Echo Delay"),
 					p("The echo effect repeats the instrument's sound after a delay, and this setting controls how long the delay is."),
+					p("The bars on the slider indicate x.0 beat delays. This can help for aligning."),
 				);
 			} break;
 			case "pitchShift": {
@@ -372,7 +376,7 @@ export class TipPrompt implements Prompt {
 			case "detune": {
 				message = div(
 					h2("Detune"),
-					p("This setting slightly adjusts the frequency of notes played by the instrument. You can use a little bit to add a pleasing shifting sound similar to the \"unison\" feature when combined with other instruments. If you use too much, then the instrument may sound unpleasantly out-of-tune. This setting can also, when appiled to the grand majority of instruments, change the feel of your song, even if ever so slightly."),
+					p("This setting slightly adjusts the frequency of notes played by the instrument. You can use a little bit to add a shifting sound similar to the \"unison\" setting when combined with other instruments. If you use too much, then the instrument may sound unpleasantly out-of-tune. This setting can also, when appiled to the grand majority of instruments, change the feel of your song, even if ever so slightly."),
 				);
 			} break;
 			case "distortion": {
@@ -380,21 +384,21 @@ export class TipPrompt implements Prompt {
 					h2("Distortion"),
 					p("This is the famous electric guitar effect! However, there are some things to be aware of."),
 					p("First, most chords don't sound right when combined with heavy distortion, nor heavy bit/freq crush. The only chords commonly used with distorted electric guitars are \"power chords\" which consist of a root note, a \"fifth\" note above that, and/or any octaves of those two notes."),
-					p("Second, the distortion sound depends a lot on filtering. In particular, I recommend enabling the note filter effect, and adding both high-pass and low-pass points to the note filter. (Note filters are applied first, then distortion which transforms the sound based on that filtering, then the EQ filter is applied last.)"),
+					p("Second, the distortion sound depends a lot on filtering. In particular, I recommend enabling the note filter effect, and adding both high-pass and low-pass points to the note filter. (Note filters are applied first, then distortion (or any effect) which transforms the sound based on that filtering, then the EQ filter is applied last.)"),
 					p("Finally, I recommend adjusting the fade-out setting to allow the end of each note to overlap a little bit with the beginning of the next, but not too much!"),
 				);
 			} break;
 			case "bitcrusherQuantization": {
 				message = div(
 					h2("Bitcrusher Quantization"),
-					p("This effect makes stuff sounds harsher, artificial, and \"low quality\", which is great if that's what you're going for! Combine this effect with a bunch of low-pass points gathered on the top left of a note filter, and you can create dynamic sounds based on which pitch the instrument is."),
+					p("This effect makes stuff sounds harsher, artificial, and \"low quality\", which is great if that's what you're going for! Combine this effect with a bunch of low-pass points gathered on the top-left/center-left of a note filter, and you can create dynamic sounds based on which pitch the instrument is."),
 				);
 			} break;
 			case "bitcrusherFreq": {
 				message = div(
 					h2("Frequency Quantization"),
 					p("The bitcrusher effect comes with an additional frequency quantization effect! This is a fun one to play with, especially when combined with the note filter effect."),
-					p("Every other notch on this slider is aligned with the currently selected key of the song, and the in-between notches are aligned with the tritones of the key. High amounts of this settings will typically make your instrument sound more retro, but don't always expect the same results!"),
+					p("Every other notch on this slider is aligned with the currently selected key of the song, and the in-between notches are aligned with the tritones of the key. High amounts of this settings will typically make your instrument sound more retro or corrupt, but don't always expect the same results!"),
 				);
 			} break;
 			case "envelopes": {
@@ -403,13 +407,14 @@ export class TipPrompt implements Prompt {
 					p("Envelopes are a way to dynamically adjust various other settings over time, usually based on how long the note lasts. Press the + button to add an envelope, then use the menus below to select which setting to control and the curve of the envelope. Try different combinations to see how they sound!"),
 					p("Most envelope curves restart from the beginning every time a new note plays. The \"note size\" option is based on the note width as drawn in the pattern editor."),
 					p("Envelope curves move in the range from 0 to 1 (or vice versa), where 0 means as quiet as possible and 1 is the same as the corresponding position selected in the instrument settings above. If multiple envelopes are targetting the same setting, they are multiplied before applying to the setting."),
+					p("BE AWARE: Stacking too many envelopes on the same setting may have undesired effects, such as errors in sound and the program in general. Try to keep it one or two envelopes per setting to avoid such issues."),
 				);
 			} break;
 			case "discreteEnvelope": {
 				message = div(
 					h2("Use Discrete Envelopes?"),
 					p("Envelopes are usually interpolated, meaning they change continuously and smoothly. This setting, when ticked, makes envelopes not interpolate. It's a small difference, but can be helpful for some chip-like sounds."),
-					p("For understandability, imagine this: Each envelope is a function, and every tick, or 48ths of a second, the envelope is updated to have the current value of the function. Imagine this as many /48th notes that fade in volume. When this checkbox is enabled, those notes will be flat rather than faded. Very small change, but can have a difference on faster envelopes.")
+					p("For understandability, imagine this: Each envelope is a function, and every tick (or 48ths of a second) the envelope is updated to have the current value of the function. Picture this as many /48th notes that fade in volume. When this checkbox is enabled, those notes will be flat rather than faded. Very small change, but can have a larger difference on faster envelopes.")
 				);
 			} break;
 			case "envelopeSpeed": {
@@ -423,14 +428,14 @@ export class TipPrompt implements Prompt {
 				message = div(
 					h3("'Is this instrument used somewhere else?'"),
 					p("This indicator will light up when the instrument you're currently looking at is used in another place in your song (outside the selection)."),
-					p("This can be useful when you're not sure if you've used the instrument before and making edits carelessly could change other parts of the song."),
+					p("This can be useful when you're not sure if you've used the instrument before, and making edits carelessly could change other parts of the song."),
 				);
 			} break;
 			case "usedPattern": {
 				message = div(
 					h3("'Is this pattern used somewhere else?'"),
 					p("This indicator will light up when the pattern you're currently looking at is used in another place in your song (outside the selection)."),
-					p("This can be useful when you're not sure if you've used the pattern before and making edits carelessly could change other parts of the song."),
+					p("This can be useful when you're not sure if you've used the pattern before, and making edits carelessly could change other parts of the song."),
 				);
 			} break;
 			case "modChannel": {
@@ -481,14 +486,14 @@ export class TipPrompt implements Prompt {
 			case "continueThruPattern": {
 				message = div(
 					h2("Continue Through Pattern"),
-					p("By default, this checkbox is ticked. When ticked, if the transition is 'seamless', the transition will be cut off at the end of a pattern."),
+					p("By default, this checkbox is ticked. When ticked, if the transition is 'seamless', the transition will be cut off at the end of a bar."),
 				);
 			} break;
 			case "aliases": {
 				message = div(
 					h2("Aliasing"),
 					p("Midbox applies a technique called 'anti-aliasing' to instruments normally to help them sound cleaner even at high frequencies and low sample rates."),
-					p("When this setting is ticked that technique is disabled, so you may hear strange audio artifacts especially at high pitches and when bending notes. However, this can lend a grungy sound to an instrument that could be desirable."),
+					p("When this setting is ticked, that technique is disabled, so you may hear strange audio artifacts especially at high pitches and when bending notes. However, this can lend a grungy sound to an instrument that could be desirable."),
 				);
 			} break;
 			case "percussion":{
@@ -511,7 +516,7 @@ export class TipPrompt implements Prompt {
 			case "operatorWaveform": {
 				message = div(
 					h2("Operator Waveform"),
-					p('This setting controls the what kind of sound wave an individual FM wave uses. By defualt, the FM synth only uses sinewaves.'),
+					p('This setting controls the what kind of sound wave an individual FM wave uses. By defualt, the FM synth only uses sine waves.'),
 					p('This feature was ported from Aury System`s GoldBox!'),
 				);
 			} break;
@@ -519,7 +524,7 @@ export class TipPrompt implements Prompt {
 				message = div(
 					h2("Filter Type"),
 					p('Toggling these buttons lets you choose between a simple filter interface with two sliders, or the more advanced filter graph.'),
-					p('The two-slider version controls a single low-pass filter and was used in legacy versions. It is not as powerful, but if you feel overwhelmed you can start with this.'),
+					p('The two-slider version (simple) controls a single low-pass filter and was used in legacy versions. It is not as powerful, but if you feel overwhelmed you can start with this.'),
 					p('Note that switching from the simple interface to the advanced interface will convert your current settings, so you can also use it as a basis for later tweaking.'),
 				);
 			} break;
@@ -547,8 +552,8 @@ export class TipPrompt implements Prompt {
 			case "x": {
 				message = div(
 					h2("Speed Display"),
-					p("This is a little number that shows you how fast/slow a speed is. This display is measured in a multiplier."),
-					p("Key: 'x2' means twice as fast as standard. 'x0.5' means half as fast..")
+					p("This is a little number that shows you how fast/slow a speed is. This display is measured as a multiplier."),
+					p("Key: 'x2' means twice as fast as standard. 'x0.5' means half as fast.")
 				);
 			} break;
 			case "tk": {
@@ -594,7 +599,7 @@ export class TipPrompt implements Prompt {
 				}
 		}
 		
-		this.container = div({class: "prompt", style: "width: 300px;"},
+		this.container = div({class: "prompt", style: "width: 400px;"},
 			message,
 			this._closeButton,
 		);
