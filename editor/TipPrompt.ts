@@ -31,6 +31,13 @@ export class TipPrompt implements Prompt {
 					p("If you don't want specific instruments to be affected by this setting, go to that instrument's effects and check out Midbox's percussion effect!"),
 				);
 			} break;
+			case "key_octave": {
+				message = div(
+					h2("Octave"),
+					p("This setting can shift the \"key\" by an octave, allowing you to use a B- or C+ key. This goes from -2 to 2."),
+					p("This feature was ported from Ultrabox!"),
+				);
+			} break;
 			case "tempo": {
 				message = div(
 					h2("Song Tempo"),
@@ -499,8 +506,8 @@ export class TipPrompt implements Prompt {
 			case "percussion":{
 				message = div(
 					h2("Key-Affected"),
-					p("The percussion effect is a bit different from the rest, more focused on features for your drums. It comes with this checkbox."),
-					p("When the box is unchecked, the instrument will not be affected by song key."),
+					p("The percussion effect comes with multiple checkboxs that toggle whether or not the instrument is affected by pitch-changing elements."),
+					p("By default, the checkbox is checked. When this box is unchecked, the instrument will no longer be affected by the song key."),
 					p("This allows changing your song key without messing up the pitches of your instrument-drums."),
 					p("[Massive thanks to LeoV for making this checkbox.]"),
 				);
@@ -508,9 +515,17 @@ export class TipPrompt implements Prompt {
 			case "songDetuneEffected": {
 				message = div(
 					h2("Song Detune-Affected"),
-					p("The percussion effect comes with another checkbox that decides whether or not the instrument is changed by the song detune modulator."),
-					p("By default, the checkbox is checked. When this box is unchecked, the instrument will no longer be affected by song detune."),
+					p("The percussion effect comes with multiple checkboxs that toggle whether or not the instrument is affected by pitch-changing elements."),
+					p("By default, the checkbox is checked. When this box is unchecked, the instrument will no longer be affected by the song detune modulator."),
 					p("This allows using the song detune modulator without messing up the pitches of your drums."),
+				);
+			} break;
+			case "songOctaveEffected": {
+				message = div(
+					h2("Song Key Octave-Affected"),
+					p("The percussion effect comes with multiple checkboxs that toggle whether or not the instrument is affected by pitch-changing elements."),
+					p("By default, the checkbox is checked. When this box is unchecked, the instrument will no longer be affected by the song key octave."),
+					p("This allows changing the song key's octave without messing up the pitches of your instrument-drums."),
 				);
 			} break;
 			case "operatorWaveform": {

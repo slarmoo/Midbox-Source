@@ -47,7 +47,7 @@ import { ThemePrompt } from "./ThemePrompt";
 import { TipPrompt } from "./TipPrompt";
 import { LanguagePrompt } from "./LanguagePrompt";
 import { Localization as _ } from "./Localization";
-import { ChangeTempo, /*ChangeKeyOctave,*/ ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangeSupersawDynamism, ChangeSupersawSpread, ChangeSupersawShape, ChangeWavetableSpeed, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, pickRandomPresetValue, ChangeRandomGeneratedInstrument, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, ChangeChipWave, ChangeNoiseWave, ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeAddEnvelope, ChangeEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeWavetableCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeBounceArp, ChangeClicklessTransition, ChangeContinueThruPattern, ChangeAliasing, ChangePercussion, ChangeSDAffected, ChangeStrumSpeed, ChangeSlideSpeed, ChangeSongSubtitle, ChangeSetPatternInstruments, ChangeHoldingModRecording } from "./changes";
+import { ChangeTempo, ChangeKeyOctave, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangeSupersawDynamism, ChangeSupersawSpread, ChangeSupersawShape, ChangeWavetableSpeed, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, pickRandomPresetValue, ChangeRandomGeneratedInstrument, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, ChangeChipWave, ChangeNoiseWave, ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeAddEnvelope, ChangeEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeWavetableCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeBounceArp, ChangeClicklessTransition, ChangeContinueThruPattern, ChangeAliasing, ChangePercussion, ChangeSDAffected, ChangeSOAffected, ChangeStrumSpeed, ChangeSlideSpeed, ChangeSongSubtitle, ChangeSetPatternInstruments, ChangeHoldingModRecording } from "./changes";
 import { oscilloscopeCanvas } from "../global/Oscilloscope"
 import { TrackEditor } from "./TrackEditor";
 
@@ -188,6 +188,8 @@ class CustomChipCanvas {
         const chipData: Float32Array = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].customChipWave;
         const renderColor: string = ColorConfig.getComputedChannelColor(this._doc.song, this._doc.channel).primaryNote;
 
+        this.renderedArray.set(chipData);
+
         // Check if the data has changed from the last render.
         let needsRedraw: boolean = false;
         if (renderColor != this.renderedColor) {
@@ -201,8 +203,6 @@ class CustomChipCanvas {
         if (!needsRedraw) {
             return;
         }
-
-        this.renderedArray.set(chipData);
 
         var ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
 
@@ -373,6 +373,8 @@ class WavetableCustomChipCanvas {
         const chipData: Float32Array = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].wavetableWaves[this.index];
         const renderColor: string = ColorConfig.getComputedChannelColor(this._doc.song, this._doc.channel).primaryNote;
 
+        this.renderedArray.set(chipData);
+
         // Check if the data has changed from the last render.
         let needsRedraw: boolean = false;
         if (renderColor != this.renderedColor) {
@@ -386,8 +388,6 @@ class WavetableCustomChipCanvas {
         if (!needsRedraw) {
             return;
         }
-
-        this.renderedArray.set(chipData);
 
         var ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
 
@@ -638,6 +638,7 @@ export class SongEditor {
 
     ]);
     private readonly _keySelect: HTMLSelectElement = buildOptions(select(), Config.keys.map(key => key.name).reverse());
+    private readonly _octaveStepper: HTMLInputElement = input({ type: "number", min: Config.octaveMin, max: Config.octaveMax, value: "0" });
     private readonly _tempoSlider: Slider = new Slider(input({ style: "margin: 0; vertical-align: middle;", type: "range", min: "30", max: "320", value: "160", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeTempo(this._doc, oldValue, newValue), false);
     private readonly _tempoStepper: HTMLInputElement = input({ style: "width: 4em; font-size: 80%; margin-left: 0.4em; vertical-align: middle;", type: "number", step: "1" });
     private readonly _chorusSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.chorusRange - 1, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeChorus(this._doc, oldValue, newValue), false);
@@ -849,6 +850,8 @@ export class SongEditor {
     private readonly _percussionRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "margin-left:10px;", onclick: () => this._openPrompt("percussion") }, span(_.percussionLabel)), this._percussionBox);
     private readonly _songDetuneEffectedBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
     private readonly _songDetuneEffectedRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "margin-left:10px;", onclick: () => this._openPrompt("songDetuneEffected") }, span(_.songDetuneEffectedLabel)), this._songDetuneEffectedBox);
+    private readonly _songOctaveEffectedBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
+    private readonly _songOctaveEffectedRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "margin-left:10px;", onclick: () => this._openPrompt("songOctaveEffected") }, span(_.songOctaveEffectedLabel)), this._songOctaveEffectedBox);
     private readonly _bitcrusherQuantizationSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.bitcrusherQuantizationRange - 1, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeBitcrusherQuantization(this._doc, oldValue, newValue), false);
     private readonly _bitcrusherQuantizationRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", title: (_.bitCrushHover), onclick: () => this._openPrompt("bitcrusherQuantization") }, span(_.bitCrushLabel)), this._bitcrusherQuantizationSlider.container);
     private readonly _bitcrusherFreqSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.bitcrusherFreqRange - 1, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeBitcrusherFreq(this._doc, oldValue, newValue), false);
@@ -1108,6 +1111,7 @@ export class SongEditor {
         this._reverbRow,
         this._percussionRow,
         this._songDetuneEffectedRow,
+        this._songOctaveEffectedRow,
         div({ style: `padding: 2px 0; margin-left: 2em; display: flex; align-items: center;` },
             span({ style: `flex-grow: 1; text-align: center;` }, span({ class: "tip", onclick: () => this._openPrompt("envelopes") }, span(_.envelopesLabel))),
             this._envelopeDropdown,
@@ -1215,6 +1219,10 @@ export class SongEditor {
             div({ class: "selectRow" },
                 span({ class: "tip", onclick: () => this._openPrompt("key") }, span(_.songKeyLabel)),
                 div({ class: "selectContainer" }, this._keySelect),
+            ),
+            div({ class: "selectRow" },
+                span({ class: "tip", onclick: () => this._openPrompt("key_octave") }, span(_.songKeyOctaveLabel)),
+                this._octaveStepper,
             ),
             div({ class: "selectRow" },
                 span({ class: "tip", onclick: () => this._openPrompt("tempo") }, span(_.songTempoLabel)),
@@ -1543,6 +1551,7 @@ export class SongEditor {
         this._tempoStepper.addEventListener("change", this._whenSetTempo);
         this._scaleSelect.addEventListener("change", this._whenSetScale);
         this._keySelect.addEventListener("change", this._whenSetKey);
+        this._octaveStepper.addEventListener("change", this._whenSetOctave);
         this._rhythmSelect.addEventListener("change", this._whenSetRhythm);
         //this._pitchedPresetSelect.addEventListener("change", this._whenSetPitchedPreset);
         //this._drumPresetSelect.addEventListener("change", this._whenSetDrumPreset);
@@ -1644,6 +1653,7 @@ export class SongEditor {
         this._aliasingBox.addEventListener("input", () => { this._doc.record(new ChangeAliasing(this._doc, this._aliasingBox.checked)) });
         this._percussionBox.addEventListener("input", () => { this._doc.record(new ChangePercussion(this._doc, this._percussionBox.checked)) });
         this._songDetuneEffectedBox.addEventListener("input", () => { this._doc.record(new ChangeSDAffected(this._doc, this._songDetuneEffectedBox.checked)) });
+        this._songOctaveEffectedBox.addEventListener("input", () => { this._doc.record(new ChangeSOAffected(this._doc, this._songOctaveEffectedBox.checked)) });
         this._discreteEnvelopeBox.addEventListener("input", () => { this._doc.record(new ChangeDiscreteEnvelope(this._doc, this._discreteEnvelopeBox.checked)) });
 
         /*(this._promptContainer.addEventListener("click", (event) => {
@@ -2168,6 +2178,7 @@ export class SongEditor {
         setSelectedValue(this._scaleSelect, this._doc.song.scale);
         this._scaleSelect.title = Config.scales[this._doc.song.scale].realName;
         setSelectedValue(this._keySelect, Config.keys.length - 1 - this._doc.song.key);
+        this._octaveStepper.value = Math.round(this._doc.song.octave).toString();
         this._tempoSlider.updateValue(Math.max(0, Math.round(this._doc.song.tempo)));
         this._tempoStepper.value = Math.round(this._doc.song.tempo).toString();
         this._songTitleInputBox.updateValue(this._doc.song.title);
@@ -2527,9 +2538,11 @@ export class SongEditor {
             if (effectsIncludePercussion(instrument.effects)) {
                 this._percussionRow.style.display = "";
                 this._songDetuneEffectedRow.style.display = "";
+                this._songOctaveEffectedRow.style.display = "";
             } else {
                 this._percussionRow.style.display = "none";
                 this._songDetuneEffectedRow.style.display = "none";
+                this._songOctaveEffectedRow.style.display = "none";
             }
 
             if (instrument.type == InstrumentType.chip || instrument.type == InstrumentType.customChipWave || instrument.type == InstrumentType.harmonics || instrument.type == InstrumentType.pickedString || instrument.type == InstrumentType.spectrum || instrument.type == InstrumentType.pwm || instrument.type == InstrumentType.noise || instrument.type == InstrumentType.wavetable) {
@@ -2590,7 +2603,7 @@ export class SongEditor {
             this._slideSpeedSlider.input.title = prettyNumber(Config.slideSpeedScale[instrument.slideSpeed]);
             this._slideSpeedDisplay.textContent = prettyNumber(Config.slideSpeedScale[instrument.slideSpeed]) + " tk";
             this._wavetableSpeedSlider.input.title = prettyNumber(Config.wavetableSpeedScale[instrument.wavetableSpeed]);
-            this._wavetableSpeedDisplay.textContent = prettyNumber(Config.wavetableSpeedScale[instrument.wavetableSpeed]) + "wps";
+            this._wavetableSpeedDisplay.textContent = prettyNumber(Config.wavetableSpeedScale[instrument.wavetableSpeed] * 4) + "wps";
             this._eqFilterSimpleCutSlider.updateValue(instrument.eqFilterSimpleCut);
             this._eqFilterSimplePeakSlider.updateValue(instrument.eqFilterSimplePeak);
             this._noteFilterSimpleCutSlider.updateValue(instrument.noteFilterSimpleCut);
@@ -4366,6 +4379,11 @@ export class SongEditor {
 
     private _whenSetTempo = (): void => {
         this._doc.record(new ChangeTempo(this._doc, -1, parseInt(this._tempoStepper.value) | 0));
+    }
+
+    private _whenSetOctave = (): void => {
+        this._doc.record(new ChangeKeyOctave(this._doc, this._doc.song.octave, parseInt(this._octaveStepper.value) | 0));
+        this._piano.forceRender();
     }
 
     private _whenSetScale = (): void => {

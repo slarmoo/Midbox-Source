@@ -184,7 +184,7 @@ const enum SongTagCode {
     arpeggioSpeed       = CharCode.G, // added in JummBox URL version 3 for arpeggio speed, DEPRECATED
     harmonics           = CharCode.H, // added in BeepBox URL version 7
     stringSustain       = CharCode.I, // added in BeepBox URL version 9
-//                      = CharCode.J,
+    octave              = CharCode.J, // added in Ultrabox URL version 2 | Midbox V0.3
     songSubtitle        = CharCode.K, // added in Midbox V0.3 for song subtitles
     pan                 = CharCode.L, // added in BeepBox URL version between 8 and 9, DEPRECATED
     customChipWave      = CharCode.M, // added in JummBox URL version 1(?) for custom chipwaves
@@ -1243,6 +1243,7 @@ export class Instrument {
     public aliases: boolean = false;
     public percussion: boolean = true;
     public songDetuneEffected: boolean = true;
+    public songOctaveEffected: boolean = true;
     public pulseWidth: number = Config.pulseWidthRange;
     public supersawDynamism: number = Config.supersawDynamismMax;
 	public supersawSpread: number = Math.ceil(Config.supersawSpreadMax / 2.0);
@@ -1263,7 +1264,6 @@ export class Instrument {
     public customChipWaveIntegral: Float32Array = new Float32Array(65); // One extra element for wrap-around in chipSynth.
     public wavetableWaves: Float32Array[];
     public wavetableIntegralWaves: Float32Array[];
-    public currentWave: number = 0;
     public wavetableSpeed: number = 8;
     public currentCycle: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31];
     public readonly operators: Operator[] = [];
@@ -1423,6 +1423,7 @@ export class Instrument {
         this.aliases = false;
         this.percussion = true;
         this.songDetuneEffected = true;
+        this.songOctaveEffected = true;
         this.fadeIn = 0;
         this.fadeOut = Config.fadeOutNeutral;
         this.transition = Config.transitions.dictionary["normal"].index;
@@ -1770,6 +1771,7 @@ export class Instrument {
         if (effectsIncludePercussion(this.effects)) {
             instrumentObject["percussion"] = this.percussion;
             instrumentObject["songDetuneEffected"] = this.songDetuneEffected;
+            instrumentObject["songOctaveEffected"] = this.songOctaveEffected;
         }
 
         if (this.type != InstrumentType.drumset) {
@@ -2373,6 +2375,12 @@ export class Instrument {
                 this.songDetuneEffected = true;
             }
 
+            if (instrumentObject["songOctaveEffected"] != undefined) {
+                this.songOctaveEffected = instrumentObject["songOctaveEffected"];
+            } else {
+                this.songOctaveEffected = true;
+            }
+
             if (instrumentObject["noteFilterType"] != undefined) {
                 this.noteFilterType = instrumentObject["noteFilterType"];
             }
@@ -2591,7 +2599,7 @@ export class Song {
     public subtitle: string;
     public scale: number;
     public key: number;
-    //public octave: number;
+    public octave: number;
     public tempo: number;
     public reverb: number;
     public beatsPerBar: number;
@@ -2737,7 +2745,7 @@ export class Song {
     public initToDefault(andResetChannels: boolean = true): void {
         this.scale = 0;
         this.key = 0;
-        //this.octave = 0;
+        this.octave = 0;
         this.loopStart = 0;
         this.loopLength = 8;
         this.tempo = 150;
@@ -2809,7 +2817,7 @@ export class Song {
             buffer.push(encodedSongTitle.charCodeAt(i));
         }
 
-        // Length of the song name string
+        // Length of the song subtitle string
         buffer.push(SongTagCode.songSubtitle);
         var encodedSongSubtitle: string = encodeURIComponent(this.subtitle);
         buffer.push(base64IntToCharCode[encodedSongSubtitle.length >> 6], base64IntToCharCode[encodedSongSubtitle.length & 0x3f]);
@@ -2825,6 +2833,7 @@ export class Song {
         buffer.push(SongTagCode.loopStart, base64IntToCharCode[this.loopStart >> 6], base64IntToCharCode[this.loopStart & 0x3f]);
         buffer.push(SongTagCode.loopEnd, base64IntToCharCode[(this.loopLength - 1) >> 6], base64IntToCharCode[(this.loopLength - 1) & 0x3f]);
         buffer.push(SongTagCode.tempo, base64IntToCharCode[this.tempo >> 6], base64IntToCharCode[this.tempo & 0x3F]);
+        buffer.push(SongTagCode.octave, base64IntToCharCode[this.octave + 2]);
         buffer.push(SongTagCode.beatCount, base64IntToCharCode[this.beatsPerBar - 1]);
         buffer.push(SongTagCode.barCount, base64IntToCharCode[(this.barCount - 1) >> 6], base64IntToCharCode[(this.barCount - 1) & 0x3f]);
         buffer.push(SongTagCode.patternCount, base64IntToCharCode[(this.patternsPerChannel - 1) >> 6], base64IntToCharCode[(this.patternsPerChannel - 1) & 0x3f]);
@@ -3020,7 +3029,7 @@ export class Song {
                     buffer.push(base64IntToCharCode[instrument.reverb]);
                 }
                 if (effectsIncludePercussion(instrument.effects)) {
-                    buffer.push(base64IntToCharCode[+instrument.percussion], base64IntToCharCode[+instrument.songDetuneEffected]);
+                    buffer.push(base64IntToCharCode[+instrument.percussion], base64IntToCharCode[+instrument.songDetuneEffected], base64IntToCharCode[+instrument.songOctaveEffected]);
                 }
 
                 if (instrument.type != InstrumentType.drumset) {
@@ -3510,6 +3519,9 @@ export class Song {
                 } else {
                     this.key = clamp(0, Config.keys.length, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                 }
+            } break;
+            case SongTagCode.octave: {
+                this.octave = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] - 2;
             } break;
             case SongTagCode.loopStart: {
                 if (beforeFive && fromBeepBox) {
@@ -4341,6 +4353,7 @@ export class Song {
                     if (effectsIncludePercussion(instrument.effects)) {
                         instrument.percussion = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] ? true : false;
                         instrument.songDetuneEffected = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] ? true : false;
+                        instrument.songOctaveEffected = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] ? true : false;
                     }
                 }
                 // Clamp the range.
@@ -5118,6 +5131,7 @@ export class Song {
             "version": Song._latestJummBoxVersion,
             "scale": Config.scales[this.scale].name,
             "key": Config.keys[this.key].name,
+            "keyOctave": this.octave,
             "introBars": this.loopStart,
             "loopBars": this.loopLength,
             "beatsPerBar": this.beatsPerBar,
@@ -5190,6 +5204,10 @@ export class Song {
 
         if (jsonObject["beatsPerMinute"] != undefined) {
             this.tempo = clamp(Config.tempoMin, Config.tempoMax + 1, jsonObject["beatsPerMinute"] | 0);
+        }
+
+        if (jsonObject["keyOctave"] != undefined) {
+            this.octave = clamp(Config.octaveMin, Config.octaveMax + 1, jsonObject["keyOctave"] | 0);
         }
 
         let legacyGlobalReverb: number = 0; // In older songs, reverb was song-global, record that here and pass it to Instrument.fromJsonObject() for context.
@@ -6371,8 +6389,13 @@ class InstrumentState {
                 quantizationSettingEnd = synth.getModValue(Config.modulators.dictionary["bit crush"].index, channelIndex, instrumentIndex, true);
             }
 
-            let basePitch: number = Config.keys[synth.song!.key].basePitch; // TODO: What if there's a key change mid-song?
+            // Set basePitch. Take into account if there are any percussion checkboxes disabled.
+            let basePitch: number = Config.keys[synth.song!.key].basePitch + (Config.pitchesPerOctave * synth.song!.octave); // TODO: What if there's a key change mid-song?
             if (usesPercussion && (instrument.percussion == false)) {
+                basePitch = 12 + (Config.pitchesPerOctave * synth.song!.octave);
+            } else if (usesPercussion && (instrument.songOctaveEffected == false)) {
+                basePitch = Config.keys[synth.song!.key].basePitch;
+            } else if (usesPercussion && (instrument.songOctaveEffected == false) && (instrument.percussion == false)) {
                 basePitch = 12;
             }
             const freqStart: number = Instrument.frequencyFromPitch(basePitch + 60) * Math.pow(2.0, (Config.bitcrusherFreqRange - 1 - freqSettingStart) * Config.bitcrusherOctaveStep);
@@ -8949,8 +8972,13 @@ export class Synth {
         let chordExpressionEnd: number = chordExpression;
 
         let expressionReferencePitch: number = 16; // A low "E" as a MIDI pitch.
-        let basePitch: number = Config.keys[song.key].basePitch;
+        // Set basePitch. Take into account if there are any percussion checkboxes disabled.
+        let basePitch: number = Config.keys[song.key].basePitch + (Config.pitchesPerOctave * song.octave);
         if (effectsIncludePercussion(instrument.effects) && (instrument.percussion == false)) {
+            basePitch = 12 + (Config.pitchesPerOctave * song.octave);
+        } else if (effectsIncludePercussion(instrument.effects) && (instrument.songOctaveEffected == false)) {
+            basePitch = Config.keys[song.key].basePitch;
+        } else if (effectsIncludePercussion(instrument.effects) && (instrument.percussion == false)  && (instrument.songOctaveEffected == false)) {
             basePitch = 12;
         }
         let baseExpression: number = 1.0;
@@ -9560,7 +9588,7 @@ export class Synth {
                 if (wavetableSpeed == 0 && this.isModActive(Config.modulators.dictionary["cycle wave"].index, channelIndex, tone.instrumentIndex)) {
                     tone.currentWave = Math.max(0, Math.floor(this.getModValue(Config.modulators.dictionary["cycle wave"].index, channelIndex, tone.instrumentIndex, false) - Config.modulators.dictionary["cycle wave"].convertRealFactor));
                 } else {
-                tone.currentWave = instrument.currentCycle[Math.floor(instrument.currentWave) % instrument.currentCycle.length];
+                tone.currentWave = instrument.currentCycle[Math.floor(instrumentState.currentWave) % instrument.currentCycle.length];
                 }
             }
             if (instrument.type == InstrumentType.pickedString) {
@@ -11326,7 +11354,7 @@ export class Synth {
             }
             // Setting the position of the cycle according to it's mod's value.
             else if (setting == Config.modulators.dictionary["cycle wave"].index && synth.tick == 0 && tone.noteStartPart == synth.beat * Config.partsPerBeat + synth.part) {
-                synth.song.channels[instrument.modChannels[mod]].instruments[usedInstruments[instrumentIndex]].currentWave = synth.getModValue(Config.modulators.dictionary["cycle wave"].index, instrument.modChannels[mod], usedInstruments[instrumentIndex], false) - Config.modulators.dictionary["cycle wave"].convertRealFactor;
+                synth.channels[instrument.modChannels[mod]].instruments[usedInstruments[instrumentIndex]].currentWave = synth.getModValue(Config.modulators.dictionary["cycle wave"].index, instrument.modChannels[mod], usedInstruments[instrumentIndex], false) - Config.modulators.dictionary["cycle wave"].convertRealFactor;
             } 
             // Denote next bar skip
             else if (setting == Config.modulators.dictionary["next bar"].index) {

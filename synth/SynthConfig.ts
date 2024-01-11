@@ -310,8 +310,8 @@ export class Config {
     public static readonly blackKeyNameParents:       ReadonlyArray<number> = [-1, 1, -1, 1, -1, 1, -1, -1, 1, -1, 1, -1];
     public static readonly tempoMin:                  number = 1;
     public static readonly tempoMax:                  number = 750;
-    public static readonly octaveMin:                 number = -3;
-	public static readonly octaveMax:                 number = 3;
+    public static readonly octaveMin:                 number = -2;
+	public static readonly octaveMax:                 number = 2;
     public static readonly echoDelayRange:            number = 48;
     public static readonly echoDelayStepTicks:        number = 4;
     public static readonly echoSustainRange:          number = 8;

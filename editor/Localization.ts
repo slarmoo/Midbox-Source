@@ -76,6 +76,7 @@ export class Localization {
     public static instTypeLabel: string = "Type:";
     public static songScaleLabel: string = "Scale:";
     public static songKeyLabel: string = "Key:";
+    public static songKeyOctaveLabel: string = "Octave: ";
     public static songTempoLabel: string = "Tempo:";
     public static songRhythmLabel: string = "Rhythm:";
     public static operFreqLabel: string = "Freq:";
@@ -142,6 +143,7 @@ export class Localization {
     public static reverbEffectLabel: string = "reverb";
     public static percussionEffectLabel: string = "percussion";
     public static songDetuneEffectedLabel: string = "SD-Affected:";
+    public static songOctaveEffectedLabel: string = "SO-Affected:";
     public static wave1Label: string = "rounded";
     public static wave2Label: string = "triangle";
     public static wave3Label: string = "square";
@@ -936,6 +938,7 @@ if (language == "spanish") {
     Localization.instTypeLabel = "Tipo:";
     Localization.songScaleLabel = "Escala:";
     Localization.songKeyLabel = "Tono:";
+    Localization.songKeyOctaveLabel = "Octavo: ";
     Localization.songTempoLabel = "Tempo:";
     Localization.songRhythmLabel = "Ritmo:";
     Localization.operFreqLabel = "Frec:";
@@ -980,6 +983,7 @@ if (language == "spanish") {
     Localization.rhythmBy24Label = "÷24 (Quattuorvigntillizos)";
     Localization.percussionLabel = "Clave-Afectado:";
     Localization.songDetuneEffectedLabel = "DdC-Afectado:";
+    Localization.songOctaveEffectedLabel = "OdC-Afectado:";
     Localization.editLabel = "Modificar";
     Localization.customLabel = "personalizado";
     Localization.newSongLabel = "Nuevo Proyecto";
@@ -1082,7 +1086,7 @@ if (language == "spanish") {
     Localization.notesOutsideScaleLabel = "Agregar Notas Fuera de Escala";
     Localization.setDefaultScaleLabel = "Mantener Escala Seleccionada como Predeterminada";
     Localization.showAllChannelsLabel = "Mostrar Todos los Canales";
-    Localization.scrollbarLabel = "Mostrar Barra de Desplazamiento de Octava";
+    Localization.scrollbarLabel = "Mostrar Barra de Desplazamiento de Octavo";
     Localization.fineNoteVolumeLabel = "Volumen de Nota Siempre Correcto";
     Localization.channelMutingLabel = "Habilitar Silenciamiento/Cambio de Nombre de Canal";
     Localization.displayURLInBrowserLabel = "Mostrar Datos de Canciones en la URL";

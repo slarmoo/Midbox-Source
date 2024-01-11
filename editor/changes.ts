@@ -2933,6 +2933,19 @@ export class ChangeSDAffected extends Change {
     }
 }
 
+export class ChangeSOAffected extends Change {
+    constructor(doc: SongDocument, newValue: boolean) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        const oldValue: boolean = instrument.songOctaveEffected;
+        doc.notifier.changed();
+        if (oldValue != newValue) {
+            instrument.songOctaveEffected = newValue;
+            this._didSomething();
+        }
+    }
+}
+
 export class ChangeDiscreteEnvelope extends Change {
     constructor(doc: SongDocument, newValue: boolean) {
         super();
@@ -4685,14 +4698,14 @@ export function removeDuplicatePatterns(channels: Channel[]): void {
     }
 }
 
-/*export class ChangeKeyOctave extends Change {
+export class ChangeKeyOctave extends Change {
     constructor(doc: SongDocument, oldValue: number, newValue: number) {
         super();
         doc.song.octave = Math.max(Config.octaveMin, Math.min(Config.octaveMax, Math.round(newValue)));
         doc.notifier.changed();
         if (oldValue != newValue) this._didSomething();
     }
-}*/
+}
 
 export class ChangeTempo extends Change {
     constructor(doc: SongDocument, oldValue: number, newValue: number) {
