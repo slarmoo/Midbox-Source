@@ -12,6 +12,7 @@ export class KeybindSetupPrompt implements Prompt {
     option({value: "ctrlRtoPageReload"}, "Reload Page"),
     option({value: "ctrlRDeactivated"}, "Deactivate"),
     );
+    private readonly _deactivateBKeybindBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
 
     private readonly _cancelButton: HTMLButtonElement = button({class: "cancelButton"});
 	private readonly _okayButton: HTMLButtonElement = button({class: "okayButton", style: "width:45%;"}, _.confirmLabel);
@@ -31,6 +32,12 @@ public readonly container: HTMLDivElement = div({class: "prompt noSelection", st
                 "Ctrl+r will, in most cases, refresh the page. In Midbox, it instead brings you to the random generation settings prompt."),
 			this._CTRLAndROptions,
         ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 5em; justify-content: flex-end;"},
+			"B:",
+            p({style: "margin-left: 2em;"},
+                "B activates a 'loop bar' mode on the bar you have selected."),
+			this._deactivateBKeybindBox,
+        ),
     label({style: "display: flex; flex-direction: row-reverse; justify-content: space-between;"},
 			this._okayButton,
 		),
@@ -40,6 +47,7 @@ public readonly container: HTMLDivElement = div({class: "prompt noSelection", st
 constructor(private _doc: SongDocument) {
     this._deactivateCapsLockBox.checked = this._doc.prefs.deactivateCapsLock;
     this._CTRLAndROptions.value = this._doc.prefs.CTRLrEvent;
+    this._deactivateBKeybindBox.checked = this._doc.prefs.deactivateBKeybind;
 
     this._okayButton.addEventListener("click", this._confirm);
 	this._cancelButton.addEventListener("click", this._close);
@@ -53,6 +61,7 @@ private _close = (): void => {
 private _confirm = (): void => { 
     this._doc.prefs.deactivateCapsLock = this._deactivateCapsLockBox.checked;
     this._doc.prefs.CTRLrEvent = this._CTRLAndROptions.value;
+    this._doc.prefs.deactivateBKeybind = this._deactivateBKeybindBox.checked;
 
     this._doc.prefs.save();
 	this._close();

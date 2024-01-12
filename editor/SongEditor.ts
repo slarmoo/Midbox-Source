@@ -986,7 +986,7 @@ export class SongEditor {
     );
 
     private readonly _customWaveDrawCanvas: CustomChipCanvas = new CustomChipCanvas(canvas({ width: 128, height: 52, style: "border:2px solid " + ColorConfig.uiWidgetBackground, id: "customWaveDrawCanvas" }), this._doc, (newArray: Float32Array) => new ChangeCustomWave(this._doc, newArray));
-    private readonly _wavetableCustomWaveDrawCanvas: WavetableCustomChipCanvas = new WavetableCustomChipCanvas(canvas({ width: 128, height: 52, style: "border:2px solid " + ColorConfig.uiWidgetBackground, id: "customWaveDrawCanvas" }), this._doc, (newArray: Float32Array) => new ChangeWavetableCustomWave(this._doc, newArray, this._wavetableIndex));
+    private readonly _wavetableCustomWaveDrawCanvas: WavetableCustomChipCanvas = new WavetableCustomChipCanvas(canvas({ width: 128, height: 52, style: "border:2px solid " + ColorConfig.uiWidgetBackground, id: "customWaveDrawCanvas" }), this._doc, (newArray: Float32Array) => new ChangeWavetableCustomWave(this._doc, newArray, this._wavetableIndices[this._doc.channel][this._doc.getCurrentInstrument()]));
 
     private readonly _customWavePresetDrop: HTMLSelectElement = buildHeaderedOptions(_.loadPresetLabel, select({ style: "width: 50%; height:1.5em; text-align: center; text-align-last: center;" }),
         Config.chipWaves.map(wave => wave.name)
@@ -1278,7 +1278,10 @@ export class SongEditor {
     private _wasPlaying: boolean = false;
     private _currentPromptName: string | null = null;
     private _highlightedInstrumentIndex: number = -1;
-    private _highlightedWavetableIndex: number = -1;
+    private _highlightedWavetableIndices: number[][] = [];
+    public _wavetableIndices: number[][] = [];
+    private _currentlySeenWavetableChannel: number = -1;
+    private _currentlySeenWavetableInstrument: number = -1;
     private _renderedInstrumentCount: number = 0;
     private _renderedIsPlaying: boolean = false;
     private _renderedIsRecording: boolean = false;
@@ -1318,8 +1321,6 @@ export class SongEditor {
     private _modRecTimeout: number = -1;
 
     constructor(private _doc: SongDocument) {
-
-        this._wavetableWaveButtons[0].classList.add("selected-wave");
 
         this._doc.notifier.watch(this.whenUpdated);
         this._doc.modRecordingHandler = () => { this.handleModRecording() };
@@ -1400,6 +1401,21 @@ export class SongEditor {
             frequencySelect.addEventListener("change", () => {
                 this._doc.record(new ChangeOperatorFrequency(this._doc, operatorIndex, frequencySelect.selectedIndex));
             });
+        }
+
+        {
+            const maxChannelCount: number = Config.pitchChannelCountMax;
+            const maxInstrumentCount: number = Config.patternInstrumentCountMax;
+            for (let i: number = 0; i < maxChannelCount; i++) {
+                const channelWavetableIndices: number[] = [];
+                const channelWavetableHighlightedIndices: number[] = [];
+                for (let j: number = 0; j < maxInstrumentCount; j++) {
+                    channelWavetableIndices.push(0);
+                    channelWavetableHighlightedIndices.push(-1);
+                }
+                this._wavetableIndices.push(channelWavetableIndices);
+                this._highlightedWavetableIndices.push(channelWavetableHighlightedIndices);
+            }
         }
 
         this._drumsetGroup.appendChild(
@@ -1983,10 +1999,9 @@ export class SongEditor {
                 case "randomGenSettings":
                     this.prompt = new RandomGenPrompt(this._doc);
                     break;
-                /*case "harmonicsSettings":
-                    this.prompt = new HarmonicsPrompt(this._doc, this);
+                case "harmonicsSettings":
+                    //this.prompt = new HarmonicsPrompt(this._doc, this); MID TODO: uncomment it again pls dude come on you can do it bruv quit being lazy
                     break;
-                    MID TODO: Uncomment this and work on it ya lazy dog.*/
                 case "stringSustain":
 					this.prompt = new SustainPrompt(this._doc);
 					break;
@@ -2626,6 +2641,8 @@ export class SongEditor {
                 if (this.prompt instanceof WavetablePrompt) {
                     this.prompt.wavetableCanvas.render();
                 }
+
+                this._renderWavetableWaveButtons(this._doc.song.channels[this._doc.channel], ColorConfig.getChannelColor(this._doc.song, this._doc.channel));
             }
 
             this._renderInstrumentBar(channel, instrumentIndex, colors);
@@ -3335,24 +3352,21 @@ export class SongEditor {
         }
     }
 
-    private _renderWavetableWaveButtons(channel: Channel, wavetableIndex: number, colors: ChannelColors) {
-        wavetableIndex = this._wavetableIndex
+    private _renderWavetableWaveButtons(channel: Channel, colors: ChannelColors) {
         let instrument: Instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
         if (instrument.type == InstrumentType.wavetable) {
             this._wavetableWaveButtonsContainer.style.setProperty("--text-color-lit", colors.primaryNote);
             this._wavetableWaveButtonsContainer.style.setProperty("--text-color-dim", colors.secondaryNote);
             this._wavetableWaveButtonsContainer.style.setProperty("--background-color-lit", colors.primaryChannel);
             this._wavetableWaveButtonsContainer.style.setProperty("--background-color-dim", colors.secondaryChannel);
-            if (this._highlightedWavetableIndex != this._wavetableIndex) {
-                const oldButton: HTMLButtonElement = this._wavetableWaveButtons[this._highlightedWavetableIndex];
+            if (this._currentlySeenWavetableChannel != this._doc.channel || this._currentlySeenWavetableInstrument != this._doc.getCurrentInstrument() || this._highlightedWavetableIndices[this._doc.channel][this._doc.getCurrentInstrument()] != this._wavetableIndices[this._doc.channel][this._doc.getCurrentInstrument()]) {
+                const oldButton: HTMLButtonElement | undefined = this._wavetableWaveButtons.find(x => x.classList.contains("selected-wave"));
                 if (oldButton != null) oldButton.classList.remove("selected-wave");
-                const newButton: HTMLButtonElement = this._wavetableWaveButtons[this._wavetableIndex];
+                const newButton: HTMLButtonElement = this._wavetableWaveButtons[this._wavetableIndices[this._doc.channel][this._doc.getCurrentInstrument()]];
                 newButton.classList.add("selected-wave");
-                this._highlightedWavetableIndex = this._wavetableIndex;
-            } else {
-                const oldButton: HTMLButtonElement = this._wavetableWaveButtons[this._highlightedWavetableIndex];
-                if (oldButton != null) oldButton.classList.remove("selected-wave");
-                this._highlightedWavetableIndex = -1;
+                this._highlightedWavetableIndices[this._doc.channel][this._doc.getCurrentInstrument()] = this._wavetableIndices[this._doc.channel][this._doc.getCurrentInstrument()];
+                this._currentlySeenWavetableChannel = this._doc.channel;
+                this._currentlySeenWavetableInstrument = this._doc.getCurrentInstrument();
             }
         }
     }
@@ -3720,6 +3734,7 @@ export class SongEditor {
                         event.preventDefault();
                     }
                 } else {
+                    if (this._doc.prefs.deactivateBKeybind == true) {
                     if (needControlForShortcuts == (event.ctrlKey || event.metaKey)) {
                         if (this._doc.synth.loopBar != this._doc.bar) {
                             this._doc.synth.loopBar = this._doc.bar;
@@ -3751,6 +3766,9 @@ export class SongEditor {
                         event.preventDefault();
                     }
                     break;
+                    } else {
+                        break;
+                    }
                 }
                 break;
             case 68: // d
@@ -4495,10 +4513,10 @@ export class SongEditor {
     private _whenSelectWavetableWave = (event: MouseEvent): void => {
         const index: number = this._wavetableWaveButtons.indexOf(<any>event.target);
         if (index != -1) {
-            this._wavetableIndex = index;
-            this._wavetableCustomWaveDrawCanvas.index = this._wavetableIndex;
+            this._wavetableIndices[this._doc.channel][this._doc.getCurrentInstrument()] = index;
+            this._wavetableCustomWaveDrawCanvas.index = this._wavetableIndices[this._doc.channel][this._doc.getCurrentInstrument()];
             this._wavetableCustomWaveDrawCanvas.redrawCanvas();
-            this._renderWavetableWaveButtons(this._doc.song.channels[this._doc.channel], index, ColorConfig.getChannelColor(this._doc.song, this._doc.channel));
+            this._renderWavetableWaveButtons(this._doc.song.channels[this._doc.channel], ColorConfig.getChannelColor(this._doc.song, this._doc.channel));
         }
         this.refocusStage();
     }
@@ -4869,6 +4887,4 @@ export class SongEditor {
         this._doc.notifier.changed();
         this._doc.prefs.save();
     }
-
-    public _wavetableIndex: number = 0;
 }

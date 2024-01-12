@@ -12,11 +12,19 @@ import { AnalogousDrum, analogousDrumMap, MidiChunkType, MidiFileFormat, MidiEve
 import { ArrayBufferReader } from "./ArrayBufferReader";
 import { Localization as _ } from "./Localization";
 
-	const {button, p, div, h2, input} = HTML;
+	const {button, p, div, h2, input, select, option} = HTML;
 
 export class ImportPrompt implements Prompt {
 		private readonly _fileInput: HTMLInputElement = input({type: "file", accept: ".json,application/json,.mid,.midi,audio/midi,audio/x-midi"});
 		private readonly _cancelButton: HTMLButtonElement = button({class: "cancelButton"});
+		private readonly _modSelect: HTMLSelectElement = select({style: "width: 75%; align-self: center; margin-top: 5px;"},
+    	option({value: "beepboxJson"}, "Beepbox"),
+    	option({value: "jummboxJson"}, "Jummbox"),
+		option({value: "midboxJson"}, "Midbox"),
+    	option({value: "goldboxJson"}, "Goldbox"),
+		option({value: "ultraboxJson"}, "Ultrabox"),
+		option({value: "somethingJson"}, "What other mods..."),
+    	);
 		
 		public readonly container: HTMLDivElement = div({class: "prompt noSelection", style: "width: 300px;"},
 		h2(_.importPrompt1Label),
@@ -26,10 +34,11 @@ export class ImportPrompt implements Prompt {
 			p({style: "text-align: left; margin: 0.5em 0;"},
 			_.importPromptLargeText2Label,
 		),
+		this._fileInput,
 			p({style: "text-align: left; margin: 0.5em 0;"},
 			_.importPromptLargeText3Label,
 		),
-		this._fileInput,
+		this._modSelect,
 		this._cancelButton,
 	);
 		

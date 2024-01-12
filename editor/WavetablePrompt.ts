@@ -263,7 +263,7 @@ export class WavetablePromptCanvas {
 
 export class WavetablePrompt implements Prompt {
 
-	public wavetableCanvas: WavetablePromptCanvas = new WavetablePromptCanvas(this._doc, this._songEditor._wavetableIndex);
+	public wavetableCanvas: WavetablePromptCanvas = new WavetablePromptCanvas(this._doc, this._songEditor._wavetableIndices[this._doc.channel][this._doc.getCurrentInstrument()]);
 
 	public readonly _playButton: HTMLButtonElement = button({ style: "width: 55%;", type: "button" });
 
@@ -336,7 +336,7 @@ export class WavetablePrompt implements Prompt {
 		}
 		this._wavetableWaveButtons[0].classList.add("rounded-top-left");
 		this._wavetableWaveButtons[31].classList.add("rounded-top-right");
-		this._wavetableWaveButtons[this._songEditor._wavetableIndex].classList.add("selected-instrument");
+		this._wavetableWaveButtons[this._songEditor._wavetableIndices[this._doc.channel][this._doc.getCurrentInstrument()]].classList.add("selected-instrument");
 
 		this._wavetableWaveButtonContainer.style.setProperty("--text-color-lit", colors.primaryNote);
 		this._wavetableWaveButtonContainer.style.setProperty("--text-color-dim", colors.secondaryNote);

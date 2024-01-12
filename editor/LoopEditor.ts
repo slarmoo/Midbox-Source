@@ -23,7 +23,7 @@ export class LoopEditor {
 		private _loopAtPoint: number = -1;
 		
 		private readonly _loop: SVGPathElement = SVG.path({fill: "none", stroke: ColorConfig.loopAccent, "stroke-width": 4});
-		private readonly _barLoop: SVGPathElement = SVG.path({fill: "none", stroke: ColorConfig.uiWidgetFocus, "stroke-width": 2});
+		private readonly _barLoop: SVGPathElement = SVG.path({fill: "none", stroke: ColorConfig.primaryText, "stroke-width": 2});
 		private readonly _highlight: SVGPathElement = SVG.path({fill: ColorConfig.hoverPreview, "pointer-events": "none"});
 		
 	private readonly _svg: SVGSVGElement = SVG.svg({style: `touch-action: pan-y; position: absolute;`, height: this._editorHeight},

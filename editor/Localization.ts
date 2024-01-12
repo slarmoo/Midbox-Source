@@ -488,7 +488,7 @@ export class Localization {
     public static importPrompt1Label: string = "Import";
     public static importPromptLargeText1Label: string = "Midbox songs exported and re-imported as .json files. You could also use other means to make .json files for Midbox as long as they follow the same structure.";
     public static importPromptLargeText2Label: string = "Midbox can also (crudely) import .mid files. There are many tools available for creating .mid files. Shorter and simpler songs are more likely to work well.";
-    public static importPromptLargeText3Label: string = "Warning. When importing .json files into and from Midbox, be wary that due to how Midbox works, things in these files may be imported incorrectly or get corrupted.";
+    public static importPromptLargeText3Label: string = "If you are importing a .json from another Beepbox mod, you can select which mod the .json is coming from here so the import will be more accurate.";
     public static moveNotesSidewaysPrompt1Label: string = "Overflow notes across bars.";
     public static moveNotesSidewaysPrompt2Label: string = "Wrap notes around within bars.";
     public static moveNotesSidewaysPrompt3Label: string = "Move Notes Sideways";
@@ -1343,7 +1343,7 @@ if (language == "spanish") {
     Localization.importPrompt1Label = "Importar";
     Localization.importPromptLargeText1Label = "Las canciones de Midbox se puede exportan y se vuelven a importar como archivos .json. También puede usar otros medios para crear archivos .json para Midbox, siempre que sigan la misma estructura.";
     Localization.importPromptLargeText2Label = "Midbox también puede (crudamente) importar archivos .mid. Hay muchas herramientas disponibles para crear archivos .mid. Es más probable que las canciones más cortas y sencillas funcionen bien.";
-    Localization.importPromptLargeText3Label = "Advertencia. Al importar archivos .json hacia y desde Midbox, tenga en cuenta que, debido a cómo funciona Midbox, las cosas en estos archivos pueden importarse incorrectamente o dañarse.";
+    Localization.importPromptLargeText3Label = "Si está importando un .json desde otro mod de Beepbox, puede seleccionar de qué mod proviene el .json aquí para que la importación sea más precisa.";
     Localization.moveNotesSidewaysPrompt1Label = "Notas de desbordamiento a través de las barras.";
     Localization.moveNotesSidewaysPrompt2Label = "Envuelve las notas dentro de las barras.";
     Localization.moveNotesSidewaysPrompt3Label = "Mover Notas a los Lados";

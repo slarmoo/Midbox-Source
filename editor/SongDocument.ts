@@ -143,6 +143,7 @@ export class SongDocument {
 
 	public deactivateCapsLock: boolean = true;
 	public CTRLrEvent: string = "ctrlRtoRandomGenPrompt";
+	public deactivateBKeybind: boolean = true;
 		
 	constructor() {
 		this.notifier.watch(this._validateDocState);

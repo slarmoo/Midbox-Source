@@ -54,6 +54,7 @@ export class Preferences {
 
 	public deactivateCapsLock: boolean;
 	public CTRLrEvent: string;
+	public deactivateBKeybind: boolean;
 	
 	constructor() {
 		this.reload();
@@ -107,6 +108,8 @@ export class Preferences {
 		
 		this.deactivateCapsLock = window.localStorage.getItem("deactivateCapsLock") != "false";
 		this.CTRLrEvent = window.localStorage.getItem("CTRLrEvent") || "ctrlRtoRandomGenPrompt";
+		this.deactivateBKeybind = window.localStorage.getItem("deactivateBKeybind") != "false";
+		
 
 		const defaultScale: Scale | undefined = Config.scales.dictionary[window.localStorage.getItem("defaultScale")!];
 		this.defaultScale = (defaultScale != undefined) ? defaultScale.index : 0;
@@ -171,5 +174,6 @@ export class Preferences {
 
 		window.localStorage.setItem("deactivateCapsLock", this.deactivateCapsLock ? "true" : "false");
 		window.localStorage.setItem("CTRLrEvent", this.CTRLrEvent);
+		window.localStorage.setItem("deactivateBKeybind", this.deactivateBKeybind ? "true" : "false");
 	}
 }
