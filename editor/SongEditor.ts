@@ -1319,6 +1319,8 @@ export class SongEditor {
 
     constructor(private _doc: SongDocument) {
 
+        this._wavetableWaveButtons[0].classList.add("selected-wave");
+
         this._doc.notifier.watch(this.whenUpdated);
         this._doc.modRecordingHandler = () => { this.handleModRecording() };
         new MidiInputHandler(this._doc);
@@ -4869,9 +4871,4 @@ export class SongEditor {
     }
 
     public _wavetableIndex: number = 0;
-    /*public _changeWavetableIndex = (index: number): void => {
-        this._wavetableIndex = index;
-        this._wavetableCustomWaveDrawCanvas.index = this._wavetableIndex;
-        this._wavetableCustomWaveDrawCanvas.redrawCanvas();
-    }*/
 }

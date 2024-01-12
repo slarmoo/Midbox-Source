@@ -5722,8 +5722,8 @@ class EnvelopeComputer {
         const beatsPerTick: number = 1.0 / (Config.ticksPerPart * Config.partsPerBeat);
         const beatTimeStart: number = beatsPerTick * tickTimeStart;
         const beatTimeEnd: number = beatsPerTick * tickTimeEnd;
-        const beatNoteTimeStart: number = beatsPerTick * noteTicksStart;
-        const beatNoteTimeEnd: number = beatsPerTick * noteTicksEnd;
+        const beatNoteTimeStart: number = beatsPerTick * (noteTicksStart * timeScale);
+        const beatNoteTimeEnd: number = beatsPerTick * (noteTicksStart * timeScale + timeScale);
 
         let noteSizeStart: number = this._noteSizeFinal;
         let noteSizeEnd: number = this._noteSizeFinal;
@@ -5909,6 +5909,7 @@ class EnvelopeComputer {
             }
             // New Jummbox V2.6 envelope!
             case EnvelopeType.jummboxBlip: return 1.0 * +(time < (0.25 / Math.sqrt(envelope.speed)));
+            // 3 Midbox-unique envelopes.
             case EnvelopeType.decelerate:
             return 0.5 - Math.sin(((time + 3) / 8) ** -1.3 * (400 / envelope.speed)) * 0.5;
             case EnvelopeType.stairs: {
@@ -6390,13 +6391,13 @@ class InstrumentState {
             }
 
             // Set basePitch. Take into account if there are any percussion checkboxes disabled.
-            let basePitch: number = Config.keys[synth.song!.key].basePitch + (Config.pitchesPerOctave * synth.song!.octave); // TODO: What if there's a key change mid-song?
-            if (usesPercussion && (instrument.percussion == false)) {
-                basePitch = 12 + (Config.pitchesPerOctave * synth.song!.octave);
-            } else if (usesPercussion && (instrument.songOctaveEffected == false)) {
-                basePitch = Config.keys[synth.song!.key].basePitch;
-            } else if (usesPercussion && (instrument.songOctaveEffected == false) && (instrument.percussion == false)) {
-                basePitch = 12;
+            const songKeyBasePitch: number = Config.keys[synth.song!.key].basePitch;
+            const songOctaveBasePitch: number = Config.pitchesPerOctave * synth.song!.octave;
+            let basePitch: number = songKeyBasePitch + songOctaveBasePitch;
+            if (usesPercussion) {
+                const keyBasePitch: number = instrument.percussion ? songKeyBasePitch : 12;
+                const octaveBasePitch: number = instrument.songOctaveEffected ? songOctaveBasePitch : 0;
+                basePitch = keyBasePitch + octaveBasePitch;
             }
             const freqStart: number = Instrument.frequencyFromPitch(basePitch + 60) * Math.pow(2.0, (Config.bitcrusherFreqRange - 1 - freqSettingStart) * Config.bitcrusherOctaveStep);
             const freqEnd: number = Instrument.frequencyFromPitch(basePitch + 60) * Math.pow(2.0, (Config.bitcrusherFreqRange - 1 - freqSettingEnd) * Config.bitcrusherOctaveStep);
@@ -8973,13 +8974,13 @@ export class Synth {
 
         let expressionReferencePitch: number = 16; // A low "E" as a MIDI pitch.
         // Set basePitch. Take into account if there are any percussion checkboxes disabled.
-        let basePitch: number = Config.keys[song.key].basePitch + (Config.pitchesPerOctave * song.octave);
-        if (effectsIncludePercussion(instrument.effects) && (instrument.percussion == false)) {
-            basePitch = 12 + (Config.pitchesPerOctave * song.octave);
-        } else if (effectsIncludePercussion(instrument.effects) && (instrument.songOctaveEffected == false)) {
-            basePitch = Config.keys[song.key].basePitch;
-        } else if (effectsIncludePercussion(instrument.effects) && (instrument.percussion == false)  && (instrument.songOctaveEffected == false)) {
-            basePitch = 12;
+        const songKeyBasePitch: number = Config.keys[song.key].basePitch;
+        const songOctaveBasePitch: number = Config.pitchesPerOctave * song.octave;
+        let basePitch: number = songKeyBasePitch + songOctaveBasePitch;
+        if (effectsIncludePercussion(instrument.effects)) {
+            const keyBasePitch: number = instrument.percussion ? songKeyBasePitch : 12;
+            const octaveBasePitch: number = instrument.songOctaveEffected ? songOctaveBasePitch : 0;
+            basePitch = keyBasePitch + octaveBasePitch;
         }
         let baseExpression: number = 1.0;
         let pitchDamping: number = 48;
