@@ -45,6 +45,8 @@ export class ImportPrompt implements Prompt {
 	constructor(private _doc: SongDocument) {
 		this._fileInput.select();
 			setTimeout(()=>this._fileInput.focus());
+
+		//this._modSelect.value = ???
 			
 		this._fileInput.addEventListener("change", this._whenFileSelected);
 		this._cancelButton.addEventListener("click", this._close);

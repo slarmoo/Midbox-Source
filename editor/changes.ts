@@ -973,7 +973,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
             instrument.fadeOut = selectCurvedDistribution(0, Config.fadeOutTicks.length - 1, Config.fadeOutNeutral, 2);
             }
 
-            if (doc.prefs.unisonOnRandomization && (type == InstrumentType.chip || type == InstrumentType.harmonics || type == InstrumentType.pickedString || type == InstrumentType.customChipWave || type == InstrumentType.pwm || type == InstrumentType.spectrum)) {
+            if (doc.prefs.unisonOnRandomization && (type == InstrumentType.chip || type == InstrumentType.harmonics || type == InstrumentType.pickedString || type == InstrumentType.customChipWave || type == InstrumentType.pwm || type == InstrumentType.spectrum || type == InstrumentType.wavetable)) {
                 instrument.unison = Config.unisons.dictionary[selectWeightedRandom([
                     { item: "none", weight: 20 },
                     { item: "shimmer", weight: 2 },
@@ -1001,9 +1001,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                 ])].index;
             }
             else {
-                instrument.unison = Config.unisons.dictionary[selectWeightedRandom([
-                    { item: "none", weight: 20 },
-                ])].index;
+                instrument.unison = instrument.unison;
             }
             if (Math.random() < 0.1) {
                 instrument.effects |= 1 << EffectType.transition;

@@ -42,6 +42,8 @@ export class Localization {
     public static EQTypeLabel: string = "EQ Filt. Type:";
     public static noteFiltLabel: string = "Note Filt:";
     public static noteFiltTypeLabel: string = "Note Filt. Type:";
+    public static songEQLabel: string = "Song EQ:";
+    public static songEQTypeLabel: string = "Song EQ Type:";
     public static pwmLabel: string = "Pulse Width:";
     public static pitchShiftLabel: string = "Pitch Shift:";
     public static detuneLabel: string = "Detune:";

@@ -614,6 +614,17 @@ export class SongEditor {
         option({ value: "recordingSetup" }, (_.setNoteRecordingLabel)),
         option({ value: "keybindSetup" }, (_.keybindSetupLabel)),
     );
+    private readonly _songEQFilterSimpleButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "no-underline", onclick: () => this._switchEQFilterType(true) }, span(_.simpleLabel));
+    private readonly _songEQFilterAdvancedButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "last-button no-underline", onclick: () => this._switchEQFilterType(false) }, span(_.advancedLabel));
+    private readonly _songEQFilterTypeRow: HTMLElement = div({ class: "selectRow", style: "padding-top: 4px; margin-bottom: 0px;" }, span({ style: "font-size: x-small;", class: "tip", onclick: () => this._openPrompt("filterType") }, span(_.songEQTypeLabel)), div({ class: "instrument-bar" }, this._songEQFilterSimpleButton, this._songEQFilterAdvancedButton));
+    private readonly _songEQFilterEditor: FilterEditor = new FilterEditor(this._doc);
+    private readonly _songEQFilterZoom: HTMLButtonElement = button({ style: "margin-left:0em; padding-left:0.2em; height:1.5em; max-width: 12px;", onclick: () => this._openPrompt("customEQFilterSettings") }, "+");
+    private readonly _songEQFilterRow: HTMLElement = div({ class: "selectRow" }, this._songEQFilterZoom, this._songEQFilterEditor.container);
+    private readonly _songEQFilterSimpleCutSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.filterSimpleCutRange - 1, value: "6", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeEQFilterSimpleCut(this._doc, oldValue, newValue), false);
+    private _songEQFilterSimpleCutRow: HTMLDivElement = div({ class: "selectRow", style: "font-size: 12px;", title: _.simpleFilter1Label }, span({ class: "tip", onclick: () => this._openPrompt("filterCutoff") }, span(_.filterCutLabel)), this._songEQFilterSimpleCutSlider.container);
+    private readonly _songEQFilterSimplePeakSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.filterSimplePeakRange - 1, value: "6", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeEQFilterSimplePeak(this._doc, oldValue, newValue), false);
+    private _songEQFilterSimplePeakRow: HTMLDivElement = div({ class: "selectRow", style: "font-size: 12px;", title: _.simpleFilter2Label }, span({ class: "tip", onclick: () => this._openPrompt("filterResonance") }, span(_.filterPeakLabel)), this._songEQFilterSimplePeakSlider.container);
+
     private readonly _scaleSelect: HTMLSelectElement = buildOptions(select(), [
         _.scale1Label, 
         _.scale2Label, 
@@ -1210,6 +1221,15 @@ export class SongEditor {
                     ),
                     span(_.songSettingsLabel),
                     div({ style: "width: 100%; left: 0; top: -1px; position:absolute; overflow-x:clip;" }, this._jumpToModIndicator),
+                ),
+            ),
+            div({ class: "selectRow" },
+                span({ class: "tip", onclick: () => this._openPrompt("songEQFilter") }, span(_.songEQLabel)),
+                div({ class: "selectContainer" }, 
+                this._songEQFilterTypeRow,
+                this._songEQFilterRow,
+                this._songEQFilterSimpleCutRow,
+                this._songEQFilterSimplePeakRow,
                 ),
             ),
             div({ class: "selectRow" },
