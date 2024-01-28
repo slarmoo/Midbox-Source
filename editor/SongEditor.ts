@@ -1,7 +1,7 @@
 // Copyright (c) 2012-2022 John Nesky and contributing authors, distributed under the MIT license, see accompanying the LICENSE.md file.
 
 //import {Layout} from "./Layout";
-import { InstrumentType, EffectType, Config, getPulseWidthRatio, effectsIncludeTransition, effectsIncludeChord, effectsIncludePitchShift, effectsIncludeDetune, effectsIncludeVibrato, effectsIncludeNoteFilter, effectsIncludeDistortion, effectsIncludeBitcrusher, effectsIncludePanning, effectsIncludeChorus, effectsIncludeEcho, effectsIncludeReverb, effectsIncludePercussion, DropdownID } from "../synth/SynthConfig";
+import { InstrumentType, EffectType, Config, getPulseWidthRatio, effectsIncludeTransition, effectsIncludeChord, effectsIncludePitchShift, effectsIncludeDetune, effectsIncludeVibrato, effectsIncludeNoteFilter, effectsIncludeDistortion, effectsIncludeBitcrusher, effectsIncludeTest, effectsIncludePanning, effectsIncludeChorus, effectsIncludeEcho, effectsIncludeReverb, effectsIncludePercussion, DropdownID } from "../synth/SynthConfig";
 import { BarScrollBar } from "./BarScrollBar";
 import { BeatsPerBarPrompt } from "./BeatsPerBarPrompt";
 import { Change, ChangeGroup } from "./Change";
@@ -47,7 +47,7 @@ import { ThemePrompt } from "./ThemePrompt";
 import { TipPrompt } from "./TipPrompt";
 import { LanguagePrompt } from "./LanguagePrompt";
 import { Localization as _ } from "./Localization";
-import { ChangeTempo, ChangeKeyOctave, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangeSupersawDynamism, ChangeSupersawSpread, ChangeSupersawShape, ChangeWavetableSpeed, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, pickRandomPresetValue, ChangeRandomGeneratedInstrument, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, ChangeChipWave, ChangeNoiseWave, ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeAddEnvelope, ChangeEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeWavetableCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeBounceArp, ChangeClicklessTransition, ChangeContinueThruPattern, ChangeAliasing, ChangePercussion, ChangeSDAffected, ChangeSOAffected, ChangeStrumSpeed, ChangeSlideSpeed, ChangeSongSubtitle, ChangeSetPatternInstruments, ChangeHoldingModRecording } from "./changes";
+import { ChangeTempo, ChangeKeyOctave, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangeSupersawDynamism, ChangeSupersawSpread, ChangeSupersawShape, ChangeWavetableSpeed, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, pickRandomPresetValue, ChangeRandomGeneratedInstrument, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, ChangeChipWave, ChangeNoiseWave, ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeTest, ChangeAddEnvelope, ChangeEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeWavetableCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeBounceArp, ChangeClicklessTransition, ChangeContinueThruPattern, ChangeAliasing, ChangePercussion, ChangeSDAffected, ChangeSOAffected, ChangeStrumSpeed, ChangeSlideSpeed, ChangeSongSubtitle, ChangeSetPatternInstruments, ChangeHoldingModRecording } from "./changes";
 import { oscilloscopeCanvas } from "../global/Oscilloscope"
 import { TrackEditor } from "./TrackEditor";
 
@@ -614,16 +614,6 @@ export class SongEditor {
         option({ value: "recordingSetup" }, (_.setNoteRecordingLabel)),
         option({ value: "keybindSetup" }, (_.keybindSetupLabel)),
     );
-    private readonly _songEQFilterSimpleButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "no-underline", onclick: () => this._switchEQFilterType(true) }, span(_.simpleLabel));
-    private readonly _songEQFilterAdvancedButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "last-button no-underline", onclick: () => this._switchEQFilterType(false) }, span(_.advancedLabel));
-    private readonly _songEQFilterTypeRow: HTMLElement = div({ class: "selectRow", style: "padding-top: 4px; margin-bottom: 0px;" }, span({ style: "font-size: x-small;", class: "tip", onclick: () => this._openPrompt("filterType") }, span(_.songEQTypeLabel)), div({ class: "instrument-bar" }, this._songEQFilterSimpleButton, this._songEQFilterAdvancedButton));
-    private readonly _songEQFilterEditor: FilterEditor = new FilterEditor(this._doc);
-    private readonly _songEQFilterZoom: HTMLButtonElement = button({ style: "margin-left:0em; padding-left:0.2em; height:1.5em; max-width: 12px;", onclick: () => this._openPrompt("customEQFilterSettings") }, "+");
-    private readonly _songEQFilterRow: HTMLElement = div({ class: "selectRow" }, this._songEQFilterZoom, this._songEQFilterEditor.container);
-    private readonly _songEQFilterSimpleCutSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.filterSimpleCutRange - 1, value: "6", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeEQFilterSimpleCut(this._doc, oldValue, newValue), false);
-    private _songEQFilterSimpleCutRow: HTMLDivElement = div({ class: "selectRow", style: "font-size: 12px;", title: _.simpleFilter1Label }, span({ class: "tip", onclick: () => this._openPrompt("filterCutoff") }, span(_.filterCutLabel)), this._songEQFilterSimpleCutSlider.container);
-    private readonly _songEQFilterSimplePeakSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.filterSimplePeakRange - 1, value: "6", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeEQFilterSimplePeak(this._doc, oldValue, newValue), false);
-    private _songEQFilterSimplePeakRow: HTMLDivElement = div({ class: "selectRow", style: "font-size: 12px;", title: _.simpleFilter2Label }, span({ class: "tip", onclick: () => this._openPrompt("filterResonance") }, span(_.filterPeakLabel)), this._songEQFilterSimplePeakSlider.container);
 
     private readonly _scaleSelect: HTMLSelectElement = buildOptions(select(), [
         _.scale1Label, 
@@ -867,6 +857,8 @@ export class SongEditor {
     private readonly _bitcrusherQuantizationRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", title: (_.bitCrushHover), onclick: () => this._openPrompt("bitcrusherQuantization") }, span(_.bitCrushLabel)), this._bitcrusherQuantizationSlider.container);
     private readonly _bitcrusherFreqSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.bitcrusherFreqRange - 1, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeBitcrusherFreq(this._doc, oldValue, newValue), false);
     private readonly _bitcrusherFreqRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", title: (_.freqCrushHover), onclick: () => this._openPrompt("bitcrusherFreq") }, span(_.freqCrushLabel)), this._bitcrusherFreqSlider.container);
+    private readonly _testSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: "15", value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeTest(this._doc, oldValue, newValue), false);
+    private readonly _testRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", title: (_.testHover), onclick: () => this._openPrompt("test") }, span(_.testLabel)), this._testSlider.container);
     private readonly _stringSustainSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.stringSustainRange - 1, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeStringSustain(this._doc, oldValue, newValue), false);
     private readonly _stringSustainLabel: HTMLSpanElement = span({class: "tip", onclick: ()=>this._openPrompt("stringSustain")}, span(_.sustainLabel));
     private readonly _stringSustainRow: HTMLDivElement = div({class: "selectRow"}, this._stringSustainLabel, this._stringSustainSlider.container);
@@ -951,8 +943,8 @@ export class SongEditor {
     private readonly _spectrumEditor: SpectrumEditor = new SpectrumEditor(this._doc, null);
     private readonly _spectrumRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("spectrum") }, span(_.spectrumLabel)), this._spectrumEditor.container);
     private readonly _harmonicsEditor: HarmonicsEditor = new HarmonicsEditor(this._doc);
-    private readonly _harmonicsZoom: HTMLButtonElement = button({ style: "margin-left:0em; padding-left:0.2em; height:1.5em; max-width: 12px;", onclick: () => this._openPrompt("harmonicsSettings") }, "+");
-    private readonly _harmonicsRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "font-size: smaller;", onclick: () => this._openPrompt("harmonics") }, span(_.harmonicsLabel)), this._harmonicsZoom, this._harmonicsEditor.container);
+    //private readonly _harmonicsZoom: HTMLButtonElement = button({ style: "margin-left:0em; padding-left:0.2em; height:1.5em; max-width: 12px;", onclick: () => this._openPrompt("harmonicsSettings") }, "+");
+    private readonly _harmonicsRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "font-size: smaller;", onclick: () => this._openPrompt("harmonics") }, span(_.harmonicsLabel)), /*this._harmonicsZoom,*/ this._harmonicsEditor.container);
     
     private readonly _envelopeEditor: EnvelopeEditor = new EnvelopeEditor(this._doc);
     private readonly _discreteEnvelopeBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
@@ -1116,6 +1108,7 @@ export class SongEditor {
         this._aliasingRow,
         this._bitcrusherQuantizationRow,
         this._bitcrusherFreqRow,
+        this._testRow,
         this._chorusRow,
         this._echoSustainRow,
         this._echoDelayRow,
@@ -1221,15 +1214,6 @@ export class SongEditor {
                     ),
                     span(_.songSettingsLabel),
                     div({ style: "width: 100%; left: 0; top: -1px; position:absolute; overflow-x:clip;" }, this._jumpToModIndicator),
-                ),
-            ),
-            div({ class: "selectRow" },
-                span({ class: "tip", onclick: () => this._openPrompt("songEQFilter") }, span(_.songEQLabel)),
-                div({ class: "selectContainer" }, 
-                this._songEQFilterTypeRow,
-                this._songEQFilterRow,
-                this._songEQFilterSimpleCutRow,
-                this._songEQFilterSimplePeakRow,
                 ),
             ),
             div({ class: "selectRow" },
@@ -1586,6 +1570,7 @@ export class SongEditor {
         this._editMenu.addEventListener("change", this._editMenuHandler);
         this._optionsMenu.addEventListener("change", this._optionsMenuHandler);
         this._customWavePresetDrop.addEventListener("change", this._customWavePresetHandler);
+        this._wavetableCustomWavePresetDrop.addEventListener("change", this._wavetableCustomWavePresetHandler);
         this._tempoStepper.addEventListener("change", this._whenSetTempo);
         this._scaleSelect.addEventListener("change", this._whenSetScale);
         this._keySelect.addEventListener("change", this._whenSetKey);
@@ -2202,7 +2187,8 @@ export class SongEditor {
             (_.vibratoEffectLabel),
             (_.transitionEffectLabel),
             (_.chordEffectLabel),
-            (_.percussionEffectLabel)
+            (_.percussionEffectLabel),
+            (_.testEffectLabel)
         ];
         for (let i: number = 0; i < Config.effectOrder.length; i++) {
             let effectFlag: number = Config.effectOrder[i];
@@ -2535,6 +2521,13 @@ export class SongEditor {
             } else {
                 this._bitcrusherQuantizationRow.style.display = "none";
                 this._bitcrusherFreqRow.style.display = "none";
+            }
+
+            if (effectsIncludeTest(instrument.effects)) {
+                this._testRow.style.display = "";
+                this._testSlider.updateValue(instrument.test);
+            } else {
+                this._testRow.style.display = "none";
             }
 
             if (effectsIncludePanning(instrument.effects)) {
@@ -4904,6 +4897,56 @@ export class SongEditor {
         this._doc.record(new ChangeVolume(this._doc, +this._instrumentVolumeSlider.input.value, -Config.volumeRange / 2 + Math.round(Math.sqrt(Config.chipWaves[index].expression) * Config.volumeRange / 2)));
 
         this._customWavePresetDrop.selectedIndex = 0;
+        this._doc.notifier.changed();
+        this._doc.prefs.save();
+    }
+
+    private _wavetableCustomWavePresetHandler = (event: Event): void => {
+
+        // Update custom wave value
+        let customWaveArray: Float32Array = new Float32Array(64);
+        let index: number = this._wavetableCustomWavePresetDrop.selectedIndex - 1;
+        let maxValue: number = Number.MIN_VALUE;
+        let minValue: number = Number.MAX_VALUE;
+        let arrayPoint: number = 0;
+        let arrayStep: number = (Config.chipWaves[index].samples.length - 1) / 64.0;
+
+        for (let i: number = 0; i < 64; i++) {
+            // Compute derivative to get original wave.
+            customWaveArray[i] = (Config.chipWaves[index].samples[Math.floor(arrayPoint)] - Config.chipWaves[index].samples[(Math.floor(arrayPoint) + 1)]) / arrayStep;
+
+            if (customWaveArray[i] < minValue)
+                minValue = customWaveArray[i];
+
+            if (customWaveArray[i] > maxValue)
+                maxValue = customWaveArray[i];
+
+            // Scale an any-size array to 64 elements
+            arrayPoint += arrayStep;
+        }
+
+        for (let i: number = 0; i < 64; i++) {
+            // Change array range from Min~Max to 0~(Max-Min)
+            customWaveArray[i] -= minValue;
+            // Divide by (Max-Min) to get a range of 0~1,
+            customWaveArray[i] /= (maxValue - minValue);
+            //then multiply by 48 to get 0~48,
+            customWaveArray[i] *= 48.0;
+            //then subtract 24 to get - 24~24
+            customWaveArray[i] -= 24.0;
+            //need to force integers
+            customWaveArray[i] = Math.ceil(customWaveArray[i]);
+
+            // Copy back data to canvas
+            this._wavetableCustomWaveDrawCanvas.newArray[i] = customWaveArray[i];
+        }
+
+        //this._instrumentVolumeSlider.input.value = "" + Math.round(Config.waveVolumes[index] * 50.0 - 50.0);
+
+        this._doc.record(new ChangeWavetableCustomWave(this._doc, customWaveArray, this._wavetableIndices[this._doc.channel][this._doc.getCurrentInstrument()]))
+        this._doc.record(new ChangeVolume(this._doc, +this._instrumentVolumeSlider.input.value, -Config.volumeRange / 2 + Math.round(Math.sqrt(Config.chipWaves[index].expression) * Config.volumeRange / 2)));
+
+        this._wavetableCustomWavePresetDrop.selectedIndex = 0;
         this._doc.notifier.changed();
         this._doc.prefs.save();
     }

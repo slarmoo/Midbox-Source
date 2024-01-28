@@ -3363,14 +3363,39 @@ export class ColorConfig {
 					--mod-primary-note-lum-scale: 0;
 					--disabled-note-primary:    #53527b;
 					--disabled-note-secondary:  #1c1b30;
+					--track-font: "Audiowide";
 				}
 				@font-face {
 					font-family: "Audiowide";
 					src:
 						url("Audiowide-Regular.otf") format("opentype") tech(color-COLRv1),
 					}
-				html {
+				h1 {
 					font-family: 'Audiowide';
+					font-size: 1.9rem;
+					}
+				h2 {
+					font-family: 'Audiowide';
+					font-size: 1.5rem;
+					}
+				h3 {
+					font-family: 'Audiowide';
+					font-size: 1.35rem;
+					}
+				h4 {
+					font-family: 'Audiowide';
+					font-size: 1.10rem;
+					}
+				@font-face {
+					font-family: "Exo2";
+					src:
+						url("Exo2-Medium.otf") format("opentype") tech(color-COLRv1),
+					}
+				html {
+					font-family: 'Exo2';
+					}
+				.beepboxEditor .trackContainer {
+					--track-font: 'Exo2' !important;
 					}
 		`,
     };

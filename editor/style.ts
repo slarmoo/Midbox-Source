@@ -928,7 +928,7 @@ document.head.appendChild(HTML.style({ type: "text/css" }, `
 }
 
 .select2-container--default .select2-results>.select2-results__options {
-    max-height: 430px;
+    max-height: 500px;
     overflow-x: hidden;
 }
 .select2-container--default .select2-results__group {
@@ -1343,6 +1343,7 @@ document.head.appendChild(HTML.style({ type: "text/css" }, `
 
 .beepboxEditor .trackContainer {
 	flex-grow: 1;
+	--track-font: sans-serif;
 }
 
 .beepboxEditor .trackAndMuteContainer {
@@ -1368,7 +1369,7 @@ document.head.appendChild(HTML.style({ type: "text/css" }, `
 }
 .beepboxEditor .channelBoxLabel {
 	font-size: 20px;
-	font-family: sans-serif;
+	font-family: var(--track-font);
 	font-weight: bold;
 }
 .beepboxEditor .dropFader {

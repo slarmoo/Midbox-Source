@@ -112,12 +112,8 @@ export const enum EffectType {
     transition,
     chord,
     percussion,
+    test,
     length,
-    /*  
-    Mid: 
-    Remember that when touching effects, keep length at the end. 
-    Add your new effects after "Percussion". 
-    */
 }
 
 export const enum EnvelopeComputeIndex {
@@ -356,6 +352,7 @@ export class Config {
     public static readonly wavetableBaseExpression:          number = 0.03375;   // Gonna keep it the same as chipBaseExpression for now.
     public static readonly distortionBaseVolume:             number = 0.011;     // Distortion is not affected by pitchDamping, which otherwise approximately halves expression for notes around the middle of the range.
     public static readonly bitcrusherBaseVolume:             number = 0.010;     // Also not affected by pitchDamping, used when bit crushing is maxed out (aka "1-bit" output).
+    public static readonly testBaseVolume:                   number = 0.011;     // The "Test" effect is not affected by pitchDamping, which otherwise approximately halves expression for notes around the middle of the range.
 
     public static readonly rawChipWaves: DictionaryArray<ChipWave> = toNameMap([
         { name: "rounded",         expression: 0.94,  samples: centerWave            ([0.0,   0.2,   0.4,   0.5,  0.6, 0.7, 0.8, 0.85, 0.9, 0.95, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.95, 0.9, 0.85, 0.8, 0.7, 0.6, 0.5, 0.4, 0.2, 0.0, -0.2, -0.4, -0.5, -0.6, -0.7, -0.8, -0.85, -0.9, -0.95, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -0.95, -0.9, -0.85, -0.8, -0.7, -0.6, -0.5, -0.4, -0.2])},
@@ -477,8 +474,8 @@ export class Config {
         { name: "weird octave",    voices: 2, spread: 5.85,     offset:  5.85,   expression: 0.75, sign:  1.0 },
     ]);
 
-    public static readonly effectNames: ReadonlyArray<string> =     ["reverb", "chorus", "panning", "distortion", "bitcrusher", "note filter", "echo", "pitch shift", "detune", "vibrato", "transition type", "chord type", "percussion"];
-    public static readonly effectOrder: ReadonlyArray<EffectType> = [EffectType.panning, EffectType.transition, EffectType.chord, EffectType.pitchShift, EffectType.detune, EffectType.vibrato, EffectType.noteFilter, EffectType.distortion, EffectType.bitcrusher, EffectType.chorus, EffectType.echo, EffectType.reverb, EffectType.percussion];
+    public static readonly effectNames: ReadonlyArray<string> =     ["reverb", "chorus", "panning", "distortion", "bitcrusher", "note filter", "echo", "pitch shift", "detune", "vibrato", "transition type", "chord type", "percussion", "test"];
+    public static readonly effectOrder: ReadonlyArray<EffectType> = [EffectType.panning, EffectType.transition, EffectType.chord, EffectType.pitchShift, EffectType.detune, EffectType.vibrato, EffectType.noteFilter, EffectType.distortion, EffectType.bitcrusher, EffectType.test, EffectType.chorus, EffectType.echo, EffectType.reverb, EffectType.percussion];
 
     public static readonly noteSizeMax:         number = 6;
     public static readonly volumeRange:         number = 50;
@@ -1476,6 +1473,9 @@ export function effectsIncludeDistortion(effects: number): boolean {
 }
 export function effectsIncludeBitcrusher(effects: number): boolean {
     return (effects & (1 << EffectType.bitcrusher)) != 0;
+}
+export function effectsIncludeTest(effects: number): boolean {
+    return (effects & (1 << EffectType.test)) != 0;
 }
 export function effectsIncludePanning(effects: number): boolean {
     return (effects & (1 << EffectType.panning)) != 0;

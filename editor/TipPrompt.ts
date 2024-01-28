@@ -417,6 +417,12 @@ export class TipPrompt implements Prompt {
 					p("Every other notch on this slider is aligned with the currently selected key of the song, and the in-between notches are aligned with the tritones of the key. High amounts of this settings will typically make your instrument sound more retro or corrupt, but don't always expect the same results!"),
 				);
 			} break;
+			case "test": {
+				message = div(
+					h2("Test Effect"),
+					p("This effect has been made for testing purposes. Mid should make a proper tip prompt for this in the future."),
+				);
+			} break;
 			case "envelopes": {
 				message = div(
 					h2("Envelopes"),

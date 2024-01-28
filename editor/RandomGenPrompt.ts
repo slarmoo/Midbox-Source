@@ -467,14 +467,17 @@ constructor(private _doc: SongDocument) {
     this._customChipBox.checked = this._doc.prefs.customChipOnRandomization;
     this._noiseBox.checked = this._doc.prefs.noiseOnRandomization;
     this._wavetableBox.checked = this._doc.wavetableOnRandomization;
+
     this._drumSpectrumBox.checked = this._doc.prefs.drumSpectrumOnRandomization;
     this._drumNoiseBox.checked = this._doc.prefs.drumNoiseOnRandomization;
     this._drumsetBox.checked = this._doc.prefs.drumsetOnRandomization;
+
     this._volumeBox.checked = this._doc.volumeOnRandomization;
     this._panBox.checked = this._doc.panningOnRandomization;
     this._panDelayBox.checked = this._doc.panDelayOnRandomization;
     this._fadeBox.checked = this._doc.prefs.fadeOnRandomization;
     this._unisonBox.checked = this._doc.prefs.unisonOnRandomization;
+
     this._EQFilterBox.checked = this._doc.prefs.EQFilterOnRandomization;
     this._EQFilterCutBox.checked = this._doc.EQFilterCutOnRandomization;
     this._EQFilterPeakBox.checked = this._doc.EQFilterPeakOnRandomization;
@@ -483,6 +486,7 @@ constructor(private _doc: SongDocument) {
     this._noteFilterCutBox.checked = this._doc.noteFilterCutOnRandomization;
     this._noteFilterPeakBox.checked = this._doc.noteFilterPeakOnRandomization;
     this._noteFilterTypeBox.checked = this._doc.noteFilterTypeOnRandomization;
+
     this._chipwaveBox.checked = this._doc.chipWaveformOnRandomization;
     this._pulseWidthBox.checked = this._doc.PWMWidthOnRandomization;
     this._dynamismBox.checked = this._doc.supersawDynamismOnRandomization;
@@ -501,12 +505,14 @@ constructor(private _doc: SongDocument) {
     this._wavetableCustomChipWavesBox.checked = this._doc.wavetableCustomChipWavesOnRandomization;
     this._wavetableCustomChipGenerationType.value = this._doc.wavetableCustomChipGenerationType;
     this._wavetableSpeedBox.checked = this._doc.wavetableSpeedOnRandomization;
+
     this._FMAlgorithmBox.checked = this._doc.FMAlgorithmOnRandomization;
     this._FMOpFrequencyBox.checked = this._doc.FMOpFrequencyOnRandomization;
     this._FMOpVolumeBox.checked = this._doc.FMOpVolumeOnRandomization;
     this._FMOpWaveformBox.checked = this._doc.FMOpWaveformOnRandomization;
     this._FMFeedbackBox.checked = this._doc.FMFeedbackOnRandomization;
     this._FMFeedbackVolumeBox.checked = this._doc.FMFeedbackVolumeOnRandomization;
+
     this._transitionTypeBox.checked = this._doc.transitionTypeOnRandomization;
     this._slideSpeedBox.checked = this._doc.slideSpeedOnRandomization;
     this._clicklessBox.checked = this._doc.clicklessTransitionOnRandomization;
@@ -533,6 +539,7 @@ constructor(private _doc: SongDocument) {
     this._reverbBox.checked = this._doc.reverbOnRandomization;
     this._keyAffectedBox.checked = this._doc.keyAffectedOnRandomization;
     this._SDAffectedBox.checked = this._doc.SDAffectedOnRandomization;
+    
     this._envelopeBox.checked = this._doc.envelopesOnRandomization;
     this._envelopeSpeedBox.checked = this._doc.envelopeSpeedOnRandomization;
     this._discreteEnvelopeBox.checked = this._doc.discreteEnvelopesOnRandomization;

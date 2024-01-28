@@ -34,27 +34,32 @@ export class Preferences {
 	public metronomeWhileRecording: boolean;
 	public showOscilloscope: boolean;
 
-	public unisonOnRandomization: boolean;
-	public chipWaveOnRandomization: boolean;
-	public PWMOnRandomization: boolean;
-	public supersawOnRandomization: boolean;
-	public harmonicsOnRandomization: boolean;
-	public pickedStringOnRandomization: boolean;
-	public spectrumOnRandomization: boolean;
-	public FMOnRandomization: boolean;
-	public customChipOnRandomization: boolean;
-	public noiseOnRandomization: boolean;
-	public wavetableOnRandomization: boolean;
-	public drumSpectrumOnRandomization: boolean;
-	public drumNoiseOnRandomization: boolean;
-	public drumsetOnRandomization: boolean;
-	public fadeOnRandomization: boolean;
-	public EQFilterOnRandomization: boolean;
-	public noteFilterOnRandomization: boolean;
+	// Random Generation Setup
+		public chipWaveOnRandomization: boolean;
+		public PWMOnRandomization: boolean;
+		public supersawOnRandomization: boolean;
+		public harmonicsOnRandomization: boolean;
+		public pickedStringOnRandomization: boolean;
+		public spectrumOnRandomization: boolean;
+		public FMOnRandomization: boolean;
+		public customChipOnRandomization: boolean;
+		public noiseOnRandomization: boolean;
+		public wavetableOnRandomization: boolean;
 
-	public deactivateCapsLock: boolean;
-	public CTRLrEvent: string;
-	public deactivateBKeybind: boolean;
+		public drumSpectrumOnRandomization: boolean;
+		public drumNoiseOnRandomization: boolean;
+		public drumsetOnRandomization: boolean;
+
+		public fadeOnRandomization: boolean;
+		public unisonOnRandomization: boolean;
+
+		public EQFilterOnRandomization: boolean;
+		public noteFilterOnRandomization: boolean;
+
+	// Keybind Setup
+		public deactivateCapsLock: boolean;
+		public CTRLrEvent: string;
+		public deactivateBKeybind: boolean;
 	
 	constructor() {
 		this.reload();
@@ -88,7 +93,7 @@ export class Preferences {
 		this.colorTheme = window.localStorage.getItem("colorTheme") || "midbox";
 		this.visibleOctaves = ((<any>window.localStorage.getItem("visibleOctaves")) >>> 0) || Preferences.defaultVisibleOctaves;
 
-		this.unisonOnRandomization = window.localStorage.getItem("unisonOnRandomization") != "false";
+		// Random Generation Setup
 		this.chipWaveOnRandomization = window.localStorage.getItem("chipWaveOnRandomization") != "false";
 		this.PWMOnRandomization = window.localStorage.getItem("PWMOnRandomization") != "false";
 		this.supersawOnRandomization = window.localStorage.getItem("supersawOnRandomization") != "false";
@@ -99,13 +104,18 @@ export class Preferences {
 		this.customChipOnRandomization = window.localStorage.getItem("customChipOnRandomization") != "false";
 		this.noiseOnRandomization = window.localStorage.getItem("noiseOnRandomization") != "false";
 		this.wavetableOnRandomization = window.localStorage.getItem("wavetableOnRandomization") != "false";
+
 		this.drumSpectrumOnRandomization = window.localStorage.getItem("drumSpectrumOnRandomization") != "false";
 		this.drumNoiseOnRandomization = window.localStorage.getItem("drumNoiseOnRandomization") != "false";
 		this.drumsetOnRandomization = window.localStorage.getItem("drumsetOnRandomization") == "true";
+
 		this.fadeOnRandomization = window.localStorage.getItem("fadeOnRandomization") != "false";
+		this.unisonOnRandomization = window.localStorage.getItem("unisonOnRandomization") != "false";
+
 		this.EQFilterOnRandomization = window.localStorage.getItem("EQFilterOnRandomization") != "false";
 		this.noteFilterOnRandomization = window.localStorage.getItem("noteFilterOnRandomization") != "false";
 		
+		// Keybind Setup
 		this.deactivateCapsLock = window.localStorage.getItem("deactivateCapsLock") != "false";
 		this.CTRLrEvent = window.localStorage.getItem("CTRLrEvent") || "ctrlRtoRandomGenPrompt";
 		this.deactivateBKeybind = window.localStorage.getItem("deactivateBKeybind") != "false";
@@ -154,7 +164,7 @@ export class Preferences {
 		window.localStorage.setItem("volume", String(this.volume));
 		window.localStorage.setItem("visibleOctaves", String(this.visibleOctaves));
 
-		window.localStorage.setItem("unisonOnRandomization", this.unisonOnRandomization ? "true" : "false");
+		// Random Generation Setup
 		window.localStorage.setItem("chipWaveOnRandomization", this.chipWaveOnRandomization ? "true" : "false");
 		window.localStorage.setItem("PWMOnRandomization", this.PWMOnRandomization ? "true" : "false");
 		window.localStorage.setItem("supersawOnRandomization", this.supersawOnRandomization ? "true" : "false");
@@ -165,13 +175,18 @@ export class Preferences {
 		window.localStorage.setItem("customChipOnRandomization", this.customChipOnRandomization ? "true" : "false");
 		window.localStorage.setItem("noiseOnRandomization", this.noiseOnRandomization ? "true" : "false");
 		window.localStorage.setItem("wavetableOnRandomization", this.wavetableOnRandomization ? "true" : "false");
+
 		window.localStorage.setItem("drumSpectrumOnRandomization", this.drumSpectrumOnRandomization ? "true" : "false");
 		window.localStorage.setItem("drumNoiseOnRandomization", this.drumNoiseOnRandomization ? "true" : "false");
 		window.localStorage.setItem("drumsetOnRandomization", this.drumsetOnRandomization ? "true" : "false");
+
 		window.localStorage.setItem("fadeOnRandomization", this.fadeOnRandomization ? "true" : "false");
+		window.localStorage.setItem("unisonOnRandomization", this.unisonOnRandomization ? "true" : "false");
+
 		window.localStorage.setItem("EQFilterOnRandomization", this.EQFilterOnRandomization ? "true" : "false");
 		window.localStorage.setItem("noteFilterOnRandomization", this.noteFilterOnRandomization ? "true" : "false");
 
+		// Keybind Setup
 		window.localStorage.setItem("deactivateCapsLock", this.deactivateCapsLock ? "true" : "false");
 		window.localStorage.setItem("CTRLrEvent", this.CTRLrEvent);
 		window.localStorage.setItem("deactivateBKeybind", this.deactivateBKeybind ? "true" : "false");

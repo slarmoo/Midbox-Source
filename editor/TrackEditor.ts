@@ -425,7 +425,7 @@ export class TrackEditor {
 			if (this._renderedBarCount < this._doc.song.barCount) {
 				this._barNumbers.length = this._doc.song.barCount;
 				for (var pos = this._renderedBarCount; pos < this._barNumbers.length; pos++) {
-					this._barNumbers[pos] = SVG.text({ "font-family": "sans-serif", "font-size": "8px", "text-anchor": "middle", "font-weight": "bold", "x": (pos * this._barWidth + this._barWidth / 2) + "px", "y": "7px", fill: ColorConfig.secondaryText }, "" + (pos + 1));
+					this._barNumbers[pos] = SVG.text({ "font-family": "var(--track-font)", "font-size": "8px", "text-anchor": "middle", "font-weight": "bold", "x": (pos * this._barWidth + this._barWidth / 2) + "px", "y": "7px", fill: ColorConfig.secondaryText }, "" + (pos + 1));
 					if (pos % 4 == 0) {
 						// Highlighting every 4 bars
 						this._barNumbers[pos].setAttribute("fill", ColorConfig.primaryText);

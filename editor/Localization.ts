@@ -53,6 +53,7 @@ export class Localization {
     public static aliasingLabel: string = "Aliasing:";
     public static bitCrushLabel: string = "Bit Crush:";
     public static freqCrushLabel: string = "Freq Crush:";
+    public static testLabel: string = "Test:";
     public static fadeLabel: string = "Fade:";
     public static unisonLabel: string = "Unison:";
     public static strumSpeedLabel: string = "‣ Spd:";
@@ -96,6 +97,7 @@ export class Localization {
     public static preferenceSettingsLabel: string = "Preferences";
     public static bitCrushHover: string = "Bitcrusher Quantization";
     public static freqCrushHover: string = "Frequency Quantization";
+    public static testHover: string = "This slider is a test.";
     public static scale1Label: string = "Free / Chromatic";
     public static scale2Label: string = "Major";
     public static scale3Label: string = "Minor";
@@ -140,6 +142,7 @@ export class Localization {
     public static noteFiltEffectLabel: string = "note filter";
     public static distortionEffectLabel: string = "distortion";
     public static bitCrushEffectLabel: string = "bitcrusher";
+    public static testEffectLabel: string = "TEST";
     public static chorusEffectLabel: string = "chorus";
     public static echoEffectLabel: string = "echo";
     public static reverbEffectLabel: string = "reverb";
@@ -672,6 +675,7 @@ export class Localization {
     public static midboxLeadPresets15Label: string = "retro pulse";
     public static midboxLeadPresets16Label: string = "square wave harp";
     public static midboxLeadPresets17Label: string = "echo pulse lead 2";
+    public static midboxLeadPresets18Label: string = "casino lead";
     public static midboxFMPresets1Label: string = "FM electronic guitar";
     public static midboxFMPresets2Label: string = "FM electronic bass";
     public static midboxFMPresets3Label: string = "FM guitar";
