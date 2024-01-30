@@ -641,6 +641,7 @@ export class Localization {
     public static midboxDubstepPresets17Label: string = "dubstep grinder 2";
     public static midboxDubstepPresets18Label: string = "dubstep robot";
     public static midboxDubstepPresets19Label: string = "terror";
+    public static midboxDubstepPresets20Label: string = "heavily distorted bwah";
     public static midboxNoisePresets1Label: string = "hollow retro riser";
     public static midboxNoisePresets2Label: string = "hollow snare-clap";
     public static midboxDrumPresets1Label: string = "enhanced synth kick";
@@ -650,6 +651,8 @@ export class Localization {
     public static midboxDrumPresets5Label: string = "odd snare";
     public static midboxDrumPresets6Label: string = "spectrum hi-hat";
     public static midboxDrumPresets7Label: string = "generic kick";
+    public static midboxDrumPresets8Label: string = "kick bass 1";
+    public static midboxDrumPresets9Label: string = "kick bass 2";
     public static midboxPianoPresets1Label: string = "blessed piano";
     public static midboxPianoPresets2Label: string = "desolated piano";
     public static midboxPianoPresets3Label: string = "rough glistening piano";

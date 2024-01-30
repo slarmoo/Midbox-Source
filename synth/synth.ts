@@ -5723,7 +5723,7 @@ class EnvelopeComputer {
                 this._noteSizeFinal = Config.noteSizeMax;
             }
         }
-        const tickTimeEnd: number = tickTimeStart + 1.0;
+        const tickTimeEnd: number = tickTimeStart + timeScale;
         const tickTimeEndReal: number = tickTimeStartReal + 1.0;
         const noteSecondsStart: number = this.noteSecondsEnd;
         const noteSecondsEnd: number = noteSecondsStart + secondsPerTick;
@@ -6311,10 +6311,6 @@ class InstrumentState {
 
         this.volumeScale = 1.0;
         this.aliases = false;
-        this.vibratoTime = 0.0;
-        this.nextVibratoTime = 0.0;
-        this.arpTime = 0.0;
-        this.envelopeTime = 0.0;
         this.currentWave = 0.0;
 
         this.awake = false;
@@ -6326,6 +6322,11 @@ class InstrumentState {
 
     public resetAllEffects(): void {
         this.deactivate();
+        // LFOs are reset here rather than in deactivate() for periodic oscillation that stays "on the beat". Resetting in deactivate() will cause it to reset with each note.
+        this.vibratoTime = 0;
+        this.nextVibratoTime = 0;
+        this.arpTime = 0;
+        this.envelopeTime = 0;
 
         if (this.chorusDelayLineDirty) {
             for (let i: number = 0; i < this.chorusDelayLineL!.length; i++) this.chorusDelayLineL![i] = 0.0;
@@ -7060,17 +7061,17 @@ export class Synth {
                                                         tgtInstrument.tmpEqFilterStart = tgtInstrument.eqSubFilters[latestPinValues[mod]];
                                                     } else {
                                                         for (let i: number = 0; i < Config.filterMorphCount; i++) {
-                                                            if (tgtInstrument.tmpEqFilterStart == tgtInstrument.eqSubFilters[i]) {
+                                                            if (tgtInstrument.tmpEqFilterStart != null && tgtInstrument.tmpEqFilterStart == tgtInstrument.eqSubFilters[i]) {
                                                                 tgtInstrument.tmpEqFilterStart = new FilterSettings();
                                                                 tgtInstrument.tmpEqFilterStart.fromJsonObject(tgtInstrument.eqSubFilters[i]!.toJsonObject());
                                                                 i = Config.filterMorphCount;
                                                             }
                                                         }
-                                                        if (Math.floor((instrument.modFilterTypes[mod] - 1) / 2) < tgtInstrument.tmpEqFilterStart!.controlPointCount) {
+                                                        if (tgtInstrument.tmpEqFilterStart != null && Math.floor((instrument.modFilterTypes[mod] - 1) / 2) < tgtInstrument.tmpEqFilterStart.controlPointCount) {
                                                             if (instrument.modFilterTypes[mod] % 2)
-                                                                tgtInstrument.tmpEqFilterStart!.controlPoints[Math.floor((instrument.modFilterTypes[mod] - 1) / 2)].freq = latestPinValues[mod];
+                                                                tgtInstrument.tmpEqFilterStart.controlPoints[Math.floor((instrument.modFilterTypes[mod] - 1) / 2)].freq = latestPinValues[mod];
                                                             else
-                                                                tgtInstrument.tmpEqFilterStart!.controlPoints[Math.floor((instrument.modFilterTypes[mod] - 1) / 2)].gain = latestPinValues[mod];
+                                                                tgtInstrument.tmpEqFilterStart.controlPoints[Math.floor((instrument.modFilterTypes[mod] - 1) / 2)].gain = latestPinValues[mod];
                                                         }
                                                     }
                                                     tgtInstrument.tmpEqFilterEnd = tgtInstrument.tmpEqFilterStart;
@@ -7080,17 +7081,17 @@ export class Synth {
                                                         tgtInstrument.tmpNoteFilterStart = tgtInstrument.noteSubFilters[latestPinValues[mod]];
                                                     } else {
                                                         for (let i: number = 0; i < Config.filterMorphCount; i++) {
-                                                            if (tgtInstrument.tmpNoteFilterStart == tgtInstrument.noteSubFilters[i]) {
+                                                            if (tgtInstrument.tmpNoteFilterStart != null && tgtInstrument.tmpNoteFilterStart == tgtInstrument.noteSubFilters[i]) {
                                                                 tgtInstrument.tmpNoteFilterStart = new FilterSettings();
                                                                 tgtInstrument.tmpNoteFilterStart.fromJsonObject(tgtInstrument.noteSubFilters[i]!.toJsonObject());
                                                                 i = Config.filterMorphCount;
                                                             }
                                                         }
-                                                        if (Math.floor((instrument.modFilterTypes[mod] - 1) / 2) < tgtInstrument.tmpNoteFilterStart!.controlPointCount) {
+                                                        if (tgtInstrument.tmpNoteFilterStart != null && Math.floor((instrument.modFilterTypes[mod] - 1) / 2) < tgtInstrument.tmpNoteFilterStart.controlPointCount) {
                                                             if (instrument.modFilterTypes[mod] % 2)
-                                                                tgtInstrument.tmpNoteFilterStart!.controlPoints[Math.floor((instrument.modFilterTypes[mod] - 1) / 2)].freq = latestPinValues[mod];
+                                                                tgtInstrument.tmpNoteFilterStart.controlPoints[Math.floor((instrument.modFilterTypes[mod] - 1) / 2)].freq = latestPinValues[mod];
                                                             else
-                                                                tgtInstrument.tmpNoteFilterStart!.controlPoints[Math.floor((instrument.modFilterTypes[mod] - 1) / 2)].gain = latestPinValues[mod];
+                                                                tgtInstrument.tmpNoteFilterStart.controlPoints[Math.floor((instrument.modFilterTypes[mod] - 1) / 2)].gain = latestPinValues[mod];
                                                         }
                                                     }
                                                     tgtInstrument.tmpNoteFilterEnd = tgtInstrument.tmpNoteFilterStart;
@@ -7317,7 +7318,7 @@ export class Synth {
         let prevTempo: number = this.song.tempo;
 
         // Determine if any tempo or next bar mods happen anywhere in the window
-        for (let channel: number = this.song.pitchChannelCount + this.song.noiseChannelCount; channel < this.song.getChannelCount(); channel++) {
+        for (let channel: number = this.song.getChannelCount() - 1; channel >= this.song.pitchChannelCount + this.song.noiseChannelCount; channel--) {
             for (let bar: number = startBar; bar < endBar; bar++) {
                 let pattern: Pattern | null = this.song.getPattern(channel, bar);
                 if (pattern != null) {
@@ -7340,7 +7341,7 @@ export class Synth {
             let latestTempoValue: number = 0;
 
             for (let bar: number = startBar - 1; bar >= 0; bar--) {
-                for (let channel: number = this.song.pitchChannelCount + this.song.noiseChannelCount; channel < this.song.getChannelCount(); channel++) {
+                for (let channel: number = this.song.getChannelCount() - 1; channel >= this.song.pitchChannelCount + this.song.noiseChannelCount; channel--) {
                     let pattern = this.song.getPattern(channel, bar);
 
                     if (pattern != null) {
@@ -7402,7 +7403,7 @@ export class Synth {
                 // Compute average tempo in this tick window, or use last tempo if nothing happened
                 if (hasTempoMods) {
                     let foundMod: boolean = false;
-                    for (let channel: number = this.song.pitchChannelCount + this.song.noiseChannelCount; channel < this.song.getChannelCount(); channel++) {
+                    for (let channel: number = this.song.getChannelCount() - 1; channel >= this.song.pitchChannelCount + this.song.noiseChannelCount; channel--) {
                         if (foundMod == false) {
                             let pattern: Pattern | null = this.song.getPattern(channel, bar);
                             if (pattern != null) {
@@ -9208,7 +9209,13 @@ export class Synth {
         const envelopeComputer: EnvelopeComputer = tone.envelopeComputer;
         let useEnvelopeSpeed: number = Config.arpSpeedScale[instrument.envelopeSpeed];
         if (this.isModActive(Config.modulators.dictionary["envelope speed"].index, channelIndex, tone.instrumentIndex)) {
-            useEnvelopeSpeed = Math.max(0, this.getModValue(Config.modulators.dictionary["envelope speed"].index, channelIndex, tone.instrumentIndex, false));
+            useEnvelopeSpeed = Math.max(0, Math.min(Config.arpSpeedScale.length - 1, this.getModValue(Config.modulators.dictionary["envelope speed"].index, channelIndex, tone.instrumentIndex, false)));
+            if (Number.isInteger(useEnvelopeSpeed)) {
+                useEnvelopeSpeed = Config.arpSpeedScale[useEnvelopeSpeed];
+            } else {
+                // Linear interpolate envelope values
+                useEnvelopeSpeed = (1 - (useEnvelopeSpeed % 1)) * Config.arpSpeedScale[Math.floor(useEnvelopeSpeed)] + (useEnvelopeSpeed % 1) * Config.arpSpeedScale[Math.ceil(useEnvelopeSpeed)];
+            }
         }
         envelopeComputer.computeEnvelopes(instrument, currentPart, instrumentState.envelopeTime, Config.ticksPerPart * partTimeStart, samplesPerTick / this.samplesPerSecond, tone, useEnvelopeSpeed);
         const envelopeStarts: number[] = tone.envelopeComputer.envelopeStarts;
@@ -11112,13 +11119,15 @@ export class Synth {
 			let supersawSample: number = phase - 0.5 * (1.0 + (voiceCount - 1.0) * dynamism);
 
 			// This is a PolyBLEP, which smooths out discontinuities at any frequency to reduce aliasing. 
-			if (phase < phaseDelta) {
-				var t: number = phase / phaseDelta;
-				supersawSample -= (t+t-t*t-1) * 0.5;
-			} else if (phase > 1.0 - phaseDelta) {
-				var t: number = (phase - 1.0) / phaseDelta;
-				supersawSample -= (t+t+t*t+1) * 0.5;
-			}
+			if (!instrumentState.aliases) {
+                if (phase < phaseDelta) {
+                    var t: number = phase / phaseDelta;
+                    supersawSample -= (t + t - t * t - 1) * 0.5;
+                } else if (phase > 1.0 - phaseDelta) {
+                    var t: number = (phase - 1.0) / phaseDelta;
+                    supersawSample -= (t + t + t * t + 1) * 0.5;
+                }
+            }
 
 			phases[0] = phase;
 
@@ -11130,13 +11139,15 @@ export class Synth {
 				supersawSample += phase * dynamism;
 
 				// This is a PolyBLEP, which smooths out discontinuities at any frequency to reduce aliasing. 
-				if (phase < detunedPhaseDelta) {
-					const t: number = phase / detunedPhaseDelta;
-					supersawSample -= (t+t-t*t-1) * 0.5 * dynamism;
-				} else if (phase > 1.0 - detunedPhaseDelta) {
-					const t: number = (phase - 1.0) / detunedPhaseDelta;
-					supersawSample -= (t+t+t*t+1) * 0.5 * dynamism;
-				}
+				if (!instrumentState.aliases) {
+                    if (phase < detunedPhaseDelta) {
+                        const t: number = phase / detunedPhaseDelta;
+                        supersawSample -= (t + t - t * t - 1) * 0.5 * dynamism;
+                    } else if (phase > 1.0 - detunedPhaseDelta) {
+                        const t: number = (phase - 1.0) / detunedPhaseDelta;
+                        supersawSample -= (t + t + t * t + 1) * 0.5 * dynamism;
+                    }
+                }
 
 				phases[i] = phase;
 			}

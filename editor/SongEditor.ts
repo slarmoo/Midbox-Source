@@ -2650,6 +2650,7 @@ export class SongEditor {
             }
 
             if (instrument.type == InstrumentType.wavetable) {
+                this._wavetableCustomWaveDrawCanvas.index = this._wavetableIndices[this._doc.channel][this._doc.getCurrentInstrument()];
                 this._wavetableCustomWaveDrawCanvas.redrawCanvas();
                 if (this.prompt instanceof WavetablePrompt) {
                     this.prompt.wavetableCanvas.render();
@@ -3657,6 +3658,9 @@ export class SongEditor {
                 if (canPlayNotes) break;
                 if (event.ctrlKey || event.metaKey) {
                     this._toggleRecord();
+                    this._doc.synth.loopBar = -1;
+                    this._loopEditor.setLoopAt(this._doc.synth.loopBar);
+
                     event.preventDefault();
                     this.refocusStage();
                 } else
@@ -3714,6 +3718,9 @@ export class SongEditor {
                 event.preventDefault();
                 break;
             case 13: // enter/return
+                this._doc.synth.loopBar = -1;
+                this._loopEditor.setLoopAt(this._doc.synth.loopBar);
+
                 if (event.ctrlKey || event.metaKey) {
                     this._doc.selection.insertChannel();
                 } else {
@@ -3722,6 +3729,9 @@ export class SongEditor {
                 event.preventDefault();
                 break;
             case 8: // backspace/delete
+                this._doc.synth.loopBar = -1;
+                this._loopEditor.setLoopAt(this._doc.synth.loopBar);
+
                 if (event.ctrlKey || event.metaKey) {
                     this._doc.selection.deleteChannel();
                 } else {
@@ -3748,40 +3758,40 @@ export class SongEditor {
                     }
                 } else {
                     if (this._doc.prefs.deactivateBKeybind == true) {
-                    if (needControlForShortcuts == (event.ctrlKey || event.metaKey)) {
-                        if (this._doc.synth.loopBar != this._doc.bar) {
-                            this._doc.synth.loopBar = this._doc.bar;
-
-                            if (!this._doc.synth.playing) {
+                        if (needControlForShortcuts == (event.ctrlKey || event.metaKey)) {
+                            if (this._doc.synth.loopBar != this._doc.bar) {
+                                this._doc.synth.loopBar = this._doc.bar;
+    
+                                if (!this._doc.synth.playing) {
+                                    this._doc.synth.snapToBar();
+                                    this._doc.performance.play();
+                                }
+                            }
+                            else {
+                                this._doc.synth.loopBar = -1;
+                            }
+    
+                            // Pressed while viewing a different bar than the current synth playhead.
+                            if (this._doc.bar != Math.floor(this._doc.synth.playhead) && this._doc.synth.loopBar != -1) {
+    
+                                this._doc.synth.goToBar(this._doc.bar);
                                 this._doc.synth.snapToBar();
-                                this._doc.performance.play();
+                                this._doc.synth.initModFilters(this._doc.song);
+                                this._doc.synth.computeLatestModValues();
+                                if (this._doc.prefs.autoFollow) {
+                                    this._doc.selection.setChannelBar(this._doc.channel, Math.floor(this._doc.synth.playhead));
+                                }
+    
                             }
+    
+                            this._loopEditor.setLoopAt(this._doc.synth.loopBar);
+    
+                            event.preventDefault();
                         }
-                        else {
-                            this._doc.synth.loopBar = -1;
-                        }
-
-                        // Pressed while viewing a different bar than the current synth playhead.
-                        if (this._doc.bar != Math.floor(this._doc.synth.playhead) && this._doc.synth.loopBar != -1) {
-
-                            this._doc.synth.goToBar(this._doc.bar);
-                            this._doc.synth.snapToBar();
-                            this._doc.synth.initModFilters(this._doc.song);
-                            this._doc.synth.computeLatestModValues();
-                            if (this._doc.prefs.autoFollow) {
-                                this._doc.selection.setChannelBar(this._doc.channel, Math.floor(this._doc.synth.playhead));
-                            }
-
-                        }
-
-                        this._loopEditor.setLoopAt(this._doc.synth.loopBar);
-
-                        event.preventDefault();
-                    }
-                    break;
-                    } else {
                         break;
-                    }
+                        } else {
+                            break;
+                            }
                 }
                 break;
             case 68: // d
@@ -3801,6 +3811,9 @@ export class SongEditor {
             case 70: // f
                 if (canPlayNotes) break;
                 if (needControlForShortcuts == (event.ctrlKey || event.metaKey)) {
+                    this._doc.synth.loopBar = -1;
+                    this._loopEditor.setLoopAt(this._doc.synth.loopBar);
+
                     this._doc.synth.snapToStart();
                     this._doc.synth.initModFilters(this._doc.song);
                     this._doc.synth.computeLatestModValues();
@@ -3813,6 +3826,11 @@ export class SongEditor {
             case 72: // h
                 if (canPlayNotes) break;
                 if (needControlForShortcuts == (event.ctrlKey || event.metaKey)) {
+                    if (this._doc.synth.loopBar != this._doc.bar) {
+                        this._doc.synth.loopBar = -1;
+                        this._loopEditor.setLoopAt(this._doc.synth.loopBar);
+                    }
+
                     this._doc.synth.goToBar(this._doc.bar);
                     this._doc.synth.snapToBar();
                     this._doc.synth.initModFilters(this._doc.song);
@@ -4030,6 +4048,9 @@ export class SongEditor {
             case 219: // left brace
                 if (canPlayNotes) break;
                 if (needControlForShortcuts == (event.ctrlKey || event.metaKey)) {
+                    this._doc.synth.loopBar = -1;
+                    this._loopEditor.setLoopAt(this._doc.synth.loopBar);
+
                     this._doc.synth.goToPrevBar();
                     this._doc.synth.initModFilters(this._doc.song);
                     this._doc.synth.computeLatestModValues();
@@ -4042,6 +4063,9 @@ export class SongEditor {
             case 221: // right brace
                 if (canPlayNotes) break;
                 if (needControlForShortcuts == (event.ctrlKey || event.metaKey)) {
+                    this._doc.synth.loopBar = -1;
+                    this._loopEditor.setLoopAt(this._doc.synth.loopBar);
+
                     this._doc.synth.goToNextBar();
                     this._doc.synth.initModFilters(this._doc.song);
                     this._doc.synth.computeLatestModValues();
@@ -4230,11 +4254,15 @@ export class SongEditor {
     }
 
     private _whenPrevBarPressed = (): void => {
+        this._doc.synth.loopBar = -1;
+        this._loopEditor.setLoopAt(this._doc.synth.loopBar);
         this._doc.synth.goToPrevBar();
         this._barScrollBar.animatePlayhead();
     }
 
     private _whenNextBarPressed = (): void => {
+        this._doc.synth.loopBar = -1;
+        this._loopEditor.setLoopAt(this._doc.synth.loopBar);
         this._doc.synth.goToNextBar();
         this._barScrollBar.animatePlayhead();
     }
