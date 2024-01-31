@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel='shortcut icon' type='image/x-icon' href='./favicon.png' />
+    <!-- CDN for jQuery and select2 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.7/css/select2.min.css" rel="stylesheet" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Midbox</title>
+    <meta name="application-name" content="Midbox" />
+    <meta name="apple-mobile-web-app-title" content="Midbox">
+	<meta name="description" content="Midbox is an online tool for sketching and sharing instrumental music." />
+    <meta name="keywords" content="chiptune, instrumental, music, song, melody, composition, tool, free, square wave, NES, NSF, Midbox, midbox, JummBox, jummbox, BeepBox, beepbox" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#444" />
+    <meta name="msapplication-TileColor" content="#603cba" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icon_32.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link href="https://fonts.googleapis.com/css?family=B612" rel="stylesheet" media="none" onload="if (this.media != 'all') this.media='all';" /> <!-- this is a trick to load CSS asynchronously. -->
+    <style type="text/css">
+
+        html {
+            background: var(--page-margin, black);
+            overflow-x: hidden;
+            font-size: large;
+            font-family: 'B612', sans-serif;
+            line-height: 1.3;
+            color: var(--primary-text, white);
+        }
+
+        body {
+            margin: auto;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            align-content: center;
+        }
+
+        #beepboxEditorContainer {
+            min-height: 645px;
+            overflow: auto;
+            background: var(--editor-background, black);
+            width: 100%;
+			max-width: 710px;
+            padding-left: 30px;
+            padding-right: 30px;
+        }
+
+        #text-content {
+            overflow: auto;
+            background: var(--editor-background, black);
+            width: 100%;
+			max-width: 710px;
+            padding-left: 30px;
+            padding-right: 30px;
+        }
+
+        @font-face {
+        font-family: "Exo2";
+        src: url("../Exo2-Medium.otf");
+        }
+
+        h1 {
+            font-size: 1.7rem;
+            font-family: 'Audiowide';
+            text-align: center;
+            -webkit-text-stroke-width: 0;
+            color: rgb(255, 255, 255);
+        }
+
+        h2 {
+            font-size: 1.45rem;
+            font-family: 'Audiowide'; 
+            text-align: left;
+            margin-bottom: 0px;
+            -webkit-text-stroke-width: 0;
+            color: rgb(177, 233, 235);
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            font-family: 'Exo2'; 
+            text-align: left;
+            margin-top: 3px; 
+            margin-bottom: 3px;
+        }
+
+        h4 {
+            font-size: 1rem;
+            font-family: 'Exo2';
+            text-align: left;
+            margin-top: 0.15em;
+        }
+
+        h5 {
+            font-size: 1.65rem;
+            font-family: 'Audiowide';
+            text-align: center;
+            -webkit-text-stroke-width: 0;
+            color: rgb(240, 240, 240);
+            text-shadow: 0px 2px 1px rgb(196, 196, 196), 0px 4px 1px rgb(146, 146, 146);
+        }
+
+        h6 {
+            font-size: 1.7rem;
+            font-family: 'Audiowide';
+            text-align: center;
+            margin-top: 60px; 
+            margin-bottom: 40px; 
+            -webkit-text-stroke-width: 0;
+            color: rgb(235, 99, 99);
+            text-shadow: 0px 3px 2px rgb(131, 39, 39), 0px 6px 3px rgba(88, 17, 17, 0.76);
+        }
+
+        .v0_3 {
+            font-size: 2rem;
+            font-family: 'Audiowide';
+            text-align: center;
+            margin-top: 0px; 
+            margin-bottom: 10px; 
+            -webkit-text-stroke-width: 0;
+            color: rgb(32, 73, 255);
+            text-shadow: 2px 2px 1px rgb(0, 0, 161), 0px 4px 1px rgba(24, 102, 248, 0.705), 0px 8px 3px rgba(17, 113, 177, 0.616);
+        }
+
+        .v0_3_Changelog {
+            font-size: 1.2rem;
+            text-align: left;
+            font-family: 'Exo2';
+            margin-top: 20px; 
+            margin-bottom: 30px; 
+            color: rgb(234, 246, 248);
+        }
+
+        .v0_3_Credits {
+            font-size: 1.2rem;
+            text-align: left;
+            font-family: 'Exo2';
+            margin-top: 20px; 
+            margin-bottom: 30px; 
+            color: rgb(206, 209, 209);
+        }
+
+        .centerDiv {
+			margin: 0px auto;
+		}
+
+        a {
+            color: rgb(16, 120, 218);
+            text-shadow: 0px 0px 1px rgba(34, 77, 141, 0), 0px 1px 3px rgba(21, 45, 128, 0), 0px 2px 5px rgba(6, 8, 85, 0);
+        }
+
+        a:hover {
+            animation-name: colorShift;
+            animation-duration: 0.3s;
+            animation-fill-mode: forwards;
+        }
+
+        @keyframes colorShift {
+            0% {
+                color: rgb(16, 120, 218);
+                text-shadow: 0px 0px 1px rgba(34, 77, 141, 0), 0px 1px 3px rgba(21, 45, 128, 0), 0px 2px 5px rgba(6, 8, 85, 0);
+                font-size: 100%
+            }
+            100% {
+                color: rgb(92, 208, 253);
+                text-shadow: 2px 0px 1px rgba(46, 98, 177, 0.89), 4px -2px 3px rgba(25, 51, 143, 0.753), 7px -4px 6px rgba(7, 10, 87, 0.562);
+                font-size: 125%
+            }
+        }
+
+        /* wide screen */
+		@media (min-width: 711px) {
+            html {
+                width: 100%;
+            }
+
+            body {
+                width: 100%;
+            }
+
+            .column-container {
+				width: 710px;
+                display: flex;
+				gap: 25px;
+            }
+
+            .instructions-column {
+				min-width: 0;
+            }
+        }
+
+        /* narrow screen */
+		@media (max-width: 710px) {
+            body {
+                width: 100%;
+            }
+
+            p, .donation {
+                margin: 1em 0.5em;
+            }
+
+            .column-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="text-content">
+        <section>
+            <div class="v0_3">
+                <font>Midbox Revolution</font>
+            </div>
+            <h4>
+                Midbox Revolution, or Midbox V0.3, is the largest update to come to Midbox yet.<br>
+                This update takes various things from other Beepmods, ports over Jummbox V2.6's content, and adds many unique things.  <br>
+                <br>
+            </h4>
+            <div class="v0_3_Changelog">
+                <h1>
+                    New Content<br>
+                </h1>
+                <h2>
+                    Presets
+                </h2>
+                <h3>
+                    ‣ Added 5 preset categories. <br>
+                    The new categories are: Midbox Drum Presets, Midbox Piano Presets, Midbox Lead Presets, Midbox FM Presets, and Beepbox Supersaw Presets. <br>
+                    <br>
+                    ‣ Added many presets and reorganized them. They were added/reorganized as the following: <br>
+                    |<br>
+                    [Midbox Misc Presets (24)] - Ambient Pad, Guitar Pluck, Error, Clang Synth Guitar, Midbox Banjo, Corrupted Sine Bass, Corrupted Vocals 1, Electronic Rounded Synth, Harsh Mechanical Bass, Sine Synth Pluck, Punch Synth, Electronic Pluck 1, Growling Bass, Freq-Crushed Xylophone, Scream, Electric Guitar, Electronic Pluck 2, Chorus Bass, Pulse Synth, Smooth Bass, Supersaw Brass, Supersaw Dist. Guitar, Supersaw Click, and Corrupted Vocals 2. <br>
+                    |<br>
+                    [Midbox Dubstep Presets (13)] - Crispy Growl, Distorted Growl, Dance Growl, Dubstep Saw, Retro Dubstep Growl, Heavy Growl, Bouncy Wub, Dubstep Lead 2, Dubstep Grinder 1, Dubstep Grinder 2, Dubstep Robot, Terror, and Heavily Distorted Bwahh.<br>
+                    |<br>
+                    [Midbox Drum Presets (9)] - Enhanced Synth Kick (Moved), Heavy Kick (Moved), Otherworldly Kick (Moved), Tight Kick, Generic Kick, Kick Bass 1, Kick Bass 2, Odd Snare (Moved), and Spectrum Hi-Hat. <br>
+                    |<br>
+                    [Midbox Piano Presets (8)] - Blessed Piano (Moved), Desolated Piano (Moved), Rough Glistening Piano (Moved), Soft Glistening Piano (Moved), Bit-Crushed Piano (Moved), Another Piano (Moved), Mellow Piano, and Pandorasbox PianoC4. <br>
+                    |<br>
+                    [Midbox Lead Presets (18)] - Disco Vocal Lead (Moved), Distorted Lead (Moved), Scratch Lead, Future Lead, Echo Pulse Lead 1, Random Lead, Retro Ghostly Lead, Industrial Lead, Chaotic Pulse, Squealing Lead, Distorted Lead 2, Random Lead Distortion, Harmonized Chipwave, Freq-Crushed Sawtooth Lead, Retro Pulse, Square Wave Harp, Echo Pulse Lead 2, and Casino Lead. <br>
+                    |<br>
+                    [Midbox FM Presets (5)] - FM Electronic Guitar, FM Electronic Bass, FM Guitar, FM Pluck Bass, and FM Lead. <br>
+                    |<br>
+                    [Beepbox Supersaw Presets (3)] - Supersaw Lead, Supersaw String, and Supersaw Pad. <br>
+                    |<br>
+                    [Midbox Noise Presets (1)] - Hollow Snare-Clap. <br>
+                </h3>
+                <h2>
+                    New Instrument Types
+                </h2>
+                <h3>
+                    ‣ The Supersaw from Beepbox V4.2! <br>
+                    An instrument type that uses many sawtooth/pulse width waves that shift in frequency using adjustable chorus-like settings. <br>
+                    Comes with modulators for each of its settings. <br>
+                    <br>
+                    ‣ The Wavetable! <br>
+                    An instrument type that one-ups Sandbox's duty cycle instrument type. It uses 32 custom chips in a cycle where they swap through each other with adjustable speed. <br>
+                    Comes with 2 modulators to control the speed and set the current wave of the cycle.
+                </h3>
+                <h2>
+                    New Effects
+                </h2>
+                <h3>
+                    ‣ The Percussion effect! <br>
+                    An effect for preventing percussive instruments from changing pitch to song-wide pitch changes. These are: Song Key, Song Key Octave, and Song Detune Modulation. <br>
+                    <br>
+                    ‣ The [TEST] effect! <br>
+                    An effect currently in the making. Supposed to act like distortion/bitcrusher.
+                </h3>
+                <h2>
+                    Effects | Chord Type
+                </h2>
+                <h3>
+                    ‣ Added the strum speed slider, as well as its modulator. <br>
+                    <br>
+                    ‣ Added a 'bounce' checkbox for arpeggio chords. <br>
+                    When toggled, instead of the arpeggio going to the next note, getting to the last note, then looping, it bounces back upon hitting the last note.
+                </h3>
+                <h2>
+                    Effects | Transition Type
+                </h2>
+                <h3>
+                    ‣ Added the slide speed slider, as well as its modulator. <br>
+                    <br>
+                    ‣ Added a checkbox that toggles whether a seamless transition is cut off at the end of a pattern.
+                </h3>
+                <h2>
+                    Keybinds
+                </h2>
+                <h3>
+                    ‣ Added 5 keybinds. <br>
+                    These keybinds are B, X, `, CTRL+CLICK, and CTRL+R. <br>
+                    The X keybind 'cuts' the pattern, removing all notes from it while also copying them. The B keybind now activates a loop bar mode, while the 'beats per bar' prompt keybind was moved to 'SHIFT+B'. The ` keybind opens the 'song recovery' prompt, holding CTRL and drag clicking on an filter/slider will record the value to a modulator as the song plays, and CTRL+R takes you to the new random generation settings prompt. <br>
+                    <br>
+                    ‣ Finished the ~ (SHIFT+`) keybind for starting a new blank song. <br>
+                    <br>
+                    ‣ Added a prompt in the preferences menu that allows toggling keybinds on/off called 'Keybind Setup...'.
+                </h3>
+                <h2>
+                    Unisons
+                </h2>
+                <h3>
+                    ‣ Added unison compatibility to the pulse width and spectrum instrument types.
+                </h3>
+                <h2>
+                    Envelopes
+                </h2>
+                <h3>
+                    ‣ Tweaked envelope numbers and speed values a bit as well as adding many more numbers. <br>
+                    <br>
+                    ‣ Added 11 envelopes. <br>
+                    The new envelopes are: Linear, Rise, Wibble, Mini Tremolo, Full Tripolo, Semi Tripolo, Mini Tripolo, Decelerate, Stairs, Looped Stairs, and Jummbox Blip. <br>
+                    The Linear, Rise, and Wibble envelopes were ported from Goldbox. Jummbox Blip was ported from Jummbox V2.6. Decelerate, Stairs, and Looped Stairs are unique envelopes to Midbox. <br>
+                    <br>
+                    ‣ Added a dropdown containing more envelope settings. <br>
+                    These settings are envelope speed (affects all envelopes on the instrument) and discrete envelopes (makes envelopes sound harsher). <br>
+                    <br>
+                    ‣ Renamed the 'Slow Swell' envelope to 'Swell 5'.
+                </h3>
+                <h2>
+                    FM Centric
+                </h2>
+                <h3>
+                    ‣ Added a 64x FM operator frequency. <br>
+                    <br>
+                    ‣ Ported Ultrabox's 'rounded' operator waveform type. <br>
+                    <br>
+                    ‣ Added 2 FM operator waveforms. <br>
+                    These are Clang and Metal. <br>
+                    <br>
+                    ‣ Added plenty more options into the FM pulse width slider. <br>
+                    <br>
+                    ‣ Added many more feedback options to the FM.
+                </h3>
+                <h2>
+                    Basic Noise Centric
+                </h2>
+                <h3>
+                    ‣ Made basic noise both an instrument type and drum type. <br>
+                    <br>
+                    ‣ Ported 7 noise types from Goldbox, Old Modbox, and Sandbox. <br>
+                    The new noise types are: Static, Retro Clang, Harsh, Trill, Detuned Periodic, Snare, and Chime.
+                </h3>
+                <h2>
+                    Randomly Generated Instruments
+                </h2>
+                <h3>
+                    ‣ Added all features to the random generator. <br>
+                    <br>
+                    ‣ Added a prompt for better control on how your instrument randomly generates. <br>
+                    It can be found in the edit menu or by using the CTRL+R keybind.
+                </h3>
+                <h2>
+                    UI Changes
+                </h2>
+                <h3>
+                    ‣ Dropdown items now fade in when the dropdown button is pressed. These items are marked with "‣ ". <br>
+                    <br>
+                    ‣ Added speed displays next to all speed sliders. <br>
+                    They can be measured in ticks, multipliers, or waves per second (wavetable-only case). <br>
+                    The affected sliders are: Arpeggio Speed (multiplier), Vibrato Speed (multiplier), Strum Speed (ticks), Slide Speed (ticks), Envelope Speed (multiplier), and Wavetable Speed (WPS).
+                </h3>
+                <h2>
+                    Themes
+                </h2>
+                <h3>
+                    ‣ Added the Blutonium theme. <br>
+                    <br>
+                    ‣ Added color variables for the oscilloscope lines and mod name. <br>
+                    <br>
+                    ‣ Added the old variants of the Jummbox Dark and Poly (Mono) themes as options.
+                </h3>
+                <h2>
+                    Misc
+                </h2>
+                <h3>
+                    ‣ Added random splash text under the mod's name. <br>
+                    <br>
+                    ‣ Added the song subtitle right under the song title. <br>
+                    <br>
+                    ‣ Added a new mod logo. <br>
+                    The old mod logo was a pink version of Jummbox's. The new one is a little pair of headphones. <br>
+                    <br>
+                    ‣ Ported the 'song key octave' box from Ultrabox. <br>
+                    <br>
+                    ‣ Ported Goldbox's oscilloscope as well as a preference to disable it. <br>
+                    <br>
+                    ‣ Doubled the amount of options on the distortion slider. <br>
+                    <br>
+                    ‣ Put a few more options on the fade in/out editor. <br>
+                    <br>
+                    ‣ Added copy/paste wave buttons in the custom chip/wavetable's zoomed-in menus. <br>
+                    <br>
+                    ‣ Added picked string 'sustain types' in the 'sustain' tip prompt. <br>
+                    You can choose between acoustic (A) and bright (B) sustain. <br>
+                    <br>
+                    ‣ Added a 'bass offset' option in the note recording prompt for two-hand keyboard playing.
+                </h3>
+                <h1>
+                    Bug Fixing<br>
+                </h1>
+                <h2>
+                    Misc
+                </h2>
+                <h3>
+                    ‣ Fixed an issue where vibrato/arpeggios would desync when exporting the song to a sound file. <br>
+                    <br>
+                    ‣ Made the detune envelope work like the pitch shift's for usability. <br>
+                    <br>
+                    ‣ Fixed an issue where if the Modbox Bow envelope was used on a pulse width, it would make a loud click sound. <br>
+                    <br>
+                    ‣ Fixed an issue where the fourth noise channel's notes would appear black if the theme was Beepbox Competition.
+                </h3>
+                <h1>
+                    Changes<br>
+                </h1>
+                <h2>
+                    Presets
+                </h2>
+                <h3>
+                    ‣ Renamed the '3, 2, 1, GO! Pulse' to 'Countdown Pulse'. <br>
+                    <br>
+                    ‣ Tweaked various presets to give them the correct envelopes, names, correct settings, and make them more distinct/usable (the most notable of which being the drum presets).
+                </h3>
+                <h2>
+                    Keybinds
+                </h2>
+                <h3>
+                    ‣ Changed the 'beats per bar' prompt keybind from B to SHIFT+B so the loop bar toggle could take its place.
+                </h3>
+                <h2>
+                    Envelopes
+                </h2>
+                <h3>
+                    ‣ Renamed the 'Slow Swell' envelope to 'Swell 5'. Renamed Tremolo 1-3 and Tremolo 4-6 to Full/Semi Tremolo. <br>
+                    <br>
+                    ‣ Slightly changed the Modbox Click envelope to not be so powerful.
+                </h3>
+                <h2>
+                    Themes
+                </h2>
+                <h3>
+                    ‣ Finished up the Midbox theme. <br>
+                    <br>
+                    ‣ Updated all themes with new colors. <br>
+                    <br>
+                    ‣ Renamed the 'Mono' theme to 'Poly' and changed its colors slightly. <br>
+                    The old version of Poly (Mono) is an option in the theme select.
+                </h3>
+                <h2>
+                    Misc
+                </h2>
+                <h3>
+                    ‣ Renamed the FM "1⟲ 2⟲ 3⟲ 4⟲" feedback option to "⟲ALL". <br>
+                    <br>
+                    ‣ Changed the echo delay's reach from 2 beats to 4 beats, as well as putting bars on the slider to indicate each 'X.0' beat. <br>
+                    <br>
+                    ‣ Re-enabled the limit decay/rise options in the limiter settings. <br>
+                    <br>
+                    ‣ Lowered the volume of the Shine noise type. <br>
+                    <br>
+                    ‣ Made the detune slider a bit more precise. <br>
+                    <br>
+                    ‣ Replaced all needed mentions of Jummbox/Beepbox with Midbox. <br>
+                    <br>
+                    ‣ Replaced the recommendation in the song length prompt with a tip. <br>
+                    <br>
+                    ‣ Disabled clicking off prompts to close them due to cases of an accidently click resulting in losing unsaved values. <br> 
+                    This can be reactivated using the preference 'Close Prompt on Click Off'. <br>
+                    <br>
+                    ‣ Rephrased various tip prompts and slightly increased their width.
+                </h3>
+                <h6>
+                    Removed<br>
+                </h6>
+                <h2>
+                    ‣ Strum-Based Chord Types
+                </h2>
+                <h3>
+                    This refers to the various strum-like chords that varied in speeds. <br>
+                    They were removed due to not being needed anymore upon the addition of strum speed. <br>
+                    [REMOVED]: Medium Strum, Slow Strum, ⅓ Strum, ⅓ Medium Strum, ⅓ Slow Strum, and Build Up chord types.
+                </h3>
+                <h2>
+                    ‣ 'In Pattern' Transition Types
+                </h2>
+                <h3>
+                    This refers to the transition types that would be cut off at the end of a pattern. <br>
+                    They were removed due to not being needed anymore upon the addition of the 'continue through pattern/in pattern' checkbox. <br>
+                    [REMOVED]: Continue in Pattern and Slide in Pattern transition types.
+                </h3>
+                <h2>
+                    ‣ Insta-Slide Transition Type
+                </h2>
+                <h3>
+                    This refers to the transition type that was a very fast version of slide. <br>
+                    It was removed due to not being needed anymore upon the addition of slide speed. <br>
+                    [REMOVED]: Insta-Slide transition type.
+                </h3>
+            </div>
+            <div class="v0_3_Credits">
+                <h5>
+                    Credits
+                </h5>
+                <h2>
+                    Presets
+                </h2>
+                <h3>
+                    Thanks to XAxis for the "Electronic Rounded Synth", "Harsh Mechanical Bass", "Sine Synth Pluck", "Punch Synth", "Electronic Pluck 1", "Electronic Pluck 2", "Chorus Bass", "Pulse Synth", "Harmonized Chipwave", "Spectrum Hi-Hat", "Tight Kick", and "Hollow Snare Clap" presets. <br>
+                    Thanks to CEARS for the “Electric Guitar” preset. <br>
+                    Thanks to Glyde for the “Dubstep Grinder 1” preset. <br>
+                    Thanks to Ruskah for the “Supersaw Brass” and “Supersaw Dist. Guitar” presets. <br>
+                </h3>
+                <h2>
+                    Translations
+                </h2>
+                <h3>
+                    Thanks to Maggie and Glyde for help with translating Spanish.
+                </h3>
+                <h2>
+                    Logo
+                </h2>
+                <h3>
+                    Thanks to Gedd for creating the fabulous mod logo.
+                </h3>
+                <h2>
+                    Programming Help
+                </h2>
+                <h3>
+                    Huge thanks to Main and LeoV for helping me make this entire mod from the ground up. 
+                </h3>
+                <h3>
+                    <br>
+                    And thank you. You are part of the reason why Midbox stands the way it is today.
+                    <br>
+                </h3>
+            </div>
+            <h1>
+                <a href="./AllVersions.html">Return to Version List</a>
+            </h1>
+        </section>
+    </div>
+</body>
+</html>

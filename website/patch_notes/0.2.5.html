@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel='shortcut icon' type='image/x-icon' href='./favicon.png' />
+    <!-- CDN for jQuery and select2 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.7/css/select2.min.css" rel="stylesheet" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Midbox</title>
+    <meta name="application-name" content="Midbox" />
+    <meta name="apple-mobile-web-app-title" content="Midbox">
+	<meta name="description" content="Midbox is an online tool for sketching and sharing instrumental music." />
+    <meta name="keywords" content="chiptune, instrumental, music, song, melody, composition, tool, free, square wave, NES, NSF, Midbox, midbox, JummBox, jummbox, BeepBox, beepbox" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#444" />
+    <meta name="msapplication-TileColor" content="#603cba" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icon_32.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link href="https://fonts.googleapis.com/css?family=B612" rel="stylesheet" media="none" onload="if (this.media != 'all') this.media='all';" /> <!-- this is a trick to load CSS asynchronously. -->
+    <style type="text/css">
+
+        html {
+            background: var(--page-margin, black);
+            overflow-x: hidden;
+            font-size: large;
+            font-family: 'B612', sans-serif;
+            line-height: 1.3;
+            color: var(--primary-text, white);
+        }
+
+        body {
+            margin: auto;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            align-content: center;
+        }
+
+        #beepboxEditorContainer {
+            min-height: 645px;
+            overflow: auto;
+            background: var(--editor-background, black);
+            width: 100%;
+			max-width: 710px;
+            padding-left: 30px;
+            padding-right: 30px;
+        }
+
+        #text-content {
+            overflow: auto;
+            background: var(--editor-background, black);
+            width: 100%;
+			max-width: 710px;
+            padding-left: 30px;
+            padding-right: 30px;
+        }
+
+        @font-face {
+        font-family: "Exo2";
+        src: url("../Exo2-Medium.otf");
+        }
+
+        h1 {
+            font-size: 1.7rem;
+            font-family: 'Audiowide';
+            text-align: center;
+            -webkit-text-stroke-width: 0;
+            color: rgb(255, 255, 255);
+        }
+
+        h2 {
+            font-size: 1.45rem;
+            font-family: 'Audiowide'; 
+            text-align: left;
+            margin-bottom: 0px;
+            -webkit-text-stroke-width: 0;
+            color: rgb(177, 233, 235);
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            font-family: 'Exo2'; 
+            text-align: left;
+            margin-top: 3px; 
+            margin-bottom: 3px;
+        }
+
+        h4 {
+            font-size: 1rem;
+            font-family: 'Exo2';
+            text-align: left;
+            margin-top: 0.15em;
+        }
+
+        h5 {
+            font-size: 1.65rem;
+            font-family: 'Audiowide';
+            text-align: center;
+            -webkit-text-stroke-width: 0;
+            color: rgb(240, 240, 240);
+            text-shadow: 0px 2px 1px rgb(196, 196, 196), 0px 4px 1px rgb(146, 146, 146);
+        }
+
+        .v0_2_5 {
+            font-size: 2rem;
+            font-family: 'Audiowide';
+            text-align: center;
+            margin-top: 0px; 
+            margin-bottom: 10px; 
+            -webkit-text-stroke-width: 0;
+            color: rgb(7, 101, 241);
+            text-shadow: 2px 2px 1px rgb(11, 44, 155);
+        }
+
+        .v0_2_5_Changelog {
+            font-size: 1.2rem;
+            text-align: left;
+            font-family: 'Exo2';
+            margin-top: 20px; 
+            margin-bottom: 30px; 
+            color: rgb(234, 246, 248);
+        }
+
+        .v0_2_5_Credits {
+            font-size: 1.2rem;
+            text-align: left;
+            font-family: 'Exo2';
+            margin-top: 20px; 
+            margin-bottom: 30px; 
+            color: rgb(206, 209, 209);
+        }
+
+        .centerDiv {
+			margin: 0px auto;
+		}
+
+        a {
+            color: rgb(16, 120, 218);
+            text-shadow: 0px 0px 1px rgba(34, 77, 141, 0), 0px 1px 3px rgba(21, 45, 128, 0), 0px 2px 5px rgba(6, 8, 85, 0);
+        }
+
+        a:hover {
+            animation-name: colorShift;
+            animation-duration: 0.3s;
+            animation-fill-mode: forwards;
+        }
+
+        @keyframes colorShift {
+            0% {
+                color: rgb(16, 120, 218);
+                text-shadow: 0px 0px 1px rgba(34, 77, 141, 0), 0px 1px 3px rgba(21, 45, 128, 0), 0px 2px 5px rgba(6, 8, 85, 0);
+                font-size: 100%
+            }
+            100% {
+                color: rgb(92, 208, 253);
+                text-shadow: 2px 0px 1px rgba(46, 98, 177, 0.89), 4px -2px 3px rgba(25, 51, 143, 0.753), 7px -4px 6px rgba(7, 10, 87, 0.562);
+                font-size: 125%
+            }
+        }
+
+        /* wide screen */
+		@media (min-width: 711px) {
+            html {
+                width: 100%;
+            }
+
+            body {
+                width: 100%;
+            }
+
+            .column-container {
+				width: 710px;
+                display: flex;
+				gap: 25px;
+            }
+
+            .instructions-column {
+				min-width: 0;
+            }
+        }
+
+        /* narrow screen */
+		@media (max-width: 710px) {
+            body {
+                width: 100%;
+            }
+
+            p, .donation {
+                margin: 1em 0.5em;
+            }
+
+            .column-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="text-content">
+        <section>
+            <div class="v0_2_5">
+                <font>V0.2 Finalizing</font>
+            </div>
+            <h4>
+                V0.2 Finalizing is a relatively small update adding features and fixing some bugs.<br>
+                This was to set the stage for an update much, much larger.<br>
+                <br>
+            </h4>
+            <div class="v0_2_5_Changelog">
+                <h1>
+                    New Content<br>
+                </h1>
+                <h2>
+                    Keybinds
+                </h2>
+                <h3>
+                    ‣ Added 3 keybinds.
+                    These 3 keybinds are U, ~, and B. 
+                    The U keybind would quickly shorten the song URL, the ~ keybind (or shift `) creates a new blank song (the keybind is unfinished and thus doesn't actually make a new blank song), and the B keybind was yoinked from Ultrabox, sending you to the 'beats per bar' prompt.
+                </h3>
+                <h2>
+                    Presets
+                </h2>
+                <h3>
+                    ‣ Added 2 presets. They were added as the following: <br>
+                    |<br>
+                    [Midbox Misc Presets (2)] - Mechanical Blip and Another Piano. <br>
+                </h3>
+                <h2>
+                    Misc
+                </h2>
+                <h3>
+                    ‣ Made a forms for users to report bugs and send suggestions/feedback for Midbox and linked it in the description. <br>
+                    <br>
+                    ‣ Added a Midbox theme, which was unfinished at the time. <br>
+                    <br>
+                    ‣ Added a language preference that would change the language between English and Spanish. Most translations were unfinished. <br>
+                    In the current version of Midbox, the Spanish translations have been finished. <br>
+                    <br>
+                </h3>
+                <h1>
+                    Bug Fixing<br>
+                </h1>
+                <h2>
+                    Misc
+                </h2>
+                <h3>
+                    ‣ Fixed an issue where FM operator frequencies would be defaulted on 0.125x rather than 1x. <br>
+                    <br>
+                    ‣ Fixed an issue where chip waves would be offset on various presets. <br>
+                    <br>
+                </h3>
+                <h1>
+                    Changes<br>
+                </h1>
+                <h2>
+                    Misc
+                </h2>
+                <h3>
+                    ‣ Changed the color of the mod name. <br>
+                    <br>
+                </h3>
+            </div>
+            <div class="v0_2_5_Credits">
+                <h5>
+                    Credits
+                </h5>
+                <h2>
+                    Translations
+                </h2>
+                <h3>
+                    Thanks to Maggie for some help on translating Midbox to Spanish for the language feature.
+                </h3>
+                <h2>
+                    Programming Help
+                </h2>
+                <h3>
+                    Yet another big thanks to LeoV for the continued guidance through this project. <br>
+                    <br>
+                </h3>
+            </div>
+            <h1>
+                <a href="./AllVersions.html">Return to Version List</a>
+            </h1>
+        </section>
+    </div>
+</body>
+</html>

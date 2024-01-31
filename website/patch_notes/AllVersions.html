@@ -61,6 +61,11 @@
             padding-right: 30px;
         }
 
+        @font-face {
+        font-family: "Exo2";
+        src: url("../Exo2-Medium.otf");
+        }
+
         h1 {
             font-size: 2rem;
             font-family: 'Audiowide';
@@ -82,7 +87,7 @@
 
         h3 {
             font-size: 1rem;
-            font-family: 'Exo2'; 
+            font-family: 'Exo2';
             text-align: left;
             margin-top: 5px; 
             color: rgb(234, 246, 248);
@@ -137,7 +142,7 @@
             margin-bottom: 8px; 
             -webkit-text-stroke-width: 0;
             color: rgb(32, 73, 255);
-            text-shadow: 2px 2px 1px rgb(0, 0, 161);
+            text-shadow: 2px 2px 1px rgb(0, 0, 161), 0px 4px 2px rgba(8, 68, 180, 0.5), 0px 8px 5px rgba(57, 107, 139, 0.377), 4px -1px 2px rgba(34, 248, 248, 0.158);
         }
 
         .v0_3_1 {
@@ -156,8 +161,27 @@
 		}
 
         a {
-            color: var(--link-accent, rgb(112, 215, 255));
-            text-shadow: 2px 2px 1px rgb(16, 125, 158);
+            color: rgb(87, 111, 247);
+            text-shadow: 2px 2px 1px rgb(8, 6, 126), 1px 1px 5px rgba(84, 151, 168, 0), 1px 0px 1px rgba(14, 11, 212, 0);
+        }
+
+        a:hover {
+            animation-name: colorShift;
+            animation-duration: 0.3s;
+            animation-fill-mode: forwards;
+        }
+
+        @keyframes colorShift {
+            0% {
+                color: rgb(87, 111, 247);
+                text-shadow: 2px 2px 1px rgb(8, 6, 126), 1px 1px 5px rgba(84, 151, 168, 0), 1px 0px 1px rgba(14, 11, 212, 0);
+                font-size: 100%
+            }
+            100% {
+                color: rgb(112, 215, 255);
+                text-shadow: 2px 2px 1px rgb(13, 91, 163), 1px 1px 5px rgba(84, 151, 168, 0.911), 3px 2px 1px rgb(17, 117, 248);
+                font-size: 120%
+            }
         }
 
         /* wide screen */

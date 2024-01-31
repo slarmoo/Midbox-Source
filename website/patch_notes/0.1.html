@@ -61,6 +61,11 @@
             padding-right: 30px;
         }
 
+        @font-face {
+        font-family: "Exo2";
+        src: url("../Exo2-Medium.otf");
+        }
+
         h1 {
             font-size: 1.7rem;
             font-family: 'Audiowide';
@@ -136,7 +141,27 @@
 		}
 
         a {
-            color: var(--link-accent, rgb(17, 138, 252));
+            color: rgb(16, 120, 218);
+            text-shadow: 0px 0px 1px rgba(34, 77, 141, 0), 0px 1px 3px rgba(21, 45, 128, 0), 0px 2px 5px rgba(6, 8, 85, 0);
+        }
+
+        a:hover {
+            animation-name: colorShift;
+            animation-duration: 0.3s;
+            animation-fill-mode: forwards;
+        }
+
+        @keyframes colorShift {
+            0% {
+                color: rgb(16, 120, 218);
+                text-shadow: 0px 0px 1px rgba(34, 77, 141, 0), 0px 1px 3px rgba(21, 45, 128, 0), 0px 2px 5px rgba(6, 8, 85, 0);
+                font-size: 100%
+            }
+            100% {
+                color: rgb(92, 208, 253);
+                text-shadow: 2px 0px 1px rgba(46, 98, 177, 0.89), 4px -2px 3px rgba(25, 51, 143, 0.753), 7px -4px 6px rgba(7, 10, 87, 0.562);
+                font-size: 125%
+            }
         }
 
         /* wide screen */
@@ -187,7 +212,7 @@
             </div>
             <h4>
                 The Porting Update, or Midbox V0.1, was mainly a transition from Beepbox to Jummbox.<br>
-                The update adds most things from the <a href="https://mid-the-modder.github.io/Midbox-DISCONTINUED/">old version of Midbox</a> (which can currently be accessed, but will not be receiving any further development) as well as a few new things.<br>
+                The update adds most things from the <a target="_blank" href="https://mid-the-modder.github.io/Midbox-DISCONTINUED/">old version of Midbox</a> (which can currently be accessed, but will not be receiving any further development) as well as a few new things.<br>
                 <br>
             </h4>
             <div class="v0_1_Changelog">
@@ -214,6 +239,9 @@
                 <h3>
                     ‣ Added 2 envelopes. These envelopes are based off of old Modbox's transition types. <br>
                     The new envelopes are: Modbox Trill, and Modbox Blip. <br>
+                    <br>
+                    ‣ Added the distortion envelope target. It was defunct. <br>
+                    It was later removed in V0.2 but was added back in V0.3 and is now functional.
                 </h3>
                 <h2>
                     Chord Types
