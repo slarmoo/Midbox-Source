@@ -671,7 +671,7 @@ export class SongEditor {
     private readonly _instrumentsButtonRow: HTMLDivElement = div({ class: "selectRow", style: "display: none;" }, span({ class: "tip", onclick: () => this._openPrompt("instrumentIndex") }, span(_.instAmountLabel)), this._instrumentsButtonBar);
     private readonly _instrumentVolumeSlider: Slider = new Slider(input({ style: "margin: 0; position: sticky;", type: "range", min: Math.floor(-Config.volumeRange / 2), max: Math.floor(Config.volumeRange / 2), value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeVolume(this._doc, oldValue, newValue), true);
     private readonly _instrumentVolumeSliderInputBox: HTMLInputElement = input({ style: "width: 4em; font-size: 80%", id: "volumeSliderInputBox", type: "number", step: "1", min: Math.floor(-Config.volumeRange / 2), max: Math.floor(Config.volumeRange / 2), value: "0" });
-    private readonly _instrumentVolumeSliderTip: HTMLDivElement = div({ class: "selectRow", style: "height: 1em" }, span({ class: "tip", style: "font-size: smaller;", onclick: () => this._openPrompt("instrumentVolume") }, span(_.volumeLabel)));
+    private readonly _instrumentVolumeSliderTip: HTMLDivElement = div({ class: "selectRow", style: "height: 1em" }, span({ class: "tip", style: "font-size: smaller;", onclick: () => this._openPrompt("instrumentVolume") }, _.volumeLabel));
     private readonly _instrumentVolumeSliderRow: HTMLDivElement = div({ class: "selectRow" }, div({},
         div({ style: `color: ${ColorConfig.secondaryText};` }, span({ class: "tip" }, this._instrumentVolumeSliderTip)),
         div({ style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;` }, this._instrumentVolumeSliderInputBox),
@@ -787,7 +787,7 @@ export class SongEditor {
 	private readonly _supersawShapeSlider: Slider = new Slider(input({style: "margin: 0;", type: "range", min: "0", max: Config.supersawShapeMax, value: "0", step: "1"}), this._doc, (oldValue: number, newValue: number) => new ChangeSupersawShape(this._doc, oldValue, newValue), false);
 	private readonly _supersawShapeRow: HTMLDivElement = div({class: "selectRow"}, span({class: "tip", onclick: ()=>this._openPrompt("supersawShape")}, span(_.sawToPulseLabel)), this._supersawShapeSlider.container);
 
-    private readonly _wavetableSpeedDisplay: HTMLSpanElement = span({ style: `color: ${ColorConfig.secondaryText}; font-size: smaller; text-overflow: clip;`, class: "tip", onclick: () => this._openPrompt("wps") }, "1wps");
+    private readonly _wavetableSpeedDisplay: HTMLSpanElement = span({ style: `color: ${ColorConfig.secondaryText}; font-size: smaller; text-overflow: clip;`, class: "tip", onclick: () => this._openPrompt("wpb") }, "1wpb");
     private readonly _wavetableSpeedSlider: Slider = new Slider(input({style: "margin: 0;", type: "range", min: "0", max: Config.wavetableSpeedMax, value: "0", step: "1"}), this._doc, (oldValue: number, newValue: number) => new ChangeWavetableSpeed(this._doc, oldValue, newValue), false);
     private readonly _wavetableSpeedRow: HTMLDivElement = div({class: "selectRow"}, span({class: "tip", onclick: ()=>this._openPrompt("wavetableSpeed")}, span(_.wavetableSpeedLabel)), this._wavetableSpeedDisplay, this._wavetableSpeedSlider.container);
     private readonly _wavetableWaveButtons: HTMLButtonElement[] = [
@@ -885,7 +885,8 @@ export class SongEditor {
         _.unison20Label,
         _.unison21Label,
         _.unison22Label,
-        _.unison23Label
+        _.unison23Label,
+        _.unison24Label
 
     ]);
     private readonly _unisonSelectRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("unison") }, span(_.unisonLabel)), div({ class: "selectContainer" }, this._unisonSelect));
@@ -1595,8 +1596,10 @@ export class SongEditor {
         this._pauseButton.addEventListener("click", this.togglePlay);
         this._recordButton.addEventListener("click", this._toggleRecord);
         this._stopButton.addEventListener("click", this._toggleRecord);
-        //this._customWaveCopy.addEventListener("click", this._copyCustomWave); MID REMEMBER
-        //this._customWavePaste.addEventListener("click", this._pasteCustomWave); MID REMEMBER
+        this._customWaveCopy.addEventListener("click", this._copyCustomWave);
+        this._customWavePaste.addEventListener("click", this._pasteCustomWave);
+        this._wavetableCustomWaveCopy.addEventListener("click", this._copyWavetableCustomWave);
+        this._wavetableCustomWavePaste.addEventListener("click", this._pasteWavetableCustomWave);
         // Start recording instead of opening context menu when control-clicking the record button on a Mac.
         this._recordButton.addEventListener("contextmenu", (event: MouseEvent) => {
             if (event.ctrlKey) {
@@ -2633,7 +2636,7 @@ export class SongEditor {
             this._slideSpeedSlider.input.title = prettyNumber(Config.slideSpeedScale[instrument.slideSpeed]);
             this._slideSpeedDisplay.textContent = prettyNumber(Config.slideSpeedScale[instrument.slideSpeed]) + " tk";
             this._wavetableSpeedSlider.input.title = prettyNumber(Config.wavetableSpeedScale[instrument.wavetableSpeed]);
-            this._wavetableSpeedDisplay.textContent = prettyNumber(Config.wavetableSpeedScale[instrument.wavetableSpeed] * 4) + "wps";
+            this._wavetableSpeedDisplay.textContent = prettyNumber(Config.wavetableSpeedScale[instrument.wavetableSpeed]) + "wpb";
             this._eqFilterSimpleCutSlider.updateValue(instrument.eqFilterSimpleCut);
             this._eqFilterSimplePeakSlider.updateValue(instrument.eqFilterSimplePeak);
             this._noteFilterSimpleCutSlider.updateValue(instrument.noteFilterSimpleCut);
@@ -3988,7 +3991,7 @@ export class SongEditor {
                 break;
             case 85: // u
                 if (canPlayNotes) break;
-                if (needControlForShortcuts == (event.ctrlKey || event.metaKey)) {
+                if (event.shiftKey) {
                     window.open("https://tinyurl.com/api-create.php?url=" + encodeURIComponent(new URL("#" + this._doc.song.toBase64String(), location.href).href));
                     event.preventDefault();
                 }
@@ -4285,19 +4288,27 @@ export class SongEditor {
         }
     }
 
-    /*public _copyCustomWave = (): void => {
-        const chipCopy: Float32Array = this._customWavePresetHandler.customWaveArray
-		window.localStorage.setItem("chipCopy", JSON.stringify(Array.from(chipCopy)));
+    public _copyCustomWave = (): void => {
+        let instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
+        const chipCopy: Float32Array = instrument.customChipWave;
+        window.localStorage.setItem("chipCopy", JSON.stringify(Array.from(chipCopy)));
     }
 
     public _pasteCustomWave = (): void => {
         const storedChipWave: any = JSON.parse(String(window.localStorage.getItem("chipCopy")));
-		for (let i: number = 0; i < 64; i++) {
-            CustomChipPrompt.customChipCanvas.chipData[i] = storedChipWave[i];
-		}
-		CustomChipPrompt.customChipCanvas._storeChange();
-		new ChangeCustomWave(this._doc, CustomChipPrompt.customChipCanvas.chipData);
-    } MID REMEMBER */
+        this._doc.record(new ChangeCustomWave(this._doc, storedChipWave));
+    }
+
+    public _copyWavetableCustomWave = (): void => {
+        let instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
+        const chipCopy: Float32Array = instrument.wavetableWaves[this._wavetableIndices[this._doc.channel][this._doc.getCurrentInstrument()]];
+        window.localStorage.setItem("chipCopy", JSON.stringify(Array.from(chipCopy)));
+    }
+
+    public _pasteWavetableCustomWave = (): void => {
+        const storedWavetableChipWave: any = JSON.parse(String(window.localStorage.getItem("chipCopy")));
+        this._doc.record(new ChangeWavetableCustomWave(this._doc, storedWavetableChipWave, this._wavetableIndices[this._doc.channel][this._doc.getCurrentInstrument()]));
+    }
 
     public _animate = (): void => {
         // Need to update mods once more to clear the slider display

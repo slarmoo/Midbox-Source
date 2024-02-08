@@ -593,11 +593,11 @@ export class TipPrompt implements Prompt {
 					p("Key: '2 tk' means the duration is for two 'ticks'.")
 				);
 			} break;
-			case "wps": {
+			case "wpb": {
 				message = div(
 					h2("Speed Display"),
-					p("This is a little number that shows you how fast/slow a speed is. This display is measured in waves per second."),
-					p("Key: '4wps' means the speed is four waves per second. '0.5wps' means the speed is one wave per two seconds, or 1/2 wave per second.")
+					p("This is a little number that shows you how fast/slow a speed is. This display is measured in waves per beat."),
+					p("Key: '4wpb' means the speed is four waves per beat. '0.5wps' means the speed is one wave every two beats, or 1/2 wave per beat.")
 				);
 			} break;
 

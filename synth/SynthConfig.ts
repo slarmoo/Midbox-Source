@@ -208,6 +208,7 @@ export interface Modulator extends BeepBoxOption {
     readonly newNoteVol:       number;     
     readonly forSong:          boolean;    
     convertRealFactor:         number;     
+//  readonly checkboxMod:      boolean;
     readonly associatedEffect: EffectType; 
     readonly promptName:       string;     
     readonly promptDesc:       string[];   
@@ -472,6 +473,7 @@ export class Config {
         { name: "buried",          voices: 2, spread: 0.03575,  offset: -36.0,   expression: 1.4,  sign:  1.0 },
         { name: "corrupt",         voices: 2, spread: 18,       offset:  48.0,   expression: 0.7,  sign:  0.7 },
         { name: "weird octave",    voices: 2, spread: 5.85,     offset:  5.85,   expression: 0.75, sign:  1.0 },
+        { name: "bent",            voices: 2, spread: 9.5,      offset:  4.5,    expression: 0.8,  sign: -0.6 },
     ]);
 
     public static readonly effectNames: ReadonlyArray<string> =     ["reverb", "chorus", "panning", "distortion", "bitcrusher", "note filter", "echo", "pitch shift", "detune", "vibrato", "transition type", "chord type", "percussion", "test"];

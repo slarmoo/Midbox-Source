@@ -305,6 +305,9 @@ document.head.appendChild(HTML.style({ type: "text/css" }, `
 .beepboxEditor .tip:hover {
 	color: ${ColorConfig.linkAccent};
 	text-decoration: underline;
+	animation-name: lightUp2;
+	animation-duration: 0.3s;
+	animation-fill-mode: forwards;
 }
 .beepboxEditor .tip:active {
 	color: ${ColorConfig.primaryText};
@@ -330,12 +333,22 @@ document.head.appendChild(HTML.style({ type: "text/css" }, `
 	background-repeat: no-repeat;
 	background-position: center;
 }
+.beepboxEditor .drum-button:hover {
+	animation-name: lightUp2;
+	animation-duration: 0.3s;
+	animation-fill-mode: forwards;
+}
 
 .beepboxEditor .modulator-button {
 	flex: 1;
 	position: relative;
 	display: flex;
 	align-items: center;
+}
+.beepboxEditor .modulator-button:hover {
+	animation-name: lightUp2;
+	animation-duration: 0.3s;
+	animation-fill-mode: forwards;
 }
 .beepboxEditor .modulator-button::before {
 	content: "";
@@ -356,6 +369,11 @@ document.head.appendChild(HTML.style({ type: "text/css" }, `
 	position: relative;
 	display: flex;
 	align-items: center;
+}
+.beepboxEditor .piano-button:hover {
+	animation-name: lightUp;
+	animation-duration: 0.3s;
+	animation-fill-mode: forwards;
 }
 .beepboxEditor .piano-button::before {
 	content: "";
@@ -832,6 +850,47 @@ document.head.appendChild(HTML.style({ type: "text/css" }, `
 	-moz-appearance: none;
 	appearance: none;
 }
+.beepboxEditor select:hover {
+	animation-name: lightUpButton;
+	animation-duration: 0.3s;
+	animation-fill-mode: forwards;
+}
+@keyframes lightUp {
+	0% {
+		filter: brightness(1);
+		font-size: 100%;
+	}
+	100% {
+		filter: brightness(1.25);
+		font-size: 115%;
+	}
+}
+@keyframes lightUp2 {
+	0% {
+		filter: brightness(1);
+	}
+	100% {
+		filter: brightness(1.25);
+	}
+}
+@keyframes lightUpButton {
+	0% {
+		background: ${ColorConfig.uiWidgetBackground};
+	}
+	100% {
+		background: ${ColorConfig.uiWidgetFocus};
+	}
+}
+@keyframes lightUpButton2 {
+	0% {
+		background: ${ColorConfig.uiWidgetBackground};
+		font-size: 100%;
+	}
+	100% {
+		background: ${ColorConfig.uiWidgetFocus};
+		font-size: 110%;
+	}
+}
 .beepboxEditor select option:disabled {
 	color: ${ColorConfig.linkAccent};
 	font-weight: bold;
@@ -894,6 +953,11 @@ document.head.appendChild(HTML.style({ type: "text/css" }, `
 	-webkit-appearance:none;
 	-moz-appearance: none;
 	appearance: none;
+}
+.select2-selection__rendered:hover {
+	animation-name: lightUp2;
+	animation-duration: 0.3s;
+	animation-fill-mode: forwards;
 }
 .select2-selection__arrow b{
     display:none !important;
@@ -979,6 +1043,11 @@ document.head.appendChild(HTML.style({ type: "text/css" }, `
 	font-family: inherit;
 	font-weight: inherit;
 	cursor: pointer;
+}
+.beepboxEditor button:hover {
+	animation-name: lightUpButton1;
+	animation-duration: 0.3s;
+	animation-fill-mode: forwards;
 }
 .beepboxEditor button:focus {
 	background: ${ColorConfig.uiWidgetFocus};
@@ -1517,6 +1586,16 @@ document.head.appendChild(HTML.style({ type: "text/css" }, `
 	border: 1px solid ${ColorConfig.inputBoxOutline};
 	color: ${ColorConfig.primaryText};
 }
+.beepboxEditor input[type=text]:hover {
+	animation-name: lightUp;
+	animation-duration: 0.3s;
+	animation-fill-mode: forwards;
+}
+.beepboxEditor input[type=number]:hover {
+	animation-name: lightUp2;
+	animation-duration: 0.3s;
+	animation-fill-mode: forwards;
+}
 
 .beepboxEditor input[type=text]::selection, .beepboxEditor input[type=number]::selection {
 	background-color: ${ColorConfig.textSelection};
@@ -1538,6 +1617,11 @@ document.head.appendChild(HTML.style({ type: "text/css" }, `
 	background: none;
 	touch-action: pan-y;
   position: relative;
+}
+.beepboxEditor input[type=range]:hover {
+	animation-name: lightUp;
+	animation-duration: 0.3s;
+	animation-fill-mode: forwards;
 }
 .beepboxEditor input[type=range]:focus {
 	outline: none;

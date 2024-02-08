@@ -335,12 +335,11 @@ export class CustomChipPrompt implements Prompt {
 	}
 
 	private _copySettings = (): void => {
-		const chipCopy: Float32Array = this.customChipCanvas.chipData
+		const chipCopy: Float32Array = this.customChipCanvas.chipData;
 		window.localStorage.setItem("chipCopy", JSON.stringify(Array.from(chipCopy)));
 	}
 
 	private _pasteSettings = (): void => {
-
 		const storedChipWave: any = JSON.parse(String(window.localStorage.getItem("chipCopy")));
 		for (let i: number = 0; i < 64; i++) {
     	this.customChipCanvas.chipData[i] = storedChipWave[i];

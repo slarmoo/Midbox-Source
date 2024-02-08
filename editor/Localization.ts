@@ -268,6 +268,7 @@ export class Localization {
     public static unison21Label: string = "buried";
     public static unison22Label: string = "corrupt";
     public static unison23Label: string = "weird octave";
+    public static unison24Label: string = "bent";
     public static transition1Label: string = "normal";
     public static transition2Label: string = "interrupt";
     public static transition3Label: string = "continue";
@@ -1129,6 +1130,7 @@ if (language == "spanish") {
     Localization.unison21Label = "enterrado";
     Localization.unison22Label = "corrupto";
     Localization.unison23Label = "octava extraño";
+    Localization.unison24Label = "torcido";
     Localization.transition1Label = "normal";
     Localization.transition2Label = "interrumpir";
     Localization.transition3Label = "continuar";

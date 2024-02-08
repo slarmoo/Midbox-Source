@@ -5,18 +5,34 @@ import { ColorConfig } from "../editor/ColorConfig";
 import { NotePin, Note, Pattern, Instrument, Channel, Synth } from "../synth/synth";
 import { HTML, SVG } from "imperative-html/dist/esm/elements-strict";
 import { Localization as _ } from "../editor/Localization";
+import { oscilloscopeCanvas } from "../global/Oscilloscope";
 
-	const {a, button, div, h1, input} = HTML;
+	const {a, button, div, h1, h3, input, canvas} = HTML;
 	const {svg, circle, rect, path} = SVG;
+
+	const isMobile: boolean = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|android|ipad|playbook|silk/i.test(navigator.userAgent);
 
 	document.head.appendChild(HTML.style({type: "text/css"}, `
 	body {
 		color: ${ColorConfig.primaryText};
 		background: ${ColorConfig.editorBackground};
 	}
+	@font-face {
+        font-family: "Exo2";
+        src: url("../Exo2-Medium.otf");
+    }
 	h1 {
 		font-weight: bold;
 		font-size: 14px;
+		font-family: 'Audiowide';
+		line-height: 22px;
+		text-align: initial;
+		margin: 0;
+	}
+	h3 {
+		font-weight: bold;
+		font-size: 12px;
+		font-family: 'Exo2';
 		line-height: 22px;
 		text-align: initial;
 		margin: 0;
@@ -24,6 +40,7 @@ import { Localization as _ } from "../editor/Localization";
 	a {
 		font-weight: bold;
 		font-size: 12px;
+		font-family: 'Exo2';
 		line-height: 22px;
 		white-space: nowrap;
 		color: ${ColorConfig.linkAccent};
@@ -160,7 +177,14 @@ let outVolumeHistoricTimer: number = 0;
 let outVolumeHistoricCap: number = 0;
 
 const synth: Synth = new Synth();
-let titleText: HTMLHeadingElement = h1({ style: "flex-grow: 1; margin: 0 1px; margin-left: 10px; overflow: hidden;" }, "");
+const oscilloscope: oscilloscopeCanvas = new oscilloscopeCanvas(canvas({ width: isMobile? 144:288, height: isMobile?32:64, style: `border:2px solid ${ColorConfig.uiWidgetBackground}; overflow: hidden;` , id: "oscilloscopeAll" }), isMobile?1:2);
+const showOscilloscope: boolean = getLocalStorage("showOscilloscope") != "false";
+if (!showOscilloscope) {
+	oscilloscope.canvas.style.display = "none";
+	synth.oscEnabled = false;
+}
+let titleText: HTMLHeadingElement = h1({ style: "flex-grow: 1; margin: 3px 1px; margin-left: 10px; overflow: hidden; vertical-align: 30%;" }, "");
+let subtitleText: HTMLHeadingElement = h3({ style: "flex-grow: 1; margin: 3px 1px; margin-left: 10px; overflow: hidden; vertical-align: -30%;" }, "");
 	let editLink: HTMLAnchorElement = a({target: "_top", style: "margin: 0 4px;"}, _.songPlayer1Label);
 	let copyLink: HTMLAnchorElement = a({href: "javascript:void(0)", style: "margin: 0 4px;"}, _.songPlayer2Label);
 	let shareLink: HTMLAnchorElement = a({href: "javascript:void(0)", style: "margin: 0 4px;"}, _.songPlayer3Label);
@@ -202,7 +226,7 @@ const stop2: SVGStopElement = SVG.stop({ "stop-color": "orange", offset: "90%" }
 const stop3: SVGStopElement = SVG.stop({ "stop-color": "red", offset: "100%" });
 const gradient: SVGGradientElement = SVG.linearGradient({ id: "volumeGrad2", gradientUnits: "userSpaceOnUse" }, stop1, stop2, stop3);
 const defs: SVGDefsElement = SVG.defs({}, gradient);
-const volumeBarContainer: SVGSVGElement = SVG.svg({ style: `touch-action: none; overflow: hidden; margin: auto;`, width: "160px", height: "10px", preserveAspectRatio: "none" },
+const volumeBarContainer: SVGSVGElement = SVG.svg({ style: `touch-action: none; overflow: hidden;`, width: "160px", height: "10px", preserveAspectRatio: "none" },
 	defs,
 	outVolumeBarBg,
 	outVolumeBar,
@@ -218,7 +242,11 @@ document.body.appendChild(
 		volumeSlider,
 		zoomButton,
 		volumeBarContainer,
-		titleText,
+		oscilloscope.canvas,
+		div({style: `margin: 15px 0; margin-left: auto;`},
+			titleText,
+			subtitleText,
+		),
 		editLink,
 		copyLink,
 		shareLink,
@@ -283,6 +311,7 @@ function hashUpdatedExternally(): void {
 					loadSong(value, true);
 					if (synth.song) {
 						titleText.textContent = synth.song.title;
+						subtitleText.textContent = synth.song.subtitle;
 					}
 					break;
 				//case "title":
