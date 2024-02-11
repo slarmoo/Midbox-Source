@@ -47,7 +47,7 @@ import { ThemePrompt } from "./ThemePrompt";
 import { TipPrompt } from "./TipPrompt";
 import { LanguagePrompt } from "./LanguagePrompt";
 import { Localization as _ } from "./Localization";
-import { ChangeTempo, ChangeKeyOctave, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangeSupersawDynamism, ChangeSupersawSpread, ChangeSupersawShape, ChangeWavetableSpeed, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, pickRandomPresetValue, ChangeRandomGeneratedInstrument, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, ChangeChipWave, ChangeNoiseWave, ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeTest, ChangeAddEnvelope, ChangeEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeWavetableCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeBounceArp, ChangeClicklessTransition, ChangeContinueThruPattern, ChangeAliasing, ChangePercussion, ChangeSDAffected, ChangeSOAffected, ChangeStrumSpeed, ChangeSlideSpeed, ChangeSongSubtitle, ChangeSetPatternInstruments, ChangeHoldingModRecording } from "./changes";
+import { ChangeTempo, ChangeKeyOctave, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangeSupersawDynamism, ChangeSupersawSpread, ChangeSupersawShape, ChangeWavetableSpeed, ChangeWaveInterpolation, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, pickRandomPresetValue, ChangeRandomGeneratedInstrument, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, ChangeChipWave, ChangeNoiseWave, ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeTest, ChangeAddEnvelope, ChangeEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeWavetableCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeBounceArp, ChangeClicklessTransition, ChangeContinueThruPattern, ChangeAliasing, ChangePercussion, ChangeSDAffected, ChangeSOAffected, ChangeStrumSpeed, ChangeSlideSpeed, ChangeSongSubtitle, ChangeSetPatternInstruments, ChangeHoldingModRecording } from "./changes";
 import { oscilloscopeCanvas } from "../global/Oscilloscope"
 import { TrackEditor } from "./TrackEditor";
 
@@ -790,6 +790,8 @@ export class SongEditor {
     private readonly _wavetableSpeedDisplay: HTMLSpanElement = span({ style: `color: ${ColorConfig.secondaryText}; font-size: smaller; text-overflow: clip;`, class: "tip", onclick: () => this._openPrompt("wpb") }, "1wpb");
     private readonly _wavetableSpeedSlider: Slider = new Slider(input({style: "margin: 0;", type: "range", min: "0", max: Config.wavetableSpeedMax, value: "0", step: "1"}), this._doc, (oldValue: number, newValue: number) => new ChangeWavetableSpeed(this._doc, oldValue, newValue), false);
     private readonly _wavetableSpeedRow: HTMLDivElement = div({class: "selectRow"}, span({class: "tip", onclick: ()=>this._openPrompt("wavetableSpeed")}, span(_.wavetableSpeedLabel)), this._wavetableSpeedDisplay, this._wavetableSpeedSlider.container);
+    private readonly _interpolateWavesBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
+    private readonly _interpolateWavesRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "margin-left:10px;", onclick: () => this._openPrompt("interpolateWaves") }, span(_.interpolateWavesLabel)), this._interpolateWavesBox);
     private readonly _wavetableWaveButtons: HTMLButtonElement[] = [
         button({class: "wavetableButtonType2", style: "text-align: center;", }, span("1")),
         button({class: "wavetableButtonType1", style: "text-align: center;", }, span("2")),
@@ -1038,13 +1040,13 @@ export class SongEditor {
     private readonly _customWaveDraw: HTMLDivElement = div({ style: "height:80px; margin-top:10px; margin-bottom:25px;" }, [
         div({ style: "height:54px; display:flex; justify-content:center;" }, [this._customWaveDrawCanvas.canvas]),
         div({ style: "margin-top:5px; display:flex; justify-content:center;" }, [this._customWavePresetDrop, this._customWaveZoom]),
-        div({ style: "margin-top:5px; display:flex; justify-content:center;" }, [this._customWaveCopyPasteContainer]),
+        div({ style: "margin-top:1px; display:flex; justify-content:center;" }, [this._customWaveCopyPasteContainer]),
     ]);
 
     private readonly _wavetableCustomWaveDraw: HTMLDivElement = div({ style: "height:80px; margin-top:10px; margin-bottom:25px;" }, [
         div({ style: "height:54px; display:flex; justify-content:center;" }, [this._wavetableCustomWaveDrawCanvas.canvas]),
         div({ style: "margin-top:5px; display:flex; justify-content:center;" }, [this._wavetableCustomWavePresetDrop, this._wavetableCustomWaveZoom]),
-        div({ style: "margin-top:2px; display:flex; justify-content:center;" }, [this._wavetableCustomWaveCopyPasteContainer]),
+        div({ style: "margin-top:1px; display:flex; justify-content:center;" }, [this._wavetableCustomWaveCopyPasteContainer]),
     ]);
 
     private readonly _songTitleInputBox: InputBox = new InputBox(input({ style: "font-weight:bold; border:none; width: 96%; background-color:${ColorConfig.editorBackground}; color:${ColorConfig.primaryText}; text-align:center", maxlength: "30", type: "text", value: EditorConfig.versionDisplayName }), this._doc, (oldValue: string, newValue: string) => new ChangeSongTitle(this._doc, oldValue, newValue));
@@ -1086,6 +1088,7 @@ export class SongEditor {
 		this._supersawShapeRow,
         this._pulseWidthRow,
         this._wavetableSpeedRow,
+        this._interpolateWavesRow,
         this._stringSustainRow,
         this._unisonSelectRow,
         div({ style: `padding: 2px 0; margin-left: 2em; display: flex; align-items: center;` },
@@ -1672,6 +1675,7 @@ export class SongEditor {
         this._pwmSliderInputBox.addEventListener("input", () => { this._doc.record(new ChangePulseWidth(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].pulseWidth, Math.min(Config.pulseWidthRange, Math.max(1.0, Math.round(+this._pwmSliderInputBox.value))))) });
         this._detuneSliderInputBox.addEventListener("input", () => { this._doc.record(new ChangeDetune(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].detune, Math.min(Config.detuneMax - Config.detuneCenter, Math.max(Config.detuneMin - Config.detuneCenter, Math.round(+this._detuneSliderInputBox.value))))) });
         this._customWaveDraw.addEventListener("input", () => { this._doc.record(new ChangeCustomWave(this._doc, this._customWaveDrawCanvas.newArray)) });
+        this._interpolateWavesBox.addEventListener("input", () => { this._doc.record(new ChangeWaveInterpolation(this._doc, this._interpolateWavesBox.checked)) });
         this._twoNoteArpBox.addEventListener("input", () => { this._doc.record(new ChangeFastTwoNoteArp(this._doc, this._twoNoteArpBox.checked)) });
         this._bounceArpBox.addEventListener("input", () => { this._doc.record(new ChangeBounceArp(this._doc, this._bounceArpBox.checked)) });
         this._clicklessTransitionBox.addEventListener("input", () => { this._doc.record(new ChangeClicklessTransition(this._doc, this._clicklessTransitionBox.checked)) });
@@ -2396,6 +2400,7 @@ export class SongEditor {
             if (instrument.type == InstrumentType.wavetable) {
                 this._chipWaveSelectRow.style.display = "none";
                 this._wavetableSpeedRow.style.display = "";
+                this._interpolateWavesRow.style.display = "";
                 this._wavetableCustomWaveDraw.style.display = "";
                 this._wavetableWaveButtonsContainer.style.display = "grid";
                 this._customWaveDraw.style.display = "none";
@@ -2403,10 +2408,12 @@ export class SongEditor {
                 this._chipWaveSelectRow.style.display = "none";
                 this._customWaveDraw.style.display = "";
                 this._wavetableSpeedRow.style.display = "none";
+                this._interpolateWavesRow.style.display = "none";
                 this._wavetableCustomWaveDraw.style.display = "none";
                 this._wavetableWaveButtonsContainer.style.display = "none";
             } else {
                 this._wavetableSpeedRow.style.display = "none";
+                this._interpolateWavesRow.style.display = "none";
                 this._wavetableCustomWaveDraw.style.display = "none";
                 this._wavetableWaveButtonsContainer.style.display = "none";
                 this._customWaveDraw.style.display = "none";
@@ -3225,6 +3232,7 @@ export class SongEditor {
         }
         this._instrumentVolumeSlider.updateValue(instrument.volume);
         this._detuneSlider.updateValue(instrument.detune - Config.detuneCenter);
+        this._interpolateWavesBox.checked = instrument.interpolateWaves ? true : false;
         this._twoNoteArpBox.checked = instrument.fastTwoNoteArp ? true : false;
         this._bounceArpBox.checked = instrument.bounceArp ? true : false;
         this._clicklessTransitionBox.checked = instrument.clicklessTransition ? true : false;

@@ -62,6 +62,7 @@ export class Localization {
     public static envelopeSpeedLabel: string = "‣ Spd:";
     public static discreteEnvelopeLabel: string = "‣ Discrete:";
     public static wavetableSpeedLabel: string = "Spd:";
+    public static interpolateWavesLabel: string = "Interpolate:";
     public static twoFastArpLabel: string = "‣ Fast Two-Note:";
     public static bounceArpLabel: string = "‣ Bounce:";
     public static vibratoDepthLabel: string = "‣ Depth:";
@@ -931,6 +932,7 @@ if (language == "spanish") {
     Localization.arpSpeedLabel = "‣ Vel:";
     Localization.envelopeSpeedLabel = "‣ Vel:";
     Localization.wavetableSpeedLabel = "Vel:";
+    Localization.interpolateWavesLabel = "Interpolar:";
     Localization.discreteEnvelopeLabel = "‣ Discreto:";
     Localization.twoFastArpLabel = "‣ Rapido Dos-Notas:";
     Localization.bounceArpLabel = "‣ Rebote:";

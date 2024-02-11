@@ -3045,15 +3045,6 @@ export class ChangeSupersawShape extends ChangeInstrumentSlider {
 	}
 }
 
-/*export class ChangeDutyCycleTime extends ChangeInstrumentSlider {
-    constructor(doc: SongDocument, oldValue: number, newValue: number) {
-		super(doc);
-		this._instrument.cycleTime = newValue;
-		doc.notifier.changed();
-		if (oldValue != newValue) this._didSomething();
-    }
-}*/
-
 export class ChangePitchShift extends ChangeInstrumentSlider {
     constructor(doc: SongDocument, oldValue: number, newValue: number) {
         super(doc);
@@ -3129,6 +3120,20 @@ export class ChangeWavetableSpeed extends ChangeInstrumentSlider {
         this._instrument.wavetableSpeed = newValue;
         doc.notifier.changed();
         if (oldValue != newValue) this._didSomething();
+    }
+}
+
+export class ChangeWaveInterpolation extends Change {
+    constructor(doc: SongDocument, newValue: boolean) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        const oldValue = instrument.interpolateWaves;
+
+        doc.notifier.changed();
+        if (oldValue != newValue) {
+            instrument.interpolateWaves = newValue;
+            this._didSomething();
+        }
     }
 }
 

@@ -579,6 +579,13 @@ export class TipPrompt implements Prompt {
 					p("The wavetable consists of multiple custom chipwaves that constantly cycle between each other. This slider controls how fast they cycle."),
 				);
 			} break;
+			case "interpolateWaves": {
+				message = div(
+					h2("Wavetable Interpolation"),
+					p("Normally, the wavetable cycles through waves instantly, with no in-betweens for each wave."),
+					p("This checkbox toggles whether the wavetable changes waves instantly or by shifting the waveform to the next. This smooth transitioning is known as interpolation.")
+				);
+			} break;
 			case "x": {
 				message = div(
 					h2("Speed Display"),
