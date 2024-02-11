@@ -7192,6 +7192,7 @@ export class Synth {
     public volume: number = 1.0;
     public oscRefreshEventTimer: number = 0;
     public oscEnabled: boolean = true;
+    public oscilloscopeScale: number = 1.0;
     public enableMetronome: boolean = false;
     public countInMetronome: boolean = false;
     public renderingSong: boolean = false;
@@ -7825,7 +7826,7 @@ export class Synth {
 
             if (this.oscEnabled) {
                 if (this.oscRefreshEventTimer <= 0) {
-                    events.raise("oscilloscopeUpdate", outputDataL, outputDataR);
+                    events.raise("oscilloscopeUpdate", this.oscilloscopeScale, outputDataL, outputDataR);
                     this.oscRefreshEventTimer = 2;
                 } else {
                     this.oscRefreshEventTimer--;

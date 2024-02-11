@@ -533,6 +533,12 @@ export class SongDocument {
 	private _calcVolume(): number {
 		return Math.min(1.0, Math.pow(this.prefs.volume / 50.0, 0.5)) * Math.pow(2.0, (this.prefs.volume - 75.0) / 25.0);
 	}
+
+	public setOscilloscopeScale(val: number): void {
+		this.prefs.oscilloscopeScale = val;
+		this.prefs.save();
+		this.synth.oscilloscopeScale = this.prefs.oscilloscopeScale;
+	}
 		
 	public getCurrentPattern(barOffset: number = 0): Pattern | null {
 		return this.song.getPattern(this.channel, this.bar + barOffset);

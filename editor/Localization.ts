@@ -78,6 +78,7 @@ export class Localization {
     public static feedbackLabel: string = "Feedback:";
     public static feedbackVolumeLabel: string = "Fdback Vol:";
     public static instTypeLabel: string = "Type:";
+    public static oscilloscopeScaleLabel: string = "Scale:";
     public static songScaleLabel: string = "Scale:";
     public static songKeyLabel: string = "Key:";
     public static songKeyOctaveLabel: string = "Octave: ";
@@ -949,6 +950,7 @@ if (language == "spanish") {
     Localization.feedbackLabel = "Respuesta:";
     Localization.feedbackVolumeLabel = "Respue Vol:";
     Localization.instTypeLabel = "Tipo:";
+    Localization.oscilloscopeScaleLabel = "Tamaño:";
     Localization.songScaleLabel = "Escala:";
     Localization.songKeyLabel = "Tono:";
     Localization.songKeyOctaveLabel = "Octavo: ";

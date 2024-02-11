@@ -10,13 +10,13 @@ class EventManager {
     }
 
 
-    public raise(eventType: string, eventData: any, extraEventData?: any): void {
+    public raise(eventType: string, eventModifier: number, eventData: any, extraEventData?: any): void {
         if (this.listeners[eventType] == undefined) {
             return;
         }
         this.activeEvents.push(eventType);
         for (let i: number = 0; i < this.listeners[eventType].length; i++) {
-            this.listeners[eventType][i](eventData,extraEventData)
+            this.listeners[eventType][i](eventModifier,eventData,extraEventData)
         }
         this.activeEvents.pop();
     }

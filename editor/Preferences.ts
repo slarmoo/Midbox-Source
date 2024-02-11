@@ -22,6 +22,7 @@ export class Preferences {
 	public layout: string;
 	public displayBrowserUrl: boolean;
 	public volume: number = 75;
+	public oscilloscopeScale: number = 1;
 	public visibleOctaves: number = Preferences.defaultVisibleOctaves;
 	public pressControlForShortcuts: boolean;
 	public keyboardLayout: string;
@@ -127,6 +128,10 @@ export class Preferences {
 		if (window.localStorage.getItem("volume") != null) {
 			this.volume = Math.min(<any>window.localStorage.getItem("volume") >>> 0, 75);
 		}
+
+		if (window.localStorage.getItem("oscilloscopeScale") != null) {
+			this.oscilloscopeScale = Math.min(<any>window.localStorage.getItem("oscilloscopeScale") >>> 0.25, 5);
+		}
 		
 		if (window.localStorage.getItem("fullScreen") != null) {
 			if (window.localStorage.getItem("fullScreen") == "true") this.layout = "long";
@@ -162,6 +167,7 @@ export class Preferences {
 		window.localStorage.setItem("layout", this.layout);
 		window.localStorage.setItem("colorTheme", this.colorTheme);
 		window.localStorage.setItem("volume", String(this.volume));
+		window.localStorage.setItem("oscilloscopeScale", String(this.oscilloscopeScale));
 		window.localStorage.setItem("visibleOctaves", String(this.visibleOctaves));
 
 		// Random Generation Setup

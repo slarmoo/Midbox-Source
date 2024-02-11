@@ -5,7 +5,7 @@ export class oscilloscopeCanvas {
     public _EventUpdateCanvas: Function;
 
     constructor(public readonly canvas: HTMLCanvasElement, readonly scale: number = 1) {
-        this._EventUpdateCanvas = function(directlinkL: Float32Array, directlinkR ?: Float32Array): void {
+        this._EventUpdateCanvas = function(oscilloscopeScale: number, directlinkL: Float32Array, directlinkR ?: Float32Array): void {
             if(directlinkR) {
                 var ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 
@@ -15,7 +15,7 @@ export class oscilloscopeCanvas {
                 ctx.fillStyle = ColorConfig.getComputed("--oscilloscope-line-L") !== "" ? ColorConfig.getComputed("--oscilloscope-line-L") : ColorConfig.getComputed("--primary-text");
                 for (let i: number = directlinkL.length - 1; i >= directlinkL.length - 1 - (canvas.width/scale); i--) {
                     let x = i - (directlinkL.length - 1) + (canvas.width/scale);
-                    let yl = (directlinkL[i] * (canvas.height/scale / 2) + (canvas.height/scale / 2));
+                    let yl = (directlinkL[i] * oscilloscopeScale * (canvas.height/scale / 2) + (canvas.height/scale / 2));
 
                     ctx.fillRect((x - 1)*scale, (yl - 1)*scale, 1*scale, 1.5*scale);
                     if (x == 0) break;
@@ -23,7 +23,7 @@ export class oscilloscopeCanvas {
                 ctx.fillStyle = ColorConfig.getComputed("--oscilloscope-line-R") !== "" ? ColorConfig.getComputed("--oscilloscope-line-R") : ColorConfig.getComputed("--text-selection");
                 for (let i: number = directlinkR.length - 1; i >= directlinkR.length - 1 - (canvas.width/scale); i--) {
                     let x = i - (directlinkR.length - 1) + (canvas.width/scale);
-                    let yr = (directlinkR[i] * (canvas.height/scale / 2) + (canvas.height/scale / 2));
+                    let yr = (directlinkR[i] * oscilloscopeScale * (canvas.height/scale / 2) + (canvas.height/scale / 2));
                     
                     ctx.fillRect((x - 1)*scale, (yr - 1)*scale, 1*scale, 1.5*scale);
                     if (x == 0) break;

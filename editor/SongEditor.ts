@@ -990,6 +990,8 @@ export class SongEditor {
     private readonly _globalOscilloscopeContainer: HTMLDivElement = div({ style: "height: 38px; margin-left: auto; margin-right: auto;" },
     this._globalOscilloscope.canvas
     );
+    private readonly _oscilloscopeScaleSlider: Slider = new Slider(input({ style: "width: 120px; flex-grow: 1; margin: 0;", type: "range", min: "0.25", max: "5", value: "1", step: "0.25" }), this._doc, null, false);
+    private readonly _oscilloscopeScaleRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("oscilloscopeScaling") }, span(_.oscilloscopeScaleLabel)), this._oscilloscopeScaleSlider.container);
 
     private readonly _customWaveDrawCanvas: CustomChipCanvas = new CustomChipCanvas(canvas({ width: 128, height: 52, style: "border:2px solid " + ColorConfig.uiWidgetBackground, id: "customWaveDrawCanvas" }), this._doc, (newArray: Float32Array) => new ChangeCustomWave(this._doc, newArray));
     private readonly _wavetableCustomWaveDrawCanvas: WavetableCustomChipCanvas = new WavetableCustomChipCanvas(canvas({ width: 128, height: 52, style: "border:2px solid " + ColorConfig.uiWidgetBackground, id: "customWaveDrawCanvas" }), this._doc, (newArray: Float32Array) => new ChangeWavetableCustomWave(this._doc, newArray, this._wavetableIndices[this._doc.channel][this._doc.getCurrentInstrument()]));
@@ -1270,6 +1272,7 @@ export class SongEditor {
                 this._volumeSlider.container,
             ),
             this._globalOscilloscopeContainer,
+            this._oscilloscopeScaleRow,
         ),
         this._menuArea,
         this._songSettingsArea,
@@ -1619,6 +1622,7 @@ export class SongEditor {
         this._prevBarButton.addEventListener("click", this._whenPrevBarPressed);
         this._nextBarButton.addEventListener("click", this._whenNextBarPressed);
         this._volumeSlider.input.addEventListener("input", this._setVolumeSlider);
+        this._oscilloscopeScaleSlider.input.addEventListener("input", this._setOscilloscopeScaleSlider);
         this._zoomInButton.addEventListener("click", this._zoomIn);
         this._zoomOutButton.addEventListener("click", this._zoomOut);
         this._patternArea.addEventListener("mousedown", this._refocusStageNotEditing);
@@ -2110,6 +2114,7 @@ export class SongEditor {
         this._barScrollBar.container.style.display = this._doc.song.barCount > this._doc.trackVisibleBars ? "" : "none";
         this._volumeBarBox.style.display = this._doc.prefs.displayVolumeBar ? "" : "none";
         this._globalOscilloscopeContainer.style.display = this._doc.prefs.showOscilloscope ? "" : "none";
+        this._oscilloscopeScaleRow.style.display = this._doc.prefs.showOscilloscope ? "" : "none";
         this._doc.synth.oscEnabled = this._doc.prefs.showOscilloscope;
 
         if (this._doc.getFullScreen()) {
@@ -3244,6 +3249,7 @@ export class SongEditor {
         this._discreteEnvelopeBox.checked = instrument.discreteEnvelope ? true : false;
 
         this._volumeSlider.updateValue(prefs.volume);
+        this._oscilloscopeScaleSlider.updateValue(prefs.oscilloscopeScale);
 
         // If an interface element was selected, but becomes invisible (e.g. an instrument
         // select menu) just select the editor container so keyboard commands still work.
@@ -4410,6 +4416,10 @@ export class SongEditor {
                 this._doc.record(new ChangeHoldingModRecording(this._doc, null, null, null));
             }
         }
+    }
+
+    private _setOscilloscopeScaleSlider = (): void => {
+        this._doc.setOscilloscopeScale(Number(this._oscilloscopeScaleSlider.input.value));
     }
 
     private _copyInstrument = (): void => {

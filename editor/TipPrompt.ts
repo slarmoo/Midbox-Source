@@ -607,6 +607,12 @@ export class TipPrompt implements Prompt {
 					p("Key: '4wpb' means the speed is four waves per beat. '0.5wps' means the speed is one wave every two beats, or 1/2 wave per beat.")
 				);
 			} break;
+			case "oscilloscopeScaling": {
+				message = div(
+					h2("Waveform Scale"),
+					p("This slider changes how loud the song's waveform appears on the oscilloscope. This effect is only visual, and can be used for seeing what instrument waveforms look like better without having to raise its volume.")
+				);
+			} break;
 
 			default:
 				// Check for modSetinfo#
