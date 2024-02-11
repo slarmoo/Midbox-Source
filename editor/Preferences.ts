@@ -130,7 +130,7 @@ export class Preferences {
 		}
 
 		if (window.localStorage.getItem("oscilloscopeScale") != null) {
-			this.oscilloscopeScale = Math.min(<any>window.localStorage.getItem("oscilloscopeScale") >>> 0.25, 5);
+			this.oscilloscopeScale = Math.min(Number(<any>window.localStorage.getItem("oscilloscopeScale")), 5);
 		}
 		
 		if (window.localStorage.getItem("fullScreen") != null) {

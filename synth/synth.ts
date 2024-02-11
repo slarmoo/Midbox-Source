@@ -1846,6 +1846,7 @@ export class Instrument {
             for (const wave of this.currentCycle) {
                 instrumentObject["wavetableCycle"].push(wave);
             }
+            instrumentObject["wavetableInterpolateWaves"] = this.interpolateWaves;
         } else if (this.type == InstrumentType.harmonics) {
             instrumentObject["unison"] = Config.unisons[this.unison].name;
         } else if (this.type == InstrumentType.fm) {
@@ -2201,6 +2202,11 @@ export class Instrument {
             for (let i: number = 0; i < 32; i++) {
                 this.currentCycle.push(i);
             }
+        }
+        if (instrumentObject["wavetableInterpolateWaves"] != undefined) {
+            this.interpolateWaves = instrumentObject["wavetableInterpolateWaves"];
+        } else {
+            this.interpolateWaves = false;
         }
 
         if (this.type == InstrumentType.noise) {
@@ -3135,7 +3141,7 @@ export class Song {
                     buffer.push(SongTagCode.stringSustain, base64IntToCharCode[instrument.stringSustain | (instrument.stringSustainType << 5)]);
                 } else if (instrument.type == InstrumentType.wavetable) {
                     buffer.push(SongTagCode.unison, base64IntToCharCode[instrument.unison]);
-                    buffer.push(SongTagCode.wavetable, base64IntToCharCode[instrument.wavetableSpeed])
+                    buffer.push(SongTagCode.wavetable, base64IntToCharCode[instrument.wavetableSpeed], base64IntToCharCode[+instrument.interpolateWaves]);
                     const wavetableSize: number = instrument.wavetableWaves.length;
                     buffer.push(base64IntToCharCode[wavetableSize]);
                     for (const wave of instrument.wavetableWaves) {
@@ -5067,6 +5073,7 @@ export class Song {
                 const instrument: Instrument = this.channels[instrumentChannelIterator].instruments[instrumentIndexIterator];
                 if (instrument.type == InstrumentType.wavetable) {
                     instrument.wavetableSpeed = clamp(0, Config.wavetableSpeedMax + 1, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
+                    instrument.interpolateWaves = clamp(0, 1 + 1, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]) === 1;
                     const wavetableSize: number = clamp(0, 32 + 1, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                     for (let waveIndex: number = 0; waveIndex < wavetableSize; waveIndex++) {
                         for (let j: number = 0; j < 64; j++) {
@@ -6017,6 +6024,8 @@ class Tone {
     public pulseWidth: number = 0.0;
     public pulseWidthDelta: number = 0.0;
     public currentWave: number = 0;
+    public waveCrossfade: number = 0;
+    public waveCrossfadeDelta: number = 0;
     public supersawDynamism: number = 0.0;
 	public supersawDynamismDelta: number = 0.0;
 	public supersawUnisonDetunes: number[] = []; // These can change over time, but slowly enough that I'm not including corresponding delta values within a tick run.
@@ -6081,6 +6090,8 @@ class Tone {
         this.prevStringDecay = null;
         this.supersawPrevPhaseDelta = null;
         this.drumsetPitch = null;
+        // this.waveCrossfade = 0.0;
+        // this.waveCrossfadeDelta = 0.0;
     }
 }
 
@@ -6101,6 +6112,8 @@ class InstrumentState {
     public synthesizer: Function | null = null;
     public wave: Float32Array | null = null;
     public wavetableWaves: Float32Array[] | null = null;
+    public wavetableCycle: number[] | null = null;
+    public wavetableInterpolateWaves: boolean = false;
     public noisePitchFilterMult: number = 1.0;
     public unison: Unison | null = null;
     public chord: Chord | null = null;
@@ -6312,7 +6325,7 @@ class InstrumentState {
 
         this.volumeScale = 1.0;
         this.aliases = false;
-        this.currentWave = 0.0;
+        // this.currentWave = 0.0;
 
         this.awake = false;
         this.flushingDelayLines = false;
@@ -6328,6 +6341,7 @@ class InstrumentState {
         this.nextVibratoTime = 0;
         this.arpTime = 0;
         this.envelopeTime = 0;
+        this.currentWave = 0.0;
 
         if (this.chorusDelayLineDirty) {
             for (let i: number = 0; i < this.chorusDelayLineL!.length; i++) this.chorusDelayLineL![i] = 0.0;
@@ -6841,6 +6855,8 @@ class InstrumentState {
         } else if (instrument.type == InstrumentType.wavetable) {
             this.wave = null;
             this.wavetableWaves = this.aliases ? instrument.wavetableWaves : instrument.wavetableIntegralWaves;
+            this.wavetableCycle = instrument.currentCycle;
+            this.wavetableInterpolateWaves = instrument.interpolateWaves;
             this.volumeScale = 0.05;
         } else {
             this.wave = null;
@@ -8165,9 +8181,9 @@ export class Synth {
                                 }
                             }
                             if (wavetableSpeed == 0) {
-                            // Nothing. Skip.
+                                // Nothing. Skip.
                             } else {
-                            instrumentState.currentWave = (instrumentState.currentWave + wavetableSpeed * (1.0 / (Config.ticksPerPart * Config.partsPerBeat))) % wavetableSize;
+                                instrumentState.currentWave = (instrumentState.currentWave + wavetableSpeed * (1.0 / (Config.ticksPerPart * Config.partsPerBeat))) % wavetableSize;
                             }
                         }
                         let useArpeggioSpeed: number = instrument.arpeggioSpeed;
@@ -9643,18 +9659,18 @@ export class Synth {
             if (instrument.type == InstrumentType.wavetable) {
                 let wavetableSpeed: number = Config.wavetableSpeedScale[instrument.wavetableSpeed];
                 if (this.isModActive(Config.modulators.dictionary["wavetable speed"].index, channelIndex, tone.instrumentIndex)) {
-                    const wavetableSpeedModValue: number = Config.wavetableSpeedMax - this.getModValue(Config.modulators.dictionary["wavetable speed"].index, channelIndex, tone.instrumentIndex, false);
+                    const wavetableSpeedModValue: number = this.getModValue(Config.modulators.dictionary["wavetable speed"].index, channelIndex, tone.instrumentIndex, false);
                     if (Number.isInteger(wavetableSpeedModValue)) {
                         wavetableSpeed = Config.wavetableSpeedScale[wavetableSpeedModValue];
                     } else {
                         wavetableSpeed = (1 - (wavetableSpeedModValue % 1)) * Config.wavetableSpeedScale[Math.floor(wavetableSpeedModValue)] + (wavetableSpeedModValue % 1) * Config.wavetableSpeedScale[Math.min(Config.wavetableSpeedScale.length - 1, Math.ceil(wavetableSpeedModValue))];
                     }
                 }
-                if (wavetableSpeed == 0 && this.isModActive(Config.modulators.dictionary["cycle wave"].index, channelIndex, tone.instrumentIndex)) {
-                    tone.currentWave = Math.max(0, Math.floor(this.getModValue(Config.modulators.dictionary["cycle wave"].index, channelIndex, tone.instrumentIndex, false) - Config.modulators.dictionary["cycle wave"].convertRealFactor));
-                } else {
-                tone.currentWave = instrument.currentCycle[Math.floor(instrumentState.currentWave) % instrument.currentCycle.length];
+                if (Math.floor(tone.currentWave) !== Math.floor(instrumentState.currentWave)) {
+                    tone.waveCrossfade = 0;
                 }
+                tone.waveCrossfadeDelta = (wavetableSpeed * (1.0 / (Config.ticksPerPart * Config.partsPerBeat))) / roundedSamplesPerTick;
+                tone.currentWave = instrumentState.currentWave;
             }
             if (instrument.type == InstrumentType.pickedString) {
                 // Check for sustain mods
@@ -11603,14 +11619,38 @@ export class Synth {
             }
         }
     }
+    private static wavetableCrossfade(x: number, a: number, b: number): number {
+        // Linear interpolation.
+        return a + (b - a) * x;
+        
+        // Can also try this cross-fade curve, from the following article:
+        // https://signalsmith-audio.co.uk/writing/2021/cheap-energy-crossfade/
+        // const x2: number = 1.0 - x;
+        // const A: number = x * x2;
+        // const B: number = A * (1.0 + 1.4186 * A);
+        // const C: number = B + x;
+        // const D: number = B + x2;
+        // const fadeIn: number = C * C;
+        // const fadeOut: number = D * D;
+        // return a * fadeOut + b * fadeIn;
+    }
     private static wavetableSynth(synth: Synth, bufferIndex: number, roundedSamplesPerTick: number, tone: Tone, instrumentState: InstrumentState): void {
         const aliases: boolean = (effectsIncludeDistortion(instrumentState.effects) && instrumentState.aliases);
         const data: Float32Array = synth.tempMonoInstrumentSampleBuffer!;
+        const currentWave: number = tone.currentWave;
+        let waveCrossfade: number = tone.waveCrossfade;
+        const waveCrossfadeDelta: number = tone.waveCrossfadeDelta;
+        // Trick to avoid branching in the loop below.
+        const interpolationFactorStatus: number = instrumentState.wavetableInterpolateWaves ? 1.0 : 0.0;
+        const wavetableWaves: Float32Array[] = instrumentState.wavetableWaves!;
+        const currentCycle: number[] = instrumentState.wavetableCycle!;
+        const currentCycleLength: number = currentCycle.length;
+        const waveA: Float32Array = wavetableWaves[currentCycle[Math.floor(currentWave) % currentCycleLength]];
+        const waveB: Float32Array = wavetableWaves[currentCycle[(Math.floor(currentWave) + 1) % currentCycleLength]];
         const volumeScale = instrumentState.volumeScale;
-        const wave: Float32Array = instrumentState.wavetableWaves![Math.floor(tone.currentWave) % instrumentState.wavetableWaves!.length];
 
         // For all but aliasing custom chip, the first sample is duplicated at the end, so don't double-count it.
-        const waveLength: number = (aliases && instrumentState.type == InstrumentType.customChipWave) ? wave.length : wave.length - 1;
+        const waveLength: number = aliases ? waveA.length : waveA.length - 1;
 
         const unisonSign: number = tone.specialIntervalExpressionMult * instrumentState.unison!.sign;
         if (instrumentState.unison!.voices == 1 && !instrumentState.chord!.customInterval) tone.phases[1] = tone.phases[0];
@@ -11630,6 +11670,8 @@ export class Synth {
         const applyFilters: Function = Synth.applyFilters;
         let prevWaveIntegralA: number = 0;
         let prevWaveIntegralB: number = 0;
+        let prevWaveIntegralC: number = 0;
+        let prevWaveIntegralD: number = 0;
 
         if (!aliases) {
             const phaseAInt: number = phaseA | 0;
@@ -11638,42 +11680,102 @@ export class Synth {
             const indexB: number = phaseBInt % waveLength;
             const phaseRatioA: number = phaseA - phaseAInt;
             const phaseRatioB: number = phaseB - phaseBInt;
-            prevWaveIntegralA = +wave[indexA];
-            prevWaveIntegralB = +wave[indexB];
-            prevWaveIntegralA += (wave[indexA + 1] - prevWaveIntegralA) * phaseRatioA;
-            prevWaveIntegralB += (wave[indexB + 1] - prevWaveIntegralB) * phaseRatioB;
+            prevWaveIntegralA = +waveA[indexA];
+            prevWaveIntegralB = +waveA[indexB];
+            prevWaveIntegralA += (waveA[indexA + 1] - prevWaveIntegralA) * phaseRatioA;
+            prevWaveIntegralB += (waveA[indexB + 1] - prevWaveIntegralB) * phaseRatioB;
+            prevWaveIntegralC = +waveB[indexA];
+            prevWaveIntegralD = +waveB[indexB];
+            prevWaveIntegralC += (waveB[indexA + 1] - prevWaveIntegralC) * phaseRatioA;
+            prevWaveIntegralD += (waveB[indexB + 1] - prevWaveIntegralD) * phaseRatioB;
         }
 
         const stopIndex: number = bufferIndex + roundedSamplesPerTick;
         for (let sampleIndex: number = bufferIndex; sampleIndex < stopIndex; sampleIndex++) {
 
+            // const prevPhaseA: number = phaseA;
+            // const prevPhaseB: number = phaseB;
+
             phaseA += phaseDeltaA;
             phaseB += phaseDeltaB;
 
-            let waveA: number;
-            let waveB: number;
+            waveCrossfade += waveCrossfadeDelta * interpolationFactorStatus;
+
+            /* const nextWaveA: Float32Array = wavetableWaves[currentCycle[Math.floor(currentWave) % currentCycleLength]];
+            const nextWaveB: Float32Array = wavetableWaves[currentCycle[(Math.floor(currentWave) + 1) % currentCycleLength]];
+
+            if (!aliases) {
+                const prevPhaseAInt: number = prevPhaseA | 0;
+                const prevPhaseBInt: number = prevPhaseB | 0;
+                const prevIndexA: number = prevPhaseAInt % waveLength;
+                const prevIndexB: number = prevPhaseBInt % waveLength;
+                const prevPhaseRatioA: number = prevPhaseA - prevPhaseAInt;
+                const prevPhaseRatioB: number = prevPhaseB - prevPhaseBInt;
+                if (waveA !== nextWaveA) {
+                    waveA = nextWaveA;
+                    prevWaveIntegralA = waveA[prevIndexA];
+                    prevWaveIntegralB = waveA[prevIndexB];
+                    prevWaveIntegralA += (waveA[prevIndexA + 1] - prevWaveIntegralA) * prevPhaseRatioA;
+                    prevWaveIntegralB += (waveA[prevIndexB + 1] - prevWaveIntegralB) * prevPhaseRatioB;
+                }
+                if (waveB !== nextWaveB) {
+                    waveB = nextWaveB;
+                    prevWaveIntegralC = waveB[prevIndexA];
+                    prevWaveIntegralD = waveB[prevIndexB];
+                    prevWaveIntegralC += (waveB[prevIndexA + 1] - prevWaveIntegralC) * prevPhaseRatioA;
+                    prevWaveIntegralD += (waveB[prevIndexB + 1] - prevWaveIntegralD) * prevPhaseRatioB;
+                }
+            } else {
+                waveA = nextWaveA;
+                waveB = nextWaveB;
+            } */
+
+            let waveSampleA: number;
+            let waveSampleB: number;
+            let waveSampleC: number;
+            let waveSampleD: number;
             let inputSample: number;
 
+            const interpolationFactor: number = Math.max(0, Math.min(1, waveCrossfade)) * interpolationFactorStatus;
+
             if (aliases) {
-                waveA = wave[(0 | phaseA) % waveLength];
-                waveB = wave[(0 | phaseB) % waveLength];
-                inputSample = waveA + waveB;
+                waveSampleA = waveA[(0 | phaseA) % waveLength];
+                waveSampleB = waveA[(0 | phaseB) % waveLength];
+                const inputSampleA: number = waveSampleA + waveSampleB;
+
+                waveSampleC = waveB[(0 | phaseA) % waveLength];
+                waveSampleD = waveB[(0 | phaseB) % waveLength];
+                const inputSampleB: number = waveSampleC + waveSampleD;
+
+                inputSample = Synth.wavetableCrossfade(interpolationFactor, inputSampleA, inputSampleB);
             } else {
                 const phaseAInt: number = phaseA | 0;
                 const phaseBInt: number = phaseB | 0;
                 const indexA: number = phaseAInt % waveLength;
                 const indexB: number = phaseBInt % waveLength;
-                let nextWaveIntegralA: number = wave[indexA];
-                let nextWaveIntegralB: number = wave[indexB];
+                let nextWaveIntegralA: number = waveA[indexA];
+                let nextWaveIntegralB: number = waveA[indexB];
                 const phaseRatioA: number = phaseA - phaseAInt;
                 const phaseRatioB: number = phaseB - phaseBInt;
-                nextWaveIntegralA += (wave[indexA + 1] - nextWaveIntegralA) * phaseRatioA;
-                nextWaveIntegralB += (wave[indexB + 1] - nextWaveIntegralB) * phaseRatioB;
-                waveA = (nextWaveIntegralA - prevWaveIntegralA) / phaseDeltaA;
-                waveB = (nextWaveIntegralB - prevWaveIntegralB) / phaseDeltaB;
+                nextWaveIntegralA += (waveA[indexA + 1] - nextWaveIntegralA) * phaseRatioA;
+                nextWaveIntegralB += (waveA[indexB + 1] - nextWaveIntegralB) * phaseRatioB;
+                waveSampleA = (nextWaveIntegralA - prevWaveIntegralA) / phaseDeltaA;
+                waveSampleB = (nextWaveIntegralB - prevWaveIntegralB) / phaseDeltaB;
                 prevWaveIntegralA = nextWaveIntegralA;
                 prevWaveIntegralB = nextWaveIntegralB;
-                inputSample = waveA + waveB * unisonSign;
+                const inputSampleA: number = waveSampleA + waveSampleB * unisonSign;
+
+                let nextWaveIntegralC: number = waveB[indexA];
+                let nextWaveIntegralD: number = waveB[indexB];
+                nextWaveIntegralC += (waveB[indexA + 1] - nextWaveIntegralC) * phaseRatioA;
+                nextWaveIntegralD += (waveB[indexB + 1] - nextWaveIntegralD) * phaseRatioB;
+                waveSampleC = (nextWaveIntegralC - prevWaveIntegralC) / phaseDeltaA;
+                waveSampleD = (nextWaveIntegralD - prevWaveIntegralD) / phaseDeltaB;
+                prevWaveIntegralC = nextWaveIntegralC;
+                prevWaveIntegralD = nextWaveIntegralD;
+                const inputSampleB: number = waveSampleC + waveSampleD * unisonSign;
+
+                inputSample = Synth.wavetableCrossfade(interpolationFactor, inputSampleA, inputSampleB);
             }
 
             const sample: number = applyFilters(inputSample * volumeScale, initialFilterInput1, initialFilterInput2, filterCount, filters);
@@ -11694,6 +11796,8 @@ export class Synth {
         tone.phaseDeltas[0] = phaseDeltaA / waveLength;
         tone.phaseDeltas[1] = phaseDeltaB / waveLength;
         tone.expression = expression;
+        tone.currentWave = currentWave;
+        tone.waveCrossfade = waveCrossfade;
 
         synth.sanitizeFilters(filters);
         tone.initialNoteFilterInput1 = initialFilterInput1;
