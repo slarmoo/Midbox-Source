@@ -586,6 +586,20 @@ export class TipPrompt implements Prompt {
 					p("This checkbox toggles whether the wavetable changes waves instantly or by shifting the waveform to the next. This smooth transitioning is known as interpolation.")
 				);
 			} break;
+			case "resetCyclePerNote": {
+				message = div(
+					h2("Cycle per Note"),
+					p("The wavetable often will cycle from one wave to the next seamlessly across notes."),
+					p("If this checkbox is ticked, then the cycle will reset to the first wave on each note instead.")
+				);
+			} break;
+			case "oneShotCycle": {
+				message = div(
+					h2("One-Shot Cycle"),
+					p("Your wavetable now resets the cycle every time a note is played. Now, with this checkbox, you can toggle whether you want the cycle to continue looping, or to stop looping and stay at the final note."),
+					p("This can be useful for making various chiptune pulses.")
+				);
+			} break;
 			case "x": {
 				message = div(
 					h2("Speed Display"),

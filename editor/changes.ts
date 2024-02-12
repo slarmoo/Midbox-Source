@@ -3137,6 +3137,34 @@ export class ChangeWaveInterpolation extends Change {
     }
 }
 
+export class ChangeCyclePerNote extends Change {
+    constructor(doc: SongDocument, newValue: boolean) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        const oldValue = instrument.cyclePerNote;
+
+        doc.notifier.changed();
+        if (oldValue != newValue) {
+            instrument.cyclePerNote = newValue;
+            this._didSomething();
+        }
+    }
+}
+
+export class ChangeOneShotCycle extends Change {
+    constructor(doc: SongDocument, newValue: boolean) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        const oldValue = instrument.oneShotCycle;
+
+        doc.notifier.changed();
+        if (oldValue != newValue) {
+            instrument.oneShotCycle = newValue;
+            this._didSomething();
+        }
+    }
+}
+
 export class ChangeStringSustainType extends Change {
 	constructor(doc: SongDocument, newValue: SustainType) {
 		super();
