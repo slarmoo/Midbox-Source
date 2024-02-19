@@ -466,7 +466,7 @@ constructor(private _doc: SongDocument) {
     this._FMBox.checked = this._doc.prefs.FMOnRandomization;
     this._customChipBox.checked = this._doc.prefs.customChipOnRandomization;
     this._noiseBox.checked = this._doc.prefs.noiseOnRandomization;
-    this._wavetableBox.checked = this._doc.wavetableOnRandomization;
+    this._wavetableBox.checked = this._doc.prefs.wavetableOnRandomization;
 
     this._drumSpectrumBox.checked = this._doc.prefs.drumSpectrumOnRandomization;
     this._drumNoiseBox.checked = this._doc.prefs.drumNoiseOnRandomization;

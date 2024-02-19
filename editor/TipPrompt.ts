@@ -596,7 +596,7 @@ export class TipPrompt implements Prompt {
 			case "oneShotCycle": {
 				message = div(
 					h2("One-Shot Cycle"),
-					p("Your wavetable now resets the cycle every time a note is played. Now, with this checkbox, you can toggle whether you want the cycle to continue looping, or to stop looping and stay at the final note."),
+					p("Your wavetable now resets the cycle every time a note is played. Now, with this checkbox, you can toggle whether you want the cycle to continue looping, or to stop looping and stay at the final wave."),
 					p("This can be useful for making various chiptune pulses.")
 				);
 			} break;

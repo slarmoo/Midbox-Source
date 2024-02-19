@@ -2415,12 +2415,11 @@ export class SongEditor {
                 this._wavetableSpeedRow.style.display = "";
                 this._interpolateWavesRow.style.display = "";
                 this._resetCyclePerNoteRow.style.display = "";
-                if (instrument.cyclePerNote == true) { // not working? MID TODO. Yup. You hear me future mid. This.
+                if (instrument.cyclePerNote) {
                     this._oneShotCycleRow.style.display = "";
                 } else {
                     this._oneShotCycleRow.style.display = "none";
                 }
-                this._oneShotCycleRow.style.display = "";
                 this._wavetableCustomWaveDraw.style.display = "";
                 this._wavetableWaveButtonsContainer.style.display = "grid";
                 this._customWaveDraw.style.display = "none";
@@ -4969,8 +4968,6 @@ export class SongEditor {
             this._customWaveDrawCanvas.newArray[i] = customWaveArray[i];
         }
 
-        //this._instrumentVolumeSlider.input.value = "" + Math.round(Config.waveVolumes[index] * 50.0 - 50.0);
-
         this._doc.record(new ChangeCustomWave(this._doc, customWaveArray))
         this._doc.record(new ChangeVolume(this._doc, +this._instrumentVolumeSlider.input.value, -Config.volumeRange / 2 + Math.round(Math.sqrt(Config.chipWaves[index].expression) * Config.volumeRange / 2)));
 
@@ -5019,10 +5016,9 @@ export class SongEditor {
             this._wavetableCustomWaveDrawCanvas.newArray[i] = customWaveArray[i];
         }
 
-        //this._instrumentVolumeSlider.input.value = "" + Math.round(Config.waveVolumes[index] * 50.0 - 50.0);
-
         this._doc.record(new ChangeWavetableCustomWave(this._doc, customWaveArray, this._wavetableIndices[this._doc.channel][this._doc.getCurrentInstrument()]))
-        this._doc.record(new ChangeVolume(this._doc, +this._instrumentVolumeSlider.input.value, -Config.volumeRange / 2 + Math.round(Math.sqrt(Config.chipWaves[index].expression) * Config.volumeRange / 2)));
+        //this._doc.record(new ChangeVolume(this._doc, +this._instrumentVolumeSlider.input.value, -Config.volumeRange / 2 + Math.round(Math.sqrt(Config.chipWaves[index].expression) * Config.volumeRange / 2)));
+        // Comment this out since the wavetable shouldn't have all wave volumes changed just for one wave.
 
         this._wavetableCustomWavePresetDrop.selectedIndex = 0;
         this._doc.notifier.changed();

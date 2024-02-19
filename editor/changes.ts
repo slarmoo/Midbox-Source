@@ -3146,6 +3146,9 @@ export class ChangeCyclePerNote extends Change {
         doc.notifier.changed();
         if (oldValue != newValue) {
             instrument.cyclePerNote = newValue;
+            if (instrument.cyclePerNote == false) {
+                instrument.oneShotCycle = false;
+            }
             this._didSomething();
         }
     }

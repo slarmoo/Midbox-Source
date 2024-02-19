@@ -377,6 +377,7 @@ export class WavetablePrompt implements Prompt {
 	}
 
 	private _changeCycleEditorButton = (index: number): void => {
+		let instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
 		if (this._buttonOn[index] == true) {
 			this._buttonOn[index] = false;
 		} else {
@@ -385,11 +386,14 @@ export class WavetablePrompt implements Prompt {
 		this._cycleEditorButtons[index].innerHTML = (this._buttonOn[index]) ? "●" : "○";
 		this.wavetableCanvas._storeChange();
 		this.cycle = [];
-		this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].currentCycle = this.cycle;
+		instrument.currentCycle = this.cycle;
 		for (let i: number = 0; i < this._buttonOn.length; i++) {
 			if (this._buttonOn[i]) {
-				this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].currentCycle.push(i);
+				instrument.currentCycle.push(i);
 			}
+		}
+		if (instrument.currentCycle.length == 0) {
+			instrument.currentCycle = [0];
 		}
 	}
 

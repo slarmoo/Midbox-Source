@@ -1530,6 +1530,7 @@ export class Instrument {
                     this.chord = Config.chords.dictionary["arpeggio"].index;
                     this.wavetableIntegralWaves = [];
                     this.wavetableWaves = [];
+                    this.wavetableSpeed = 8;
                     for (const chipWaveIntegral of [
                         Config.chipWaves.dictionary["square"].samples,
                         Config.chipWaves.dictionary["1/4 pulse"].samples,
@@ -1572,6 +1573,12 @@ export class Instrument {
                     for (let i: number = 0; i < this.wavetableWaves.length; i++) {
                         this.currentCycle.push(i);
                     }
+                    // Special case. If there are no waves in the cycle, play the first wave.
+                    if (this.currentCycle.length == 0) {
+                        this.currentCycle = [0];
+                    }
+                    this.cyclePerNote = false;
+                    this.oneShotCycle = false;
                     break;
             default:
                 throw new Error("Unrecognized instrument type: " + type);
@@ -1849,6 +1856,8 @@ export class Instrument {
                 instrumentObject["wavetableCycle"].push(wave);
             }
             instrumentObject["wavetableInterpolateWaves"] = this.interpolateWaves;
+            instrumentObject["cyclePerNote"] = this.cyclePerNote;
+            instrumentObject["oneShotCycle"] = this.oneShotCycle;
         } else if (this.type == InstrumentType.harmonics) {
             instrumentObject["unison"] = Config.unisons[this.unison].name;
         } else if (this.type == InstrumentType.fm) {
@@ -2209,6 +2218,16 @@ export class Instrument {
             this.interpolateWaves = instrumentObject["wavetableInterpolateWaves"];
         } else {
             this.interpolateWaves = false;
+        }
+        if (instrumentObject["cyclePerNote"] != undefined) {
+            this.cyclePerNote = instrumentObject["cyclePerNote"];
+        } else {
+            this.cyclePerNote = false;
+        }
+        if (instrumentObject["oneShotCycle"] != undefined) {
+            this.oneShotCycle = instrumentObject["oneShotCycle"];
+        } else {
+            this.oneShotCycle = false;
         }
 
         if (this.type == InstrumentType.noise) {
@@ -3143,7 +3162,7 @@ export class Song {
                     buffer.push(SongTagCode.stringSustain, base64IntToCharCode[instrument.stringSustain | (instrument.stringSustainType << 5)]);
                 } else if (instrument.type == InstrumentType.wavetable) {
                     buffer.push(SongTagCode.unison, base64IntToCharCode[instrument.unison]);
-                    buffer.push(SongTagCode.wavetable, base64IntToCharCode[instrument.wavetableSpeed], base64IntToCharCode[+instrument.interpolateWaves]);
+                    buffer.push(SongTagCode.wavetable, base64IntToCharCode[instrument.wavetableSpeed], base64IntToCharCode[+instrument.interpolateWaves], base64IntToCharCode[+instrument.cyclePerNote], base64IntToCharCode[+instrument.oneShotCycle]);
                     const wavetableSize: number = instrument.wavetableWaves.length;
                     buffer.push(base64IntToCharCode[wavetableSize]);
                     for (const wave of instrument.wavetableWaves) {
@@ -4215,7 +4234,7 @@ export class Song {
                     const legacySettings: LegacySettings = legacySettingsCache![instrumentChannelIterator][instrumentIndexIterator];
                     instrument.convertLegacySettings(legacySettings, forceSimpleFilter);
                 } else {
-                    // BeepBox currently uses six base64 characters at 6 bits each for a bitfield representing all the enabled effects.
+                    // Midbox currently uses six base64 characters at 6 bits each for a bitfield representing all the enabled effects.
                     if (EffectType.length > 32) throw new Error();
                     instrument.effects = (
                         (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] << (6 * 5))
@@ -5076,6 +5095,8 @@ export class Song {
                 if (instrument.type == InstrumentType.wavetable) {
                     instrument.wavetableSpeed = clamp(0, Config.wavetableSpeedMax + 1, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                     instrument.interpolateWaves = clamp(0, 1 + 1, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]) === 1;
+                    instrument.cyclePerNote = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] ? true : false;
+                    instrument.oneShotCycle = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] ? true : false;
                     const wavetableSize: number = clamp(0, 32 + 1, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                     for (let waveIndex: number = 0; waveIndex < wavetableSize; waveIndex++) {
                         for (let j: number = 0; j < 64; j++) {
@@ -8185,7 +8206,12 @@ export class Synth {
                             if (wavetableSpeed == 0) {
                                 // Nothing. Skip.
                             } else {
-                                instrumentState.currentWave = (instrumentState.currentWave + wavetableSpeed * (1.0 / (Config.ticksPerPart * Config.partsPerBeat))) % wavetableSize;
+                                // If the OneShotCycle checkbox is ticked, make it only cycle once. Otherwise, use the modulo to continue looping the cycle.
+                                if (instrument.oneShotCycle) {
+                                    instrumentState.currentWave = Math.min((instrumentState.currentWave + wavetableSpeed * (1.0 / (Config.ticksPerPart * Config.partsPerBeat))), (wavetableSize - 1));
+                                } else {
+                                    instrumentState.currentWave = (instrumentState.currentWave + wavetableSpeed * (1.0 / (Config.ticksPerPart * Config.partsPerBeat))) % wavetableSize;
+                                }
                             }
                         }
                         let useArpeggioSpeed: number = instrument.arpeggioSpeed;
@@ -9107,6 +9133,10 @@ export class Synth {
 
         if ((tone.atNoteStart && !transition.isSeamless && !tone.forceContinueAtStart) || tone.freshlyAllocated) {
             tone.reset();
+            // Also reset the wavetable cycle if cyclePerNote is ticked.
+            if (instrument.cyclePerNote) {
+            instrumentState.currentWave = 0.0;
+            }
         }
         tone.freshlyAllocated = false;
 
@@ -11682,14 +11712,21 @@ export class Synth {
             const indexB: number = phaseBInt % waveLength;
             const phaseRatioA: number = phaseA - phaseAInt;
             const phaseRatioB: number = phaseB - phaseBInt;
-            prevWaveIntegralA = +waveA[indexA];
-            prevWaveIntegralB = +waveA[indexB];
-            prevWaveIntegralA += (waveA[indexA + 1] - prevWaveIntegralA) * phaseRatioA;
-            prevWaveIntegralB += (waveA[indexB + 1] - prevWaveIntegralB) * phaseRatioB;
-            prevWaveIntegralC = +waveB[indexA];
-            prevWaveIntegralD = +waveB[indexB];
-            prevWaveIntegralC += (waveB[indexA + 1] - prevWaveIntegralC) * phaseRatioA;
-            prevWaveIntegralD += (waveB[indexB + 1] - prevWaveIntegralD) * phaseRatioB;
+            if (currentCycleLength == 0) {
+                prevWaveIntegralA = 0;
+                prevWaveIntegralB = 0;
+                prevWaveIntegralC = 0;
+                prevWaveIntegralD = 0;
+            } else {
+                prevWaveIntegralA = +waveA[indexA];
+                prevWaveIntegralB = +waveA[indexB];
+                prevWaveIntegralA += (waveA[indexA + 1] - prevWaveIntegralA) * phaseRatioA;
+                prevWaveIntegralB += (waveA[indexB + 1] - prevWaveIntegralB) * phaseRatioB;
+                prevWaveIntegralC = +waveB[indexA];
+                prevWaveIntegralD = +waveB[indexB];
+                prevWaveIntegralC += (waveB[indexA + 1] - prevWaveIntegralC) * phaseRatioA;
+                prevWaveIntegralD += (waveB[indexB + 1] - prevWaveIntegralD) * phaseRatioB;
+            }
         }
 
         const stopIndex: number = bufferIndex + roundedSamplesPerTick;
@@ -11741,43 +11778,51 @@ export class Synth {
             const interpolationFactor: number = Math.max(0, Math.min(1, waveCrossfade)) * interpolationFactorStatus;
 
             if (aliases) {
-                waveSampleA = waveA[(0 | phaseA) % waveLength];
-                waveSampleB = waveA[(0 | phaseB) % waveLength];
-                const inputSampleA: number = waveSampleA + waveSampleB;
+                if (currentCycleLength == 0) {
+                    inputSample = Synth.wavetableCrossfade(interpolationFactor, 0, 0);
+                } else {
+                    waveSampleA = waveA[(0 | phaseA) % waveLength];
+                    waveSampleB = waveA[(0 | phaseB) % waveLength];
+                    const inputSampleA: number = waveSampleA + waveSampleB;
 
-                waveSampleC = waveB[(0 | phaseA) % waveLength];
-                waveSampleD = waveB[(0 | phaseB) % waveLength];
-                const inputSampleB: number = waveSampleC + waveSampleD;
+                    waveSampleC = waveB[(0 | phaseA) % waveLength];
+                    waveSampleD = waveB[(0 | phaseB) % waveLength];
+                    const inputSampleB: number = waveSampleC + waveSampleD;
 
-                inputSample = Synth.wavetableCrossfade(interpolationFactor, inputSampleA, inputSampleB);
+                    inputSample = Synth.wavetableCrossfade(interpolationFactor, inputSampleA, inputSampleB);
+                }
             } else {
-                const phaseAInt: number = phaseA | 0;
-                const phaseBInt: number = phaseB | 0;
-                const indexA: number = phaseAInt % waveLength;
-                const indexB: number = phaseBInt % waveLength;
-                let nextWaveIntegralA: number = waveA[indexA];
-                let nextWaveIntegralB: number = waveA[indexB];
-                const phaseRatioA: number = phaseA - phaseAInt;
-                const phaseRatioB: number = phaseB - phaseBInt;
-                nextWaveIntegralA += (waveA[indexA + 1] - nextWaveIntegralA) * phaseRatioA;
-                nextWaveIntegralB += (waveA[indexB + 1] - nextWaveIntegralB) * phaseRatioB;
-                waveSampleA = (nextWaveIntegralA - prevWaveIntegralA) / phaseDeltaA;
-                waveSampleB = (nextWaveIntegralB - prevWaveIntegralB) / phaseDeltaB;
-                prevWaveIntegralA = nextWaveIntegralA;
-                prevWaveIntegralB = nextWaveIntegralB;
-                const inputSampleA: number = waveSampleA + waveSampleB * unisonSign;
+                if (currentCycleLength == 0) {
+                    inputSample = Synth.wavetableCrossfade(interpolationFactor, 0, 0);
+                } else {
+                    const phaseAInt: number = phaseA | 0;
+                    const phaseBInt: number = phaseB | 0;
+                    const indexA: number = phaseAInt % waveLength;
+                    const indexB: number = phaseBInt % waveLength;
+                    let nextWaveIntegralA: number = waveA[indexA];
+                    let nextWaveIntegralB: number = waveA[indexB];
+                    const phaseRatioA: number = phaseA - phaseAInt;
+                    const phaseRatioB: number = phaseB - phaseBInt;
+                    nextWaveIntegralA += (waveA[indexA + 1] - nextWaveIntegralA) * phaseRatioA;
+                    nextWaveIntegralB += (waveA[indexB + 1] - nextWaveIntegralB) * phaseRatioB;
+                    waveSampleA = (nextWaveIntegralA - prevWaveIntegralA) / phaseDeltaA;
+                    waveSampleB = (nextWaveIntegralB - prevWaveIntegralB) / phaseDeltaB;
+                    prevWaveIntegralA = nextWaveIntegralA;
+                    prevWaveIntegralB = nextWaveIntegralB;
+                    const inputSampleA: number = waveSampleA + waveSampleB * unisonSign;
 
-                let nextWaveIntegralC: number = waveB[indexA];
-                let nextWaveIntegralD: number = waveB[indexB];
-                nextWaveIntegralC += (waveB[indexA + 1] - nextWaveIntegralC) * phaseRatioA;
-                nextWaveIntegralD += (waveB[indexB + 1] - nextWaveIntegralD) * phaseRatioB;
-                waveSampleC = (nextWaveIntegralC - prevWaveIntegralC) / phaseDeltaA;
-                waveSampleD = (nextWaveIntegralD - prevWaveIntegralD) / phaseDeltaB;
-                prevWaveIntegralC = nextWaveIntegralC;
-                prevWaveIntegralD = nextWaveIntegralD;
-                const inputSampleB: number = waveSampleC + waveSampleD * unisonSign;
+                    let nextWaveIntegralC: number = waveB[indexA];
+                    let nextWaveIntegralD: number = waveB[indexB];
+                    nextWaveIntegralC += (waveB[indexA + 1] - nextWaveIntegralC) * phaseRatioA;
+                    nextWaveIntegralD += (waveB[indexB + 1] - nextWaveIntegralD) * phaseRatioB;
+                    waveSampleC = (nextWaveIntegralC - prevWaveIntegralC) / phaseDeltaA;
+                    waveSampleD = (nextWaveIntegralD - prevWaveIntegralD) / phaseDeltaB;
+                    prevWaveIntegralC = nextWaveIntegralC;
+                    prevWaveIntegralD = nextWaveIntegralD;
+                    const inputSampleB: number = waveSampleC + waveSampleD * unisonSign;
 
-                inputSample = Synth.wavetableCrossfade(interpolationFactor, inputSampleA, inputSampleB);
+                    inputSample = Synth.wavetableCrossfade(interpolationFactor, inputSampleA, inputSampleB);
+                }
             }
 
             const sample: number = applyFilters(inputSample * volumeScale, initialFilterInput1, initialFilterInput2, filterCount, filters);

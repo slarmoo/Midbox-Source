@@ -330,7 +330,7 @@ export class Config {
     public static readonly ticksPerPart:              number = 2;
     public static readonly ticksPerArpeggio:          number = 3;
     public static readonly arpeggioPatterns:          ReadonlyArray<ReadonlyArray<number>> = [[0], [0, 1], [0, 1, 2, 1], [0, 1, 2, 3],       [0, 1, 2, 3, 4],          [0, 1, 2, 3, 4, 5],             [0, 1, 2, 3, 4, 5, 6],                [0, 1, 2, 3, 4, 5, 6, 7]                  ];
-    public static readonly bounceArpeggioPatterns:    ReadonlyArray<ReadonlyArray<number>> = [[0], [0, 1], [0, 1, 2, 1], [0, 1, 2, 3, 2, 1], [0, 1, 2, 3, 4, 3, 2, 1], [0, 1, 2, 3, 4, 5, 4, 3, 2, 1], [0, 1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 1], [0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1]];
+    public static readonly bounceArpeggioPatterns:    ReadonlyArray<ReadonlyArray<number>> = [[0], [0, 1], [0, 1, 2, 1], [0, 1, 2, 3, 2, 1], [0, 1, 2, 3, 4, 3, 2, 1], [0, 1, 2, 3, 4, 5, 4, 3, 2, 1], [0, 1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 1], [0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1], [0, 1, 2, 3, 4, 5, 6, 7, 8, 7, 6, 5, 4, 3, 2, 1]];
     public static readonly rhythms: DictionaryArray<Rhythm> = toNameMap([
         { name: "÷3 (triplets)", stepsPerBeat: 3,  roundUpThresholds: [5, 12, 18    ]},
         { name: "÷4 (standard)", stepsPerBeat: 4,  roundUpThresholds: [3, 9,  17, 21]},
