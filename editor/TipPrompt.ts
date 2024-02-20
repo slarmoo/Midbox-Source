@@ -611,7 +611,7 @@ export class TipPrompt implements Prompt {
 				message = div(
 					h2("Speed Display"),
 					p("This is a little number that shows you how fast/slow a speed is. This display is measured in ticks."),
-					p("Key: '2 tk' means the duration is for two 'ticks'.")
+					p("Key: '4 tk' means the duration is for four 'ticks'. A tick's length depends on the song's tempo, and is usually defined as twice as fast as freehand notes, which means there should be 48 ticks per beat.")
 				);
 			} break;
 			case "wpb": {
@@ -624,7 +624,7 @@ export class TipPrompt implements Prompt {
 			case "oscilloscopeScaling": {
 				message = div(
 					h2("Waveform Scale"),
-					p("This slider changes how loud the song's waveform appears on the oscilloscope. This effect is only visual, and can be used for seeing what instrument waveforms look like better without having to raise its volume.")
+					p("This slider changes how loud the song's waveform appears on the oscilloscope (scale on the Y axis). This effect is only visual, and can be used for seeing what instrument waveforms look like better without having to raise its volume.")
 				);
 			} break;
 
