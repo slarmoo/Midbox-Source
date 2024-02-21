@@ -392,8 +392,10 @@ export class WavetablePrompt implements Prompt {
 				instrument.currentCycle.push(i);
 			}
 		}
-		if (instrument.currentCycle.length == 0) {
+		if (instrument.currentCycle.length < 1) {
 			instrument.currentCycle = [];
+		} else {
+			// Keep the current cycle.
 		}
 	}
 

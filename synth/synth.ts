@@ -2180,55 +2180,95 @@ export class Instrument {
         this.stringSustainType = Config.enableAcousticSustain ? Config.sustainTypeNames.indexOf(instrumentObject["stringSustainType"]) : SustainType.bright;
 		if (<any>this.stringSustainType == -1) this.stringSustainType = SustainType.bright;
 
-        
-        if (instrumentObject["wavetableSpeed"] != undefined) {
-            this.wavetableSpeed = instrumentObject["wavetableSpeed"];
-        }
-        if (instrumentObject["wavetableWaves"] != undefined) {
-            for (let waveIndex: number = 0; waveIndex < instrumentObject["wavetableWaves"].length; waveIndex++) {
-                for (let i: number = 0; i < 64; i++) {
-                    this.wavetableWaves[waveIndex][i] = instrumentObject["wavetableWaves"][waveIndex][i];
-                }
-                let sum: number = 0.0;
-                for (let i: number = 0; i < this.wavetableWaves[waveIndex].length; i++) {
-                    sum += this.wavetableWaves[waveIndex][i];
-                }
-                const average: number = sum / this.wavetableWaves[waveIndex].length;
-                let cumulative: number = 0;
-                let wavePrev: number = 0;
-                for (let i: number = 0; i < this.wavetableWaves[waveIndex].length; i++) {
-                    cumulative += wavePrev;
-                    wavePrev = this.wavetableWaves[waveIndex][i] - average;
-                    this.wavetableIntegralWaves[waveIndex][i] = cumulative;
-                }
-            this.wavetableIntegralWaves[waveIndex][64] = 0.0;
+        if (this.type == InstrumentType.wavetable) {
+            if (instrumentObject["wavetableSpeed"] != undefined) {
+                this.wavetableSpeed = instrumentObject["wavetableSpeed"];
             }
-        }
-        if (instrumentObject["wavetableCycle"] != undefined) {
-            this.currentCycle = [];
-            for (const wave of instrumentObject["wavetableCycle"]) {
-                this.currentCycle.push(wave);
+            if (instrumentObject["wavetableWaves"] != undefined) {
+                for (let waveIndex: number = 0; waveIndex < instrumentObject["wavetableWaves"].length; waveIndex++) {
+                    for (let i: number = 0; i < 64; i++) {
+                        this.wavetableWaves[waveIndex][i] = instrumentObject["wavetableWaves"][waveIndex][i];
+                    }
+                    let sum: number = 0.0;
+                    for (let i: number = 0; i < this.wavetableWaves[waveIndex].length; i++) {
+                        sum += this.wavetableWaves[waveIndex][i];
+                    }
+                    const average: number = sum / this.wavetableWaves[waveIndex].length;
+                    let cumulative: number = 0;
+                    let wavePrev: number = 0;
+                    for (let i: number = 0; i < this.wavetableWaves[waveIndex].length; i++) {
+                        cumulative += wavePrev;
+                        wavePrev = this.wavetableWaves[waveIndex][i] - average;
+                        this.wavetableIntegralWaves[waveIndex][i] = cumulative;
+                    }
+                this.wavetableIntegralWaves[waveIndex][64] = 0.0;
+                }
+            } else {
+                for (const chipWaveIntegral of [
+                    Config.chipWaves.dictionary["square"].samples,
+                    Config.chipWaves.dictionary["1/4 pulse"].samples,
+                    Config.chipWaves.dictionary["1/6 pulse"].samples,
+                    Config.chipWaves.dictionary["1/8 pulse"].samples,
+                    Config.chipWaves.dictionary["square"].samples,
+                    Config.chipWaves.dictionary["1/4 pulse"].samples,
+                    Config.chipWaves.dictionary["sawtooth"].samples,
+                    Config.chipWaves.dictionary["double saw"].samples,
+                    Config.chipWaves.dictionary["triangle"].samples,
+                    Config.chipWaves.dictionary["rounded"].samples,
+                    Config.chipWaves.dictionary["triangle"].samples,
+                    Config.chipWaves.dictionary["sine"].samples,
+                    Config.chipWaves.dictionary["triangle"].samples,
+                    Config.chipWaves.dictionary["rounded"].samples,
+                    Config.chipWaves.dictionary["glitch"].samples,
+                    Config.chipWaves.dictionary["flute"].samples,
+                    Config.chipWaves.dictionary["glitch"].samples,
+                    Config.chipWaves.dictionary["pan flute"].samples,
+                    Config.chipWaves.dictionary["electric guitar"].samples,
+                    Config.chipWaves.dictionary["soft clarinet"].samples,
+                    Config.chipWaves.dictionary["glitch"].samples,
+                    Config.chipWaves.dictionary["double saw"].samples,
+                    Config.chipWaves.dictionary["electric guitar"].samples,
+                    Config.chipWaves.dictionary["sharp clarinet"].samples,
+                    Config.chipWaves.dictionary["triangle"].samples,
+                    Config.chipWaves.dictionary["rounded"].samples,
+                    Config.chipWaves.dictionary["triangle"].samples,
+                    Config.chipWaves.dictionary["sine"].samples,
+                    Config.chipWaves.dictionary["triangle"].samples,
+                    Config.chipWaves.dictionary["rounded"].samples,
+                    Config.chipWaves.dictionary["glitch"].samples,
+                    Config.chipWaves.dictionary["flute"].samples,
+                ]) {
+                    const [raw, integral]: [Float32Array, Float32Array] = convertChipWaveToCustomChip(chipWaveIntegral);
+                    this.wavetableIntegralWaves.push(integral);
+                    this.wavetableWaves.push(raw);
+                }
             }
-        } else {
-            this.currentCycle = [];
-            for (let i: number = 0; i < 32; i++) {
-                this.currentCycle.push(i);
+            if (instrumentObject["wavetableCycle"] != undefined) {
+                this.currentCycle = [];
+                for (const wave of instrumentObject["wavetableCycle"]) {
+                    this.currentCycle.push(wave);
+                }
+            } else {
+                this.currentCycle = [];
+                for (let i: number = 0; i < 32; i++) {
+                    this.currentCycle.push(i);
+                }
             }
-        }
-        if (instrumentObject["wavetableInterpolateWaves"] != undefined) {
-            this.interpolateWaves = instrumentObject["wavetableInterpolateWaves"];
-        } else {
-            this.interpolateWaves = false;
-        }
-        if (instrumentObject["cyclePerNote"] != undefined) {
-            this.cyclePerNote = instrumentObject["cyclePerNote"];
-        } else {
-            this.cyclePerNote = false;
-        }
-        if (instrumentObject["oneShotCycle"] != undefined) {
-            this.oneShotCycle = instrumentObject["oneShotCycle"];
-        } else {
-            this.oneShotCycle = false;
+            if (instrumentObject["wavetableInterpolateWaves"] != undefined) {
+                this.interpolateWaves = instrumentObject["wavetableInterpolateWaves"];
+            } else {
+                this.interpolateWaves = false;
+            }
+            if (instrumentObject["cyclePerNote"] != undefined) {
+                this.cyclePerNote = instrumentObject["cyclePerNote"];
+            } else {
+                this.cyclePerNote = false;
+            }
+            if (instrumentObject["oneShotCycle"] != undefined) {
+                this.oneShotCycle = instrumentObject["oneShotCycle"];
+            } else {
+                this.oneShotCycle = false;
+            }
         }
 
         if (this.type == InstrumentType.noise) {
@@ -6138,6 +6178,7 @@ class InstrumentState {
     public wavetableWaves: Float32Array[] | null = null;
     public wavetableCycle: number[] | null = null;
     public wavetableInterpolateWaves: boolean = false;
+    public oneShotCycle: boolean = false;
     public noisePitchFilterMult: number = 1.0;
     public unison: Unison | null = null;
     public chord: Chord | null = null;
@@ -6881,6 +6922,7 @@ class InstrumentState {
             this.wavetableWaves = this.aliases ? instrument.wavetableWaves : instrument.wavetableIntegralWaves;
             this.wavetableCycle = instrument.currentCycle;
             this.wavetableInterpolateWaves = instrument.interpolateWaves;
+            this.oneShotCycle = instrument.oneShotCycle;
             this.volumeScale = 0.05;
         } else {
             this.wave = null;
@@ -8025,7 +8067,7 @@ export class Synth {
                 
                 this.wantToSkip = false;
                 this.skipBar();
-                
+
                 continue;
             }
 
@@ -8214,18 +8256,18 @@ export class Synth {
                                     wavetableSpeed = (1 - (wavetableSpeedModValue % 1)) * Config.wavetableSpeedScale[Math.floor(wavetableSpeedModValue)] + (wavetableSpeedModValue % 1) * Config.wavetableSpeedScale[Math.min(Config.wavetableSpeedScale.length - 1, Math.ceil(wavetableSpeedModValue))];
                                 }
                             }
-                            if (wavetableSpeed == 0) {
+                            if (wavetableSpeed < 1) {
                                 // Nothing. Skip.
                             } else {
                                 // If the OneShotCycle checkbox is ticked, make it only cycle once. Otherwise, use the modulo to continue looping the cycle.
                                 if (instrument.oneShotCycle) {
-                                    if (wavetableSize == 0) {
+                                    if (wavetableSize < 1) {
                                         // Do nothing?
                                     } else {
                                         instrumentState.currentWave = Math.min((instrumentState.currentWave + wavetableSpeed * (1.0 / (Config.ticksPerPart * Config.partsPerBeat))), (wavetableSize - 1));
                                     }
                                 } else {
-                                    if (wavetableSize == 0) {
+                                    if (wavetableSize < 1) {
                                         // Do nothing?
                                     } else {
                                         instrumentState.currentWave = (instrumentState.currentWave + wavetableSpeed * (1.0 / (Config.ticksPerPart * Config.partsPerBeat))) % wavetableSize;
@@ -11687,6 +11729,7 @@ export class Synth {
     }
     private static wavetableSynth(synth: Synth, bufferIndex: number, roundedSamplesPerTick: number, tone: Tone, instrumentState: InstrumentState): void {
         const aliases: boolean = (effectsIncludeDistortion(instrumentState.effects) && instrumentState.aliases);
+        const oneShotBoolean: boolean = instrumentState.oneShotCycle;
         const data: Float32Array = synth.tempMonoInstrumentSampleBuffer!;
         const currentWave: number = tone.currentWave;
         let waveCrossfade: number = tone.waveCrossfade;
@@ -11697,11 +11740,11 @@ export class Synth {
         const currentCycle: number[] = instrumentState.wavetableCycle!;
         const currentCycleLength: number = currentCycle.length;
         const waveA: Float32Array = wavetableWaves[currentCycle[Math.floor(currentWave) % currentCycleLength]];
-        const waveB: Float32Array = wavetableWaves[currentCycle[(Math.floor(currentWave) + 1) % currentCycleLength]];
+        const waveB: Float32Array = oneShotBoolean ? wavetableWaves[currentCycle[(Math.min((currentWave) + 1, currentCycleLength - 1))]] : wavetableWaves[currentCycle[(Math.floor(currentWave) + 1) % currentCycleLength]];
         const volumeScale = instrumentState.volumeScale;
 
         // For all but aliasing custom chip, the first sample is duplicated at the end, so don't double-count it.
-        const waveLength: number = aliases ? (currentCycleLength == 0) ? 0 : waveA.length : (currentCycleLength == 0) ? 0 : waveA.length - 1;
+        const waveLength: number = aliases ? (currentCycleLength < 1) ? 0 : waveA.length : (currentCycleLength < 1) ? 0 : waveA.length - 1;
 
         const unisonSign: number = tone.specialIntervalExpressionMult * instrumentState.unison!.sign;
         if (instrumentState.unison!.voices == 1 && !instrumentState.chord!.customInterval) tone.phases[1] = tone.phases[0];
@@ -11731,7 +11774,7 @@ export class Synth {
             const indexB: number = phaseBInt % waveLength;
             const phaseRatioA: number = phaseA - phaseAInt;
             const phaseRatioB: number = phaseB - phaseBInt;
-            if (currentCycleLength == 0) {
+            if (currentCycleLength < 1) {
                 prevWaveIntegralA = 0;
                 prevWaveIntegralB = 0;
                 prevWaveIntegralC = 0;
@@ -11797,7 +11840,7 @@ export class Synth {
             const interpolationFactor: number = Math.max(0, Math.min(1, waveCrossfade)) * interpolationFactorStatus;
 
             if (aliases) {
-                if (currentCycleLength == 0) {
+                if (currentCycleLength < 1) {
                     inputSample = Synth.wavetableCrossfade(interpolationFactor, 0, 0);
                 } else {
                     waveSampleA = waveA[(0 | phaseA) % waveLength];
@@ -11811,7 +11854,7 @@ export class Synth {
                     inputSample = Synth.wavetableCrossfade(interpolationFactor, inputSampleA, inputSampleB);
                 }
             } else {
-                if (currentCycleLength == 0) {
+                if (currentCycleLength < 1) {
                     inputSample = Synth.wavetableCrossfade(interpolationFactor, 0, 0);
                 } else {
                     const phaseAInt: number = phaseA | 0;
