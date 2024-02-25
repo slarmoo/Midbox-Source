@@ -713,7 +713,11 @@ export class SongEditor {
         _.wave24Label,
         _.wave25Label,
         _.wave26Label,
-        _.wave27Label
+        _.wave27Label,
+        _.wave28Label,
+        _.wave29Label,
+        _.wave30Label,
+        _.wave31Label
 
     ]);
     private readonly _chipNoiseSelect: HTMLSelectElement = buildOptions(select(), [

@@ -121,23 +121,27 @@ export class Piano {
 		if (scale[Math.floor(mousePitch) % Config.pitchesPerOctave] || this._doc.song.getChannelIsNoise(this._doc.channel)) {
 			this._cursorPitch = Math.floor(mousePitch);
 		} else {
-			let topPitch: number = Math.floor(mousePitch) + 1;
-			let bottomPitch: number = Math.floor(mousePitch) - 1;
-			while (!scale[topPitch % Config.pitchesPerOctave]) {
-				topPitch++;
+			if (!this._doc.prefs.notesOutsideScale) {
+				let topPitch: number = Math.floor(mousePitch) + 1;
+				let bottomPitch: number = Math.floor(mousePitch) - 1;
+				while (!scale[topPitch % Config.pitchesPerOctave]) {
+					topPitch++;
+				}
+				while (!scale[(bottomPitch) % Config.pitchesPerOctave]) {
+					bottomPitch--;
+				}
+				let topRange: number = topPitch;
+				let bottomRange: number = bottomPitch + 1;
+				if (topPitch % Config.pitchesPerOctave == 0 || topPitch % Config.pitchesPerOctave == 7) {
+					topRange -= 0.5;
+				}
+				if (bottomPitch % Config.pitchesPerOctave == 0 || bottomPitch % Config.pitchesPerOctave == 7) {
+					bottomRange += 0.5;
+				}
+				this._cursorPitch = mousePitch - bottomRange > topRange - mousePitch ? topPitch : bottomPitch;
+			} else {
+				this._cursorPitch = Math.floor(mousePitch);
 			}
-			while (!scale[(bottomPitch) % Config.pitchesPerOctave]) {
-				bottomPitch--;
-			}
-			let topRange: number = topPitch;
-			let bottomRange: number = bottomPitch + 1;
-			if (topPitch % Config.pitchesPerOctave == 0 || topPitch % Config.pitchesPerOctave == 7) {
-				topRange -= 0.5;
-			}
-			if (bottomPitch % Config.pitchesPerOctave == 0 || bottomPitch % Config.pitchesPerOctave == 7) {
-				bottomRange += 0.5;
-			}
-			this._cursorPitch = mousePitch - bottomRange > topRange - mousePitch ? topPitch : bottomPitch;
 		}
 	}
 		

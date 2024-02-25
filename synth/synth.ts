@@ -1317,46 +1317,7 @@ export class Instrument {
             this.drumsetSpectrumWaves[i] = new SpectrumWave(true);
         }
 
-        this.wavetableIntegralWaves = [];
-        this.wavetableWaves = [];
-        for (const chipWaveIntegral of [
-            Config.chipWaves.dictionary["square"].samples,
-            Config.chipWaves.dictionary["1/4 pulse"].samples,
-            Config.chipWaves.dictionary["1/6 pulse"].samples,
-            Config.chipWaves.dictionary["1/8 pulse"].samples,
-            Config.chipWaves.dictionary["square"].samples,
-            Config.chipWaves.dictionary["1/4 pulse"].samples,
-            Config.chipWaves.dictionary["sawtooth"].samples,
-            Config.chipWaves.dictionary["double saw"].samples,
-            Config.chipWaves.dictionary["triangle"].samples,
-            Config.chipWaves.dictionary["rounded"].samples,
-            Config.chipWaves.dictionary["triangle"].samples,
-            Config.chipWaves.dictionary["sine"].samples,
-            Config.chipWaves.dictionary["triangle"].samples,
-            Config.chipWaves.dictionary["rounded"].samples,
-            Config.chipWaves.dictionary["glitch"].samples,
-            Config.chipWaves.dictionary["flute"].samples,
-            Config.chipWaves.dictionary["glitch"].samples,
-            Config.chipWaves.dictionary["pan flute"].samples,
-            Config.chipWaves.dictionary["electric guitar"].samples,
-            Config.chipWaves.dictionary["soft clarinet"].samples,
-            Config.chipWaves.dictionary["glitch"].samples,
-            Config.chipWaves.dictionary["double saw"].samples,
-            Config.chipWaves.dictionary["electric guitar"].samples,
-            Config.chipWaves.dictionary["sharp clarinet"].samples,
-            Config.chipWaves.dictionary["triangle"].samples,
-            Config.chipWaves.dictionary["rounded"].samples,
-            Config.chipWaves.dictionary["triangle"].samples,
-            Config.chipWaves.dictionary["sine"].samples,
-            Config.chipWaves.dictionary["triangle"].samples,
-            Config.chipWaves.dictionary["rounded"].samples,
-            Config.chipWaves.dictionary["glitch"].samples,
-            Config.chipWaves.dictionary["flute"].samples,
-        ]) {
-            const [raw, integral]: [Float32Array, Float32Array] = convertChipWaveToCustomChip(chipWaveIntegral);
-            this.wavetableIntegralWaves.push(integral);
-            this.wavetableWaves.push(raw);
-        }
+        Synth.wavetableWaveDefaults(this);
 
         for (let i = 0; i < 64; i++) {
             this.customChipWave[i] = 24 - Math.floor(i * (48 / 64));
@@ -1528,47 +1489,8 @@ export class Instrument {
                     break;
                 case InstrumentType.wavetable:
                     this.chord = Config.chords.dictionary["arpeggio"].index;
-                    this.wavetableIntegralWaves = [];
-                    this.wavetableWaves = [];
                     this.wavetableSpeed = 8;
-                    for (const chipWaveIntegral of [
-                        Config.chipWaves.dictionary["square"].samples,
-                        Config.chipWaves.dictionary["1/4 pulse"].samples,
-                        Config.chipWaves.dictionary["1/6 pulse"].samples,
-                        Config.chipWaves.dictionary["1/8 pulse"].samples,
-                        Config.chipWaves.dictionary["square"].samples,
-                        Config.chipWaves.dictionary["1/4 pulse"].samples,
-                        Config.chipWaves.dictionary["sawtooth"].samples,
-                        Config.chipWaves.dictionary["double saw"].samples,
-                        Config.chipWaves.dictionary["triangle"].samples,
-                        Config.chipWaves.dictionary["rounded"].samples,
-                        Config.chipWaves.dictionary["triangle"].samples,
-                        Config.chipWaves.dictionary["sine"].samples,
-                        Config.chipWaves.dictionary["triangle"].samples,
-                        Config.chipWaves.dictionary["rounded"].samples,
-                        Config.chipWaves.dictionary["glitch"].samples,
-                        Config.chipWaves.dictionary["flute"].samples,
-                        Config.chipWaves.dictionary["glitch"].samples,
-                        Config.chipWaves.dictionary["pan flute"].samples,
-                        Config.chipWaves.dictionary["electric guitar"].samples,
-                        Config.chipWaves.dictionary["soft clarinet"].samples,
-                        Config.chipWaves.dictionary["glitch"].samples,
-                        Config.chipWaves.dictionary["double saw"].samples,
-                        Config.chipWaves.dictionary["electric guitar"].samples,
-                        Config.chipWaves.dictionary["sharp clarinet"].samples,
-                        Config.chipWaves.dictionary["triangle"].samples,
-                        Config.chipWaves.dictionary["rounded"].samples,
-                        Config.chipWaves.dictionary["triangle"].samples,
-                        Config.chipWaves.dictionary["sine"].samples,
-                        Config.chipWaves.dictionary["triangle"].samples,
-                        Config.chipWaves.dictionary["rounded"].samples,
-                        Config.chipWaves.dictionary["glitch"].samples,
-                        Config.chipWaves.dictionary["flute"].samples,
-                    ]) {
-                        const [raw, integral]: [Float32Array, Float32Array] = convertChipWaveToCustomChip(chipWaveIntegral);
-                        this.wavetableIntegralWaves.push(integral);
-                        this.wavetableWaves.push(raw);
-                    }
+                    Synth.wavetableWaveDefaults(this);
                     this.currentCycle = [];
                     for (let i: number = 0; i < this.wavetableWaves.length; i++) {
                         this.currentCycle.push(i);
@@ -2180,7 +2102,7 @@ export class Instrument {
         this.stringSustainType = Config.enableAcousticSustain ? Config.sustainTypeNames.indexOf(instrumentObject["stringSustainType"]) : SustainType.bright;
 		if (<any>this.stringSustainType == -1) this.stringSustainType = SustainType.bright;
 
-        if (this.type == InstrumentType.wavetable) {
+        //if (this.type == InstrumentType.wavetable) {
             if (instrumentObject["wavetableSpeed"] != undefined) {
                 this.wavetableSpeed = instrumentObject["wavetableSpeed"];
             }
@@ -2204,44 +2126,7 @@ export class Instrument {
                 this.wavetableIntegralWaves[waveIndex][64] = 0.0;
                 }
             } else {
-                for (const chipWaveIntegral of [
-                    Config.chipWaves.dictionary["square"].samples,
-                    Config.chipWaves.dictionary["1/4 pulse"].samples,
-                    Config.chipWaves.dictionary["1/6 pulse"].samples,
-                    Config.chipWaves.dictionary["1/8 pulse"].samples,
-                    Config.chipWaves.dictionary["square"].samples,
-                    Config.chipWaves.dictionary["1/4 pulse"].samples,
-                    Config.chipWaves.dictionary["sawtooth"].samples,
-                    Config.chipWaves.dictionary["double saw"].samples,
-                    Config.chipWaves.dictionary["triangle"].samples,
-                    Config.chipWaves.dictionary["rounded"].samples,
-                    Config.chipWaves.dictionary["triangle"].samples,
-                    Config.chipWaves.dictionary["sine"].samples,
-                    Config.chipWaves.dictionary["triangle"].samples,
-                    Config.chipWaves.dictionary["rounded"].samples,
-                    Config.chipWaves.dictionary["glitch"].samples,
-                    Config.chipWaves.dictionary["flute"].samples,
-                    Config.chipWaves.dictionary["glitch"].samples,
-                    Config.chipWaves.dictionary["pan flute"].samples,
-                    Config.chipWaves.dictionary["electric guitar"].samples,
-                    Config.chipWaves.dictionary["soft clarinet"].samples,
-                    Config.chipWaves.dictionary["glitch"].samples,
-                    Config.chipWaves.dictionary["double saw"].samples,
-                    Config.chipWaves.dictionary["electric guitar"].samples,
-                    Config.chipWaves.dictionary["sharp clarinet"].samples,
-                    Config.chipWaves.dictionary["triangle"].samples,
-                    Config.chipWaves.dictionary["rounded"].samples,
-                    Config.chipWaves.dictionary["triangle"].samples,
-                    Config.chipWaves.dictionary["sine"].samples,
-                    Config.chipWaves.dictionary["triangle"].samples,
-                    Config.chipWaves.dictionary["rounded"].samples,
-                    Config.chipWaves.dictionary["glitch"].samples,
-                    Config.chipWaves.dictionary["flute"].samples,
-                ]) {
-                    const [raw, integral]: [Float32Array, Float32Array] = convertChipWaveToCustomChip(chipWaveIntegral);
-                    this.wavetableIntegralWaves.push(integral);
-                    this.wavetableWaves.push(raw);
-                }
+                Synth.wavetableWaveDefaults(this);
             }
             if (instrumentObject["wavetableCycle"] != undefined) {
                 this.currentCycle = [];
@@ -2269,6 +2154,30 @@ export class Instrument {
             } else {
                 this.oneShotCycle = false;
             }
+        //}
+
+        if (!instrumentObject["customChipWave"]) {
+            for (let i = 0; i < 64; i++) {
+                this.customChipWave[i] = 24 - Math.floor(i * (48 / 64));
+            }
+    
+            let sum: number = 0.0;
+            for (let i: number = 0; i < this.customChipWave.length; i++) {
+                sum += this.customChipWave[i];
+            }
+            const average: number = sum / this.customChipWave.length;
+    
+            // Perform the integral on the wave. The chipSynth will perform the derivative to get the original wave back but with antialiasing.
+            let cumulative: number = 0;
+            let wavePrev: number = 0;
+            for (let i: number = 0; i < this.customChipWave.length; i++) {
+                cumulative += wavePrev;
+                wavePrev = this.customChipWave[i] - average;
+                this.customChipWaveIntegral[i] = cumulative;
+            }
+    
+            // 65th, last sample is for anti-aliasing
+            this.customChipWaveIntegral[64] = 0.0;
         }
 
         if (this.type == InstrumentType.noise) {
@@ -11740,11 +11649,11 @@ export class Synth {
         const currentCycle: number[] = instrumentState.wavetableCycle!;
         const currentCycleLength: number = currentCycle.length;
         const waveA: Float32Array = wavetableWaves[currentCycle[Math.floor(currentWave) % currentCycleLength]];
-        const waveB: Float32Array = oneShotBoolean ? wavetableWaves[currentCycle[(Math.min((currentWave) + 1, currentCycleLength - 1))]] : wavetableWaves[currentCycle[(Math.floor(currentWave) + 1) % currentCycleLength]];
+        const waveB: Float32Array = oneShotBoolean ? wavetableWaves[currentCycle[(Math.min(Math.floor((currentWave)) + 1, currentCycleLength - 1))]] : wavetableWaves[currentCycle[(Math.floor(currentWave) + 1) % currentCycleLength]];
         const volumeScale = instrumentState.volumeScale;
 
         // For all but aliasing custom chip, the first sample is duplicated at the end, so don't double-count it.
-        const waveLength: number = aliases ? (currentCycleLength < 1) ? 0 : waveA.length : (currentCycleLength < 1) ? 0 : waveA.length - 1;
+        const waveLength: number = aliases ? (currentCycleLength < 1) ? 1 : waveA.length : (currentCycleLength < 1) ? 1 : waveA.length - 1;
 
         const unisonSign: number = tone.specialIntervalExpressionMult * instrumentState.unison!.sign;
         if (instrumentState.unison!.voices == 1 && !instrumentState.chord!.customInterval) tone.phases[1] = tone.phases[0];
@@ -12087,6 +11996,49 @@ export class Synth {
             input1 = output1;
         }
         return sample;
+    }
+
+    public static wavetableWaveDefaults(instrument: Instrument): void {
+        instrument.wavetableIntegralWaves = [];
+        instrument.wavetableWaves = [];
+        for (const chipWaveIntegral of [ 
+            Config.chipWaves.dictionary["square"].samples,
+            Config.chipWaves.dictionary["1/4 pulse"].samples,
+            Config.chipWaves.dictionary["1/6 pulse"].samples,
+            Config.chipWaves.dictionary["1/8 pulse"].samples,
+            Config.chipWaves.dictionary["square"].samples,
+            Config.chipWaves.dictionary["1/4 pulse"].samples,
+            Config.chipWaves.dictionary["sawtooth"].samples,
+            Config.chipWaves.dictionary["double saw"].samples,
+            Config.chipWaves.dictionary["triangle"].samples,
+            Config.chipWaves.dictionary["rounded"].samples,
+            Config.chipWaves.dictionary["triangle"].samples,
+            Config.chipWaves.dictionary["sine"].samples,
+            Config.chipWaves.dictionary["triangle"].samples,
+            Config.chipWaves.dictionary["rounded"].samples,
+            Config.chipWaves.dictionary["glitch"].samples,
+            Config.chipWaves.dictionary["flute"].samples,
+            Config.chipWaves.dictionary["glitch"].samples,
+            Config.chipWaves.dictionary["pan flute"].samples,
+            Config.chipWaves.dictionary["electric guitar"].samples,
+            Config.chipWaves.dictionary["soft clarinet"].samples,
+            Config.chipWaves.dictionary["glitch"].samples,
+            Config.chipWaves.dictionary["double saw"].samples,
+            Config.chipWaves.dictionary["electric guitar"].samples,
+            Config.chipWaves.dictionary["sharp clarinet"].samples,
+            Config.chipWaves.dictionary["triangle"].samples,
+            Config.chipWaves.dictionary["rounded"].samples,
+            Config.chipWaves.dictionary["triangle"].samples,
+            Config.chipWaves.dictionary["sine"].samples,
+            Config.chipWaves.dictionary["triangle"].samples,
+            Config.chipWaves.dictionary["rounded"].samples,
+            Config.chipWaves.dictionary["glitch"].samples,
+            Config.chipWaves.dictionary["flute"].samples,
+        ]) {
+            const [raw, integral]: [Float32Array, Float32Array] = convertChipWaveToCustomChip(chipWaveIntegral);
+            instrument.wavetableIntegralWaves.push(integral);
+            instrument.wavetableWaves.push(raw);
+        }
     }
 }
 

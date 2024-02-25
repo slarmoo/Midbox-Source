@@ -180,6 +180,10 @@ export class Localization {
     public static wave25Label: string = "organ";
     public static wave26Label: string = "pan flute";
     public static wave27Label: string = "glitch";
+    public static wave28Label: string = "accurate sine";
+    public static wave29Label: string = "accurate triangle";
+    public static wave30Label: string = "secant";
+    public static wave31Label: string = "glitch 2";
     public static noise1Label: string = "retro";
     public static noise2Label: string = "white";
     public static noise3Label: string = "clang";
@@ -326,6 +330,7 @@ export class Localization {
     public static noveltyPresetsLabel: string = "Novelty Presets";
     public static languagePromptLabel: string = "Set Language (BETA)";
     public static englishDefaultLanguageLabel: string = "English (Default)";
+    public static previewLanguageTextLabel: string = "This is the preview text used for showing what the selected language looks like.";
     public static themePromptLabel: string = "Set Theme";
     public static theme1Label: string = "Beepbox Dark";
     public static theme2Label: string = "Beepbox Light";
@@ -659,6 +664,7 @@ export class Localization {
     public static midboxDrumPresets7Label: string = "generic kick";
     public static midboxDrumPresets8Label: string = "kick bass 1";
     public static midboxDrumPresets9Label: string = "kick bass 2";
+    public static midboxDrumPresets10Label: string = "kick bass 3";
     public static midboxPianoPresets1Label: string = "blessed piano";
     public static midboxPianoPresets2Label: string = "desolated piano";
     public static midboxPianoPresets3Label: string = "rough glistening piano";
@@ -1046,6 +1052,10 @@ if (language == "spanish") {
     Localization.wave25Label = "órgano";
     Localization.wave26Label = "flauta de pan";
     Localization.wave27Label = "desperfecto";
+    Localization.wave28Label = "senoidal preciso";
+    Localization.wave29Label = "triángulo preciso";
+    Localization.wave30Label = "secante";
+    Localization.wave31Label = "desperfecto 2";
     Localization.noise1Label = "retro";
     Localization.noise2Label = "blanco";
     Localization.noise3Label = "tañido";
@@ -1191,6 +1201,7 @@ if (language == "spanish") {
     Localization.noveltyPresetsLabel = "Presets de Variedad";
     Localization.languagePromptLabel = "Seleccionar Idioma (BETA)";
     Localization.englishDefaultLanguageLabel = "English / Inglés";
+    Localization.previewLanguageTextLabel = "Este es el texto de vista previa que se utiliza para mostrar el aspecto del idioma seleccionado.";
     Localization.themePromptLabel = "Seleccionar Tema";
     Localization.theme1Label = "Beepbox Oscuro";
     Localization.theme2Label = "Beepbox Luminoso";

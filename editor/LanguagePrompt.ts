@@ -3,7 +3,7 @@ import { Prompt } from "./Prompt";
 import { SongDocument } from "./SongDocument";
 import { Localization as _ } from "./Localization";
 
-const { button, div, h2, select, option } = HTML;
+const { button, div, h2, select, option, p } = HTML;
 
 export class LanguagePrompt implements Prompt {
 	private readonly _languageSelect: HTMLSelectElement = select({ style: "width: 100%;" },
@@ -18,6 +18,7 @@ export class LanguagePrompt implements Prompt {
 		div({ style: "display: flex; flex-direction: row; align-items: center; height: 2em; justify-content: flex-end;" },
 			div({ class: "selectContainer", style: "width: 100%;" }, this._languageSelect),
 		),
+		p(_.previewLanguageTextLabel),
 		div({ style: "display: flex; flex-direction: row-reverse; justify-content: space-between;" }, this._okayButton),
 		this._cancelButton,
 	);
@@ -28,6 +29,7 @@ export class LanguagePrompt implements Prompt {
 		this._okayButton.addEventListener("click", this._saveChanges);
 		this._cancelButton.addEventListener("click", this._close);
 		this.container.addEventListener("keydown", this._whenKeyPressed);
+		this._languageSelect.addEventListener("change", this._previewLanguage);
 	}
 
 	private _close = (): void => {
@@ -55,5 +57,9 @@ export class LanguagePrompt implements Prompt {
 		this._doc.prompt = null;
 		this._doc.undo();
 		setTimeout(() => { location.reload() }, 50);
+	}
+
+	private _previewLanguage = (): void => {
+		window.localStorage.setItem("language", this._languageSelect.value);
 	}
 }
