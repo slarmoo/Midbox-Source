@@ -12,13 +12,14 @@ export class LanguagePrompt implements Prompt {
 	);
 	private readonly _cancelButton: HTMLButtonElement = button({ class: "cancelButton" });
 	private readonly _okayButton: HTMLButtonElement = button({ class: "okayButton", style: "width:100%;" }, (_.confirmLabel));
+	private _previewLanguageText: HTMLParagraphElement = p("This is the preview text used for showing what the selected language looks like.");
 
 	public readonly container: HTMLDivElement = div({ class: "prompt noSelection", style: "width: 220px;" },
 		h2((_.languagePromptLabel)),
 		div({ style: "display: flex; flex-direction: row; align-items: center; height: 2em; justify-content: flex-end;" },
 			div({ class: "selectContainer", style: "width: 100%;" }, this._languageSelect),
 		),
-		p(_.previewLanguageTextLabel),
+		this._previewLanguageText,
 		div({ style: "display: flex; flex-direction: row-reverse; justify-content: space-between;" }, this._okayButton),
 		this._cancelButton,
 	);
@@ -60,6 +61,12 @@ export class LanguagePrompt implements Prompt {
 	}
 
 	private _previewLanguage = (): void => {
-		window.localStorage.setItem("language", this._languageSelect.value);
+		if (this._languageSelect.value == "english") {
+			this._previewLanguageText.textContent = "This is the preview text used for showing what the selected language looks like.";
+		} else if (this._languageSelect.value == "spanish") {
+			this._previewLanguageText.textContent = "Este es el texto de vista previa que se utiliza para mostrar el aspecto del idioma seleccionado.";
+		} else {
+			/*Nothing, although perhaps there may be a case where none are selected. I doubt it though.*/
+		};
 	}
 }

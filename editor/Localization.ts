@@ -330,7 +330,6 @@ export class Localization {
     public static noveltyPresetsLabel: string = "Novelty Presets";
     public static languagePromptLabel: string = "Set Language (BETA)";
     public static englishDefaultLanguageLabel: string = "English (Default)";
-    public static previewLanguageTextLabel: string = "This is the preview text used for showing what the selected language looks like.";
     public static themePromptLabel: string = "Set Theme";
     public static theme1Label: string = "Beepbox Dark";
     public static theme2Label: string = "Beepbox Light";
@@ -1201,7 +1200,6 @@ if (language == "spanish") {
     Localization.noveltyPresetsLabel = "Presets de Variedad";
     Localization.languagePromptLabel = "Seleccionar Idioma (BETA)";
     Localization.englishDefaultLanguageLabel = "English / Inglés";
-    Localization.previewLanguageTextLabel = "Este es el texto de vista previa que se utiliza para mostrar el aspecto del idioma seleccionado.";
     Localization.themePromptLabel = "Seleccionar Tema";
     Localization.theme1Label = "Beepbox Oscuro";
     Localization.theme2Label = "Beepbox Luminoso";

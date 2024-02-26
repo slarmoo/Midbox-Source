@@ -1884,37 +1884,39 @@ export class ChangeRandomGeneratedInstrument extends Change {
                             { item: "metal", weight: 3},
                         ])].index;
                         if (instrument.operators[i].waveform == 3/*"pulse width"*/) {
-                            instrument.operators[i].pulseWidth = selectWeightedRandom([
-                                { item: 0, weight: 3 },
-                                { item: 1, weight: 3 },
-                                { item: 2, weight: 3 },
-                                { item: 3, weight: 3 },
-                                { item: 4, weight: 3 },
-                                { item: 5, weight: 3 },
-                                { item: 6, weight: 3 },
-                                { item: 7, weight: 3 },
-                                { item: 8, weight: 3 },
-                                { item: 9, weight: 3 },
-                                { item: 10, weight: 3 },
-                                { item: 11, weight: 3 },
-                                { item: 12, weight: 3 },
-                                { item: 13, weight: 3 },
-                                { item: 14, weight: 15 }, // 50%
-                                { item: 15, weight: 3 },
-                                { item: 16, weight: 3 },
-                                { item: 17, weight: 3 },
-                                { item: 18, weight: 3 },
-                                { item: 19, weight: 3 },
-                                { item: 20, weight: 3 },
-                                { item: 21, weight: 3 },
-                                { item: 22, weight: 3 },
-                                { item: 23, weight: 3 },
-                                { item: 24, weight: 3 },
-                                { item: 25, weight: 3 },
-                                { item: 26, weight: 3 },
-                                { item: 27, weight: 3 },
-                                { item: 28, weight: 3 },
+                            const [pulseWidth, pulseWidthDecimalOffset] = selectWeightedRandom([
+                                { item: [1, 0], weight: 3 },
+                                { item: [3, 50], weight: 3 },
+                                { item: [5, 0], weight: 3 },
+                                { item: [7, 75], weight: 3 },
+                                { item: [10, 0], weight: 3 },
+                                { item: [13, 50], weight: 3 },
+                                { item: [15, 0], weight: 3 },
+                                { item: [18, 50], weight: 3 },
+                                { item: [20, 0], weight: 3 },
+                                { item: [25, 0], weight: 3 },
+                                { item: [30, 0], weight: 3 },
+                                { item: [34, 66], weight: 3 },
+                                { item: [40, 0], weight: 3 },
+                                { item: [45, 0], weight: 3 },
+                                { item: [50, 0], weight: 25 }, // 50%
+                                { item: [55, 0], weight: 3 },
+                                { item: [60, 0], weight: 3 },
+                                { item: [67, 33], weight: 3 },
+                                { item: [70, 0], weight: 3 },
+                                { item: [75, 0], weight: 3 },
+                                { item: [80, 0], weight: 3 },
+                                { item: [83, 50], weight: 3 },
+                                { item: [85, 0], weight: 3 },
+                                { item: [88, 50], weight: 3 },
+                                { item: [90, 0], weight: 3 },
+                                { item: [94, 25], weight: 3 },
+                                { item: [95, 0], weight: 3 },
+                                { item: [98, 50], weight: 3 },
+                                { item: [99, 0], weight: 3 },
                             ]);
+                            instrument.operators[i].pulseWidth = pulseWidth;
+							instrument.operators[i].pulseWidthDecimalOffset = pulseWidthDecimalOffset;
                         }
                     }
                     for (let i: number = algorithm.carrierCount; i < Config.operatorCount; i++) {
@@ -2032,37 +2034,39 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "metal", weight: 3 },
                             ])].index;
                             if (instrument.operators[i].waveform == 3) {
-                                instrument.operators[i].pulseWidth = selectWeightedRandom([
-                                    { item: 0, weight: 3 },
-                                    { item: 1, weight: 3 },
-                                    { item: 2, weight: 3 },
-                                    { item: 3, weight: 3 },
-                                    { item: 4, weight: 3 },
-                                    { item: 5, weight: 3 },
-                                    { item: 6, weight: 3 },
-                                    { item: 7, weight: 3 },
-                                    { item: 8, weight: 3 },
-                                    { item: 9, weight: 3 },
-                                    { item: 10, weight: 3 },
-                                    { item: 11, weight: 3 },
-                                    { item: 12, weight: 3 },
-                                    { item: 13, weight: 3 },
-                                    { item: 14, weight: 15 }, // 50%
-                                    { item: 15, weight: 3 },
-                                    { item: 16, weight: 3 },
-                                    { item: 17, weight: 3 },
-                                    { item: 18, weight: 3 },
-                                    { item: 19, weight: 3 },
-                                    { item: 20, weight: 3 },
-                                    { item: 21, weight: 3 },
-                                    { item: 22, weight: 3 },
-                                    { item: 23, weight: 3 },
-                                    { item: 24, weight: 3 },
-                                    { item: 25, weight: 3 },
-                                    { item: 26, weight: 3 },
-                                    { item: 27, weight: 3 },
-                                    { item: 28, weight: 3 },
+                                const [pulseWidth, pulseWidthDecimalOffset] = selectWeightedRandom([
+                                    { item: [1, 0], weight: 3 },
+                                    { item: [3, 50], weight: 3 },
+                                    { item: [5, 0], weight: 3 },
+                                    { item: [7, 75], weight: 3 },
+                                    { item: [10, 0], weight: 3 },
+                                    { item: [13, 50], weight: 3 },
+                                    { item: [15, 0], weight: 3 },
+                                    { item: [18, 50], weight: 3 },
+                                    { item: [20, 0], weight: 3 },
+                                    { item: [25, 0], weight: 3 },
+                                    { item: [30, 0], weight: 3 },
+                                    { item: [34, 66], weight: 3 },
+                                    { item: [40, 0], weight: 3 },
+                                    { item: [45, 0], weight: 3 },
+                                    { item: [50, 0], weight: 25 }, // 50%
+                                    { item: [55, 0], weight: 3 },
+                                    { item: [60, 0], weight: 3 },
+                                    { item: [67, 33], weight: 3 },
+                                    { item: [70, 0], weight: 3 },
+                                    { item: [75, 0], weight: 3 },
+                                    { item: [80, 0], weight: 3 },
+                                    { item: [83, 50], weight: 3 },
+                                    { item: [85, 0], weight: 3 },
+                                    { item: [88, 50], weight: 3 },
+                                    { item: [90, 0], weight: 3 },
+                                    { item: [94, 25], weight: 3 },
+                                    { item: [95, 0], weight: 3 },
+                                    { item: [98, 50], weight: 3 },
+                                    { item: [99, 0], weight: 3 },
                                 ]);
+                                instrument.operators[i].pulseWidth = pulseWidth;
+							    instrument.operators[i].pulseWidthDecimalOffset = pulseWidthDecimalOffset;
                             }
                         }
                         if (instrument.envelopeCount < Config.maxEnvelopeCount && Math.random() < 0.05) {
@@ -3570,11 +3574,15 @@ export class ChangeOperatorWaveform extends Change {
 }
 
 export class ChangeOperatorPulseWidth extends Change {
+    public operatorIndex: number = 0;
     constructor(doc: SongDocument, operatorIndex: number, oldValue: number, newValue: number) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        this.operatorIndex = operatorIndex;
         instrument.operators[operatorIndex].pulseWidth = newValue;
+        instrument.operators[operatorIndex].pulseWidthDecimalOffset = 0;
         instrument.preset = instrument.type;
+        doc.synth.unsetMod(Config.modulators.dictionary["fm pwm 1"].index + operatorIndex, doc.channel, doc.getCurrentInstrument());
         doc.notifier.changed();
         if (oldValue != newValue) {
             this._didSomething();
