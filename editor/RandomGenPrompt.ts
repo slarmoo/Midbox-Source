@@ -13,6 +13,7 @@ export class RandomGenPrompt implements Prompt {
     private readonly _pickedStringBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _spectrumBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _FMBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _ADVFMBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _customChipBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _noiseBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _wavetableBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
@@ -140,6 +141,10 @@ public readonly container: HTMLDivElement = div({class: "prompt noSelection", st
     label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
 			"FM:",
 			this._FMBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+            "ADVFM:",
+            this._ADVFMBox,
         ),
     label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
 			"Custom Chip:",
@@ -464,6 +469,7 @@ constructor(private _doc: SongDocument) {
     this._pickedStringBox.checked = this._doc.prefs.pickedStringOnRandomization;
     this._spectrumBox.checked = this._doc.prefs.spectrumOnRandomization;
     this._FMBox.checked = this._doc.prefs.FMOnRandomization;
+    this._ADVFMBox.checked = this._doc.prefs.ADVFMOnRandomization;
     this._customChipBox.checked = this._doc.prefs.customChipOnRandomization;
     this._noiseBox.checked = this._doc.prefs.noiseOnRandomization;
     this._wavetableBox.checked = this._doc.prefs.wavetableOnRandomization;
@@ -561,6 +567,7 @@ private _confirm = (): void => {
     this._doc.prefs.pickedStringOnRandomization = this._pickedStringBox.checked;
     this._doc.prefs.spectrumOnRandomization = this._spectrumBox.checked;
     this._doc.prefs.FMOnRandomization = this._FMBox.checked;
+    this._doc.prefs.ADVFMOnRandomization = this._ADVFMBox.checked;
     this._doc.prefs.customChipOnRandomization = this._customChipBox.checked;
     this._doc.prefs.noiseOnRandomization = this._noiseBox.checked;
     this._doc.prefs.wavetableOnRandomization = this._wavetableBox.checked;

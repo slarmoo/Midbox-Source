@@ -43,6 +43,7 @@ export class Preferences {
 		public pickedStringOnRandomization: boolean;
 		public spectrumOnRandomization: boolean;
 		public FMOnRandomization: boolean;
+		public ADVFMOnRandomization: boolean;
 		public customChipOnRandomization: boolean;
 		public noiseOnRandomization: boolean;
 		public wavetableOnRandomization: boolean;
@@ -102,6 +103,7 @@ export class Preferences {
 		this.pickedStringOnRandomization = window.localStorage.getItem("pickedStringOnRandomization") != "false";
 		this.spectrumOnRandomization = window.localStorage.getItem("spectrumOnRandomization") != "false";
 		this.FMOnRandomization = window.localStorage.getItem("FMOnRandomization") != "false";
+		this.ADVFMOnRandomization = window.localStorage.getItem("ADVFMOnRandomization") != "false";
 		this.customChipOnRandomization = window.localStorage.getItem("customChipOnRandomization") != "false";
 		this.noiseOnRandomization = window.localStorage.getItem("noiseOnRandomization") != "false";
 		this.wavetableOnRandomization = window.localStorage.getItem("wavetableOnRandomization") != "false";
@@ -178,6 +180,7 @@ export class Preferences {
 		window.localStorage.setItem("pickedStringOnRandomization", this.pickedStringOnRandomization ? "true" : "false");
 		window.localStorage.setItem("spectrumOnRandomization", this.spectrumOnRandomization ? "true" : "false");
 		window.localStorage.setItem("FMOnRandomization", this.FMOnRandomization ? "true" : "false");
+		window.localStorage.setItem("ADVFMOnRandomization", this.ADVFMOnRandomization ? "true" : "false");
 		window.localStorage.setItem("customChipOnRandomization", this.customChipOnRandomization ? "true" : "false");
 		window.localStorage.setItem("noiseOnRandomization", this.noiseOnRandomization ? "true" : "false");
 		window.localStorage.setItem("wavetableOnRandomization", this.wavetableOnRandomization ? "true" : "false");

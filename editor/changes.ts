@@ -45,8 +45,8 @@ export function unionOfUsedNotes(pattern: Pattern, flags: boolean[]): void {
     }
 }
 
-export function generateScaleMap(oldScaleFlags: ReadonlyArray<boolean>, newScaleValue: number): number[] {
-    const newScaleFlags: ReadonlyArray<boolean> = Config.scales[newScaleValue].flags;
+export function generateScaleMap(oldScaleFlags: ReadonlyArray<boolean>, newScaleValue: number, customScaleFlags: ReadonlyArray<boolean>): number[] {
+    const newScaleFlags: ReadonlyArray<boolean> = newScaleValue == Config.scales["dictionary"]["Custom Scale"].index ? customScaleFlags : Config.scales[newScaleValue].flags;;
     const oldScale: number[] = [];
     const newScale: number[] = [];
     for (let i: number = 0; i < 12; i++) {
@@ -498,6 +498,67 @@ export class ChangeCycleWaves extends Change {
             instrument.preset = instrument.type;
             doc.notifier.changed();
             this._didSomething();
+        }
+    }
+}
+
+export class ChangeCustomAlgorithmOrFeedback extends Change {
+    constructor(doc: SongDocument, newArray: number[][], carry: number, mode: string) {
+        super();
+        if (mode == "algorithm") {
+            const oldArray: number[][] = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()].customAlgorithm.modulatedBy;
+            const oldCarriercount: number = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()].customAlgorithm.carrierCount;
+            var comparisonResult: boolean = true;
+            if (carry != oldCarriercount) {
+                comparisonResult = false;
+            } else {
+                for (let i: number = 0; i < oldArray.length; i++) {
+                    if (oldArray[i].length != newArray[i].length) {
+                        comparisonResult = false;
+                        break;
+                    } else {
+                        for (let j: number = 0; j < oldArray[i].length; j++) {
+                            if (oldArray[i][j] != newArray[i][j]) {
+                                comparisonResult = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            if (comparisonResult == false) {
+                let instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+
+                instrument.customAlgorithm.set(carry, newArray);
+
+                instrument.algorithm6Op = 0;
+                doc.notifier.changed();
+                this._didSomething();
+            }
+        } else if (mode == "feedback") {
+            const oldArray: number[][] = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()].customFeedbackType.indices;
+            var comparisonResult: boolean = true;
+			for (let i: number = 0; i < oldArray.length; i++) {
+				if (oldArray[i].length != newArray[i].length) {
+					comparisonResult = false;
+					break;
+				} else {
+					for (let j: number = 0; j < oldArray[i].length; j++) {
+						if (oldArray[i][j] != newArray[i][j]) {
+							comparisonResult = false;
+							break;
+						}
+					}
+				}
+			}
+            if (!comparisonResult) {
+                let instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+
+                instrument.customFeedbackType.set(newArray);
+                instrument.feedbackType6Op = 0;
+                doc.notifier.changed();
+                this._didSomething();
+            }
         }
     }
 }
@@ -961,6 +1022,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
             if (doc.prefs.customChipOnRandomization) { possibleTypes.push({ item: InstrumentType.customChipWave, weight: 3 }); }
             if (doc.prefs.noiseOnRandomization) { possibleTypes.push({ item: InstrumentType.noise, weight: 3 }); }
             if (doc.prefs.wavetableOnRandomization) { possibleTypes.push({ item: InstrumentType.wavetable, weight: 3 }); }
+            if (doc.prefs.ADVFMOnRandomization) { possibleTypes.push({ item: InstrumentType.advfm, weight: 3 }); }
 
             let type: InstrumentType = instrument.type;
             if (possibleTypes.length > 0) {
@@ -1866,10 +1928,18 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     }
                     instrument.spectrumWave.markCustomWaveDirty();
                 } break;
+                case InstrumentType.advfm:
                 case InstrumentType.fm: {
-                    instrument.algorithm = (Math.random() * Config.algorithms.length) | 0;
-                    instrument.feedbackType = (Math.random() * Config.feedbacks.length) | 0;
-                    const algorithm: Algorithm = Config.algorithms[instrument.algorithm];
+                    if (type == InstrumentType.fm) {
+                        instrument.algorithm = (Math.random() * Config.algorithms.length) | 0;
+                        instrument.feedbackType = (Math.random() * Config.feedbacks.length) | 0;
+                    } else {
+                        instrument.algorithm6Op = (Math.random() * (Config.algorithms6Op.length-1)+1) | 0;
+                        instrument.customAlgorithm.fromPreset(instrument.algorithm6Op);
+                        instrument.feedbackType6Op = (Math.random() * (Config.feedbacks6Op.length-1)+1) | 0;
+                        instrument.customFeedbackType.fromPreset(instrument.feedbackType6Op);
+                    }
+                    const algorithm: Algorithm = type == InstrumentType.fm ? Config.algorithms[instrument.algorithm] : Config.algorithms6Op[instrument.algorithm6Op];
                     for (let i: number = 0; i < algorithm.carrierCount; i++) {
                         instrument.operators[i].frequency = selectCurvedDistribution(0, Config.operatorFrequencies.length - 1, 0, 3);
                         instrument.operators[i].amplitude = selectCurvedDistribution(0, Config.operatorAmplitudeMax, Config.operatorAmplitudeMax - 1, 2);
@@ -1919,7 +1989,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
 							instrument.operators[i].pulseWidthDecimalOffset = pulseWidthDecimalOffset;
                         }
                     }
-                    for (let i: number = algorithm.carrierCount; i < Config.operatorCount; i++) {
+                    for (let i: number = algorithm.carrierCount; i < Config.operatorCount + (type == InstrumentType.advfm ? 2 : 0); i++) {
                         instrument.operators[i].frequency = selectCurvedDistribution(3, Config.operatorFrequencies.length - 1, 0, 3);
                         instrument.operators[i].amplitude = (Math.pow(Math.random(), 2) * Config.operatorAmplitudeMax) | 0;
                         if (instrument.envelopeCount < Config.maxEnvelopeCount && Math.random() < 0.4) {
@@ -3557,7 +3627,39 @@ export class ChangeFeedbackType extends Change {
     }
 }
 
+export class Change6OpAlgorithm extends Change {
+    constructor(doc: SongDocument, newValue: number) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        const oldValue: number = instrument.algorithm6Op;
+        if (oldValue != newValue) {
+            instrument.algorithm6Op = newValue;
+            if (newValue != 0) {
+                instrument.customAlgorithm.fromPreset(newValue);
+            }
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
 
+export class Change6OpFeedbackType extends Change {
+    constructor(doc: SongDocument, newValue: number) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        const oldValue: number = instrument.feedbackType6Op;
+        if (oldValue != newValue) {
+            instrument.feedbackType6Op = newValue;
+            if (newValue != 0) {
+                instrument.customFeedbackType.fromPreset(newValue);
+            }
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
 
 export class ChangeOperatorWaveform extends Change {
     constructor(doc: SongDocument, operatorIndex: number, newValue: number) {
@@ -4469,6 +4571,19 @@ export class ChangeScale extends ChangeGroup {
     }
 }
 
+export class ChangeCustomScale extends Change {
+    constructor(doc: SongDocument, flags: boolean[]) {
+        super();
+
+        for (let i: number = 0; i < Config.pitchesPerOctave; i++) {
+            doc.song.scaleCustom[i] = flags[i];
+        }
+
+        doc.notifier.changed();
+        this._didSomething();
+    }
+}
+
 export class ChangeDetectKey extends ChangeGroup {
     constructor(doc: SongDocument) {
         super();
@@ -4997,16 +5112,17 @@ class ChangeTransposeNote extends UndoableChange {
                     pitch = Math.max(0, pitch - 12);
                 }
             } else {
+                let scale = doc.song.scale == Config.scales.dictionary["Custom Scale"].index ? doc.song.scaleCustom : Config.scales[doc.song.scale].flags;
                 if (upward) {
                     for (let j: number = pitch + 1; j <= maxPitch; j++) {
-                        if (isNoise || ignoreScale || Config.scales[doc.song.scale].flags[j % 12]) {
+                        if (isNoise || ignoreScale || scale[j % 12]) {
                             pitch = j;
                             break;
                         }
                     }
                 } else {
                     for (let j: number = pitch - 1; j >= 0; j--) {
-                        if (isNoise || ignoreScale || Config.scales[doc.song.scale].flags[j % 12]) {
+                        if (isNoise || ignoreScale || scale[j % 12]) {
                             pitch = j;
                             break;
                         }
@@ -5045,16 +5161,17 @@ class ChangeTransposeNote extends UndoableChange {
                     interval = Math.max(min, interval - 12);
                 }
             } else {
+                let scale = doc.song.scale == Config.scales.dictionary["Custom Scale"].index ? doc.song.scaleCustom : Config.scales[doc.song.scale].flags;
                 if (upward) {
                     for (let i: number = interval + 1; i <= max; i++) {
-                        if (isNoise || ignoreScale || Config.scales[doc.song.scale].flags[i % 12]) {
+                        if (isNoise || ignoreScale || scale[i % 12]) {
                             interval = i;
                             break;
                         }
                     }
                 } else {
                     for (let i: number = interval - 1; i >= min; i--) {
-                        if (isNoise || ignoreScale || Config.scales[doc.song.scale].flags[i % 12]) {
+                        if (isNoise || ignoreScale || scale[i % 12]) {
                             interval = i;
                             break;
                         }

@@ -27,6 +27,7 @@ import { EnvelopeEditor } from "./EnvelopeEditor";
 import { FadeInOutEditor } from "./FadeInOutEditor";
 import { FilterEditor } from "./FilterEditor";
 import { LimiterPrompt } from "./LimiterPrompt";
+import { CustomScalePrompt } from "./CustomScalePrompt";
 import { RandomGenPrompt } from "./RandomGenPrompt";
 import { LoopEditor } from "./LoopEditor";
 import { MoveNotesSidewaysPrompt } from "./MoveNotesSidewaysPrompt";
@@ -47,7 +48,7 @@ import { ThemePrompt } from "./ThemePrompt";
 import { TipPrompt } from "./TipPrompt";
 import { LanguagePrompt } from "./LanguagePrompt";
 import { Localization as _ } from "./Localization";
-import { ChangeTempo, ChangeKeyOctave, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangeSupersawDynamism, ChangeSupersawSpread, ChangeSupersawShape, ChangeWavetableSpeed, ChangeWaveInterpolation, ChangeCyclePerNote, ChangeOneShotCycle, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, pickRandomPresetValue, ChangeRandomGeneratedInstrument, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, ChangeChipWave, ChangeNoiseWave, ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeTest, ChangeAddEnvelope, ChangeEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeWavetableCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeBounceArp, ChangeClicklessTransition, ChangeContinueThruPattern, ChangeAliasing, ChangePercussion, ChangeSDAffected, ChangeSOAffected, ChangeStrumSpeed, ChangeSlideSpeed, ChangeSongSubtitle, ChangeSetPatternInstruments, ChangeHoldingModRecording } from "./changes";
+import { ChangeTempo, ChangeKeyOctave, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangeSupersawDynamism, ChangeSupersawSpread, ChangeSupersawShape, ChangeWavetableSpeed, ChangeWaveInterpolation, ChangeCyclePerNote, ChangeOneShotCycle, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeCustomAlgorithmOrFeedback, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, pickRandomPresetValue, ChangeRandomGeneratedInstrument, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, Change6OpFeedbackType, Change6OpAlgorithm, ChangeChipWave, ChangeNoiseWave, ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeTest, ChangeAddEnvelope, ChangeEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeWavetableCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeBounceArp, ChangeClicklessTransition, ChangeContinueThruPattern, ChangeAliasing, ChangePercussion, ChangeSDAffected, ChangeSOAffected, ChangeStrumSpeed, ChangeSlideSpeed, ChangeSongSubtitle, ChangeSetPatternInstruments, ChangeHoldingModRecording } from "./changes";
 import { oscilloscopeCanvas } from "../global/Oscilloscope"
 import { TrackEditor } from "./TrackEditor";
 
@@ -90,6 +91,7 @@ function buildPresetOptions(isNoise: boolean, idSet: string): HTMLSelectElement 
         menu.appendChild(option({ value: InstrumentType.pickedString }, EditorConfig.valueToPreset(InstrumentType.pickedString)!.name));
         menu.appendChild(option({ value: InstrumentType.spectrum }, EditorConfig.valueToPreset(InstrumentType.spectrum)!.name));
         menu.appendChild(option({ value: InstrumentType.fm }, EditorConfig.valueToPreset(InstrumentType.fm)!.name));
+        menu.appendChild(option({ value: InstrumentType.advfm }, EditorConfig.valueToPreset(InstrumentType.advfm)!.name));
         menu.appendChild(option({ value: InstrumentType.customChipWave }, EditorConfig.valueToPreset(InstrumentType.customChipWave)!.name));
         menu.appendChild(option({ value: InstrumentType.noise }, EditorConfig.valueToPreset(InstrumentType.noise)!.name));
         menu.appendChild(option({ value: InstrumentType.wavetable }, EditorConfig.valueToPreset(InstrumentType.wavetable)!.name))
@@ -520,6 +522,360 @@ class WavetableCustomChipCanvas {
 
 }
 
+class CustomAlgorithmCanvas {
+    private mouseDown: boolean;
+    //private continuousEdit: boolean;
+    //private lastX: number;
+    //private lastY: number;
+    public newMods: number[][];
+    public lookUpArray: number[][];
+    public selected: number;
+    public inverseModulation: number[][];
+    public feedback: number[][];
+    public inverseFeedback: number[][];
+    public carriers: number;
+    public drawArray: number[][];
+    public mode: string;
+
+    private _change: Change | null = null;
+
+    constructor(public readonly canvas: HTMLCanvasElement, private readonly _doc: SongDocument, private readonly _getChange: (newArray: number[][], carry: number, mode: string) => Change) {
+        //canvas.addEventListener("input", this._whenInput);
+        //canvas.addEventListener("change", this._whenChange);
+        canvas.addEventListener("mousemove", this._onMouseMove);
+        canvas.addEventListener("mousedown", this._onMouseDown);
+        canvas.addEventListener("mouseup", this._onMouseUp);
+        canvas.addEventListener("mouseleave", this._onMouseUp);
+
+        this.mouseDown = false;
+        //this.continuousEdit = false;
+        //this.lastX = 0;
+        //this.lastY = 0;
+        this.drawArray = [[], [], [], [], [], []];
+        this.lookUpArray = [[], [], [], [], [], []];
+        this.carriers = 1;
+        this.selected = -1;
+        this.newMods = [[], [], [], [], [], []];
+        this.inverseModulation = [[], [], [], [], [], []];
+        this.feedback = [[], [], [], [], [], []];
+        this.inverseFeedback = [[], [], [], [], [], []];
+        this.mode = "algorithm";
+
+        this.redrawCanvas();
+
+    }
+
+    public reset(): void {
+        this.redrawCanvas(false);
+        this.selected = -1;
+    }
+
+    public fillDrawArray(noReset: boolean = false): void {
+        if (noReset) {
+            this.drawArray = [];
+            this.drawArray = [[], [], [], [], [], []];
+            this.inverseModulation = [[], [], [], [], [], []];
+            this.lookUpArray = [[], [], [], [], [], []];
+            for (let i: number = 0; i < this.newMods.length; i++) {
+                for (let o: number = 0; o < this.newMods[i].length; o++) {
+                    this.inverseModulation[this.newMods[i][o] - 1].push(i + 1);
+                }
+            }
+            if (this.mode == "feedback") {
+                this.inverseFeedback = [[], [], [], [], [], []];
+                for (let i: number = 0; i < this.feedback.length; i++) {
+                    for (let o: number = 0; o < this.feedback[i].length; o++) {
+                        this.inverseFeedback[this.feedback[i][o] - 1].push(i + 1);
+                    }
+                }
+            }
+        } else {
+            this.drawArray = [];
+            this.drawArray = [[], [], [], [], [], []];
+            this.carriers = 1;
+            this.newMods = [[], [], [], [], [], []];
+            this.inverseModulation = [[], [], [], [], [], []];
+            this.lookUpArray = [[], [], [], [], [], []];
+
+            var oldMods = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].customAlgorithm;
+            this.carriers = oldMods.carrierCount;
+            for (let i: number = 0; i < oldMods.modulatedBy.length; i++) {
+                for (let o: number = 0; o < oldMods.modulatedBy[i].length; o++) {
+                    this.inverseModulation[oldMods.modulatedBy[i][o] - 1].push(i + 1);
+                    this.newMods[i][o] = oldMods.modulatedBy[i][o];
+                }
+            }
+            if (this.mode == "feedback") {
+                this.feedback = [[], [], [], [], [], []];
+                this.inverseFeedback = [[], [], [], [], [], []];
+
+                var oldfeed = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].customFeedbackType.indices;
+                for (let i: number = 0; i < oldfeed.length; i++) {
+                    for (let o: number = 0; o < oldfeed[i].length; o++) {
+                        this.inverseFeedback[oldfeed[i][o] - 1].push(i + 1);
+                        this.feedback[i][o] = oldfeed[i][o];
+                    }
+                }
+            }
+        }
+        for (let i: number = 0; i < this.inverseModulation.length; i++) {
+            if (i < this.carriers) {
+                this.drawArray[this.drawArray.length - 1][i] = i + 1;
+                this.lookUpArray[i] = [0, i];
+            } else {
+                if (this.inverseModulation[i][0] != undefined) {
+                    let testPos = [this.drawArray.length - (this.lookUpArray[this.inverseModulation[i][this.inverseModulation[i].length - 1] - 1][0] + 2), this.lookUpArray[this.inverseModulation[i][this.inverseModulation[i].length - 1] - 1][1]];
+                    if (this.drawArray[testPos[0]][testPos[1]] != undefined) {
+                        while (this.drawArray[testPos[0]][testPos[1]] != undefined && testPos[1] < 6) {
+                            testPos[1]++;
+                            if (this.drawArray[testPos[0]][testPos[1]] == undefined) {
+                                this.drawArray[testPos[0]][testPos[1]] = i + 1;
+                                this.lookUpArray[i] = [this.drawArray.length - (testPos[0] + 1), testPos[1]];
+                                break;
+                            }
+                            console.log(testPos[1])
+                        }
+                    } else {
+                        this.drawArray[testPos[0] ][testPos[1]] = i + 1;
+                        this.lookUpArray[i] = [this.drawArray.length - (testPos[0] + 1), testPos[1]];
+                    }
+                } else {
+                    let testPos = [5, 0];
+                    while (this.drawArray[testPos[0]][testPos[1]] != undefined && testPos[1] < 6) {
+                        testPos[1]++;
+                        if (this.drawArray[testPos[0]][testPos[1]] == undefined) {
+                            this.drawArray[testPos[0]][testPos[1]] = i + 1;
+                            this.lookUpArray[i] = [this.drawArray.length - (testPos[0] + 1), testPos[1]];
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    private drawLines(ctx:CanvasRenderingContext2D):void {
+        if (this.mode == "feedback") {
+            for (let off: number = 0; off < 6; off++) {
+                ctx.strokeStyle = ColorConfig.getChannelColor(this._doc.song, this._doc.channel).primaryChannel;
+                const set = off * 2  + 0.5;
+                for (let i: number = 0; i < this.inverseFeedback[off].length; i++) {
+                    let tar: number = this.inverseFeedback[off][i] - 1;
+					let srtpos:number[] = this.lookUpArray[off];
+					let tarpos:number[] = this.lookUpArray[tar];
+                    ctx.beginPath();
+                    ctx.moveTo(srtpos[1] * 24 + 12 + set, (6 - srtpos[0] - 1) * 24 + 12);
+                    ctx.lineTo(srtpos[1] * 24 + 12 + set, (6 - srtpos[0] - 1) * 24 + 12 + set);
+                    if (tarpos[1] != srtpos[1]) {
+						let side:number =0;
+						if(tarpos[0] >= srtpos[0]){
+							side = 24;
+						}
+                        ctx.lineTo(srtpos[1] * 24 + side + set, (6 - srtpos[0] - 1) * 24 + 12 + set);
+                        if ((tarpos[1] == (srtpos[1] - 1)) && (tarpos[0] <= (srtpos[0] - 1))) {
+                        } else {
+							if(tarpos[0] >= srtpos[0]){
+								ctx.lineTo((tarpos[1] + 1) * 24 + set, (6 - srtpos[0] - 1) * 24 + 12 + set);
+								ctx.lineTo((tarpos[1] + 1) * 24 + set, (6 - tarpos[0] - 1) * 24 + 12 + set);
+							}else{
+								ctx.lineTo(srtpos[1] * 24 + set, (6 - tarpos[0] - 1) * 24 + 12 + set);
+								ctx.lineTo((tarpos[1] + 1) * 24 + set, (6 - tarpos[0] - 1) * 24 + 12 + set);
+							}
+                        }
+                        ctx.lineTo((tarpos[1] + 1) * 24 + set, (6 - tarpos[0] - 1) * 24 + set - 12);
+                        ctx.lineTo((tarpos[1]) * 24 + 12 + set, (6 - tarpos[0] - 1) * 24 + set - 12);
+                        ctx.lineTo((tarpos[1]) * 24 + 12 + set, (6 - tarpos[0] - 1) * 24);
+                    } else {
+                        if (srtpos[0] - tarpos[0] == 1) {
+                            ctx.lineTo((tarpos[1]) * 24 + 12 + set, (6 - tarpos[0] - 1) * 24);
+                        } else {
+							if(tarpos[0] >= srtpos[0]){
+								ctx.lineTo(srtpos[1] * 24 + 24 + set, (6 - srtpos[0] - 1) * 24 + 12 + set);
+								ctx.lineTo(srtpos[1] * 24 + 24 + set, (6 - tarpos[0] - 1) * 24 + set - 12);
+								ctx.lineTo(tarpos[1] * 24 + set + 12, (6 - tarpos[0] - 1) * 24 + set - 12);
+								ctx.lineTo(tarpos[1] * 24 + set + 12, (6 - tarpos[0] - 1) * 24);
+							}else{
+								ctx.lineTo(srtpos[1] * 24 + set, (6 - srtpos[0] - 1) * 24 + 12 + set);
+								ctx.lineTo(srtpos[1] * 24 + set, (6 - tarpos[0] - 1) * 24 + set - 12);
+								ctx.lineTo(tarpos[1] * 24 + 12 + set, (6 - tarpos[0] - 1) * 24 + set - 12);
+								ctx.lineTo(tarpos[1] * 24 + 12 + set, (6 - tarpos[0] - 1) * 24);
+							}
+                        }
+                    }
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                }
+            }
+            return;
+        };
+
+        for (let off: number = 0; off < 6; off++) {
+            ctx.strokeStyle = ColorConfig.getChannelColor(this._doc.song, this._doc.channel).primaryChannel;
+            const set = off * 2 - 1 + 0.5;
+            for (let i: number = 0; i < this.inverseModulation[off].length; i++) {
+                let tar: number = this.inverseModulation[off][i] - 1;
+				let srtpos:number[] = this.lookUpArray[off];
+				let tarpos:number[] = this.lookUpArray[tar];
+                ctx.beginPath();
+                ctx.moveTo(srtpos[1] * 24 + 12 + set, (6 - srtpos[0] - 1) * 24 + 12);
+                ctx.lineTo(srtpos[1] * 24 + 12 + set, (6 - srtpos[0] - 1) * 24 + 12 + set);
+                if ((tarpos[1]) != srtpos[1]) {
+                    ctx.lineTo(srtpos[1] * 24 + set, (6 - srtpos[0] - 1) * 24 + 12 + set);
+                    if ((tarpos[1] == (srtpos[1] - 1)) && (tarpos[0] <= (srtpos[0] - 1))) {
+                    } else {
+                        ctx.lineTo(srtpos[1] * 24 + set, (6 - tarpos[0] - 1) * 24 + 12 + set);
+                        ctx.lineTo((tarpos[1] + 1) * 24 + set, (6 - tarpos[0] - 1) * 24 + 12 + set);
+                    }
+                    ctx.lineTo((tarpos[1] + 1) * 24 + set, (6 - tarpos[0] - 1) * 24 + set - 12);
+                    ctx.lineTo((tarpos[1]) * 24 + 12 + set, (6 - tarpos[0] - 1) * 24 + set - 12);
+                    ctx.lineTo((tarpos[1]) * 24 + 12 + set, (6 - tarpos[0] - 1) * 24);
+                } else {
+                    if (Math.abs(tarpos[0] - srtpos[0]) == 1) {
+                        ctx.lineTo((tarpos[1]) * 24 + 12 + set, (6 - tarpos[0] - 1) * 24);
+                    } else {
+						ctx.lineTo(srtpos[1] * 24 + set, (6 - srtpos[0] - 1) * 24 + 12 + set);
+						ctx.lineTo(srtpos[1] * 24 + set, (6 - tarpos[0] - 1) * 24 + set - 12);
+						ctx.lineTo(srtpos[1] * 24 + 12 + set, (6 - tarpos[0] - 1) * 24 + set - 12);
+						ctx.lineTo(srtpos[1] * 24 + 12 + set, (6 - tarpos[0] - 1) * 24);
+                    }
+                }
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
+        }
+    }
+
+    public redrawCanvas(noReset:boolean = false): void {
+        this.fillDrawArray(noReset);
+        var ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
+
+        // Black BG
+        ctx.fillStyle = ColorConfig.getComputed("--editor-background");
+        ctx.fillRect(0, 0, 144, 144);
+        
+        for (let x: number = 0; x < 6; x++) {
+            for (let y: number = 0; y < 6; y++) {
+                ctx.fillStyle = ColorConfig.getComputed("--track-editor-bg-pitch-dim");
+                ctx.fillRect(x * 24 + 12, ((y) * 24), 12, 12);
+                ctx.fillStyle = ColorConfig.getComputed("--editor-background");
+                ctx.fillRect(x * 24 + 13, ((y) * 24)+1, 10, 10);
+                if (this.drawArray[y][x] != undefined) {
+                    if (this.drawArray[y][x] <= this.carriers) {
+                        ctx.fillStyle = ColorConfig.getComputed("--primary-text");
+                        ctx.fillRect(x * 24 + 12, ((y) * 24), 12, 12);
+                        ctx.fillStyle = ColorConfig.getComputed("--editor-background");
+                        ctx.fillRect(x * 24 + 13, ((y) * 24) + 1, 10, 10);
+                        ctx.fillStyle = ColorConfig.getComputedChannelColor(this._doc.song, this._doc.channel).primaryNote;
+                        ctx.fillText(this.drawArray[y][x] + "", x * 24 + 14, y * 24+10);
+                    }
+                    else {
+                        ctx.fillStyle = ColorConfig.getComputedChannelColor(this._doc.song, this._doc.channel).primaryNote;
+                        ctx.fillRect(x * 24 + 12, (y * 24), 12, 12);
+                        ctx.fillStyle = ColorConfig.getComputed("--editor-background");
+                        ctx.fillRect(x * 24 + 13, ((y) * 24) + 1, 10, 10);
+                        ctx.fillStyle = ColorConfig.getComputed("--primary-text");
+                        ctx.fillText(this.drawArray[y][x] + "", x * 24 + 14, y * 24+10);
+                    }
+                }
+            }
+        }
+        this.drawLines(ctx);
+    }
+
+    private _onMouseMove = (event: MouseEvent): void => {
+        if (this.mouseDown) {
+            var x = (event.clientX || event.pageX) - this.canvas.getBoundingClientRect().left;
+            var y = Math.floor((event.clientY || event.pageY) - this.canvas.getBoundingClientRect().top);
+            var ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
+            ctx.fillStyle = ColorConfig.getComputedChannelColor(this._doc.song, this._doc.channel).primaryNote;
+            var yindex = Math.ceil(y / 12)
+            var xindex = Math.ceil(x / 12)
+            yindex = (yindex/2)-Math.floor(yindex / 2) >= 0.5 ? Math.floor(yindex / 2) : -1;
+            xindex = (xindex / 2)+0.5 - Math.floor(xindex / 2) <= 0.5 ? Math.floor(xindex / 2)-1 : -1;
+            yindex = yindex >= 0 && yindex <= 5 ? yindex : -1;
+            xindex = xindex >= 0 && xindex <= 5 ? xindex : -1;
+            ctx.fillRect(xindex * 24+12, yindex * 24, 2, 2);
+
+            if (this.selected == -1) {
+                if (this.drawArray ?.[yindex] ?.[xindex] != undefined) {
+                    this.selected = this.drawArray[yindex][xindex];
+                    ctx.fillRect(xindex * 24 + 12, yindex * 24, 12, 12);
+                    ctx.fillStyle = ColorConfig.getComputed("--editor-background");
+                    ctx.fillText(this.drawArray[yindex][xindex] + "", xindex * 24 + 14, yindex * 24 + 10);
+                    this.mouseDown = false;
+                }
+            } else {
+                if (this.drawArray ?.[yindex] ?.[xindex] != undefined) {
+					if(this.mode == "feedback"){
+                        const newmod = this.drawArray[yindex][xindex]
+						let check = this.feedback[newmod - 1].indexOf(this.selected);
+						if (check != -1) {
+							this.feedback[newmod - 1].splice(check, 1);
+						} else {
+							this.feedback[newmod - 1].push(this.selected);
+						}
+					} else {
+						if (this.drawArray[yindex][xindex] == this.selected) {
+							if (this.selected == this.carriers) {
+								if (this.selected > 1) {
+									this.carriers--;
+								}
+							} else if (this.selected - 1 == this.carriers) {
+								this.carriers++
+							}
+						} else {
+							const newmod = this.drawArray[yindex][xindex]
+							if (this.selected > newmod) { //todo try to rebalence then do this in algorithm mode otherwise input as needed
+								let check = this.newMods[newmod - 1].indexOf(this.selected);
+								if (check != -1) {
+									this.newMods[newmod - 1].splice(check, 1);
+								} else {
+									this.newMods[newmod - 1].push(this.selected);
+								}
+							} else {
+								let check = this.newMods[this.selected - 1].indexOf(newmod);
+								if (check != -1) {
+									this.newMods[this.selected - 1].splice(check, 1);
+								} else {
+									this.newMods[this.selected - 1].push(newmod);
+								}
+							}
+						}
+					}
+                    this.selected = -1;
+                    this.redrawCanvas(true);
+                    this.mouseDown = false;
+                } else {
+                    this.selected = -1;
+                    this.redrawCanvas(true);
+                    this.mouseDown = false;
+                }
+            }
+        }
+    }
+
+    private _onMouseDown = (event: MouseEvent): void => {
+        this.mouseDown = true;
+
+        // Allow single-click edit
+        this._onMouseMove(event);
+    }
+    private _onMouseUp = (): void => {
+        this.mouseDown = false;
+        //this.continuousEdit = false;
+
+        this._whenChange();
+    }
+
+    private _whenChange = (): void => {
+        this._change = this._getChange(this.mode == "algorithm" ? this.newMods : this.feedback, this.carriers, this.mode);
+
+        this._doc.record(this._change!);
+
+        this._change = null;
+    };
+}
+
 export class SongEditor {
     public prompt: Prompt | null = null;
 
@@ -635,7 +991,8 @@ export class SongEditor {
         _.scale17Label, 
         _.scale18Label, 
         _.scale19Label, 
-        _.scale20Label
+        _.scale20Label,
+        _.scale21Label
 
     ]);
     private readonly _keySelect: HTMLSelectElement = buildOptions(select(), Config.keys.map(key => key.name).reverse());
@@ -978,6 +1335,15 @@ export class SongEditor {
     private readonly _modFilterBoxes: HTMLSelectElement[];
     private readonly _modTargetIndicators: SVGElement[];
 
+    private readonly _feedback6OpTypeSelect: HTMLSelectElement = buildOptions(select(), Config.feedbacks6Op.map(feedback => feedback.name));
+    private readonly _feedback6OpRow1: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("feedbackType") }, _.feedbackLabel), div({ class: "selectContainer" }, this._feedback6OpTypeSelect));
+
+    private readonly _algorithmCanvasSwitch: HTMLButtonElement = button({ style: "margin-left:0em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: (e:Event) => this._toggleAlgorithmCanvas(e) }, "F");
+    private readonly _customAlgorithmCanvas: CustomAlgorithmCanvas = new CustomAlgorithmCanvas(canvas({ width: 144, height: 144, style: "border:2px solid " + ColorConfig.uiWidgetBackground, id: "customAlgorithmCanvas" }), this._doc, (newArray: number[][], carry: number, mode: string) => new ChangeCustomAlgorithmOrFeedback(this._doc, newArray, carry, mode));
+    private readonly _algorithm6OpSelect: HTMLSelectElement = buildOptions(select(), Config.algorithms6Op.map(algorithm => algorithm.name));
+    private readonly _algorithm6OpSelectRow: HTMLDivElement = div(div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("algorithm") }, _.algorithmLabel), div({ class: "selectContainer" }, this._algorithm6OpSelect))
+        , div({ style: "height:144px; display:flex; flex-direction: row; align-items:center; justify-content:center;" }, div({style:"display:block; width:10px; margin-right: 0.2em"},this._algorithmCanvasSwitch), div({style: "width:144px; height:144px;"},this._customAlgorithmCanvas.canvas)));
+
     private readonly _instrumentCopyButton: HTMLButtonElement = button({ style: "max-width:86px; width: 86px;", class: "copyButton", title: _.copyInstrumentLabel }, [
         (_.copyLabel),
         // Copy icon:
@@ -1087,8 +1453,10 @@ export class SongEditor {
         this._eqFilterSimplePeakRow,
         this._fadeInOutRow,
         this._algorithmSelectRow,
+        this._algorithm6OpSelectRow,
         this._phaseModGroup,
         this._feedbackRow1,
+        this._feedback6OpRow1,
         this._feedbackRow2,
         this._spectrumRow,
         this._harmonicsRow,
@@ -1356,6 +1724,7 @@ export class SongEditor {
 
         this._scaleSelect.appendChild(optgroup({ label: (_.editLabel) },
             option({ value: "forceScale" }, span(_.snapScaleLabel)),
+            option({ value: "customize" }, span(_.customizeScaleLabel)),
         ));
         this._keySelect.appendChild(optgroup({ label: (_.editLabel) },
             option({ value: "detectKey" }, span(_.detectKeyLabel)),
@@ -1374,7 +1743,7 @@ export class SongEditor {
             div({ style: "width: 3em; margin-right: .3em;", class: "tip", onclick: () => this._openPrompt("operatorFrequency") }, span(_.operFreqLabel)),
             div({ class: "tip", onclick: () => this._openPrompt("operatorVolume") }, span(_.operVolumeLabel)),
         ));
-        for (let i: number = 0; i < Config.operatorCount; i++) {
+        for (let i: number = 0; i < Config.operatorCount+2; i++) {
             const operatorIndex: number = i;
             const operatorNumber: HTMLDivElement = div({ style: "margin-right: 0px; color: " + ColorConfig.secondaryText + ";" }, i + 1 + "");
             const frequencySelect: HTMLSelectElement = buildOptions(select({ style: "width: 100%;", title: _.hoverText6Label }), Config.operatorFrequencies.map(freq => freq.name));
@@ -1392,7 +1761,7 @@ export class SongEditor {
             ]);
             const waveformDropdown: HTMLButtonElement = button({ style: "margin-left:0em; margin-right: 2px; height:1.5em; width: 8px; max-width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.FM, i) }, "▼");
             const waveformDropdownHint: HTMLSpanElement = span({ class: "tip", style: "margin-left: 10px;", onclick: () => this._openPrompt("operatorWaveform") }, span(_.operWaveLabel));
-            const waveformPulsewidthSlider: Slider = new Slider(input({ style: "", type: "range", min: "0", max: (Config.pulseWidthRange * 2) - 1, value: "0", step: "1", title: _.hoverText9Label }), this._doc, (oldValue: number, newValue: number) => new ChangeOperatorPulseWidth(this._doc, operatorIndex, oldValue, newValue), true);
+            const waveformPulsewidthSlider: Slider = new Slider(input({ style: "", type: "range", min: "1", max: (Config.pulseWidthRange * 2) - 1, value: "0", step: "1", title: _.hoverText9Label }), this._doc, (oldValue: number, newValue: number) => new ChangeOperatorPulseWidth(this._doc, operatorIndex, oldValue, newValue), true);
             waveformPulsewidthSlider.container.style.marginLeft = "10px";
             waveformPulsewidthSlider.container.style.width = "50%";
             const waveformDropdownRow: HTMLElement = div({ class: "selectRow" }, waveformDropdownHint, waveformPulsewidthSlider.container,
@@ -1602,6 +1971,8 @@ export class SongEditor {
         this._wavetableWaveButtonsContainer.addEventListener("click", this._whenSelectWavetableWave);
         //this._customizeInstrumentButton.addEventListener("click", this._whenCustomizePressed);
         this._feedbackTypeSelect.addEventListener("change", this._whenSetFeedbackType);
+        this._algorithm6OpSelect.addEventListener("change", this._whenSet6OpAlgorithm);
+        this._feedback6OpTypeSelect.addEventListener("change", this._whenSet6OpFeedbackType);
         this._chipWaveSelect.addEventListener("change", this._whenSetChipWave);
         this._chipNoiseSelect.addEventListener("change", this._whenSetNoiseWave);
         this._transitionSelect.addEventListener("change", this._whenSetTransition);
@@ -1654,7 +2025,7 @@ export class SongEditor {
         this._instrumentVolumeSlider.container.style.setProperty("--mod-border-radius", "50%");
         this._feedbackAmplitudeSlider.container.style.setProperty("--mod-color", ColorConfig.multiplicativeModSlider);
         this._feedbackAmplitudeSlider.container.style.setProperty("--mod-border-radius", "50%");
-        for (let i: number = 0; i < Config.operatorCount; i++) {
+        for (let i: number = 0; i < Config.operatorCount+2; i++) {
             this._operatorAmplitudeSliders[i].container.style.setProperty("--mod-color", ColorConfig.multiplicativeModSlider);
             this._operatorAmplitudeSliders[i].container.style.setProperty("--mod-border-radius", "50%");
         }
@@ -1725,6 +2096,18 @@ export class SongEditor {
             layoutOption.disabled = true;
             layoutOption.setAttribute("hidden", "");
         }
+    }
+
+    private _toggleAlgorithmCanvas(e:Event):void {
+        if (this._customAlgorithmCanvas.mode != "feedback") {
+            this._customAlgorithmCanvas.mode = "feedback";
+            (e.target as Element).textContent = "A";
+            this._algorithmCanvasSwitch.value = "feedback";
+        } else {
+            this._customAlgorithmCanvas.mode = "algorithm";
+            (e.target as Element).textContent = "F";
+        }
+        this._customAlgorithmCanvas.redrawCanvas();
     }
 
     private _toggleDropdownMenu(dropdown: DropdownID, submenu: number = 0): void {
@@ -1907,6 +2290,10 @@ export class SongEditor {
                 return this._operatorAmplitudeSliders[2];
             case Config.modulators.dictionary["fm slider 4"].index:
                 return this._operatorAmplitudeSliders[3];
+            case Config.modulators.dictionary["fm slider 5"].index:
+                return this._operatorAmplitudeSliders[4];
+            case Config.modulators.dictionary["fm slider 6"].index:
+                return this._operatorAmplitudeSliders[5];
             case Config.modulators.dictionary["fm feedback"].index:
                 return this._feedbackAmplitudeSlider;
             case Config.modulators.dictionary["pulse width"].index:
@@ -1975,10 +2362,10 @@ export class SongEditor {
                 return this._operatorWaveformPulsewidthSliders[2];
             case Config.modulators.dictionary["fm pwm 4"].index:
                 return this._operatorWaveformPulsewidthSliders[3];
-            /*case Config.modulators.dictionary["fm pwm 5"].index:
+            case Config.modulators.dictionary["fm pwm 5"].index:
                     return this._operatorWaveformPulsewidthSliders[4];
             case Config.modulators.dictionary["fm pwm 6"].index:
-                    return this._operatorWaveformPulsewidthSliders[5];*/
+                    return this._operatorWaveformPulsewidthSliders[5];
             case Config.modulators.dictionary["slide speed"].index:
                 return this._slideSpeedSlider;
             case Config.modulators.dictionary["wavetable speed"].index:
@@ -2001,7 +2388,7 @@ export class SongEditor {
         this._currentPromptName = promptName;
 
         if (this.prompt) {
-            if (this._wasPlaying && !(this.prompt instanceof TipPrompt || this.prompt instanceof LimiterPrompt || this.prompt instanceof CustomChipPrompt || this.prompt instanceof CustomFilterPrompt || this.prompt instanceof WavetablePrompt || this.prompt instanceof SustainPrompt)) {
+            if (this._wasPlaying && !(this.prompt instanceof TipPrompt || this.prompt instanceof LimiterPrompt || this.prompt instanceof CustomScalePrompt || this.prompt instanceof CustomChipPrompt || this.prompt instanceof CustomFilterPrompt || this.prompt instanceof WavetablePrompt || this.prompt instanceof SustainPrompt)) {
                 this._doc.performance.play();
             }
             this._wasPlaying = false;
@@ -2037,6 +2424,9 @@ export class SongEditor {
                     break;
                 case "limiterSettings":
                     this.prompt = new LimiterPrompt(this._doc, this);
+                    break;
+                case "customScale":
+                    this.prompt = new CustomScalePrompt(this._doc);
                     break;
                 case "randomGenSettings":
                     this.prompt = new RandomGenPrompt(this._doc);
@@ -2080,7 +2470,7 @@ export class SongEditor {
             }
 
             if (this.prompt) {
-                if (!(this.prompt instanceof TipPrompt || this.prompt instanceof LimiterPrompt || this.prompt instanceof CustomChipPrompt || this.prompt instanceof CustomFilterPrompt || this.prompt instanceof WavetablePrompt)) {
+                if (!(this.prompt instanceof TipPrompt || this.prompt instanceof LimiterPrompt || this.prompt instanceof CustomScalePrompt || this.prompt instanceof CustomChipPrompt || this.prompt instanceof CustomFilterPrompt || this.prompt instanceof WavetablePrompt)) {
                     this._wasPlaying = this._doc.synth.playing;
                     this._doc.performance.pause();
                 }
@@ -2369,7 +2759,7 @@ export class SongEditor {
             }
 
 
-            if (instrument.type == InstrumentType.fm) {
+            if (instrument.type == InstrumentType.fm || instrument.type == InstrumentType.advfm) {
                 this._algorithmSelectRow.style.display = "";
                 this._phaseModGroup.style.display = "";
                 this._feedbackRow1.style.display = "";
@@ -2378,7 +2768,7 @@ export class SongEditor {
                 setSelectedValue(this._algorithmSelect, instrument.algorithm);
                 setSelectedValue(this._feedbackTypeSelect, instrument.feedbackType);
                 this._feedbackAmplitudeSlider.updateValue(instrument.feedbackAmplitude);
-                for (let i: number = 0; i < Config.operatorCount; i++) {
+                for (let i: number = 0; i < Config.operatorCount + (instrument.type == InstrumentType.advfm ? 2 : 0); i++) {
                     const isCarrier: boolean = (i < Config.algorithms[instrument.algorithm].carrierCount);
                     this._operatorRows[i].style.color = isCarrier ? ColorConfig.primaryText : "";
                     setSelectedValue(this._operatorFrequencySelects[i], instrument.operators[i].frequency);
@@ -2398,6 +2788,28 @@ export class SongEditor {
                         this._operatorWaveformPulsewidthSliders[i].container.style.display = "none";
                         this._operatorWaveformHints[i].style.display = "";
                     }
+                }
+                if (instrument.type == InstrumentType.advfm){
+                    setSelectedValue(this._algorithm6OpSelect, instrument.algorithm6Op);
+                    setSelectedValue(this._feedback6OpTypeSelect, instrument.feedbackType6Op);
+                    this._customAlgorithmCanvas.redrawCanvas();
+                    this._algorithm6OpSelectRow.style.display = "";
+                    this._feedback6OpRow1.style.display = "";
+                    this._operatorRows[4].style.display = "";
+                    this._operatorRows[5].style.display = "";
+                    this._operatorDropdownGroups[4].style.display = (this._openOperatorDropdowns[4] ? "" : "none");
+                    this._operatorDropdownGroups[5].style.display = (this._openOperatorDropdowns[5] ? "" : "none");
+                    this._algorithmSelectRow.style.display = "none";
+                    this._feedbackRow1.style.display = "none";
+                } else {
+                    this._algorithm6OpSelectRow.style.display = "none";
+                    this._feedback6OpRow1.style.display = "none";
+                    this._operatorRows[4].style.display = "none";
+                    this._operatorRows[5].style.display = "none";
+                    this._operatorDropdownGroups[4].style.display = "none";
+                    this._operatorDropdownGroups[5].style.display = "none";
+                    this._feedbackRow1.style.display = "";
+                    this._algorithmSelectRow.style.display = "";
                 }
             }
             else {
@@ -3004,6 +3416,21 @@ export class SongEditor {
                             settingList.push("fm pwm 2");
                             settingList.push("fm pwm 3");
                             settingList.push("fm pwm 4");
+                        }
+                        if (tgtInstrumentTypes.includes(InstrumentType.advfm)) {
+                            settingList.push("fm slider 1");
+                            settingList.push("fm slider 2");
+                            settingList.push("fm slider 3");
+                            settingList.push("fm slider 4");
+                            settingList.push("fm slider 5");
+                            settingList.push("fm slider 6");
+                            settingList.push("fm feedback");
+                            settingList.push("fm pwm 1");
+                            settingList.push("fm pwm 2");
+                            settingList.push("fm pwm 3");
+                            settingList.push("fm pwm 4");
+                            settingList.push("fm pwm 5");
+                            settingList.push("fm pwm 6");
                         }
                         if (tgtInstrumentTypes.includes(InstrumentType.pwm)) {
                             settingList.push("pulse width");
@@ -3654,7 +4081,7 @@ export class SongEditor {
         }
 
         // Defer to actively editing volume/pan rows
-        if (document.activeElement == this._panSliderInputBox || document.activeElement == this._pwmSliderInputBox || document.activeElement == this._detuneSliderInputBox || document.activeElement == this._instrumentVolumeSliderInputBox) {
+        if (document.activeElement == this._panSliderInputBox || document.activeElement == this._pwmSliderInputBox || document.activeElement == this._detuneSliderInputBox || document.activeElement == this._instrumentVolumeSliderInputBox || document.activeElement == this._octaveStepper) {
             // Enter/esc returns focus to form
             if (event.keyCode == 13 || event.keyCode == 27) {
                 this.mainLayer.focus();
@@ -4553,6 +4980,9 @@ export class SongEditor {
                 case "forceScale":
                     this._doc.selection.forceScale();
                     break;
+                case "customize":
+                    this._openPrompt("customScale")
+                    break;
             }
             this._doc.notifier.changed();
         } else {
@@ -4629,6 +5059,16 @@ export class SongEditor {
 
     private _whenSetAlgorithm = (): void => {
         this._doc.record(new ChangeAlgorithm(this._doc, this._algorithmSelect.selectedIndex));
+    }
+
+    private _whenSet6OpFeedbackType = (): void => {
+        this._doc.record(new Change6OpFeedbackType(this._doc, this._feedback6OpTypeSelect.selectedIndex));
+        this._customAlgorithmCanvas.reset()
+    }
+
+    private _whenSet6OpAlgorithm = (): void => {
+        this._doc.record(new Change6OpAlgorithm(this._doc, this._algorithm6OpSelect.selectedIndex));
+        this._customAlgorithmCanvas.reset()
     }
 
     private _whenSelectInstrument = (event: MouseEvent): void => {

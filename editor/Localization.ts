@@ -82,6 +82,7 @@ export class Localization {
     public static instTypeLabel: string = "Type:";
     public static oscilloscopeScaleLabel: string = "Scale:";
     public static songScaleLabel: string = "Scale:";
+    public static customScaleNoteLabel: string = "Note ";
     public static songKeyLabel: string = "Key:";
     public static songKeyOctaveLabel: string = "Octave: ";
     public static songTempoLabel: string = "Tempo:";
@@ -122,6 +123,8 @@ export class Localization {
     public static scale18Label: string = "Whole Tone";
     public static scale19Label: string = "Octatonic";
     public static scale20Label: string = "Hexatonic";
+    public static scale21Label: string = "Custom Scale";
+    public static customizeScaleLabel: string = "Configure Custom Scale";
     // public static rhythmBy2Label: string = "÷2 (Quavers)";
     public static rhythmBy3Label: string = "÷3 (Triplets)";
     public static rhythmBy4Label: string = "÷4 (Semiquavers)";
@@ -303,6 +306,7 @@ export class Localization {
     public static customChipInstLabel: string = "custom chip";
     public static supersawInstLabel: string = "supersaw";
     public static wavetableInstLabel: string = "wavetable";
+    public static ADVFMInstLabel: string = "advanced FM";
     public static customInstrumentsLabel: string = "Instrument Types";
     public static midboxMiscPresetsLabel: string = "Midbox Misc Presets";
     public static midboxDubstepPresetsLabel: string = "Midbox Dubstep Presets";
@@ -961,6 +965,7 @@ if (language == "spanish") {
     Localization.instTypeLabel = "Tipo:";
     Localization.oscilloscopeScaleLabel = "Tamaño:";
     Localization.songScaleLabel = "Escala:";
+    Localization.customScaleNoteLabel = "Nota ";
     Localization.songKeyLabel = "Tono:";
     Localization.songKeyOctaveLabel = "Octavo: ";
     Localization.songTempoLabel = "Tempo:";
@@ -1000,6 +1005,8 @@ if (language == "spanish") {
     Localization.scale18Label = "De Tonos";
     Localization.scale19Label = "Octatónica";
     Localization.scale20Label = "Hexatónica";
+    Localization.scale21Label = "Escala Personalizado";
+    Localization.customizeScaleLabel = "Editar Escala Personalizado";
     Localization.rhythmBy3Label = "÷3 (Trillizos)";
     Localization.rhythmBy4Label = "÷4 (Semicorcheas)";
     Localization.rhythmBy6Label = "÷6 (Sextillizos)";
@@ -1174,6 +1181,7 @@ if (language == "spanish") {
     Localization.customChipInstLabel = "chip personalizado";
     Localization.supersawInstLabel = "supersierra";
     Localization.wavetableInstLabel = "wavetable";
+    Localization.ADVFMInstLabel = "FM avanzado";
     Localization.customInstrumentsLabel = "Tipos de Instrumentos";
     Localization.midboxMiscPresetsLabel = "Presets Misc. de Midbox";
     Localization.midboxDubstepPresetsLabel = "Presets de Dubstep de Midbox";

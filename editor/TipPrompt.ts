@@ -295,9 +295,9 @@ export class TipPrompt implements Prompt {
 				message = div(
 					h2("FM Algorithm"),
 					p('FM Synthesis is a mysterious but powerful technique for crafting sounds, popularized by Yamaha keyboards and the Sega Genesis/Mega Drive. It may seem confusing, but try playing around with the options until you get a feel for it, or check out some of the preset examples!'),
-					p('This FM synthesizer uses up to four waves, numbered 1, 2, 3, and 4. Each wave may have its own frequency and volume.'),
+					p('There are two types of FM synthesizers that can be picked from the instrument types. FM uses 4 operators/waves, numbered 1, 2, 3, and 4. ADVFM is a more complex version of FM, which uses 6 operators/waves and allows more customization. Each wave may have its own frequency and volume.'),
 					p('There are two kinds of waves: "carrier" waves play a tone out loud, but "modulator" waves distort other waves instead. Wave 1 is always a carrier and plays a tone, but other waves may distort it. The "Algorithm" setting determines which waves are modulators, and which other waves those modulators distort. For example, "1←2" means that wave 2 modulates wave 1, and wave 1 plays out loud.'),
-					p('Tip: I would suggest playing around with FM presets like the synth kick to get a feel of what setting makes that instrument do what it does.'),
+					p('Tip: I would suggest playing around with FM/ADVFM presets like the synth kick to get a feel of what setting makes that instrument do what it does.'),
 				);
 			} break;
 			case "feedbackType": {

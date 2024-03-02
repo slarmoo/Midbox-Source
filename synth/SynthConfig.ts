@@ -83,6 +83,7 @@ export const enum InstrumentType {
     supersaw,
     customChipWave,
     wavetable,
+    advfm,
     mod,
     length,
 }
@@ -122,9 +123,9 @@ export const enum EnvelopeComputeIndex {
     pulseWidth,
     stringSustain,
     unison,
-    operatorFrequency0, operatorFrequency1, operatorFrequency2, operatorFrequency3, /*operatorFrequency4, operatorFrequency5,*/
-    operatorAmplitude0, operatorAmplitude1, operatorAmplitude2, operatorAmplitude3, /*operatorAmplitude4, operatorAmplitude5,*/
-    operatorPulseWidth0, operatorPulseWidth1, operatorPulseWidth2, operatorPulseWidth3, /*operatorPulseWidth4, operatorPulseWidth5,*/ 
+    operatorFrequency0, operatorFrequency1, operatorFrequency2, operatorFrequency3, operatorFrequency4, operatorFrequency5,
+    operatorAmplitude0, operatorAmplitude1, operatorAmplitude2, operatorAmplitude3, operatorAmplitude4, operatorAmplitude5,
+    operatorPulseWidth0, operatorPulseWidth1, operatorPulseWidth2, operatorPulseWidth3, operatorPulseWidth4, operatorPulseWidth5,
     feedbackAmplitude,
     pitchShift,
     detune,
@@ -287,7 +288,8 @@ export class Config {
         { name: "Whole Tone",        realName: _.scale18Label, flags: [true, false, true,  false, true,  false, true,  false, true,  false, true,  false]}, 
         { name: "Octatonic",         realName: _.scale19Label, flags: [true, false, true,  true,  false, true,  true,  false, true,  true,  false, true ]}, 
         { name: "Hexatonic",         realName: _.scale20Label, flags: [true, false, false, true,  true,  false, false, true,  true,  false, false, true ]},
-
+//        Nothing will really matter for this one. These are just placeholder values until the user configures them as this is the custom scale.
+        { name: "Custom Scale",      realName: _.scale21Label, flags: [true, false, true,  true,  false, false, false, true,  true,  false, true,  true ]},
     ]);
 
     public static readonly keys: DictionaryArray<Key> = toNameMap([
@@ -340,8 +342,8 @@ export class Config {
         { name: "freehand",      stepsPerBeat: 24, roundUpThresholds: null           },
     ]);
 
-    public static readonly instrumentTypeNames:              ReadonlyArray<string> =  ["chip", "FM", "noise", "spectrum", "drumset", "harmonics", "PWM", "Picked String", "supersaw", "custom chip", "wavetable", "mod"   ];
-    public static readonly instrumentTypeHasSpecialInterval: ReadonlyArray<boolean> = [ true,   true, false,   false,      false,     true,        false, false,           false,      false,         false      /*None */]; // For the custom interval chord type.
+    public static readonly instrumentTypeNames:              ReadonlyArray<string> =  ["chip", "FM", "noise", "spectrum", "drumset", "harmonics", "PWM", "Picked String", "supersaw", "custom chip", "wavetable", "ADVFM", "mod"   ];
+    public static readonly instrumentTypeHasSpecialInterval: ReadonlyArray<boolean> = [ true,   true, false,   false,      false,     true,        false, false,           false,      false,         false,       false  /*None */]; // For the custom interval chord type.
     public static readonly chipBaseExpression:               number = 0.03375;   // Doubled by unison feature, but affected by expression adjustments per unison setting and wave shape.
     public static readonly fmBaseExpression:                 number = 0.03;
     public static readonly noiseBaseExpression:              number = 0.19;
@@ -505,7 +507,7 @@ export class Config {
 
     public static readonly maxChordSize:            number = 9;
     public static readonly operatorCount:           number = 4;
-	public static readonly maxPitchOrOperatorCount: number = Math.max(Config.maxChordSize, Config.operatorCount);
+	public static readonly maxPitchOrOperatorCount: number = Math.max(Config.maxChordSize, Config.operatorCount+2);
     public static readonly algorithms: DictionaryArray<Algorithm> = toNameMap([
         { name: "1←(2 3 4)",   carrierCount: 1, associatedCarrier: [1, 1, 1, 1], modulatedBy: [[2, 3, 4], [],     [],  []]},
         { name: "1←(2 3←4)",   carrierCount: 1, associatedCarrier: [1, 1, 1, 1], modulatedBy: [[2, 3],    [],     [4], []]},
@@ -520,6 +522,55 @@ export class Config {
         { name: "1 2 3←4",     carrierCount: 3, associatedCarrier: [1, 2, 3, 3], modulatedBy: [[],        [],     [4], []]},
         { name: "(1 2 3)←4",   carrierCount: 3, associatedCarrier: [1, 2, 3, 3], modulatedBy: [[4],       [4],    [4], []]},
         { name: "1 2 3 4",     carrierCount: 4, associatedCarrier: [1, 2, 3, 4], modulatedBy: [[],        [],     [],  []]},
+        { name: "1←(2 3) 2←4", carrierCount: 2, associatedCarrier: [1, 2, 1, 2], modulatedBy: [[2, 3],    [4],    [],  []]},
+        { name: "1←(2 (3 (4",  carrierCount: 3, associatedCarrier: [1, 2, 3, 3], modulatedBy: [[2, 3, 4], [3, 4], [4], []]},
+    ]);
+    public static readonly algorithms6Op: DictionaryArray<Algorithm> = toNameMap([
+//        Custom Placeholder
+        { name: "Custom",           carrierCount: 1, associatedCarrier: [1, 1, 1, 1, 1, 1 ], modulatedBy: [[2, 3, 4, 5, 6], [],           [],        [],     [],  []]},
+//        Section 1
+    //    Operator Numbers:                                                                                 1                2             3          4       5   (6 will always be empty.)
+        { name: "1←2←3←4←5←6",      carrierCount: 1, associatedCarrier: [1, 1, 1, 1, 1, 1 ], modulatedBy: [[2],             [3],          [4],       [5],    [6], []]},
+        { name: "1←3 2←4←5←6",      carrierCount: 2, associatedCarrier: [1, 2, 2, 2, 2, 2 ], modulatedBy: [[3],             [4],          [],        [5],    [6], []]},
+        { name: "1←3←4 2←5←6",      carrierCount: 2, associatedCarrier: [1, 1, 1, 2, 2, 2 ], modulatedBy: [[3],             [5],          [4],       [],     [6], []]},
+        { name: "1←4 2←5 3←6",      carrierCount: 3, associatedCarrier: [1, 2, 3, 1, 2, 3 ], modulatedBy: [[4],             [5],          [6],       [],     [],  []]},
+//        Section 2
+    //    Operator Numbers:                                                                                 1                2             3          4       5   (6 will always be empty.)
+        { name: "1←3 2←(4 5←6)",    carrierCount: 2, associatedCarrier: [1, 2, 2, 2, 2, 2 ], modulatedBy: [[3],             [4, 5],       [],        [],     [6], []]},
+        { name: "1←(3 4) 2←5←6",    carrierCount: 2, associatedCarrier: [1, 2, 2, 2, 2, 2 ], modulatedBy: [[3, 4],          [5],          [],        [],     [6], []]},
+        { name: "1←3 2←(4 5 6)",    carrierCount: 2, associatedCarrier: [1, 2, 2, 2, 2, 2 ], modulatedBy: [[3],             [4, 5, 6],    [],        [],     [],  []]},
+        { name: "1←3 2←(4 5)←6",    carrierCount: 2, associatedCarrier: [1, 2, 2, 2, 2, 2 ], modulatedBy: [[3],             [4, 5],       [],        [6],    [6], []]},
+        { name: "1←3 2←4←(5 6)",    carrierCount: 2, associatedCarrier: [1, 2, 2, 2, 2, 2 ], modulatedBy: [[3],             [4],          [],        [5, 6], [],  []]},
+        { name: "1←(2 3 4 5 6)",    carrierCount: 1, associatedCarrier: [1, 1, 1, 1, 1, 1 ], modulatedBy: [[2, 3, 4, 5, 6], [],           [],        [],     [],  []]},
+        { name: "1←(2 3←5 4←6)",    carrierCount: 1, associatedCarrier: [1, 1, 1, 1, 1, 1 ], modulatedBy: [[2, 3, 4],       [],           [5],       [6],    [],  []]},
+        { name: "1←(2 3 4←5←6)",    carrierCount: 1, associatedCarrier: [1, 1, 1, 1, 1, 1 ], modulatedBy: [[2, 3, 4],       [],           [],        [5],    [6], []]},
+//        Section 3
+    //    Operator Numbers:                                                                                 1                2             3          4       5   (6 will always be empty.)
+        { name: "1←4←5 (2 3)←6",    carrierCount: 3, associatedCarrier: [1, 2, 3, 1, 2, 3 ], modulatedBy: [[4],             [6],          [6],       [5],    [],  []]},
+        { name: "1←(3 4)←5 2←6",    carrierCount: 2, associatedCarrier: [1, 2, 2, 2, 2, 2 ], modulatedBy: [[3, 4],          [6],          [5],       [5],    [],  []]},
+        { name: "(1 2)←4 3←(5 6)",  carrierCount: 3, associatedCarrier: [1, 2, 3, 1, 2, 3 ], modulatedBy: [[4],             [4],          [5, 6],    [],     [],  []]},
+        { name: "(1 2)←5 (3 4)←6",  carrierCount: 4, associatedCarrier: [1, 2, 3, 4, 4, 4 ], modulatedBy: [[5],             [5],          [6],       [6],    [],  []]},
+        { name: "(1 2 3)←(4 5 6)",  carrierCount: 3, associatedCarrier: [1, 2, 3, 1, 2, 3 ], modulatedBy: [[4, 5, 6],       [4, 5, 6],    [4, 5, 6], [],     [],  []]},
+        { name: "1←5 (2 3 4)←6",    carrierCount: 4, associatedCarrier: [1, 2, 3, 4, 4, 4 ], modulatedBy: [[5],             [6],          [6],       [6],    [],  []]},
+        { name: "1 2←5 (3 4)←6",    carrierCount: 4, associatedCarrier: [1, 2, 3, 4, 4, 4 ], modulatedBy: [[],              [5],          [6],       [6],    [],  []]},
+        { name: "1 2 (3 4 5)←6",    carrierCount: 5, associatedCarrier: [1, 2, 3, 4, 5, 5 ], modulatedBy: [[],              [],           [6],       [6],    [6], []]},
+        { name: "1 2 3 (4 5)←6",    carrierCount: 5, associatedCarrier: [1, 2, 3, 4, 5, 5 ], modulatedBy: [[],              [],           [],        [6],    [6], []]},
+//        Section 4
+    //    Operator Numbers:                                                                                 1                2             3          4       5   (6 will always be empty.)
+        { name: "1 2←4 3←(5 6)",    carrierCount: 3, associatedCarrier: [1, 2, 3, 3, 3, 3 ], modulatedBy: [[],              [4],          [5, 6],    [],     [],  []]},
+        { name: "1←4 2←(5 6) 3",    carrierCount: 3, associatedCarrier: [1, 2, 3, 3, 3, 3,], modulatedBy: [[4],             [5, 6],       [],        [],     [],  []]},
+        { name: "1 2 3←5 4←6",      carrierCount: 4, associatedCarrier: [1, 2, 3, 4, 4, 4 ], modulatedBy: [[],              [],           [5],       [6],    [],  []]},
+        { name: "1 (2 3)←5←6 4",    carrierCount: 4, associatedCarrier: [1, 2, 3, 4, 4, 4,], modulatedBy: [[],              [5],          [5],       [],     [6], []]},
+        { name: "1 2 3←5←6 4",      carrierCount: 4, associatedCarrier: [1, 2, 3, 4, 4, 4 ], modulatedBy: [[],              [],           [5, 6],    [],     [],  []]},
+        { name: "(1 2 3 4 5)←6",    carrierCount: 5, associatedCarrier: [1, 2, 3, 4, 5, 5 ], modulatedBy: [[6],             [6],          [6],       [6],    [6], []]},
+        { name: "1 2 3 4 5←6",      carrierCount: 5, associatedCarrier: [1, 2, 3, 4, 5, 5 ], modulatedBy: [[],              [],           [],        [],     [6], []]},
+        { name: "1 2 3 4 5 6",      carrierCount: 6, associatedCarrier: [1, 2, 3, 4, 5, 6 ], modulatedBy: [[],              [],           [],        [],     [],  []]},
+//        Section 5
+    //    Operator Numbers:                                                                                 1                2             3          4       5   (6 will always be empty.)
+        { name: "1←(2 (3 (4 (5 (6", carrierCount: 5, associatedCarrier: [1, 2, 3, 4, 5, 5 ], modulatedBy: [[2, 3, 4, 5, 6], [3, 4, 5, 6], [4, 5, 6], [5, 6], [6], []]},
+        { name: "1←(2(3(4(5(6",     carrierCount: 1, associatedCarrier: [1, 1, 1, 1, 1, 1 ], modulatedBy: [[2, 3, 4, 5, 6], [3, 4, 5, 6], [4, 5, 6], [5, 6], [6], []]},
+        { name: "1←4(2←5(3←6",      carrierCount: 3, associatedCarrier: [1, 2, 3, 1, 2, 3 ], modulatedBy: [[2, 3, 4],       [3, 5],       [6],       [],     [],  []]},
+        { name: "1←4(2←5 3←6",      carrierCount: 3, associatedCarrier: [1, 2, 3, 1, 2, 3 ], modulatedBy: [[2, 3, 4],       [5],          [6],       [],     [],  []]},
     ]);
 
     public static readonly operatorCarrierInterval: ReadonlyArray<number> = [0.0, 0.04, -0.073, 0.091];
@@ -561,7 +612,9 @@ export class Config {
         { name: "24×",    mult: 24.0,  hzOffset:  0.0, amplitudeSign:  1.0 },
         { name: "32×",    mult: 32.0,  hzOffset:  0.0, amplitudeSign:  1.0 },
         { name: "~32×",   mult: 32.0,  hzOffset: -8.4, amplitudeSign: -1.0 },
+        { name: "48×",    mult: 48.0,  hzOffset:  0.0, amplitudeSign:  1.0 },
         { name: "64×",    mult: 64.0,  hzOffset:  0.0, amplitudeSign:  1.0 },
+        { name: "128×",   mult: 128.0, hzOffset:  0.0, amplitudeSign:  1.0 },
     ]);
 
 /*  public static readonly envelopeCategories: DictionaryArray<EnvelopeCategory> = toNameMap([
@@ -791,32 +844,73 @@ export class Config {
     ]);
 
     public static readonly feedbacks: DictionaryArray<Feedback> = toNameMap([
-        { name: "1⟲",         indices: [[1], [],  [],  [] ] },
-        { name: "2⟲",         indices: [[],  [2], [],  [] ] },
-        { name: "3⟲",         indices: [[],  [],  [3], [] ] },
-        { name: "4⟲",         indices: [[],  [],  [],  [4]] },
-        { name: "1⟲ 2⟲",     indices: [[1], [2], [],  [] ] },
-        { name: "1⟲ 3⟲",     indices: [[1], [],  [3], [] ] },
-        { name: "1⟲ 4⟲",     indices: [[1], [],  [],  [4]] },
-        { name: "2⟲ 3⟲",     indices: [[],  [2], [3], [] ] },
-        { name: "2⟲ 4⟲",     indices: [[],  [2], [],  [4]] },
-        { name: "3⟲ 4⟲",     indices: [[],  [],  [3], [4]] },
-        { name: "1⟲ 2⟲ 3⟲", indices: [[1], [2], [3], [] ] },
-        { name: "2⟲ 3⟲ 4⟲", indices: [[],  [2], [3], [4]] },
-        { name: "1⟲ 3⟲ 4⟲", indices: [[1], [],  [3], [4]] },
-        { name: "1⟲ 2⟲ 4⟲", indices: [[1], [2], [],  [4]] },
-        { name: "⟲ALL",      indices: [[1], [2], [3], [4]] },
-        { name: "1→2",        indices: [[],  [1], [],  [] ] },
-        { name: "1→3",        indices: [[],  [],  [1], [] ] },
-        { name: "1→4",        indices: [[],  [],  [],  [1]] },
-        { name: "2→3",        indices: [[],  [],  [2], [] ] },
-        { name: "2→4",        indices: [[],  [],  [],  [2]] },
-        { name: "3→4",        indices: [[],  [],  [],  [3]] },
-        { name: "1→3 2→4",    indices: [[],  [],  [1], [2]] },
-        { name: "1→4 2→3",    indices: [[],  [],  [2], [1]] },
-        { name: "1→2 3→4",    indices: [[],  [1], [],  [3]] },
-        { name: "1→2→3→4",    indices: [[],  [1], [2], [3]] },
-        { name: "2→1→4→3→2",  indices: [[2], [3], [4], [1]] },
+        { name: "1⟲",         indices: [[1], [],  [],  [] ]},
+        { name: "2⟲",         indices: [[],  [2], [],  [] ]},
+        { name: "3⟲",         indices: [[],  [],  [3], [] ]},
+        { name: "4⟲",         indices: [[],  [],  [],  [4]]},
+        { name: "1⟲ 2⟲",     indices: [[1], [2], [],  [] ]},
+        { name: "1⟲ 3⟲",     indices: [[1], [],  [3], [] ]},
+        { name: "1⟲ 4⟲",     indices: [[1], [],  [],  [4]]},
+        { name: "2⟲ 3⟲",     indices: [[],  [2], [3], [] ]},
+        { name: "2⟲ 4⟲",     indices: [[],  [2], [],  [4]]},
+        { name: "3⟲ 4⟲",     indices: [[],  [],  [3], [4]]},
+        { name: "1⟲ 2⟲ 3⟲", indices: [[1], [2], [3], [] ]},
+        { name: "2⟲ 3⟲ 4⟲", indices: [[],  [2], [3], [4]]},
+        { name: "1⟲ 3⟲ 4⟲", indices: [[1], [],  [3], [4]]},
+        { name: "1⟲ 2⟲ 4⟲", indices: [[1], [2], [],  [4]]},
+        { name: "⟲ALL",      indices: [[1], [2], [3], [4]]},
+        { name: "1→2",        indices: [[],  [1], [],  [] ]},
+        { name: "1→3",        indices: [[],  [],  [1], [] ]},
+        { name: "1→4",        indices: [[],  [],  [],  [1]]},
+        { name: "2→3",        indices: [[],  [],  [2], [] ]},
+        { name: "2→4",        indices: [[],  [],  [],  [2]]},
+        { name: "3→4",        indices: [[],  [],  [],  [3]]},
+        { name: "1→3 2→4",    indices: [[],  [],  [1], [2]]},
+        { name: "1→4 2→3",    indices: [[],  [],  [2], [1]]},
+        { name: "1→2 3→4",    indices: [[],  [1], [],  [3]]},
+        { name: "1→2→3→4",    indices: [[],  [1], [2], [3]]},
+        { name: "1↔2 3↔4",    indices: [[2], [1], [4], [3]]},
+        { name: "1↔4 2↔3",    indices: [[4], [3], [2], [1]]},
+        { name: "2→1→4→3→2",  indices: [[2], [3], [4], [1]]},
+        { name: "1→2→3→4→1",  indices: [[4], [1], [2], [3]]},
+        { name: "(1 2 3)→4",  indices: [[],  [],  [],  [1, 2, 3]]},
+        { name: "ALL",        indices: [[1,2,3,4], [1,2,3,4], [1,2,3,4], [1,2,3,4]]},
+    ]);
+    public static readonly feedbacks6Op: DictionaryArray<Feedback> = toNameMap([
+//        Custom Placeholder
+        { name: "Custom",                 indices: [[2, 3, 4, 5, 6], [], [], [], [], []]},
+
+        { name: "1⟲",                    indices: [[1], [],  [],  [],  [],  [] ]},
+        { name: "2⟲",                    indices: [[],  [2], [],  [],  [],  [] ]},
+        { name: "3⟲",                    indices: [[],  [],  [3], [],  [],  [] ]},
+        { name: "4⟲",                    indices: [[],  [],  [],  [4], [],  [] ]},
+        { name: "5⟲",                    indices: [[],  [],  [],  [],  [5], [] ]},
+        { name: "6⟲",                    indices: [[],  [],  [],  [],  [],  [6]]},
+        { name: "1⟲ 2⟲",                 indices: [[1], [2], [],  [],  [],  [] ]},
+        { name: "3⟲ 4⟲",                 indices: [[],  [],  [3], [4], [],  [] ]},
+        { name: "1⟲ 2⟲ 3⟲",             indices: [[1], [2], [3], [],  [],  [] ]},
+        { name: "2⟲ 3⟲ 4⟲",             indices: [[],  [2], [3], [4], [],  [] ]},
+        { name: "1⟲ 2⟲ 3⟲ 4⟲",         indices: [[1], [2], [3], [4], [],  [] ]},
+        { name: "1⟲ 2⟲ 3⟲ 4⟲ 5⟲",     indices: [[1], [2], [3], [4], [5], [] ]},
+        { name: "⟲ALL",                  indices: [[1], [2], [3], [4], [5], [6]]},
+        { name: "1→2",                    indices: [[],  [1], [],  [],  [],  [] ]},
+        { name: "1→3",                    indices: [[],  [],  [1], [],  [],  [] ]},
+        { name: "1→4",                    indices: [[],  [],  [],  [1], [],  [] ]},
+        { name: "1→5",                    indices: [[],  [],  [],  [],  [1], [] ]},
+        { name: "1→6",                    indices: [[],  [],  [],  [],  [],  [1]]},
+        { name: "2→3",                    indices: [[],  [],  [2], [],  [],  [] ]},
+        { name: "2→4",                    indices: [[],  [],  [],  [2], [],  [] ]},
+        { name: "3→4",                    indices: [[],  [],  [],  [3], [],  [] ]},
+        { name: "4→5",                    indices: [[],  [],  [],  [],  [4], [] ]},
+        { name: "1→4 2→5 3→6",            indices: [[],  [],  [],  [1], [2], [3]]},
+        { name: "1→5 2→6 3→4",            indices: [[],  [],  [],  [3], [1], [2]]},
+        { name: "1→2→3→4→5→6",            indices: [[],  [1], [2], [3], [4], [5]]},
+        { name: "2→1→6→5→4→3→2",          indices: [[2], [3], [4], [5], [6], [1]]},
+        { name: "1→2→3→4→5→6→1",          indices: [[6], [1], [2], [3], [4], [5]]},
+        { name: "1↔2 3↔4 5↔6",            indices: [[2], [1], [4], [3], [6], [5]]},
+        { name: "1↔4 2↔5 3↔6",            indices: [[4], [5], [6], [1], [2], [3]]},
+        { name: "(1,2,3,4,5)→6",          indices: [[],  [],  [],  [],  [],  [1, 2, 3, 4, 5]]},
+        { name: "ALL",                    indices: [[1, 2, 3, 4, 5, 6], [1, 2, 3, 4, 5, 6], [1, 2, 3, 4, 5, 6], [1, 2, 3, 4, 5, 6], [1, 2, 3, 4, 5, 6], [1, 2, 3, 4, 5, 6]]},
     ]);
 
     public static readonly chipNoiseLength:                  number = 1 << 15; 
@@ -884,9 +978,9 @@ export class Config {
         { name: "pulseWidth",             computeIndex: EnvelopeComputeIndex.pulseWidth,             displayName: "pulse width",       interleave: false, isFilter: false, maxCount: 1,                       effect: null,                  compatibleInstruments: [InstrumentType.pwm, InstrumentType.supersaw] },
         { name: "stringSustain",          computeIndex: EnvelopeComputeIndex.stringSustain,          displayName: "sustain",           interleave: false, isFilter: false, maxCount: 1,                       effect: null,                  compatibleInstruments: [InstrumentType.pickedString] },
         { name: "unison",                 computeIndex: EnvelopeComputeIndex.unison,                 displayName: "unison",            interleave: false, isFilter: false, maxCount: 1,                       effect: null,                  compatibleInstruments: [InstrumentType.chip, InstrumentType.harmonics, InstrumentType.pickedString, InstrumentType.customChipWave, InstrumentType.spectrum, InstrumentType.pwm, InstrumentType.wavetable] },
-        { name: "operatorFrequency",      computeIndex: EnvelopeComputeIndex.operatorFrequency0,     displayName: "fm# freq",          interleave: true,  isFilter: false, maxCount: Config.operatorCount,    effect: null,                  compatibleInstruments: [InstrumentType.fm] },
-        { name: "operatorAmplitude",      computeIndex: EnvelopeComputeIndex.operatorAmplitude0,     displayName: "fm# volume",        interleave: false, isFilter: false, maxCount: Config.operatorCount,    effect: null,                  compatibleInstruments: [InstrumentType.fm] },
-        { name: "feedbackAmplitude",      computeIndex: EnvelopeComputeIndex.feedbackAmplitude,      displayName: "fm feedback",       interleave: false, isFilter: false, maxCount: 1,                       effect: null,                  compatibleInstruments: [InstrumentType.fm] },
+        { name: "operatorFrequency",      computeIndex: EnvelopeComputeIndex.operatorFrequency0,     displayName: "fm# freq",          interleave: true,  isFilter: false, maxCount: Config.operatorCount+2,  effect: null,                  compatibleInstruments: [InstrumentType.fm, InstrumentType.advfm] },
+        { name: "operatorAmplitude",      computeIndex: EnvelopeComputeIndex.operatorAmplitude0,     displayName: "fm# volume",        interleave: false, isFilter: false, maxCount: Config.operatorCount+2,  effect: null,                  compatibleInstruments: [InstrumentType.fm, InstrumentType.advfm] },
+        { name: "feedbackAmplitude",      computeIndex: EnvelopeComputeIndex.feedbackAmplitude,      displayName: "fm feedback",       interleave: false, isFilter: false, maxCount: 1,                       effect: null,                  compatibleInstruments: [InstrumentType.fm, InstrumentType.advfm] },
         { name: "pitchShift",             computeIndex: EnvelopeComputeIndex.pitchShift,             displayName: "pitch shift",       interleave: false, isFilter: false, maxCount: 1,                       effect: EffectType.pitchShift, compatibleInstruments: null },
         { name: "detune",                 computeIndex: EnvelopeComputeIndex.detune,                 displayName: "detune",            interleave: false, isFilter: false, maxCount: 1,                       effect: EffectType.detune,     compatibleInstruments: null },
         { name: "vibratoDepth",           computeIndex: EnvelopeComputeIndex.vibratoDepth,           displayName: "vibrato range",     interleave: false, isFilter: false, maxCount: 1,                       effect: EffectType.vibrato,    compatibleInstruments: null },
@@ -895,7 +989,7 @@ export class Config {
         { name: "supersawDynamism",       computeIndex: EnvelopeComputeIndex.supersawDynamism,       displayName: "dynamism",          interleave: false, isFilter: false, maxCount: 1,                       effect: null,                  compatibleInstruments: [InstrumentType.supersaw] },
 		{ name: "supersawSpread",         computeIndex: EnvelopeComputeIndex.supersawSpread,         displayName: "spread",            interleave: false, isFilter: false, maxCount: 1,                       effect: null,                  compatibleInstruments: [InstrumentType.supersaw] },
 		{ name: "supersawShape",          computeIndex: EnvelopeComputeIndex.supersawShape,          displayName: "saw↔pulse",         interleave: false, isFilter: false, maxCount: 1,                       effect: null,                  compatibleInstruments: [InstrumentType.supersaw] },
-        { name: "operatorPulseWidth",     computeIndex: EnvelopeComputeIndex.operatorPulseWidth0,    displayName: "fm # pwm",          interleave: false, isFilter: false, maxCount: Config.operatorCount,    effect: null,                  compatibleInstruments: [InstrumentType.fm, /*InstrumentType.fm6op*/] },
+        { name: "operatorPulseWidth",     computeIndex: EnvelopeComputeIndex.operatorPulseWidth0,    displayName: "fm # pwm",          interleave: false, isFilter: false, maxCount: Config.operatorCount+2,  effect: null,                  compatibleInstruments: [InstrumentType.fm, InstrumentType.advfm] },
         { name: "distortion",             computeIndex: EnvelopeComputeIndex.distortion,             displayName: "distortion",        interleave: false, isFilter: false, maxCount: 1,                       effect: EffectType.distortion, compatibleInstruments: null },
 /*      { name: "noteFilterGain",         computeIndex: EnvelopeComputeIndex.noteFilterGain0,        displayName: "n. filter # vol",   interleave: false, isFilter: true,  maxCount: Config.filterMaxPoints,  effect: EffectType.noteFilter, compatibleInstruments: null },
         { name: "bitcrusherQuantization", computeIndex: EnvelopeComputeIndex.bitcrusherQuantization, displayName: "bit crush",         interleave: false, isFilter: false, maxCount: 1,                       effect: EffectType.bitcrusher, compatibleInstruments: null },
@@ -1000,6 +1094,12 @@ export class Config {
         { name: "fm slider 4",     pianoName: "FM 4",                   maxRawVol: 15,                                                     newNoteVol: 15,                                                           forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.length,
             promptName: "FM Slider 4",                  promptDesc: ["This setting affects the strength of the fourth FM slider, just like the corresponding slider on your instrument.", "It works in a multiplicative way, so at $HI your slider will sound the same is its default value, and at $LO it will sound like it has been moved all the way to the left.", "For the full range of control with this mod, move your underlying slider all the way to the right.", "[MULTIPLICATIVE] [$LO - $HI] [%]"] },
 
+        { name: "fm slider 5",     pianoName: "FM 5",                   maxRawVol: 15,                                                     newNoteVol: 15,                                                           forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.length,
+            promptName: "FM Slider 5",                  promptDesc: ["This setting affects the strength of the fifth FM slider, just like the corresponding slider on your instrument.", "It works in a multiplicative way, so at $HI your slider will sound the same is its default value, and at $LO it will sound like it has been moved all the way to the left.", "For the full range of control with this mod, move your underlying slider all the way to the right.", "[MULTIPLICATIVE] [$LO - $HI] [%]"] },
+
+        { name: "fm slider 6",     pianoName: "FM 6",                   maxRawVol: 15,                                                     newNoteVol: 15,                                                           forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.length,
+            promptName: "FM Slider 6",                  promptDesc: ["This setting affects the strength of the sixth FM slider, just like the corresponding slider on your instrument.", "It works in a multiplicative way, so at $HI your slider will sound the same is its default value, and at $LO it will sound like it has been moved all the way to the left.", "For the full range of control with this mod, move your underlying slider all the way to the right.", "[MULTIPLICATIVE] [$LO - $HI] [%]"] },
+
         { name: "fm feedback",     pianoName: "FM Feedback",            maxRawVol: 15,                                                     newNoteVol: 15,                                                           forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.length,
             promptName: "FM Feedback",                  promptDesc: ["This setting affects the strength of the FM feedback slider, just like the corresponding slider on your instrument.", "It works in a multiplicative way, so at $HI your slider will sound the same is its default value, and at $LO it will sound like it has been moved all the way to the left.", "For the full range of control with this mod, move your underlying slider all the way to the right.", "[MULTIPLICATIVE] [$LO - $HI] [%]"] },
 
@@ -1096,11 +1196,11 @@ export class Config {
         { name: "fm pwm 4", pianoName: "FM PWM 4", maxRawVol: Config.pulseWidthRange * 2, newNoteVol: Config.pulseWidthRange, forSong: false, convertRealFactor: 0, associatedEffect: EffectType.length,
             promptName: "FM Pulse Width 4", promptDesc: ["This setting controls the width of the pulse wave for the fourth FM operator, just like the pulse width slider, with double the range.", "At $HI, your instrument will sound like a very thin pulse wave (on 99% of the time). It will gradually sound thicker towards $MID, where it will sound like a pure square wave (on 50% of the time), and narrower down after $MID down to $LO, where it will be inaudible (as it is on 0% of the time).", "Changing pulse width randomly between a few values is a common strategy in chiptune music to lend some personality to a lead instrument.", "[OVERWRITING] [$LO - $HI] [%Duty]"] },
 
-        /*{ name: "fm pwm 5", pianoName: "FM PWM 5", maxRawVol: Config.pulseWidthRange * 2, newNoteVol: Config.pulseWidthRange, forSong: false, convertRealFactor: 0, associatedEffect: EffectType.length,
+        { name: "fm pwm 5", pianoName: "FM PWM 5", maxRawVol: Config.pulseWidthRange * 2, newNoteVol: Config.pulseWidthRange, forSong: false, convertRealFactor: 0, associatedEffect: EffectType.length,
             promptName: "FM Pulse Width 5", promptDesc: ["This setting controls the width of the pulse wave for the fifth FM operator, just like the pulse width slider, with double the range.", "At $HI, your instrument will sound like a very thin pulse wave (on 99% of the time). It will gradually sound thicker towards $MID, where it will sound like a pure square wave (on 50% of the time), and narrower down after $MID down to $LO, where it will be inaudible (as it is on 0% of the time).", "Changing pulse width randomly between a few values is a common strategy in chiptune music to lend some personality to a lead instrument.", "[OVERWRITING] [$LO - $HI] [%Duty]"] },
 
         { name: "fm pwm 6", pianoName: "FM PWM 6", maxRawVol: Config.pulseWidthRange * 2, newNoteVol: Config.pulseWidthRange, forSong: false, convertRealFactor: 0, associatedEffect: EffectType.length,
-            promptName: "FM Pulse Width 6", promptDesc: ["This setting controls the width of the pulse wave for the sixth FM operator, just like the pulse width slider, with double the range.", "At $HI, your instrument will sound like a very thin pulse wave (on 99% of the time). It will gradually sound thicker towards $MID, where it will sound like a pure square wave (on 50% of the time), and narrower down after $MID down to $LO, where it will be inaudible (as it is on 0% of the time).", "Changing pulse width randomly between a few values is a common strategy in chiptune music to lend some personality to a lead instrument.", "[OVERWRITING] [$LO - $HI] [%Duty]"] },*/
+            promptName: "FM Pulse Width 6", promptDesc: ["This setting controls the width of the pulse wave for the sixth FM operator, just like the pulse width slider, with double the range.", "At $HI, your instrument will sound like a very thin pulse wave (on 99% of the time). It will gradually sound thicker towards $MID, where it will sound like a pure square wave (on 50% of the time), and narrower down after $MID down to $LO, where it will be inaudible (as it is on 0% of the time).", "Changing pulse width randomly between a few values is a common strategy in chiptune music to lend some personality to a lead instrument.", "[OVERWRITING] [$LO - $HI] [%Duty]"] },
 
         { name: "slide speed",     pianoName: "Slide Speed",            maxRawVol: 23,                                                     newNoteVol: 0,                                                            forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.transition,
             promptName: "Slide Speed",                  promptDesc: ["This setting controls the speed at which your instrument 'slides' between notes.", "Note that the lower numbers will slide faster, while the higher numbers will slide slower.", "[OVERWRITING] [$HI - $LO]"]},

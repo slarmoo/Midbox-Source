@@ -526,7 +526,7 @@ export class PatternEditor {
     private _snapToPitch(guess: number, min: number, max: number): number {
         if (guess < min) guess = min;
         if (guess > max) guess = max;
-        const scale: ReadonlyArray<boolean> = this._doc.prefs.notesOutsideScale ? Config.scales.dictionary["Free"].flags : Config.scales[this._doc.song.scale].flags;
+        const scale: ReadonlyArray<boolean> = this._doc.prefs.notesOutsideScale ? Config.scales.dictionary["Free"].flags : this._doc.song.scale == Config.scales.dictionary["Custom Scale"].index ? this._doc.song.scaleCustom : Config.scales[this._doc.song.scale].flags;
         if (scale[Math.floor(guess) % Config.pitchesPerOctave] || this._doc.song.getChannelIsNoise(this._doc.channel) || this._doc.song.getChannelIsMod(this._doc.channel)) {
 
             return Math.floor(guess);
@@ -1732,7 +1732,8 @@ export class PatternEditor {
                     this._dragChange = sequence;
                     this._doc.setProspectiveChange(this._dragChange);
 
-                    const notesInScale: number = Config.scales[this._doc.song.scale].flags.filter(x => x).length;
+                    let scale = this._doc.song.scale == Config.scales.dictionary["Custom Scale"].index ? this._doc.song.scaleCustom : Config.scales[this._doc.song.scale].flags;
+                    const notesInScale: number = scale.filter(x => x).length;
                     const pitchRatio: number = this._doc.song.getChannelIsNoise(this._doc.channel) ? 1 : 12 / notesInScale;
                     const draggedParts: number = Math.round((this._mouseX - this._mouseXStart) / (this._partWidth * minDivision)) * minDivision;
                     const draggedTranspose: number = Math.round((this._mouseYStart - this._mouseY) / (this._pitchHeight * pitchRatio));
@@ -2365,8 +2366,9 @@ export class PatternEditor {
         }
 
         for (let j: number = 0; j < Config.pitchesPerOctave; j++) {
+            let scale = this._doc.song.scale == Config.scales.dictionary["Custom Scale"].index ? this._doc.song.scaleCustom : Config.scales[this._doc.song.scale].flags;
 
-            this._backgroundPitchRows[j].style.visibility = Config.scales[this._doc.song.scale].flags[j] ? "visible" : "hidden";
+            this._backgroundPitchRows[j].style.visibility = scale[j] ? "visible" : "hidden";
         }
 
         if (this._doc.song.getChannelIsNoise(this._doc.channel)) {

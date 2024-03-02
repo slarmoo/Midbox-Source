@@ -69,6 +69,7 @@ export class SongDocument {
 		public pickedStringOnRandomization: boolean = true;
 		public spectrumOnRandomization: boolean = true;
 		public FMOnRandomization: boolean = true;
+		public ADVFMOnRandomization: boolean = true;
 		public customChipOnRandomization: boolean = true;
 		public noiseOnRandomization: boolean = true;
 		public wavetableOnRandomization: boolean = true;
