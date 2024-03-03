@@ -1021,6 +1021,9 @@ export class Config {
         { name: "clang",       samples: generateClangNoise()      },
         { name: "metal",       samples: generateMetalNoise()      },
         { name: "rounded",     samples: generateRoundedSineWave() },
+        { name: "secant",      samples: generateSecantWave()      },
+        { name: "double sine", samples: generateDoubleSineWave()  },
+        { name: "blocky sine", samples: generateBlockySineWave()  },
     ]);
 
     public static readonly pwmOperatorWaves: DictionaryArray<OperatorWave> = toNameMap([
@@ -1514,7 +1517,7 @@ function generateSquareWave(phaseWidth: number = 0): Float32Array {
     const centerPoint: number = Config.sineWaveLength / 4;
     for (let i: number = 0; i < Config.sineWaveLength + 1; i++) {
         wave[i] = +((Math.abs(i - centerPoint) < phaseWidth * Config.sineWaveLength / 2)
-            || ((Math.abs(i - Config.sineWaveLength - centerPoint) < phaseWidth * Config.sineWaveLength / 2))) * 2 - 1;
+        || ((Math.abs(i - Config.sineWaveLength - centerPoint) < phaseWidth * Config.sineWaveLength / 2))) * 2 - 1;
     }
     return wave;
 }
@@ -1531,31 +1534,64 @@ function generateSawWave(inverse: boolean = false): Float32Array {
 function generateClangNoise() { let drumBuffer: number = 1;
     const wave = new Float32Array(Config.sineWaveLength + 1);
     for (let i = 0; i < Config.sineWaveLength + 1; i++) {
-    wave[i] = (drumBuffer & 1) * 2.0 - 1.0;
-    let newBuffer: number = drumBuffer >> 1;
-    if (((drumBuffer + newBuffer) & 1) == 1) {
-        newBuffer += 2 << 14;
-    }
-    drumBuffer = newBuffer;
+        wave[i] = (drumBuffer & 1) * 2.0 - 1.0;
+        let newBuffer: number = drumBuffer >> 1;
+        if (((drumBuffer + newBuffer) & 1) == 1) {
+            newBuffer += 2 << 14;
         }
-        return wave;
+        drumBuffer = newBuffer;
     }
+    return wave;
+}
 
 function generateMetalNoise() {
     const wave = new Float32Array(Config.sineWaveLength + 1);
     for (let i = 0; i < Config.sineWaveLength + 1; i++) {
-    wave[i] = Math.random() * Math.sin(Math.cos(Config.sineWaveLength) * 3 - 8.0 / Config.sineWaveLength - 1.0);
-        }
-        return wave;
+        wave[i] = Math.random() * Math.sin(Math.cos(Config.sineWaveLength) * 3 - 8.0 / Config.sineWaveLength - 1.0);
     }
+    return wave;
+}
 
 function generateRoundedSineWave() {
-        const wave = new Float32Array(Config.sineWaveLength + 1);
-        for (let i = 0; i < Config.sineWaveLength + 1; i++) {
-            wave[i] = Math.round(Math.sin(i * Math.PI * 2.0 / Config.sineWaveLength));
-        }
-        return wave;
-	}
+    const wave = new Float32Array(Config.sineWaveLength + 1);
+    for (let i = 0; i < Config.sineWaveLength + 1; i++) {
+        wave[i] = Math.round(Math.sin(i * Math.PI * 2.0 / Config.sineWaveLength));
+    }
+    return wave;
+}
+
+function generateSecantWave() {
+    const wave: Float32Array = new Float32Array(Config.sineWaveLength + 1);
+    for (let i = 0; i < Config.sineWaveLength + 1; i++) {
+        wave[i] = 1 - (Math.sin((i / Config.sineWaveLength) * Math.PI * 2.0) % 2 + 2) % 2;
+    }
+    return wave;
+}
+
+function generateDoubleSineWave() {
+    const wave: Float32Array = new Float32Array(Config.sineWaveLength + 1);
+    for (let i: number = 0; i < Config.sineWaveLength + 1; i++) {
+        wave[i] = Math.abs(Math.sin(i * Math.PI * 2.0 / Config.sineWaveLength)) * 2 - 1;
+    }
+    return wave;
+}
+
+function generateBlockySineWave() {
+    const wave: Float32Array = new Float32Array(Config.sineWaveLength + 1);
+    for (let i = 0; i < Config.sineWaveLength + 1; i++) {
+        wave[i] = 1 - (Math.sin((i / Config.sineWaveLength) * Math.PI * 2.0) % 2 + 2) % 2;
+    }
+    return wave;
+}
+
+/*function generateWhiteNoise() {
+    const wave: Float32Array = new Float32Array(Config.sineWaveLength + 1);
+    for (let i: number = 0; i < Config.sineWaveLength + 1; i++) {
+        wave[i] = Math.random() * 2.0 - 1.0;
+    }
+    return wave;
+}*/
+
 export function getArpeggioPitchIndex(pitchCount: number, useFastTwoNoteArp: boolean, useBounceArp: boolean, arpeggio: number): number {
     let arpeggioPattern: ReadonlyArray<number> = (useBounceArp ? Config.bounceArpeggioPatterns : Config.arpeggioPatterns)[pitchCount - 1];
     if (arpeggioPattern != null) {

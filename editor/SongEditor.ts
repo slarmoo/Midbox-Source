@@ -1758,7 +1758,10 @@ export class SongEditor {
                 _.waveform5Label,
                 _.waveform6Label,
                 _.waveform7Label,
-                _.waveform8Label
+                _.waveform8Label,
+                _.waveform9Label,
+                _.waveform10Label,
+                _.waveform11Label
 
             ]);
             const waveformDropdown: HTMLButtonElement = button({ style: "margin-left:0em; margin-right: 2px; height:1.5em; width: 8px; max-width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.FM, i) }, "▼");

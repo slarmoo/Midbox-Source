@@ -407,6 +407,9 @@ export class Localization {
     public static waveform6Label: string = "trapezoid";
     public static waveform7Label: string = "clang";
     public static waveform8Label: string = "metal";
+    public static waveform9Label: string = "secant";
+    public static waveform10Label: string = "double sine";
+    public static waveform11Label: string = "blocky sine";
     public static envelope1Label: string = "none";
     public static envelope2Label: string = "note size";
     public static envelope3Label: string = "punch";
@@ -1284,6 +1287,9 @@ if (language == "spanish") {
     Localization.waveform6Label = "trapezoide";
     Localization.waveform7Label = "tañido";
     Localization.waveform8Label = "metal";
+    Localization.waveform9Label = "secante";
+    Localization.waveform10Label = "senoidal doble";
+    Localization.waveform11Label = "senoidal cuadrado";
     Localization.envelope1Label = "ninguno";
     Localization.envelope2Label = "tamaño del nota";
     Localization.envelope3Label = "puñetazo";
