@@ -211,6 +211,8 @@ export interface Modulator extends BeepBoxOption {
     readonly forSong:          boolean;    
     convertRealFactor:         number;     
 //  readonly checkboxMod:      boolean;
+//  The commented out thing above is for deciding if a modulator is for something that can only have
+//  two values, and thus would be like a checkbox modulator of sorts.
     readonly associatedEffect: EffectType; 
     readonly promptName:       string;     
     readonly promptDesc:       string[];   
@@ -389,7 +391,9 @@ export class Config {
         { name: "accurate sine",   expression: 0.3,   samples: centerWave            ([2, 7, 11, 14, 16, 18, 19, 20, 21, 22, 22, 23, 23, 23, 24, 24, 24, 24, 23, 23, 23, 22, 22, 21, 20, 19, 18, 16, 14, 11, 7, 2, -2, -7, -11, -14, -16, -18, -19, -20, -21, -22, -22, -23, -23, -23, -24, -24, -24, -24, -23, -23, -23, -22, -22, -21, -20, -19, -18, -16, -14, -11, -7, -2])},
         { name: "accurate tri",    expression: 0.35,  samples: centerWave            ([1, 2, 4, 5, 7, 8, 10, 11, 13, 14, 16, 17, 19, 20, 22, 23, 23, 22, 20, 19, 17, 16, 14, 13, 11, 10, 8, 7, 5, 4, 2, 1, -1, -2, -4, -5, -7,-8, -10, -11, -13, -14, -16, -17, -19, -20, -22, -23, -23, -22, -20, -19, -17, -16, -14, -13, -11, -10, -8, -7, -5, -4, -2, -1])},
         { name: "secant",          expression: 0.3,   samples: centerWave            ([23, 18, 13, 10, 8, 6, 5, 4, 3, 2, 2, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 2, 2, 3, 4, 5, 6, 8, 10, 13, 18, 23, -23, -18, -14, -10, -8, -6, -5, -4, -3, -2, -2, -1, -1, -1, 0, 0, 0, 0, -1, -1, -1, -2, -2, -3, -4, -5, -6, -8, -10, -14, -18, -23])},
-        { name: "glitch 2",        expression: 0.4,   samples: centerWave            ([0, 24, 0, 24, 0, 24, 0, 24, 0, -24, 0, -24, 0, -24, 0, -24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -24, 0, -24, 0, -24, 0, -24, 0, 24, 0, 24, 0, 24, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])}
+        { name: "glitch 2",        expression: 0.4,   samples: centerWave            ([0, 24, 0, 24, 0, 24, 0, 24, 0, -24, 0, -24, 0, -24, 0, -24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -24, 0, -24, 0, -24, 0, -24, 0, 24, 0, 24, 0, 24, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])},
+        { name: "trapezoid",       expression: 1.0,   samples: centerWave            ([1.0 / 15.0, 6.0 / 15.0, 10.0 / 15.0, 14.0 / 15.0, 15.0 / 15.0, 15.0 / 15.0, 15.0 / 15.0, 15.0 / 15.0, 15.0 / 15.0, 15.0 / 15.0, 15.0 / 15.0, 15.0 / 15.0, 14.0 / 15.0, 10.0 / 15.0, 6.0 / 15.0, 1.0 / 15.0, -1.0 / 15.0, -6.0 / 15.0, -10.0 / 15.0, -14.0 / 15.0, -15.0 / 15.0, -15.0 / 15.0, -15.0 / 15.0, -15.0 / 15.0, -15.0 / 15.0, -15.0 / 15.0, -15.0 / 15.0, -15.0 / 15.0, -14.0 / 15.0, -10.0 / 15.0, -6.0 / 15.0, -1.0 / 15.0,])},
+        { name: "accurate trapez", expression: 0.35,  samples: centerWave            ([1, 4, 7, 10, 13, 16, 19, 22, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 22, 19, 16, 13, 10, 7, 4, 1, -1, -4, -7, -10, -13, -16, -19, -22, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -22, -19, -16, -13, -10, -7, -4, -1])}
     ]);
 
     public static readonly chipWaves:  DictionaryArray<ChipWave>  = rawChipToIntegrated(Config.rawChipWaves);
@@ -481,6 +485,7 @@ export class Config {
         { name: "corrupt",         voices: 2, spread: 18,       offset:  48.0,   expression: 0.7,  sign:  0.7 },
         { name: "weird octave",    voices: 2, spread: 5.85,     offset:  5.85,   expression: 0.75, sign:  1.0 },
         { name: "bent",            voices: 2, spread: 9.5,      offset:  4.5,    expression: 0.8,  sign: -0.6 },
+        { name: "hecking gosh",    voices: 2, spread: 6.25,     offset: -6.0,    expression: 0.8,  sign: -0.7 },
     ]);
 
     public static readonly effectNames: ReadonlyArray<string> =     ["reverb", "chorus", "panning", "distortion", "bitcrusher", "note filter", "echo", "pitch shift", "detune", "vibrato", "transition type", "chord type", "percussion", "test"];
@@ -573,7 +578,7 @@ export class Config {
         { name: "1←4(2←5 3←6",      carrierCount: 3, associatedCarrier: [1, 2, 3, 1, 2, 3 ], modulatedBy: [[2, 3, 4],       [5],          [6],       [],     [],  []]},
     ]);
 
-    public static readonly operatorCarrierInterval: ReadonlyArray<number> = [0.0, 0.04, -0.073, 0.091];
+    public static readonly operatorCarrierInterval: ReadonlyArray<number> = [0.0, 0.04, -0.073, 0.091, 0.061, 0.024];
     public static readonly operatorAmplitudeMax:    number = 15;
     public static readonly operatorFrequencies: DictionaryArray<OperatorFrequency> = toNameMap([
         { name: "0.125×", mult: 0.125, hzOffset:  0.0, amplitudeSign:  1.0 },

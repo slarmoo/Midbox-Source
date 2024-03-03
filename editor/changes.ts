@@ -3113,7 +3113,7 @@ export class ChangeSupersawShape extends ChangeInstrumentSlider {
 	constructor(doc: SongDocument, oldValue: number, newValue: number) {
 		super(doc);
 		this._instrument.supersawShape = newValue;
-        doc.synth.unsetMod(Config.modulators.dictionary["saw shape"].index, doc.channel, doc.getCurrentInstrument());
+        doc.synth.unsetMod(Config.modulators.dictionary["shape"].index, doc.channel, doc.getCurrentInstrument());
 		doc.notifier.changed();
 		if (oldValue != newValue) this._didSomething();
 	}

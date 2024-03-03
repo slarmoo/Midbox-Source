@@ -633,7 +633,7 @@ class CustomAlgorithmCanvas {
                                 this.lookUpArray[i] = [this.drawArray.length - (testPos[0] + 1), testPos[1]];
                                 break;
                             }
-                            console.log(testPos[1])
+                            //console.log(testPos[1])
                         }
                     } else {
                         this.drawArray[testPos[0] ][testPos[1]] = i + 1;
@@ -1074,7 +1074,8 @@ export class SongEditor {
         _.wave28Label,
         _.wave29Label,
         _.wave30Label,
-        _.wave31Label
+        _.wave31Label,
+        _.wave32Label
 
     ]);
     private readonly _chipNoiseSelect: HTMLSelectElement = buildOptions(select(), [
@@ -1253,7 +1254,8 @@ export class SongEditor {
         _.unison21Label,
         _.unison22Label,
         _.unison23Label,
-        _.unison24Label
+        _.unison24Label,
+        _.unison25Label
 
     ]);
     private readonly _unisonSelectRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("unison") }, span(_.unisonLabel)), div({ class: "selectContainer" }, this._unisonSelect));
@@ -2769,7 +2771,7 @@ export class SongEditor {
                 setSelectedValue(this._feedbackTypeSelect, instrument.feedbackType);
                 this._feedbackAmplitudeSlider.updateValue(instrument.feedbackAmplitude);
                 for (let i: number = 0; i < Config.operatorCount + (instrument.type == InstrumentType.advfm ? 2 : 0); i++) {
-                    const isCarrier: boolean = (i < Config.algorithms[instrument.algorithm].carrierCount);
+                    const isCarrier: boolean = instrument.type == InstrumentType.fm ? (i < Config.algorithms[instrument.algorithm].carrierCount): (i < instrument.customAlgorithm.carrierCount);
                     this._operatorRows[i].style.color = isCarrier ? ColorConfig.primaryText : "";
                     setSelectedValue(this._operatorFrequencySelects[i], instrument.operators[i].frequency);
                     this._operatorAmplitudeSliders[i].updateValue(instrument.operators[i].amplitude);
@@ -2789,7 +2791,7 @@ export class SongEditor {
                         this._operatorWaveformHints[i].style.display = "";
                     }
                 }
-                if (instrument.type == InstrumentType.advfm){
+                if (instrument.type == InstrumentType.advfm) {
                     setSelectedValue(this._algorithm6OpSelect, instrument.algorithm6Op);
                     setSelectedValue(this._feedback6OpTypeSelect, instrument.feedbackType6Op);
                     this._customAlgorithmCanvas.redrawCanvas();
@@ -2813,6 +2815,8 @@ export class SongEditor {
                 }
             }
             else {
+                this._algorithm6OpSelectRow.style.display = "none";
+                this._feedback6OpRow1.style.display = "none";
                 this._algorithmSelectRow.style.display = "none";
                 this._phaseModGroup.style.display = "none";
                 this._feedbackRow1.style.display = "none";

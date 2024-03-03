@@ -187,6 +187,8 @@ export class Localization {
     public static wave29Label: string = "accurate triangle";
     public static wave30Label: string = "secant";
     public static wave31Label: string = "glitch 2";
+    public static wave32Label: string = "trapezoid";
+    public static wave33Label: string = "accurate trapezoid";
     public static noise1Label: string = "retro";
     public static noise2Label: string = "white";
     public static noise3Label: string = "clang";
@@ -280,6 +282,7 @@ export class Localization {
     public static unison22Label: string = "corrupt";
     public static unison23Label: string = "weird octave";
     public static unison24Label: string = "bent";
+    public static unison25Label: string = "hecking gosh";
     public static transition1Label: string = "normal";
     public static transition2Label: string = "interrupt";
     public static transition3Label: string = "continue";
@@ -1062,6 +1065,8 @@ if (language == "spanish") {
     Localization.wave29Label = "triángulo preciso";
     Localization.wave30Label = "secante";
     Localization.wave31Label = "desperfecto 2";
+    Localization.wave32Label = "trapezoide";
+    Localization.wave33Label = "trapezoide preciso";
     Localization.noise1Label = "retro";
     Localization.noise2Label = "blanco";
     Localization.noise3Label = "tañido";
@@ -1155,6 +1160,7 @@ if (language == "spanish") {
     Localization.unison22Label = "corrupto";
     Localization.unison23Label = "octava extraño";
     Localization.unison24Label = "torcido";
+    Localization.unison25Label = "hecking gosh";
     Localization.transition1Label = "normal";
     Localization.transition2Label = "interrumpir";
     Localization.transition3Label = "continuar";

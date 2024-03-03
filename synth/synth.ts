@@ -1426,7 +1426,7 @@ export class Instrument {
         }
 
         this.spectrumWave = new SpectrumWave(isNoiseChannel);
-        for (let i: number = 0; i < Config.operatorCount; i++) {
+        for (let i: number = 0; i < Config.operatorCount+2; i++) {
             this.operators[i] = new Operator(i);
         }
         for (let i: number = 0; i < Config.drumCount; i++) {
@@ -7738,8 +7738,8 @@ export class Synth {
                 // Check effects
                 if (!((Config.modulators[instrument.modulators[mod]].associatedEffect != EffectType.length && !(tgtInstrument.effects & (1 << Config.modulators[instrument.modulators[mod]].associatedEffect)))
                     // Instrument type specific
-                    || (tgtInstrument.type != InstrumentType.fm && (str == "fm slider 1" || str == "fm slider 2" || str == "fm slider 3" || str == "fm slider 4" || str == "fm feedback" || str == "fm pwm 1" || str == "fm pwm 2" || str == "fm pwm 3" || str == "fm pwm 4"))
-                    || (tgtInstrument.type != InstrumentType.advfm && (str == "fm slider 1" || str == "fm slider 2" || str == "fm slider 3" || str == "fm slider 4" || str == "fm slider 5" || str == "fm slider 6" || str == "fm feedback" || str == "fm pwm 1" || str == "fm pwm 2" || str == "fm pwm 3" || str == "fm pwm 4" || str == "fm pwm 5" || str == "fm pwm 6"))
+                    || ((tgtInstrument.type != InstrumentType.fm && tgtInstrument.type != InstrumentType.advfm) && (str == "fm slider 1" || str == "fm slider 2" || str == "fm slider 3" || str == "fm slider 4" || str == "fm feedback" || str == "fm pwm 1" || str == "fm pwm 2" || str == "fm pwm 3" || str == "fm pwm 4"))
+                    || (tgtInstrument.type != InstrumentType.advfm && (str == "fm slider 5" || str == "fm slider 6" || str == "fm pwm 5" || str == "fm pwm 6"))
                     || ((tgtInstrument.type != InstrumentType.pwm && tgtInstrument.type != InstrumentType.supersaw) && (str == "pulse width"))
                     || ((tgtInstrument.type != InstrumentType.supersaw) && (str == "dynamism" || str == "spread" || str == "saw shape"))
                     || (tgtInstrument.type != InstrumentType.wavetable && (str == "cycle wave" || str == "wavetable speed"))
@@ -10137,11 +10137,11 @@ export class Synth {
                     if (this.isModActive(Config.modulators.dictionary["fm slider 1"].index + i, channelIndex, tone.instrumentIndex)) {
                         amplitudeStart *= this.getModValue(Config.modulators.dictionary["fm slider 1"].index + i, channelIndex, tone.instrumentIndex, false) / 15.0;
                         amplitudeEnd *= this.getModValue(Config.modulators.dictionary["fm slider 1"].index + i, channelIndex, tone.instrumentIndex, true) / 15.0;
-                    } else {
-                        if (this.isModActive(Config.modulators.dictionary["fm slider 5"].index + i-4, channelIndex, tone.instrumentIndex)) {
-                            amplitudeStart *= this.getModValue(Config.modulators.dictionary["fm slider 5"].index + i-4, channelIndex, tone.instrumentIndex, false) / 15.0;
-                            amplitudeEnd *= this.getModValue(Config.modulators.dictionary["fm slider 5"].index + i-4, channelIndex, tone.instrumentIndex, true) / 15.0;
-                        }
+                    }
+                } else {
+                    if (this.isModActive(Config.modulators.dictionary["fm slider 5"].index + i-4, channelIndex, tone.instrumentIndex)) {
+                        amplitudeStart *= this.getModValue(Config.modulators.dictionary["fm slider 5"].index + i-4, channelIndex, tone.instrumentIndex, false) / 15.0;
+                        amplitudeEnd *= this.getModValue(Config.modulators.dictionary["fm slider 5"].index + i-4, channelIndex, tone.instrumentIndex, true) / 15.0;
                     }
                 }
 
@@ -10663,13 +10663,13 @@ export class Synth {
             return Synth.drumsetSynth;
         } else if (instrument.type == InstrumentType.advfm) {
             let operatorWaveFingerprint: string = "";
-            for (let i: number = 0; i < Config.operatorCount; i++) {
+            for (let i: number = 0; i < Config.operatorCount+2; i++) {
                 operatorWaveFingerprint += instrument.operators[i].waveform == 3 ? "1" : "0";
             }
             const fingerprint: string = (
                 instrument.customAlgorithm.name
                 + "_"
-                + instrument.customFeedbackType
+                + instrument.customFeedbackType.name
                 + "_"
                 + operatorWaveFingerprint
             );
