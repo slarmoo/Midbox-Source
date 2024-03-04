@@ -96,6 +96,7 @@ export const enum DropdownID {
     FM         = 4,
     Strum      = 5,
     Envelope   = 6,
+    Unison     = 7,
 
 }
 
@@ -370,8 +371,8 @@ export class Config {
         { name: "1/12 pulse",      expression: 0.55,  samples: centerWave            ([1.0,  -1.0,  -1.0,  -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0])},
         { name: "1/16 pulse",      expression: 0.575, samples: centerWave            ([1.0,  -1.0,  -1.0,  -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0])},
         { name: "heavy saw",       expression: 0.5,   samples: centerWave            ([1.0,  -1.0,   2.0,  -1.0,  0.0, 3.0, 1.0, -1.0, 2.0, -1.0, 0.0, 0.0])},
-        { name: "bass-y",          expression: 0.3,   samples: centerWave            ([1.0,  -5.0,   4.0,  -3.0,  7.0, -2.0, 3.0, -3.0, 6.0])},
-        { name: "strange",         expression: 0.175, samples: centerWave            ([1.0,   11.0,  1.0,  -11.0, -1.0, -11.0, 4.0, -6.0, 9.0, -1.0, -7.0, 11.0, 2.0, -5.0, 9.0, 9.0, -10.0])},
+        { name: "bass-y",          expression: 0.25,   samples: centerWave            ([1.0,  -5.0,   4.0,  -3.0,  7.0, -2.0, 3.0, -3.0, 6.0])},
+        { name: "strange",         expression: 0.125, samples: centerWave            ([1.0,   11.0,  1.0,  -11.0, -1.0, -11.0, 4.0, -6.0, 9.0, -1.0, -7.0, 11.0, 2.0, -5.0, 9.0, 9.0, -10.0])},
         { name: "sawtooth",        expression: 0.65,  samples: centerWave            ([1.0 /  31.0,  3.0 /  31.0, 5.0 / 31.0, 7.0 / 31.0, 9.0 / 31.0, 11.0 / 31.0, 13.0 / 31.0, 15.0 / 31.0, 17.0 / 31.0, 19.0 / 31.0, 21.0 / 31.0, 23.0 / 31.0, 25.0 / 31.0, 27.0 / 31.0, 29.0 / 31.0, 31.0 / 31.0, -31.0 / 31.0, -29.0 / 31.0, -27.0 / 31.0, -25.0 / 31.0, -23.0 / 31.0, -21.0 / 31.0, -19.0 / 31.0, -17.0 / 31.0, -15.0 / 31.0, -13.0 / 31.0, -11.0 / 31.0, -9.0 / 31.0, -7.0 / 31.0, -5.0 / 31.0, -3.0 / 31.0, -1.0 / 31.0])},
         { name: "double saw",      expression: 0.5,   samples: centerWave            ([0.0,  -0.2,  -0.4,  -0.6, -0.8, -1.0, 1.0, -0.8, -0.6, -0.4, -0.2, 1.0, 0.8, 0.6, 0.4, 0.2])},
         { name: "double pulse",    expression: 0.4,   samples: centerWave            ([1.0,   1.0,   1.0,   1.0,  1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0])},
@@ -388,12 +389,12 @@ export class Config {
         { name: "organ",           expression: 0.2,   samples: centerAndNormalizeWave([11.0,  10.0,  12.0,  11.0, 14.0, 7.0, 5.0, 5.0, 12.0, 10.0, 10.0, 9.0, 12.0, 6.0, 4.0, 5.0, 13.0, 12.0, 12.0, 10.0, 12.0, 5.0, 2.0, 2.0, 8.0, 6.0, 6.0, 5.0, 8.0, 3.0, 2.0, 1.0])},
         { name: "pan flute",       expression: 0.35,  samples: centerAndNormalizeWave([1.0,   4.0,   7.0,   6.0,  7.0, 9.0, 7.0, 7.0, 11.0, 12.0, 13.0, 15.0, 13.0, 11.0, 11.0, 12.0, 13.0, 10.0, 7.0, 5.0, 3.0, 6.0, 10.0, 7.0, 3.0, 3.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0])},
         { name: "glitch",          expression: 0.5,   samples: centerWave            ([1.0,   1.0,   1.0,   1.0,  1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0])},
-        { name: "accurate sine",   expression: 0.3,   samples: centerWave            ([2, 7, 11, 14, 16, 18, 19, 20, 21, 22, 22, 23, 23, 23, 24, 24, 24, 24, 23, 23, 23, 22, 22, 21, 20, 19, 18, 16, 14, 11, 7, 2, -2, -7, -11, -14, -16, -18, -19, -20, -21, -22, -22, -23, -23, -23, -24, -24, -24, -24, -23, -23, -23, -22, -22, -21, -20, -19, -18, -16, -14, -11, -7, -2])},
-        { name: "accurate tri",    expression: 0.35,  samples: centerWave            ([1, 2, 4, 5, 7, 8, 10, 11, 13, 14, 16, 17, 19, 20, 22, 23, 23, 22, 20, 19, 17, 16, 14, 13, 11, 10, 8, 7, 5, 4, 2, 1, -1, -2, -4, -5, -7,-8, -10, -11, -13, -14, -16, -17, -19, -20, -22, -23, -23, -22, -20, -19, -17, -16, -14, -13, -11, -10, -8, -7, -5, -4, -2, -1])},
-        { name: "secant",          expression: 0.3,   samples: centerWave            ([23, 18, 13, 10, 8, 6, 5, 4, 3, 2, 2, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 2, 2, 3, 4, 5, 6, 8, 10, 13, 18, 23, -23, -18, -14, -10, -8, -6, -5, -4, -3, -2, -2, -1, -1, -1, 0, 0, 0, 0, -1, -1, -1, -2, -2, -3, -4, -5, -6, -8, -10, -14, -18, -23])},
-        { name: "glitch 2",        expression: 0.4,   samples: centerWave            ([0, 24, 0, 24, 0, 24, 0, 24, 0, -24, 0, -24, 0, -24, 0, -24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -24, 0, -24, 0, -24, 0, -24, 0, 24, 0, 24, 0, 24, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])},
+        { name: "accurate sine",   expression: 0.1,   samples: centerWave            ([2, 7, 11, 14, 16, 18, 19, 20, 21, 22, 22, 23, 23, 23, 24, 24, 24, 24, 23, 23, 23, 22, 22, 21, 20, 19, 18, 16, 14, 11, 7, 2, -2, -7, -11, -14, -16, -18, -19, -20, -21, -22, -22, -23, -23, -23, -24, -24, -24, -24, -23, -23, -23, -22, -22, -21, -20, -19, -18, -16, -14, -11, -7, -2])},
+        { name: "accurate tri",    expression: 0.1,  samples: centerWave            ([1, 2, 4, 5, 7, 8, 10, 11, 13, 14, 16, 17, 19, 20, 22, 23, 23, 22, 20, 19, 17, 16, 14, 13, 11, 10, 8, 7, 5, 4, 2, 1, -1, -2, -4, -5, -7,-8, -10, -11, -13, -14, -16, -17, -19, -20, -22, -23, -23, -22, -20, -19, -17, -16, -14, -13, -11, -10, -8, -7, -5, -4, -2, -1])},
+        { name: "secant",          expression: 0.1,   samples: centerWave            ([23, 18, 13, 10, 8, 6, 5, 4, 3, 2, 2, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 2, 2, 3, 4, 5, 6, 8, 10, 13, 18, 23, -23, -18, -14, -10, -8, -6, -5, -4, -3, -2, -2, -1, -1, -1, 0, 0, 0, 0, -1, -1, -1, -2, -2, -3, -4, -5, -6, -8, -10, -14, -18, -23])},
+        { name: "glitch 2",        expression: 0.1,   samples: centerWave            ([0, 24, 0, 24, 0, 24, 0, 24, 0, -24, 0, -24, 0, -24, 0, -24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -24, 0, -24, 0, -24, 0, -24, 0, 24, 0, 24, 0, 24, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])},
         { name: "trapezoid",       expression: 1.0,   samples: centerWave            ([1.0 / 15.0, 6.0 / 15.0, 10.0 / 15.0, 14.0 / 15.0, 15.0 / 15.0, 15.0 / 15.0, 15.0 / 15.0, 15.0 / 15.0, 15.0 / 15.0, 15.0 / 15.0, 15.0 / 15.0, 15.0 / 15.0, 14.0 / 15.0, 10.0 / 15.0, 6.0 / 15.0, 1.0 / 15.0, -1.0 / 15.0, -6.0 / 15.0, -10.0 / 15.0, -14.0 / 15.0, -15.0 / 15.0, -15.0 / 15.0, -15.0 / 15.0, -15.0 / 15.0, -15.0 / 15.0, -15.0 / 15.0, -15.0 / 15.0, -15.0 / 15.0, -14.0 / 15.0, -10.0 / 15.0, -6.0 / 15.0, -1.0 / 15.0,])},
-        { name: "accurate trapez", expression: 0.35,  samples: centerWave            ([1, 4, 7, 10, 13, 16, 19, 22, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 22, 19, 16, 13, 10, 7, 4, 1, -1, -4, -7, -10, -13, -16, -19, -22, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -22, -19, -16, -13, -10, -7, -4, -1])}
+        { name: "accurate trapez", expression: 0.1,  samples: centerWave            ([1, 4, 7, 10, 13, 16, 19, 22, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 22, 19, 16, 13, 10, 7, 4, 1, -1, -4, -7, -10, -13, -16, -19, -22, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -22, -19, -16, -13, -10, -7, -4, -1])}
     ]);
 
     public static readonly chipWaves:  DictionaryArray<ChipWave>  = rawChipToIntegrated(Config.rawChipWaves);
@@ -454,7 +455,7 @@ export class Config {
         { name: "normal", periodsSeconds: [0.14],                         period: 0.14   },
         { name: "shaky",  periodsSeconds: [0.11, 1.618 * 0.11, 3 * 0.11], period: 266.97 },
     ]);
-//                                                                   0       1      2    3     4      5    6    7      8     9   10   11 12   13   14   15   16   17   18   19   20   21 22   23   24   25   26   27   28   29   30   31 32   33   34   35   36   37   38    39  40   41 42    43   44   45   46 47   48 49 50
+//  MID TODO: Make the make the envelope speed not use arpSpeedScale.    0       1      2    3     4      5    6    7      8     9   10   11 12   13   14   15   16   17   18   19   20   21 22   23   24   25   26   27   28   29   30   31 32   33   34   35   36   37   38    39  40   41 42    43   44   45   46 47   48 49 50
     public static readonly arpSpeedScale:       ReadonlyArray<number> = [0, 0.0625, 0.125, 0.2, 0.25, 1 / 3, 0.4, 0.5, 2 / 3, 0.75, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 4, 4.15, 4.3, 4.5, 4.8, 5, 5.5, 6, 8];
     public static readonly strumSpeedScale:     ReadonlyArray<number> = [24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
     public static readonly slideSpeedScale:     ReadonlyArray<number> = [24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
@@ -959,6 +960,16 @@ export class Config {
     public static readonly detuneMin:                        number = 0;
     public static readonly songDetuneMin:                    number = 0;
     public static readonly songDetuneMax:                    number = 500;
+    public static readonly unisonVoicesMin:                  number = 1;
+    public static readonly unisonVoicesMax:                  number = 2; // Careful with this one.
+    public static readonly unisonSpreadMin:                  number = -96;
+    public static readonly unisonSpreadMax:                  number = 96; 
+    public static readonly unisonOffsetMin:                  number = -96;
+    public static readonly unisonOffsetMax:                  number = 96; 
+    public static readonly unisonExpressionMin:              number = -2;
+    public static readonly unisonExpressionMax:              number = 2; 
+    public static readonly unisonSignMin:                    number = -2;
+    public static readonly unisonSignMax:                    number = 2; 
     public static readonly sineWaveLength:                   number = 1 << 8;
     public static readonly sineWaveMask:                     number = Config.sineWaveLength - 1;
     public static readonly sineWave:                         Float32Array = generateSineWave();
@@ -1023,7 +1034,7 @@ export class Config {
         { name: "rounded",     samples: generateRoundedSineWave() },
         { name: "secant",      samples: generateSecantWave()      },
         { name: "double sine", samples: generateDoubleSineWave()  },
-        { name: "blocky sine", samples: generateBlockySineWave()  },
+    //  { name: "white noise", samples: generateWhiteNoise()      },
     ]);
 
     public static readonly pwmOperatorWaves: DictionaryArray<OperatorWave> = toNameMap([
@@ -1572,14 +1583,6 @@ function generateDoubleSineWave() {
     const wave: Float32Array = new Float32Array(Config.sineWaveLength + 1);
     for (let i: number = 0; i < Config.sineWaveLength + 1; i++) {
         wave[i] = Math.abs(Math.sin(i * Math.PI * 2.0 / Config.sineWaveLength)) * 2 - 1;
-    }
-    return wave;
-}
-
-function generateBlockySineWave() {
-    const wave: Float32Array = new Float32Array(Config.sineWaveLength + 1);
-    for (let i = 0; i < Config.sineWaveLength + 1; i++) {
-        wave[i] = 1 - (Math.sin((i / Config.sineWaveLength) * Math.PI * 2.0) % 2 + 2) % 2;
     }
     return wave;
 }

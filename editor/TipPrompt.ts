@@ -247,6 +247,43 @@ export class TipPrompt implements Prompt {
 					p("The distance between two frequencies is called an \"interval\", and this setting controls how large it is. If the interval is too wide, then the waves may sound out-of-tune and \"dissonant\". However, if the interval is even larger, then the two frequencies can even be distinct pitches. A unison may also be offset, which allows it to sound like entirely different pitches when compared to no unison."),
 				);
 			} break;
+			case "unisonVoices": {
+				message = div(
+					h2("Unison Voices"),
+					p("This setting controls how many voices there are in the unison. Unisons such as \"none\" and \"lone fifth\" use 1 voice, while most other unisons use 2 voices."),
+					p(`This goes from ${Config.unisonVoicesMin} to ${Config.unisonVoicesMax}.`)
+				);
+			} break;
+			case "unisonSpread": {
+				message = div(
+					h2("Unison Spread"),
+					p("This setting controls the distance between the two voices in semitones. A small amount of spread causes the voice's waves to shift in and out from each other, causing a shimmering effect. Larger spread will cause the voices to act like separate notes."),
+					p("This setting will only work correctly with two voices, but can be used on a singular note to 'split' it apart, which can be a nice noise artifact."),
+					p(`This goes from ${Config.unisonSpreadMin} to ${Config.unisonSpreadMax}.`)
+				);
+			} break;
+			case "unisonOffset": {
+				message = div(
+					h2("Unison Offset"),
+					p("This setting controls the detune applied to both voices in semitones. Think of it like an extended pitch shift slider on the instrument."),
+					p(`This goes from ${Config.unisonOffsetMin} to ${Config.unisonOffsetMax}.`)
+				);
+			} break;
+			case "unisonVolume": {
+				message = div(
+					h2("Unison Volume"),
+					p("This setting controls the unison's volume. You can use this if the unison makes your instrument too loud in comparison to other instruments."),
+					p(`This goes from ${Config.unisonExpressionMin} to ${Config.unisonExpressionMax}.`)
+				);
+			} break;
+			case "unisonSign": {
+				message = div(
+					h2("Unison Sign"),
+					p("This setting is a volume multiplier applied to the second voice. This setting will only work correctly with two voices."),
+					p("When using negative signs on unisons, you can create various fun shifting effects, which makes stuff like the \"bowed\" unison possible."),
+					p(`This goes from ${Config.unisonSignMin} to ${Config.unisonSignMax}.`)
+				);
+			} break;
 			case "chords": {
 				message = div(
 					h2("Chords"),
