@@ -323,6 +323,7 @@ export class Localization {
     public static midboxPianoPresetsLabel: string = "Midbox Piano Presets";
     public static midboxLeadPresetsLabel: string = "Midbox Lead Presets";
     public static midboxFMPresetsLabel: string = "Midbox FM Presets";
+    public static midboxWavetablePresetsLabel: string = "Midbox Wavetable Presets";
     public static beepboxSupersawPresetsLabel: string = "Beepbox Supersaw Presets";
     public static retroPresetsLabel: string = "Retro Presets";
     public static keyboardPresetsLabel: string = "Keyboard Presets";
@@ -713,6 +714,11 @@ export class Localization {
     public static midboxFMPresets5Label: string = "FM lead";
     public static midboxFMPresets6Label: string = "";
     public static midboxFMPresets7Label: string = "";
+    public static midboxWavetablePresets1Label: string = "multi-sawtooth pulse";
+    public static midboxWavetablePresets2Label: string = "sawtooth pulse width";
+    public static midboxWavetablePresets3Label: string = "square -> sawtooth";
+    public static midboxWavetablePresets4Label: string = "square -> triangle";
+    public static midboxWavetablePresets5Label: string = "omni-chipwave";
     public static beepboxSupersawPresets1Label: string = "supersaw lead";
     public static beepboxSupersawPresets2Label: string = "supersaw string";
     public static beepboxSupersawPresets3Label: string = "supersaw pad";

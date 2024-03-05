@@ -1961,6 +1961,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                             { item: "secant", weight: 3},
                             { item: "double sine", weight: 3},
                             { item: "blocky sine", weight: 3},
+                            { item: "white noise", weight: 3},
                         ])].index;
                         if (instrument.operators[i].waveform == 3/*"pulse width"*/) {
                             const [pulseWidth, pulseWidthDecimalOffset] = selectWeightedRandom([
@@ -2115,6 +2116,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "secant", weight: 3},
                                 { item: "double sine", weight: 3},
                                 { item: "blocky sine", weight: 3},
+                                { item: "white noise", weight: 3},
                             ])].index;
                             if (instrument.operators[i].waveform == 3) {
                                 const [pulseWidth, pulseWidthDecimalOffset] = selectWeightedRandom([

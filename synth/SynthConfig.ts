@@ -970,7 +970,7 @@ export class Config {
     public static readonly unisonExpressionMax:              number = 2; 
     public static readonly unisonSignMin:                    number = -2;
     public static readonly unisonSignMax:                    number = 2; 
-    public static readonly sineWaveLength:                   number = 1 << 8;
+    public static readonly sineWaveLength:                   number = 1 << 15;
     public static readonly sineWaveMask:                     number = Config.sineWaveLength - 1;
     public static readonly sineWave:                         Float32Array = generateSineWave();
 //  Picked strings have an all-pass filter with a corner frequency based on the tone fundamental frequency, in order to add a slight inharmonicity. (Which is important for distortion.)
@@ -1034,7 +1034,7 @@ export class Config {
         { name: "rounded",     samples: generateRoundedSineWave() },
         { name: "secant",      samples: generateSecantWave()      },
         { name: "double sine", samples: generateDoubleSineWave()  },
-    //  { name: "white noise", samples: generateWhiteNoise()      },
+        { name: "white noise", samples: generateWhiteNoise()      },
     ]);
 
     public static readonly pwmOperatorWaves: DictionaryArray<OperatorWave> = toNameMap([
@@ -1463,7 +1463,6 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
 
         wave[Config.chipNoiseLength] = wave[0];
     }
-
     return wave;
 }
 
@@ -1542,10 +1541,14 @@ function generateSawWave(inverse: boolean = false): Float32Array {
     return wave;
 }
 
-function generateClangNoise() { let drumBuffer: number = 1;
+function generateClangNoise() { 
+    let drumBuffer: number = 1;
     const wave = new Float32Array(Config.sineWaveLength + 1);
-    for (let i = 0; i < Config.sineWaveLength + 1; i++) {
-        wave[i] = (drumBuffer & 1) * 2.0 - 1.0;
+    for (let i = 0; i < 256 + 1; i++) {
+        // Hold the wave in place to stretch it and make it sound right.
+        for (let j = 0; j < 128; j++) {
+            wave[i * 128 + j] = (drumBuffer & 1) * 2.0 - 1.0;
+        }
         let newBuffer: number = drumBuffer >> 1;
         if (((drumBuffer + newBuffer) & 1) == 1) {
             newBuffer += 2 << 14;
@@ -1556,9 +1559,17 @@ function generateClangNoise() { let drumBuffer: number = 1;
 }
 
 function generateMetalNoise() {
-    const wave = new Float32Array(Config.sineWaveLength + 1);
-    for (let i = 0; i < Config.sineWaveLength + 1; i++) {
-        wave[i] = Math.random() * Math.sin(Math.cos(Config.sineWaveLength) * 3 - 8.0 / Config.sineWaveLength - 1.0);
+    const wave: Float32Array = new Float32Array(Config.sineWaveLength + 1);
+    for (let i: number = 0; i < Config.sineWaveLength + 1; i++) {
+        let drumBuffer = 1;
+        for (let j = 0; j < Config.sineWaveLength; j++) {
+            wave[j] = (drumBuffer & 1) / 2.0 - 1;
+            let newBuffer = drumBuffer >> 1;
+            if (((drumBuffer + newBuffer) & 1) == 1) {
+                newBuffer -= 10 << 2;
+            }
+            drumBuffer = newBuffer;
+        }
     }
     return wave;
 }
@@ -1587,13 +1598,13 @@ function generateDoubleSineWave() {
     return wave;
 }
 
-/*function generateWhiteNoise() {
+function generateWhiteNoise() {
     const wave: Float32Array = new Float32Array(Config.sineWaveLength + 1);
     for (let i: number = 0; i < Config.sineWaveLength + 1; i++) {
         wave[i] = Math.random() * 2.0 - 1.0;
     }
     return wave;
-}*/
+}
 
 export function getArpeggioPitchIndex(pitchCount: number, useFastTwoNoteArp: boolean, useBounceArp: boolean, arpeggio: number): number {
     let arpeggioPattern: ReadonlyArray<number> = (useBounceArp ? Config.bounceArpeggioPatterns : Config.arpeggioPatterns)[pitchCount - 1];
