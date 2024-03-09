@@ -48,7 +48,7 @@ import { ThemePrompt } from "./ThemePrompt";
 import { TipPrompt } from "./TipPrompt";
 import { LanguagePrompt } from "./LanguagePrompt";
 import { Localization as _ } from "./Localization";
-import { ChangeTempo, ChangeKeyOctave, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangeSupersawDynamism, ChangeSupersawSpread, ChangeSupersawShape, ChangeWavetableSpeed, ChangeWaveInterpolation, ChangeCyclePerNote, ChangeOneShotCycle, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeCustomAlgorithmOrFeedback, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, pickRandomPresetValue, ChangeRandomGeneratedInstrument, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, Change6OpFeedbackType, Change6OpAlgorithm, ChangeChipWave, ChangeNoiseWave, ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeUnisonVoices, ChangeUnisonSpread, ChangeUnisonOffset, ChangeUnisonExpression, ChangeUnisonSign, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeTest, ChangeAddEnvelope, ChangeEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeWavetableCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeBounceArp, ChangeClicklessTransition, ChangeContinueThruPattern, ChangeAliasing, ChangePercussion, ChangeSDAffected, ChangeSOAffected, ChangeStrumSpeed, ChangeSlideSpeed, ChangeSongSubtitle, ChangeSetPatternInstruments, ChangeHoldingModRecording } from "./changes";
+import { ChangeTempo, ChangeKeyOctave, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangeSupersawDynamism, ChangeSupersawSpread, ChangeSupersawShape, ChangeWavetableSpeed, ChangeWaveInterpolation, ChangeCyclePerNote, ChangeOneShotCycle, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeCustomAlgorithmOrFeedback, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, pickRandomPresetValue, ChangeRandomGeneratedInstrument, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, Change6OpFeedbackType, Change6OpAlgorithm, ChangeChipWave, ChangeNoiseWave, ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeUnisonVoices, ChangeUnisonSpread, ChangeUnisonOffset, ChangeUnisonExpression, ChangeUnisonSign, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeTest, ChangeAddEnvelope, ChangeEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeWavetableCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeArpeggioPattern, ChangeClicklessTransition, ChangeContinueThruPattern, ChangeAliasing, ChangePercussion, ChangeSDAffected, ChangeSOAffected, ChangeStrumSpeed, ChangeSlideSpeed, ChangeSongSubtitle, ChangeSetPatternInstruments, ChangeHoldingModRecording } from "./changes";
 import { oscilloscopeCanvas } from "../global/Oscilloscope"
 import { TrackEditor } from "./TrackEditor";
 
@@ -1305,9 +1305,22 @@ export class SongEditor {
     private readonly _arpeggioSpeedRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ style: "font-size: smaller; margin-left:4px;", class: "tip", onclick: () => this._openPrompt("arpeggioSpeed") }, span(_.arpSpeedLabel)), this._arpeggioSpeedDisplay, this._arpeggioSpeedSlider.container);
     private readonly _twoNoteArpBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
     private readonly _twoNoteArpRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:4px; font-size: 11px;", onclick: () => this._openPrompt("twoNoteArpeggio") }, span(_.twoFastArpLabel)), this._twoNoteArpBox);
-    private readonly _bounceArpBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
-    private readonly _bounceArpRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:4px;", onclick: () => this._openPrompt("bounceArpeggio") }, span(_.bounceArpLabel)), this._bounceArpBox);
-    private readonly _chordDropdownGroup: HTMLElement = div({ class: "editor-controls", style: "display: none;" }, this._arpeggioSpeedRow, this._twoNoteArpRow, this._bounceArpRow);
+    private readonly _arpeggioPatternSelectedText: HTMLSpanElement = span({ style: `color: ${ColorConfig.getChannelColor(this._doc.song, this._doc.channel)}; margin-bottom: 0px;`}, _.arpeggioPattern1Label);
+    private readonly _arpeggioPatternSelect: HTMLSelectElement = buildOptions(select(), [
+        "1 2 3 4 5 6 7 8 9",                              // Normal
+        "1 2 3) 4 5 6 7 8 9",                             // Legacy. For older songs.
+        "1 2 1 3 4 5 4 6 7 8 7 9",                        // Scramble
+        "1 2 1 3 1 4 1 5 1 6 1 7 1 8 1 9",                // Oscillate
+        "1 2 1 3 2 4 3 5 4 6 5 7 6 8 7 9",                // Escalate
+        "1 9 2 8 3 7 4 6 5",                              // Shift
+        "1) 2) 3) 4) 5) 6) 7) 8) 9)",                    // Normal Bounce
+        "1 2 1 3 4 5 4 6 7 8 7 9 4 5 4 6",               // Scramble Bounce
+        "1 2) 1 3) 1 4) 1 5) 1 6) 1 7) 1 8) 1 9)",       // Oscillate Bounce
+        "1) 2) 1 3) 2 4) 3 5) 4 6) 5 7) 6 8) 7 9) 8 1)", // Escalate Bounce
+        "1) 9) 2) 8) 3) 7) 4) 6) 5)",                    // Shift Bounce
+    ]);
+    private readonly _arpeggioPatternRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:4px; font-size: 12px;", onclick: () => this._openPrompt("arpeggioPattern") }, _.arpeggioPatternLabel), this._arpeggioPatternSelect);
+    private readonly _chordDropdownGroup: HTMLElement = div({ class: "editor-controls", style: "display: none;" }, this._arpeggioSpeedRow, this._twoNoteArpRow, this._arpeggioPatternSelectedText, this._arpeggioPatternRow);
     private readonly _strumDropdownGroup: HTMLElement = div({ class: "editor-controls", style: "display: none;" }, this._strumSpeedRow);
 
     private readonly _vibratoSelect: HTMLSelectElement = buildOptions(select(), [
@@ -1316,7 +1329,6 @@ export class SongEditor {
         _.vibrato3Label,
         _.vibrato4Label,
         _.vibrato5Label
-
     ]);
     private readonly _vibratoDropdown: HTMLButtonElement = button({ style: "margin-left:0em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.Vibrato) }, "▼");
     private readonly _vibratoSelectRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("vibrato") }, span(_.vibratoLabel)), this._vibratoDropdown, div({ class: "selectContainer", style: "width: 61.5%;" }, this._vibratoSelect));
@@ -1330,7 +1342,6 @@ export class SongEditor {
     private readonly _vibratoTypeSelect: HTMLSelectElement = buildOptions(select(), [
         _.vibratoNormalLabel,
         _.vibratoShakyLabel
-
     ]);
     private readonly _vibratoTypeSelectRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:4px;", onclick: () => this._openPrompt("vibratoType") }, span(_.vibratoTypeLabel)), div({ class: "selectContainer", style: "width: 61.5%;" }, this._vibratoTypeSelect));
     private readonly _vibratoDropdownGroup: HTMLElement = div({ class: "editor-controls", style: "display: none;" }, this._vibratoDepthRow, this._vibratoSpeedRow, this._vibratoDelayRow, this._vibratoTypeSelectRow);
@@ -2016,6 +2027,7 @@ export class SongEditor {
         this._effectsSelect.addEventListener("change", this._whenSetEffects);
         this._unisonSelect.addEventListener("change", this._whenSetUnison);
         this._chordSelect.addEventListener("change", this._whenSetChord);
+        this._arpeggioPatternSelect.addEventListener("change", this._whenSetArpeggioPattern);
         this._vibratoSelect.addEventListener("change", this._whenSetVibrato);
         this._vibratoTypeSelect.addEventListener("change", this._whenSetVibratoType);
         this._playButton.addEventListener("click", this.togglePlay);
@@ -2109,7 +2121,6 @@ export class SongEditor {
         this._resetCyclePerNoteBox.addEventListener("input", () => { this._doc.record(new ChangeCyclePerNote(this._doc, this._resetCyclePerNoteBox.checked)) });
         this._oneShotCycleBox.addEventListener("input", () => { this._doc.record(new ChangeOneShotCycle(this._doc, this._oneShotCycleBox.checked)) });
         this._twoNoteArpBox.addEventListener("input", () => { this._doc.record(new ChangeFastTwoNoteArp(this._doc, this._twoNoteArpBox.checked)) });
-        this._bounceArpBox.addEventListener("input", () => { this._doc.record(new ChangeBounceArp(this._doc, this._bounceArpBox.checked)) });
         this._clicklessTransitionBox.addEventListener("input", () => { this._doc.record(new ChangeClicklessTransition(this._doc, this._clicklessTransitionBox.checked)) });
         this._continueThruPatternBox.addEventListener("input", () => { this._doc.record(new ChangeContinueThruPattern(this._doc, this._continueThruPatternBox.checked)) });
         this._aliasingBox.addEventListener("input", () => { this._doc.record(new ChangeAliasing(this._doc, this._aliasingBox.checked)) });
@@ -2942,6 +2953,7 @@ export class SongEditor {
                 this._chordDropdownGroup.style.display = (instrument.chord == Config.chords.dictionary["arpeggio"].index && this._openChordDropdown) ? "" : "none";
                 this._strumDropdownGroup.style.display = (Config.chords[instrument.chord].strumParts > 0 && this._openChordDropdown2) ? "" : "none";
                 setSelectedValue(this._chordSelect, instrument.chord);
+                setSelectedValue(this._arpeggioPatternSelect, instrument.arpeggioPattern);
             } else {
                 this._chordSelectRow.style.display = "none";
                 this._chordDropdown.style.display = "none";
@@ -3148,6 +3160,18 @@ export class SongEditor {
             this._panDelaySlider.input.title = "" + instrument.panDelay;
             this._arpeggioSpeedSlider.input.title = "x" + prettyNumber(Config.arpSpeedScale[instrument.arpeggioSpeed]);
             this._arpeggioSpeedDisplay.textContent = "x" + prettyNumber(Config.arpSpeedScale[instrument.arpeggioSpeed]);
+            if (this._arpeggioPatternSelect.selectedIndex == 0) this._arpeggioPatternSelectedText.textContent = _.arpeggioPattern1Label;
+            else if (this._arpeggioPatternSelect.selectedIndex == 1) this._arpeggioPatternSelectedText.textContent = _.arpeggioPattern2Label;
+            else if (this._arpeggioPatternSelect.selectedIndex == 2) this._arpeggioPatternSelectedText.textContent = _.arpeggioPattern3Label;
+            else if (this._arpeggioPatternSelect.selectedIndex == 3) this._arpeggioPatternSelectedText.textContent = _.arpeggioPattern4Label;
+            else if (this._arpeggioPatternSelect.selectedIndex == 4) this._arpeggioPatternSelectedText.textContent = _.arpeggioPattern5Label;
+            else if (this._arpeggioPatternSelect.selectedIndex == 5) this._arpeggioPatternSelectedText.textContent = _.arpeggioPattern6Label;
+            else if (this._arpeggioPatternSelect.selectedIndex == 6) this._arpeggioPatternSelectedText.textContent = _.arpeggioPattern7Label;
+            else if (this._arpeggioPatternSelect.selectedIndex == 7) this._arpeggioPatternSelectedText.textContent = _.arpeggioPattern8Label;
+            else if (this._arpeggioPatternSelect.selectedIndex == 8) this._arpeggioPatternSelectedText.textContent = _.arpeggioPattern9Label;
+            else if (this._arpeggioPatternSelect.selectedIndex == 9) this._arpeggioPatternSelectedText.textContent = _.arpeggioPattern10Label;
+            else if (this._arpeggioPatternSelect.selectedIndex == 10) this._arpeggioPatternSelectedText.textContent = _.arpeggioPattern11Label;
+            else throw new Error("There is no label for the arpeggio pattern type selected.");
             this._strumSpeedSlider.input.title = prettyNumber(Config.strumSpeedScale[instrument.strumSpeed]);
             this._strumSpeedDisplay.textContent = prettyNumber((Config.strumSpeedScale[instrument.strumSpeed]) * 2) + " tk";
             this._slideSpeedSlider.input.title = prettyNumber(Config.slideSpeedScale[instrument.slideSpeed]);
@@ -3766,7 +3790,6 @@ export class SongEditor {
         this._resetCyclePerNoteBox.checked = instrument.cyclePerNote ? true : false;
         this._oneShotCycleBox.checked = instrument.oneShotCycle ? true : false;
         this._twoNoteArpBox.checked = instrument.fastTwoNoteArp ? true : false;
-        this._bounceArpBox.checked = instrument.bounceArp ? true : false;
         this._clicklessTransitionBox.checked = instrument.clicklessTransition ? true : false;
         this._continueThruPatternBox.checked = instrument.continueThruPattern ? true : false;
         this._aliasingBox.checked = instrument.aliases ? true : false;
@@ -5291,6 +5314,10 @@ export class SongEditor {
 
     private _whenSetChord = (): void => {
         this._doc.record(new ChangeChord(this._doc, this._chordSelect.selectedIndex));
+    }
+
+    private _whenSetArpeggioPattern = (): void => {
+        this._doc.record(new ChangeArpeggioPattern(this._doc, this._arpeggioPatternSelect.selectedIndex));
     }
 
     private _addNewEnvelope = (): void => {

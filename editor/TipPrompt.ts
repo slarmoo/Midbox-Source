@@ -128,12 +128,15 @@ export class TipPrompt implements Prompt {
 					);
 				}
 				break;
-			case "bounceArpeggio":
+			case "arpeggioPattern":
 				{
 					message = div(
-						h2("Bouncing Arpeggio"),
-						p("Arpeggios will 'arpeggiate' notes from the first placed note, to the next note that was placed, and rapidly does this process until the last note, which it then loops back to the first note. This order is marked by the numbers on the left-side of the notes in an arpeggio chord."),
-						p("When this setting is ticked, the arpeggio will instead 'bounce' off the last note, going backwards rather than looping."),
+						h2("Arpeggio Pattern"),
+						p("Arpeggio chords follow a pattern in which the notes cycle through each other. This is typically indicated by numbers on the left side of the note that are dependant of the order you placed them in."),
+						p("What this setting does is that it changes the order these notes play in. There is some text above this box containing the name of the pattern type."),
+						p(""), // Line break
+						p("The default pattern, 'normal', goes upwards in order of when the notes were placed. The 'legacy' pattern type is only slightly different to the default one, where arpeggio chords with three notes in them will do a 1 2 3 2 pattern. The rest are sillier more-unique patterns. Experimentation is key!"),
+						p("If a pattern name has (Bounce) next to it, instead of looping from the last note to the beginning as most arpeggios do, they 'bounce' back to the first note. Use these is you don't like placing arpeggio notes manually!")
 					);
 				}
 				break;

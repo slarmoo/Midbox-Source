@@ -1375,7 +1375,7 @@ export class Instrument {
     public panDelay: number = 10;
     public arpeggioSpeed: number = 12;
     public fastTwoNoteArp: boolean = false;
-    public bounceArp: boolean = false;
+    public arpeggioPattern: number = 0;
     public strumSpeed: number = 23;
     public slideSpeed: number = 21;
     public legacyTieOver: boolean = false;
@@ -1526,6 +1526,7 @@ export class Instrument {
         this.clicklessTransition = false;
         this.continueThruPattern = false;
         this.arpeggioSpeed = 12;
+        this.arpeggioPattern = 0;
         this.envelopeSpeed = 12;
         this.discreteEnvelope = false;
         this.strumSpeed = 23;
@@ -1806,6 +1807,7 @@ export class Instrument {
             instrumentObject["chord"] = this.getChord().name;
             instrumentObject["fastTwoNoteArp"] = this.fastTwoNoteArp;
             instrumentObject["arpeggioSpeed"] = this.arpeggioSpeed;
+            instrumentObject["arpeggioPattern"] = this.arpeggioPattern;
             instrumentObject["strumSpeed"] = this.strumSpeed;
         }
         if (effectsIncludePitchShift(this.effects)) {
@@ -1963,10 +1965,15 @@ export class Instrument {
             instrumentObject["wavetableWaves"] = [];
             for (const wave of this.wavetableWaves) {
                 const savedWave: Float32Array = new Float32Array(64);
+                let foundNonZero = false; 
                 for (let i: number = 0; i < wave.length; i++) {
                     savedWave[i] = wave[i];
+                    if (savedWave[i] != savedWave[0]) { 
+                        foundNonZero = true;
+                    } 
                 }
-                instrumentObject["wavetableWaves"].push(savedWave);
+                if (!foundNonZero) instrumentObject["wavetableWaves"].push(null);
+                else instrumentObject["wavetableWaves"].push(Array.from(savedWave));
             }
             instrumentObject["wavetableCycle"] = [];
             for (const wave of this.currentCycle) {
@@ -2344,22 +2351,28 @@ export class Instrument {
             }
             if (instrumentObject["wavetableWaves"] != undefined) {
                 for (let waveIndex: number = 0; waveIndex < instrumentObject["wavetableWaves"].length; waveIndex++) {
-                    for (let i: number = 0; i < 64; i++) {
-                        this.wavetableWaves[waveIndex][i] = instrumentObject["wavetableWaves"][waveIndex][i];
+                    if (instrumentObject["wavetableWaves"][waveIndex] == null) {
+                        for (let i: number = 0; i < 64; i++) {
+                            this.wavetableWaves[waveIndex][i] = 0;
+                        }
+                    } else {
+                        for (let i: number = 0; i < 64; i++) {
+                            this.wavetableWaves[waveIndex][i] = instrumentObject["wavetableWaves"][waveIndex][i];
+                        }
+                        let sum: number = 0.0;
+                        for (let i: number = 0; i < this.wavetableWaves[waveIndex].length; i++) {
+                            sum += this.wavetableWaves[waveIndex][i];
+                        }
+                        const average: number = sum / this.wavetableWaves[waveIndex].length;
+                        let cumulative: number = 0;
+                        let wavePrev: number = 0;
+                        for (let i: number = 0; i < this.wavetableWaves[waveIndex].length; i++) {
+                            cumulative += wavePrev;
+                            wavePrev = this.wavetableWaves[waveIndex][i] - average;
+                            this.wavetableIntegralWaves[waveIndex][i] = cumulative;
+                        }
+                    this.wavetableIntegralWaves[waveIndex][64] = 0.0;
                     }
-                    let sum: number = 0.0;
-                    for (let i: number = 0; i < this.wavetableWaves[waveIndex].length; i++) {
-                        sum += this.wavetableWaves[waveIndex][i];
-                    }
-                    const average: number = sum / this.wavetableWaves[waveIndex].length;
-                    let cumulative: number = 0;
-                    let wavePrev: number = 0;
-                    for (let i: number = 0; i < this.wavetableWaves[waveIndex].length; i++) {
-                        cumulative += wavePrev;
-                        wavePrev = this.wavetableWaves[waveIndex][i] - average;
-                        this.wavetableIntegralWaves[waveIndex][i] = cumulative;
-                    }
-                this.wavetableIntegralWaves[waveIndex][64] = 0.0;
                 }
             } else {
                 Synth.wavetableWaveDefaults(this);
@@ -2730,6 +2743,14 @@ export class Instrument {
             }
             else {
                 this.fastTwoNoteArp = useFastTwoNoteArp;
+            }
+
+            if (this.chord == Config.chords.dictionary["arpeggio"].index && instrumentObject["arpeggioPattern"] != undefined) {
+                this.arpeggioPattern = instrumentObject["arpeggioPattern"];
+            }
+            else {
+                // Using the legacy arpeggio to not break imported songs.
+                this.arpeggioPattern = 1;
             }
 
             if (instrumentObject["strumSpeed"] != undefined) {
@@ -3396,6 +3417,7 @@ export class Song {
                     if (instrument.chord == Config.chords.dictionary["arpeggio"].index) {
                         buffer.push(base64IntToCharCode[instrument.arpeggioSpeed]);
                         buffer.push(base64IntToCharCode[+instrument.fastTwoNoteArp]); // Two note arp setting piggybacks on this
+                        buffer.push(base64IntToCharCode[+instrument.arpeggioPattern]);
                     }
                     // Also don't forget strum speed! Only if the instrument strums.
                     else if (Config.chords[instrument.chord].strumParts > 0) {
@@ -4576,6 +4598,7 @@ export class Song {
                     const instrument: Instrument = this.channels[instrumentChannelIterator].instruments[instrumentIndexIterator];
                     instrument.arpeggioSpeed = clamp(0, Config.modulators.dictionary["arp speed"].maxRawVol + 1, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                     instrument.fastTwoNoteArp = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] ? true : false; // Two note arp setting piggybacks on this
+                    instrument.arpeggioPattern = clamp(0, 10, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                 }
                 else {
                     // Do nothing, deprecated for now
@@ -4768,6 +4791,7 @@ export class Song {
                         if (instrument.chord == Config.chords.dictionary["arpeggio"].index && fromJummBox) {
                             instrument.arpeggioSpeed = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
                             instrument.fastTwoNoteArp = (base64CharCodeToInt[compressed.charCodeAt(charIndex++)]) ? true : false;
+                            instrument.arpeggioPattern = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
                         }
                         // Custom strum speed!
                         else if (Config.chords[instrument.chord].strumParts > 0 && fromJummBox) {
@@ -10266,7 +10290,7 @@ export class Synth {
             const arpeggiates: boolean = chord.arpeggiates;
             if (tone.pitchCount > 1 && arpeggiates) {
                 const arpeggio: number = Math.floor(instrumentState.arpTime / Config.ticksPerArpeggio);
-                arpeggioInterval = tone.pitches[getArpeggioPitchIndex(tone.pitchCount, instrument.fastTwoNoteArp, instrument.bounceArp, arpeggio)] - tone.pitches[0];
+                arpeggioInterval = tone.pitches[getArpeggioPitchIndex(tone.pitchCount, instrument.fastTwoNoteArp, instrument.arpeggioPattern, arpeggio)] - tone.pitches[0];
             }
 
             const carrierCount: number = (instrument.type == InstrumentType.advfm ? instrument.customAlgorithm.carrierCount : Config.algorithms[instrument.algorithm].carrierCount);
@@ -10417,11 +10441,11 @@ export class Synth {
             if (tone.pitchCount > 1 && (chord.arpeggiates || chord.customInterval)) {
                 const arpeggio: number = Math.floor(instrumentState.arpTime / Config.ticksPerArpeggio);
                 if (chord.customInterval) {
-                    const intervalOffset: number = tone.pitches[1 + getArpeggioPitchIndex(tone.pitchCount - 1, instrument.fastTwoNoteArp, instrument.bounceArp, arpeggio)] - tone.pitches[0];
+                    const intervalOffset: number = tone.pitches[1 + getArpeggioPitchIndex(tone.pitchCount - 1, instrument.fastTwoNoteArp, instrument.arpeggioPattern, arpeggio)] - tone.pitches[0];
                     specialIntervalMult = Math.pow(2.0, intervalOffset / 12.0);
                     tone.specialIntervalExpressionMult = Math.pow(2.0, -intervalOffset / pitchDamping);
                 } else {
-                    pitch = tone.pitches[getArpeggioPitchIndex(tone.pitchCount, instrument.fastTwoNoteArp, instrument.bounceArp, arpeggio)];
+                    pitch = tone.pitches[getArpeggioPitchIndex(tone.pitchCount, instrument.fastTwoNoteArp, instrument.arpeggioPattern, arpeggio)];
                 }
             }
 

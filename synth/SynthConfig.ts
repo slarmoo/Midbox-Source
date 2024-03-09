@@ -335,8 +335,22 @@ export class Config {
     public static readonly partsPerBeat:              number = 24;
     public static readonly ticksPerPart:              number = 2;
     public static readonly ticksPerArpeggio:          number = 3;
-    public static readonly arpeggioPatterns:          ReadonlyArray<ReadonlyArray<number>> = [[0], [0, 1], [0, 1, 2, 1], [0, 1, 2, 3],       [0, 1, 2, 3, 4],          [0, 1, 2, 3, 4, 5],             [0, 1, 2, 3, 4, 5, 6],                [0, 1, 2, 3, 4, 5, 6, 7]                  ];
-    public static readonly bounceArpeggioPatterns:    ReadonlyArray<ReadonlyArray<number>> = [[0], [0, 1], [0, 1, 2, 1], [0, 1, 2, 3, 2, 1], [0, 1, 2, 3, 4, 3, 2, 1], [0, 1, 2, 3, 4, 5, 4, 3, 2, 1], [0, 1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 1], [0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1], [0, 1, 2, 3, 4, 5, 6, 7, 8, 7, 6, 5, 4, 3, 2, 1]];
+
+//  Normal variants.
+    public static readonly normalArpeggioPatterns:             ReadonlyArray<ReadonlyArray<number>> = [[0], [0, 1], [0, 1, 2],    [0, 1, 2, 3],       [0, 1, 2, 3, 4],          [0, 1, 2, 3, 4, 5],             [0, 1, 2, 3, 4, 5, 6],                [0, 1, 2, 3, 4, 5, 6, 7],                   [0, 1, 2, 3, 4, 5, 6, 7, 8]                     ];
+//  This one is mostly the same as Normal, but the third case bounces back. Kept to not break songs.
+    public static readonly legacyArpeggioPatterns:             ReadonlyArray<ReadonlyArray<number>> = [[0], [0, 1], [0, 1, 2, 1], [0, 1, 2, 3],       [0, 1, 2, 3, 4],          [0, 1, 2, 3, 4, 5],             [0, 1, 2, 3, 4, 5, 6],                [0, 1, 2, 3, 4, 5, 6, 7],                   [0, 1, 2, 3, 4, 5, 6, 7, 8]                     ];
+    public static readonly scrambleArpeggioPatterns:           ReadonlyArray<ReadonlyArray<number>> = [[0], [0, 1], [0, 1, 0, 2], [0, 1, 0, 2, 3],    [0, 1, 0, 2, 3, 2, 4, 2], [0, 1, 0, 2, 3, 4, 3, 5],       [0, 1, 0, 2, 3, 4, 6, 5],             [0, 1, 0, 2, 3, 2, 4, 2, 6, 5, 7, 5],       [0, 1, 0, 2, 3, 4, 3, 5, 6, 7, 6, 8]            ];
+    public static readonly oscillateArpeggioPatterns:          ReadonlyArray<ReadonlyArray<number>> = [[0], [0, 1], [0, 1, 0, 2], [0, 1, 0, 2, 0, 3], [0, 1, 0, 2, 0, 3, 0, 4], [0, 1, 0, 2, 0, 3, 0, 4, 0, 5], [0, 1, 0, 2, 0, 3, 0, 4, 0, 5, 0, 6], [0, 1, 0, 2, 0, 3, 0, 4, 0, 5, 0, 6, 0, 7], [0, 1, 0, 2, 0, 3, 0, 4, 0, 5, 0, 6, 0, 7, 0, 8]];
+    public static readonly escalateArpeggioPatterns:           ReadonlyArray<ReadonlyArray<number>> = [[0], [0, 1], [0, 1, 0, 2], [0, 1, 0, 2, 1, 3], [0, 1, 0, 2, 1, 3, 2, 4], [0, 1, 0, 2, 1, 3, 2, 4, 3, 5], [0, 1, 0, 2, 1, 3, 2, 4, 3, 5, 4, 6], [0, 1, 0, 2, 1, 3, 2, 4, 3, 5, 4, 6, 5, 7], [0, 1, 0, 2, 1, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 8]];
+    public static readonly shiftArpeggioPatterns:              ReadonlyArray<ReadonlyArray<number>> = [[0], [0, 1], [0, 2, 1],    [0, 3, 1, 2],       [0, 4, 1, 3, 2],          [0, 5, 1, 4, 2, 3],             [0, 6, 1, 5, 2, 4, 3],                [0, 7, 1, 6, 2, 5, 3, 4],                   [0, 8, 1, 7, 2, 6, 3, 5, 4]                     ];
+//  Bounce variants.
+    public static readonly normalBounceArpeggioPatterns:       ReadonlyArray<ReadonlyArray<number>> = [[0], [0, 1], [0, 1, 2, 1],             [0, 1, 2, 3, 2, 1],                   [0, 1, 2, 3, 4, 3, 2, 1],                         [0, 1, 2, 3, 4, 5, 4, 3, 2, 1],                               [0, 1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 1],                                     [0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1],                                           [0, 1, 2, 3, 4, 5, 6, 7, 8, 7, 6, 5, 4, 3, 2, 1]                                                ];
+    public static readonly scrambleBounceArpeggioPatterns:     ReadonlyArray<ReadonlyArray<number>> = [[0], [0, 1], [0, 1, 0, 2, 1],          [0, 1, 0, 2, 3, 1],                   [0, 1, 0, 2, 3, 2, 4, 2, 3, 1],                   [0, 1, 0, 2, 3, 4, 3, 5, 4, 2],                               [0, 1, 0, 2, 3, 4, 6, 5, 3, 1],                                           [0, 1, 0, 2, 3, 2, 4, 2, 6, 5, 7, 5, 4, 3, 2, 1],                                     [0, 1, 0, 2, 3, 4, 3, 5, 6, 7, 6, 8, 0, 1, 0, 2]                                                ];
+    public static readonly oscillateBounceArpeggioPatterns:    ReadonlyArray<ReadonlyArray<number>> = [[0], [0, 1], [0, 1, 0, 2],             [0, 1, 0, 2, 0, 3, 0, 2],             [0, 1, 0, 2, 0, 3, 0, 4, 0, 3, 0, 2],             [0, 1, 0, 2, 0, 3, 0, 4, 0, 5, 0, 4, 0, 3, 0, 2],             [0, 1, 0, 2, 0, 3, 0, 4, 0, 5, 0, 6, 0, 5, 0, 4, 0, 3, 0, 2],             [0, 1, 0, 2, 0, 3, 0, 4, 0, 5, 0, 6, 0, 7, 0, 6, 0, 5, 0, 4, 0, 3, 0, 2],             [0, 1, 0, 2, 0, 3, 0, 4, 0, 5, 0, 6, 0, 7, 0, 8, 0, 7, 0, 6, 0, 5, 0, 4, 0, 3, 0, 2]            ];
+    public static readonly escalateBounceArpeggioPatterns:     ReadonlyArray<ReadonlyArray<number>> = [[0], [0, 1], [0, 1, 0, 2, 1, 0, 1],    [0, 1, 0, 2, 1, 3, 2, 0, 2, 3, 1, 2], [0, 1, 0, 2, 1, 3, 2, 4, 3, 0, 3, 4, 2, 3, 1, 2], [0, 1, 0, 2, 1, 3, 2, 4, 3, 5, 4, 0, 4, 5, 3, 4, 2, 3, 1, 2], [0, 1, 0, 2, 1, 3, 2, 4, 3, 5, 4, 6, 5, 0, 5, 6, 4, 5, 3, 4, 2, 3, 1, 2], [0, 1, 0, 2, 1, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 0, 6, 7, 5, 6, 4, 5, 3, 4, 2, 3, 1, 2], [0, 1, 0, 2, 1, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 8, 7, 0, 7, 8, 6, 7, 5, 6, 4, 5, 3, 4, 2, 3, 1, 2]];
+    public static readonly shiftBounceArpeggioPatterns:        ReadonlyArray<ReadonlyArray<number>> = [[0], [0, 1], [0, 2, 1, 2],             [0, 3, 1, 2, 1, 3],                   [0, 4, 1, 3, 2, 3, 1, 4],                         [0, 5, 1, 4, 2, 3, 2, 4, 1, 5],                               [0, 6, 1, 5, 2, 4, 3, 4, 2, 5, 1, 6],                                     [0, 7, 1, 6, 2, 5, 3, 4, 3, 5, 2, 6, 1, 7],                                           [0, 8, 1, 7, 2, 6, 3, 5, 4, 5, 3, 6, 2, 7, 1, 8]                                                ];
+
     public static readonly rhythms: DictionaryArray<Rhythm> = toNameMap([
         { name: "÷3 (triplets)", stepsPerBeat: 3,  roundUpThresholds: [5, 12, 18    ]},
         { name: "÷4 (standard)", stepsPerBeat: 4,  roundUpThresholds: [3, 9,  17, 21]},
@@ -1606,8 +1620,21 @@ function generateWhiteNoise() {
     return wave;
 }
 
-export function getArpeggioPitchIndex(pitchCount: number, useFastTwoNoteArp: boolean, useBounceArp: boolean, arpeggio: number): number {
-    let arpeggioPattern: ReadonlyArray<number> = (useBounceArp ? Config.bounceArpeggioPatterns : Config.arpeggioPatterns)[pitchCount - 1];
+export function getArpeggioPitchIndex(pitchCount: number, useFastTwoNoteArp: boolean, arpeggioPatternType: number, arpeggio: number): number {
+    let arpeggioPatternListPicker: any;
+    if (arpeggioPatternType == 0) arpeggioPatternListPicker = (Config.normalArpeggioPatterns)[pitchCount - 1];
+    else if (arpeggioPatternType == 1) arpeggioPatternListPicker = (Config.legacyArpeggioPatterns)[pitchCount - 1];
+    else if (arpeggioPatternType == 2) arpeggioPatternListPicker = (Config.scrambleArpeggioPatterns)[pitchCount - 1];
+    else if (arpeggioPatternType == 3) arpeggioPatternListPicker = (Config.oscillateArpeggioPatterns)[pitchCount - 1];
+    else if (arpeggioPatternType == 4) arpeggioPatternListPicker = (Config.escalateArpeggioPatterns)[pitchCount - 1];
+    else if (arpeggioPatternType == 5) arpeggioPatternListPicker = (Config.shiftArpeggioPatterns)[pitchCount - 1];
+    else if (arpeggioPatternType == 6) arpeggioPatternListPicker = (Config.normalBounceArpeggioPatterns)[pitchCount - 1];
+    else if (arpeggioPatternType == 7) arpeggioPatternListPicker = (Config.scrambleBounceArpeggioPatterns)[pitchCount - 1];
+    else if (arpeggioPatternType == 8) arpeggioPatternListPicker = (Config.oscillateBounceArpeggioPatterns)[pitchCount - 1];
+    else if (arpeggioPatternType == 9) arpeggioPatternListPicker = (Config.escalateBounceArpeggioPatterns)[pitchCount - 1];
+    else if (arpeggioPatternType == 10) arpeggioPatternListPicker = (Config.shiftBounceArpeggioPatterns)[pitchCount - 1];
+    else throw new Error("Unknown arpeggio pattern type in getArpeggioPitchIndex: " + arpeggioPatternType);
+    let arpeggioPattern: ReadonlyArray<number> = arpeggioPatternListPicker;
     if (arpeggioPattern != null) {
         if (pitchCount == 2 && useFastTwoNoteArp == false) {
             arpeggioPattern = [0, 0, 1, 1];

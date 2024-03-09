@@ -3013,16 +3013,16 @@ export class ChangeFastTwoNoteArp extends Change {
     }
 }
 
-export class ChangeBounceArp extends Change {
-    constructor(doc: SongDocument, newValue: boolean) {
+export class ChangeArpeggioPattern extends Change {
+    constructor(doc: SongDocument, newValue: number) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        const oldValue = instrument.bounceArp;
-
-        doc.notifier.changed();
+        const oldValue: number = instrument.arpeggioPattern;
         if (oldValue != newValue) {
-            instrument.bounceArp = newValue;
             this._didSomething();
+            instrument.arpeggioPattern = newValue;
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
         }
     }
 }
