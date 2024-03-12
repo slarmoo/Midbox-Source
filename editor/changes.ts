@@ -1,7 +1,7 @@
 // Copyright (c) 2012-2022 John Nesky and contributing authors, distributed under the MIT license, see accompanying the LICENSE.md file.
 
 import { Algorithm, Dictionary, FilterType, SustainType, InstrumentType, EffectType, AutomationTarget, Config, effectsIncludeDistortion } from "../synth/SynthConfig";
-import { NotePin, Note, makeNotePin, Pattern, FilterSettings, FilterControlPoint, SpectrumWave, HarmonicsWave, Instrument, Channel, Song, Synth } from "../synth/synth";
+import { NotePin, Note, makeNotePin, Pattern, FilterSettings, FilterControlPoint, SpectrumWave, HarmonicsWave, Instrument, Channel, Song, Synth, convertChipWaveToCustomChip, clamp } from "../synth/synth";
 import { Preset, PresetCategory, EditorConfig } from "./EditorConfig";
 import { Change, ChangeGroup, ChangeSequence, UndoableChange } from "./Change";
 import { SongDocument } from "./SongDocument";
@@ -218,6 +218,164 @@ function projectNoteIntoBar(oldNote: Note, timeOffset: number, noteStartPart: nu
     if (!joinedWithPrevNote) {
         newNotes.push(newNote);
     }
+}
+
+function mod(a: number, b: number): number {
+    return (a % b + b) % b;
+}
+
+function sigma(a: number, b: (i: number) => number, c: number): number {
+    let result = 0;
+    for (let i = c; i <= a; i++) {
+        result += b(i);
+    }
+    return result;
+}
+
+// The following functions are for custom chip generation seen later on.
+function randomRoundedWave(wave: Float32Array): void {
+    let randomRoundWave: Float32Array = new Float32Array(64);
+    let waveLength: number = 64;
+    let foundNonZero = false;
+    const roundedWaveType: number = (Math.random() * 2 + 1) | 0;
+    if (roundedWaveType == 1) {
+        // https://www.desmos.com/calculator/hji1istsat
+        // "Phased"
+        let randomNumber1 = Math.random() * 2 + 0.5;
+        let randomNumber2 = Math.random() * 13 + 3;
+        let randomNumber3 = Math.random() * 48 - 24;
+        for (let i = 0; i < waveLength; i++) {
+            randomRoundWave[i] = clamp(-24, 24+1, Math.round(mod(randomNumber3 + ((Math.sin((i + randomNumber3) / randomNumber2) * 24) + i * randomNumber1), 48) - 24));
+        }
+    } else if (roundedWaveType == 2) {
+        // https://www.desmos.com/calculator/0bxjhiwhwq
+        // "Bouncy"
+        let randomNumber1 = Math.random() * 0.19 + 0.06;
+        let randomNumber2 = Math.random() * 2 + 1;
+        let randomNumber3 = Math.random() * 48 - 24;
+        let randomNumber4 = Math.random() * 2 - 1;
+        for (let i = 0; i < waveLength; i++) {
+            randomRoundWave[i] = clamp(-24, 24+1, Math.round(randomNumber4 * Math.abs(2 * Math.floor((Math.sin((i / randomNumber2) * randomNumber1 + randomNumber3) * Math.cos((i * randomNumber2) * (randomNumber1 / 2)) * 24))) - randomNumber4 * 24));
+        }
+    } else if (roundedWaveType == 3) {
+        // There is no type 3 yet, but perhaps in the future...
+        // "None"
+    }
+    for (let i = 0; i < waveLength; i++) {
+        wave[i] = randomRoundWave[i];
+        let minimum = Infinity;
+        let maximum = -Infinity;
+        for (let i = 0; i < waveLength; i++) {
+            minimum = Math.min(minimum, wave[i]);
+            maximum = Math.max(maximum, wave[i]);
+        }
+        const distance = maximum - minimum;
+        if (distance >= 7) {
+            foundNonZero = true;
+        }
+    }
+    // If the waveform is too quiet/all waves are the same, reroll.
+    if (!foundNonZero) randomRoundedWave(wave);
+}
+
+function randomPulses(wave: Float32Array): void {
+    let randomPulse: Float32Array = new Float32Array(64);
+    let waveLength: number = 64;
+    let foundNonZero = false;
+    // Weird math for building random pulses but this is what we are going with.
+    let randomNumber2 = Math.round(Math.random() * 15 + 15);
+    let randomNumber3 = Math.round(Math.random() * 3 + 1);
+    let randomNumber4 = Math.round(Math.random() * 13 + 2);
+    for (let i = 0; i < waveLength; i++) {
+        let randomNumber1 = sigma(mod(i, randomNumber2), (i) => 1, randomNumber4);
+        randomPulse[i] = clamp(-24, 24+1, Math.round(mod(24 * (sigma(i, (i) => randomNumber1, Math.round(randomNumber2 / randomNumber3))), 24.0000000000001)));
+    }
+    for (let i = 0; i < waveLength; i++) {
+        wave[i] = randomPulse[i];
+        let minimum = Infinity;
+        let maximum = -Infinity;
+        for (let i = 0; i < waveLength; i++) {
+            minimum = Math.min(minimum, wave[i]);
+            maximum = Math.max(maximum, wave[i]);
+        }
+        const distance = maximum - minimum;
+        if (distance >= 7) {
+            foundNonZero = true;
+        }
+    }
+    // If the waveform is too quiet/all waves are the same, reroll.
+    if (!foundNonZero) randomPulses(wave);
+}
+
+function randomChip(wave: Float32Array): void {
+    let randomChipWave: Float32Array = new Float32Array(64);
+    let waveLength: number = 64;
+    let foundNonZero = false;
+    const chipType: number = (Math.random() * 2 + 1) | 0;
+    if (chipType == 1) {
+        // https://www.desmos.com/calculator/udpkkpxqaj
+        // "Sawscape"
+        let randomNumber1 = Math.random() * 3;
+        let randomNumber2 = Math.random() * 0.99 - 1;
+        let randomNumber3 = Math.random() * 9 + 2;
+        let randomNumber4 = Math.random() * 2 - 1;
+        for (let i = 0; i < waveLength; i++) {
+            randomChipWave[i] = clamp(-24, 24+1, (Math.round(Math.abs(randomNumber4 * mod(((randomNumber2 / randomNumber3) * randomNumber3) + (sigma(i / (randomNumber1 * randomNumber1), (i) => randomNumber3, randomNumber1 * -randomNumber2)) * randomNumber4, 24)))) * 2 - 24);
+        }
+    } else if (chipType == 2) {
+        // https://www.desmos.com/calculator/bmogge156f
+        // "Fake Chip"
+        let randomNumber1 = Math.random() * 3;
+        let randomNumber2 = Math.random() * 2 - 1;
+        let randomNumber3 = Math.random() * 100;
+        for (let i = 0; i < waveLength; i++) {
+            randomChipWave[i] = clamp(-24, 24+1, mod(Math.round(mod((sigma(i / randomNumber1, (i) => (randomNumber1 * randomNumber3), 0)), 25 + randomNumber2) * 24), 48) - 24);
+        }
+    }
+    for (let i = 0; i < waveLength; i++) {
+        wave[i] = randomChipWave[i];
+        let minimum = Infinity;
+        let maximum = -Infinity;
+        for (let i = 0; i < waveLength; i++) {
+            minimum = Math.min(minimum, wave[i]);
+            maximum = Math.max(maximum, wave[i]);
+        }
+        const distance = maximum - minimum;
+        if (distance >= 7) {
+            foundNonZero = true;
+        }
+    }
+    // If the waveform is too quiet/all waves are the same, reroll.
+    if (!foundNonZero) randomChip(wave);
+}
+
+function biasedFullyRandom(wave: Float32Array): void {
+    let fullyRandomWave: Float32Array = new Float32Array(64);
+    let waveLength: number = 64;
+    let foundNonZero = false;
+    // Math for a fully random custom chip but the higher/lower parts 
+    // of the waveform (in height) will contain less samples.
+    for (let i: number = 0; i < waveLength; i++) {
+        const v = Math.random() * 2 - 1;
+        const bias = 6;
+        const biased = v > 0 ? Math.pow(v, bias) : -Math.pow(-v, bias);
+        fullyRandomWave[i] = clamp(-24, 24 + 1, Math.floor(biased * 24));
+    }
+    for (let i = 0; i < waveLength; i++) {
+        wave[i] = fullyRandomWave[i];
+        let minimum = Infinity;
+        let maximum = -Infinity;
+        for (let i = 0; i < waveLength; i++) {
+            minimum = Math.min(minimum, wave[i]);
+            maximum = Math.max(maximum, wave[i]);
+        }
+        const distance = maximum - minimum;
+        if (distance >= 7) {
+            foundNonZero = true;
+        }
+    }
+    // If the waveform is too quiet/all waves are the same, reroll.
+    if (!foundNonZero) biasedFullyRandom(wave);
 }
 
 export class ChangeMoveAndOverflowNotes extends ChangeGroup {
@@ -684,9 +842,9 @@ export class ChangeRandomGeneratedInstrument extends Change {
             }
             instrument.preset = instrument.type = type;
 
-            if (doc.prefs.fadeOnRandomization) {
-            instrument.fadeIn = (Math.random() < 0.8) ? 0 : selectCurvedDistribution(0, Config.fadeInRange - 1, 0, 2);
-            instrument.fadeOut = selectCurvedDistribution(0, Config.fadeOutTicks.length - 1, Config.fadeOutNeutral, 2);
+            if (doc.prefs.fadeOnRandomization && !(instrument.type == InstrumentType.drumset)) {
+                instrument.fadeIn = (Math.random() < 0.8) ? 0 : selectCurvedDistribution(0, Config.fadeInRange - 1, 0, 2);
+                instrument.fadeOut = selectCurvedDistribution(0, Config.fadeOutTicks.length - 1, Config.fadeOutNeutral, 2);
             } 
             if (Math.random() < 0.1) {
                 instrument.effects |= 1 << EffectType.transition;
@@ -829,7 +987,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     new PotentialFilterPoint(1.0, FilterType.lowPass, midFreq, maxFreq, 8000.0, -1),
                 ]);
                 instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["noteFilterAllFreqs"].index, 0, Config.envelopes.dictionary[selectWeightedRandom([
-                        { item: "none", weight: 8},
+                        { item: "none", weight: 30},
                         { item: "note size", weight: 2},
                         { item: "punch", weight: 2 },
                         { item: "flare 0", weight: 2 },
@@ -1006,7 +1164,23 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     instrument.spectrumWave.markCustomWaveDirty();
                 } break;
                 case InstrumentType.drumset: {
-                    // MID TODO: Put your drumset stuff here. Randomize each spectrum and their envelope.
+                    for (let i: number = 0; i < Config.drumCount; i++) {
+                        instrument.drumsetEnvelopes[i] = Math.floor(Math.random() * Config.envelopes.length);
+                        const spectrum: number[] = [];
+                        for (let i: number = 0; i < Config.spectrumControlPoints; i++) {
+                            const isHarmonic: boolean = i == 0 || i == 7 || i == 11 || i == 14 || i == 16 || i == 18 || i == 21;
+                            if (isHarmonic) {
+                                spectrum[i] = Math.pow(Math.random(), 0.25);
+                            } else {
+                                spectrum[i] = Math.pow(Math.random(), 3) * 0.5;
+                            }
+                        }
+                        normalize(spectrum);
+                        for (let j: number = 0; j < Config.spectrumControlPoints; j++) {
+                            instrument.drumsetSpectrumWaves[i].spectrum[j] = Math.round(spectrum[j]);
+                        }
+                        instrument.drumsetSpectrumWaves[i].markCustomWaveDirty();
+                    }
                 } break;
                 default: throw new Error("Unhandled noise instrument type in random generator.");
             }
@@ -1060,6 +1234,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "buried", weight: 2 },
                     { item: "corrupt", weight: 2 },
                     { item: "weird octave", weight: 2 },
+                    { item: "bent", weight: 2 },
                 ])].index;
                 instrument.unisonVoices = Config.unisons[instrument.unison].voices;
                 instrument.unisonSpread = Config.unisons[instrument.unison].spread;
@@ -2361,13 +2536,101 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     }
                 } break;
                 case InstrumentType.customChipWave: {
-                    // MID TODO: Randomize custom chip.
+                    let randomGeneratedArray: Float32Array = new Float32Array(64);
+                    let randomGeneratedArrayIntegral: Float32Array = new Float32Array(65);
+                    if (doc.prefs.customChipGenerationType == "customChipGenerateFully") {
+                        for (let i: number = 0; i < 64; i++) {
+                            randomGeneratedArray[i] = clamp(-24, 24+1, ((Math.random() * 48) | 0) - 24);
+                        }
+                    } 
+                    else if (doc.prefs.customChipGenerationType == "customChipGeneratePreset") {
+                        let index = ((Math.random() * Config.chipWaves.length) | 0);
+                        let waveformPreset = Config.chipWaves[index].samples;
+                        randomGeneratedArray = convertChipWaveToCustomChip(waveformPreset)[0];
+                    }
+                    else if (doc.prefs.customChipGenerationType == "customChipGenerateAlgorithm") {
+                        const algorithmFunction: (wave: Float32Array) => void = selectWeightedRandom([
+                            { item: randomRoundedWave, weight: 1},
+                            { item: randomPulses, weight: 1},
+                            { item: randomChip, weight: 1},
+                            { item: biasedFullyRandom, weight: 1},
+                        ]);
+                        algorithmFunction(randomGeneratedArray);
+                    }
+                    else if (doc.prefs.customChipGenerationType == "customChipGenerateNone") {
+                        randomGeneratedArray = instrument.customChipWave;
+                    }
+
+                    let sum: number = 0.0;
+                    for (let i: number = 0; i < randomGeneratedArray.length; i++) sum += randomGeneratedArray[i];
+                    const average: number = sum / randomGeneratedArray.length;
+                    let cumulative: number = 0;
+                    let wavePrev: number = 0;
+                    for (let i: number = 0; i < randomGeneratedArray.length; i++) {
+                        cumulative += wavePrev;
+                        wavePrev = randomGeneratedArray[i] - average;
+                        randomGeneratedArrayIntegral[i] = cumulative;
+                    }
+                    randomGeneratedArrayIntegral[64] = 0.0;
+
+                    instrument.customChipWave = randomGeneratedArray;
+                    instrument.customChipWaveIntegral = randomGeneratedArrayIntegral;
                 } break;
                 case InstrumentType.noise: {
                     instrument.chipNoise = (Math.random() * Config.chipNoises.length) | 0;
                 } break;
                 case InstrumentType.wavetable: {
-                    // MID TODO: Randomize the wavetable.
+                    let randomGeneratedArray: Float32Array[] = [];
+                    let randomGeneratedArrayIntegral: Float32Array[] = [];
+                    // Probably a better way to randomize the checkboxes but eh. Will be optimized later.
+                    let checkboxRandomizer1: number = Math.round(Math.random());
+                    let checkboxRandomizer2: number = Math.round(Math.random());
+                    let checkboxRandomizer3: number = Math.round(Math.random());
+                    instrument.wavetableSpeed = Math.floor(Math.random() * Config.wavetableSpeedMax + 1);
+                    instrument.cyclePerNote = checkboxRandomizer1 == 0 ? true : false;
+                    instrument.oneShotCycle = (checkboxRandomizer2 == 0 && instrument.cyclePerNote) ? true : false;
+                    instrument.interpolateWaves = checkboxRandomizer3 == 0 ? true : false;
+                    instrument.currentCycle = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31];
+                    for (let waveIndex: number = 0; waveIndex < 32; waveIndex++) {
+                        randomGeneratedArray[waveIndex] = new Float32Array(64)
+                        randomGeneratedArrayIntegral[waveIndex] = new Float32Array(65)
+                        if (doc.prefs.wavetableCustomChipGenerationType == "wavetableCustomChipGenerateFully") {
+                            for (let i: number = 0; i < 64; i++) {
+                                randomGeneratedArray[waveIndex][i] = clamp(-24, 24+1, ((Math.random() * 48) | 0) - 24);
+                            }
+                        } 
+                        else if (doc.prefs.wavetableCustomChipGenerationType == "wavetableCustomChipGeneratePreset") {
+                            let index = ((Math.random() * Config.chipWaves.length) | 0);
+                            let waveformPreset = Config.chipWaves[index].samples;
+                            randomGeneratedArray[waveIndex] = convertChipWaveToCustomChip(waveformPreset)[0];
+                        }
+                        else if (doc.prefs.wavetableCustomChipGenerationType == "wavetableCustomChipGenerateAlgorithm") {
+                            const algorithmFunction: (wave: Float32Array) => void = selectWeightedRandom([
+                                { item: randomRoundedWave, weight: 1},
+                                { item: randomPulses, weight: 1},
+                                { item: randomChip, weight: 1},
+                                { item: biasedFullyRandom, weight: 1},
+                            ]);
+                            algorithmFunction(randomGeneratedArray[waveIndex]);
+                        }
+                        else if (doc.prefs.wavetableCustomChipGenerationType == "wavetableCustomChipGenerateNone") {
+                            randomGeneratedArray[waveIndex] = instrument.wavetableWaves[waveIndex];
+                        }
+                        let sum: number = 0.0;
+                        for (let i: number = 0; i < randomGeneratedArray[waveIndex].length; i++) sum += randomGeneratedArray[waveIndex][i];
+                        const average: number = sum / randomGeneratedArray[waveIndex].length;
+                        let cumulative: number = 0;
+                        let wavePrev: number = 0;
+                        for (let i: number = 0; i < randomGeneratedArray[waveIndex].length; i++) {
+                            cumulative += wavePrev;
+                            wavePrev = randomGeneratedArray[waveIndex][i] - average;
+                            randomGeneratedArrayIntegral[waveIndex][i] = cumulative;
+                        }
+                        randomGeneratedArrayIntegral[waveIndex][64] = 0.0;
+
+                        instrument.wavetableWaves[waveIndex] = randomGeneratedArray[waveIndex];
+                        instrument.wavetableIntegralWaves[waveIndex] = randomGeneratedArrayIntegral[waveIndex];
+                    }
                 } break;
                 default: throw new Error("Unhandled pitched instrument type in random generator.");
             }

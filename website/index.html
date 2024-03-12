@@ -173,6 +173,10 @@
     <div id="text-content">
         <section>
 
+            <!--
+                MID TODO: Rework the entire description.
+            -->
+
             <h1>
                 <font>Midbox</font>
                 <span id="midboxPlant" style="display: inline; color:#0c46e4e5"></span>
@@ -198,6 +202,7 @@
             </p>
             <p>
                 There is also a forms where you can submit bug reports and give feedback/suggestions! 
+                <!-- Issue#66 - Decide whether to get rid of these forms or not. -->
                 The forms can be found <a target="_blank" href="https://forms.gle/v6YYXCrxGYDvzYpu8">here</a>.
             </p>
             <p>
@@ -212,18 +217,6 @@
                 You can choose how to export your song, whether that be by link, by mp3, wav, midi, txt, or any other way not mentioned.
                 Please note that anything regarding exporting using json and importing from and to other mods and etc will most likely not be functional.
             </p>
-            <!--
-    <div class="donation">
-        BeepBox is a passion project, and will always be free to use. If you find it valuable and have the means, any gratuity via
-        <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
-            <input type="hidden" name="cmd" value="_donations" />
-            <input type="hidden" name="business" value="QZJTX9GRYEV9N" />
-            <input type="hidden" name="currency_code" value="USD" />
-            <input type="submit" name="submit" value="Paypal"/>
-        </form>
-        would be appreciated!
-    </div>
-    -->
         </section>
 
         <div class="column-container">
@@ -372,7 +365,7 @@
             }
         }
         if (Math.floor(Math.random() * 1) == 0) {
-            switch (Math.floor(Math.random() * 86)) {
+            switch (Math.floor(Math.random() * 89)) {
                 case 0:
                     document.getElementById("randomText").innerHTML = "Let's make a song!";
                     break;
@@ -631,6 +624,15 @@
                 case 85: 
                     document.getElementById("randomText").innerHTML = "Happy 2024! Or... am I too late?";
                     break;
+                case 86: 
+                    document.getElementById("randomText").innerHTML = "Would you consider this mod better for dubstep or chiptune?";
+                    break;
+                case 87: 
+                    document.getElementById("randomText").innerHTML = "One letter off from the neighbor, ModBox.";
+                    break;
+                case 88: 
+                    document.getElementById("randomText").innerHTML = "Running out of song ideas? Explore what features are available and make yourself a challenge!";
+                    break;
             }
         }
 
@@ -638,7 +640,6 @@
             document.getElementById("introduction").innerHTML = "Midbox is an online tool for sketching and sharing chiptune melodies. Make sure that your volume is turned up, then press the play button!";
             document.getElementById("keyboard-instructions").style.display = "none";
             document.getElementById("bar-editing").innerHTML = "Tap the boxes to move to a different part of the song, or tap on the currently selected box to swap which pattern is played during that part of the song.";
-			//document.getElementById("offline-instructions").innerHTML = 'You can use BeepBox when your device is offline if you put a shortcut to BeepBox on your home screen. <ul><li>Chrome: find the "Add to Home Screen" option in the ⋮ menu.</li><li>Firefox: find the "Add Page Shortcut" option in the ⋮ menu.</li><li>Safari: find the "Add to Home Screen" option in the bookmark menu.</li></ul>';
         }
 
         function browserHasRequiredFeatures() {

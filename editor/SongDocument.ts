@@ -103,12 +103,10 @@ export class SongDocument {
     	public sustainOnRandomization: boolean = true;
 		public sustainTypeOnRandomization: boolean = false;
     	public spectrumEditorOnRandomization: boolean = true;
-    	public customChipWaveOnRandomization: boolean = true;
     	public customChipGenerationType: string = "customChipGenerateAlgorithm";
 		public noiseTypeOnRandomization: boolean = true;
 		public drumsetSpectrumOnRandomization: boolean = true;
 		public drumsetEnvelopeOnRandomization: boolean = true;
-		public wavetableCustomChipWavesOnRandomization: boolean = true;
     	public wavetableCustomChipGenerationType: string = "wavetableCustomChipGenerateAlgorithm";
 		public wavetableSpeedOnRandomization: boolean = true;
 

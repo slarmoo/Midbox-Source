@@ -58,6 +58,9 @@ export class Preferences {
 		public EQFilterOnRandomization: boolean;
 		public noteFilterOnRandomization: boolean;
 
+		public customChipGenerationType: string;
+		public wavetableCustomChipGenerationType: string;
+
 	// Keybind Setup
 		public deactivateCapsLock: boolean;
 		public CTRLrEvent: string;
@@ -117,6 +120,9 @@ export class Preferences {
 
 		this.EQFilterOnRandomization = window.localStorage.getItem("EQFilterOnRandomization") != "false";
 		this.noteFilterOnRandomization = window.localStorage.getItem("noteFilterOnRandomization") != "false";
+
+		this.customChipGenerationType = window.localStorage.getItem("customChipGenerationType") || "customChipGenerateAlgorithm";
+		this.customChipGenerationType = window.localStorage.getItem("wavetableCustomChipGenerationType") || "wavetableCustomChipGenerateAlgorithm";
 		
 		// Keybind Setup
 		this.deactivateCapsLock = window.localStorage.getItem("deactivateCapsLock") != "false";
@@ -194,6 +200,9 @@ export class Preferences {
 
 		window.localStorage.setItem("EQFilterOnRandomization", this.EQFilterOnRandomization ? "true" : "false");
 		window.localStorage.setItem("noteFilterOnRandomization", this.noteFilterOnRandomization ? "true" : "false");
+
+		window.localStorage.setItem("customChipGenerationType", this.customChipGenerationType);
+		window.localStorage.setItem("wavetableCustomChipGenerationType", this.wavetableCustomChipGenerationType);
 
 		// Keybind Setup
 		window.localStorage.setItem("deactivateCapsLock", this.deactivateCapsLock ? "true" : "false");

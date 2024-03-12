@@ -84,6 +84,10 @@ export const enum InstrumentType {
     customChipWave,
     wavetable,
     advfm,
+//  Issue#58 - Add a synth/pad instrument type. May require some more thinking about before going about implementation.
+//  synth,
+//  Issue#14 - Add an advanced drumset drum type, which will be like how ADVFM is to FM (except it's ADVDrumset to Drumset).
+//  advdrumset,
     mod,
     length,
 }
@@ -136,6 +140,7 @@ export const enum EnvelopeComputeIndex {
     supersawDynamism,
 	supersawSpread,
 	supersawShape,
+    // Issue#20 - Envelopes for effects.
     distortion,
     length,
 }
@@ -210,10 +215,11 @@ export interface Modulator extends BeepBoxOption {
     readonly maxRawVol:        number;     
     readonly newNoteVol:       number;     
     readonly forSong:          boolean;    
-    convertRealFactor:         number;     
+    convertRealFactor:         number;
 //  readonly checkboxMod:      boolean;
 //  The commented out thing above is for deciding if a modulator is for something that can only have
-//  two values, and thus would be like a checkbox modulator of sorts.
+//  two values, and thus would be like a checkbox modulator of sorts. Refer to below.
+//  Issue#47 - Add modulators specifically created for changing boolean-like elements, primarily checkboxes.
     readonly associatedEffect: EffectType; 
     readonly promptName:       string;     
     readonly promptDesc:       string[];   
@@ -385,7 +391,7 @@ export class Config {
         { name: "1/12 pulse",      expression: 0.55,  samples: centerWave            ([1.0,  -1.0,  -1.0,  -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0])},
         { name: "1/16 pulse",      expression: 0.575, samples: centerWave            ([1.0,  -1.0,  -1.0,  -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0])},
         { name: "heavy saw",       expression: 0.5,   samples: centerWave            ([1.0,  -1.0,   2.0,  -1.0,  0.0, 3.0, 1.0, -1.0, 2.0, -1.0, 0.0, 0.0])},
-        { name: "bass-y",          expression: 0.25,   samples: centerWave            ([1.0,  -5.0,   4.0,  -3.0,  7.0, -2.0, 3.0, -3.0, 6.0])},
+        { name: "bass-y",          expression: 0.25,  samples: centerWave            ([1.0,  -5.0,   4.0,  -3.0,  7.0, -2.0, 3.0, -3.0, 6.0])},
         { name: "strange",         expression: 0.125, samples: centerWave            ([1.0,   11.0,  1.0,  -11.0, -1.0, -11.0, 4.0, -6.0, 9.0, -1.0, -7.0, 11.0, 2.0, -5.0, 9.0, 9.0, -10.0])},
         { name: "sawtooth",        expression: 0.65,  samples: centerWave            ([1.0 /  31.0,  3.0 /  31.0, 5.0 / 31.0, 7.0 / 31.0, 9.0 / 31.0, 11.0 / 31.0, 13.0 / 31.0, 15.0 / 31.0, 17.0 / 31.0, 19.0 / 31.0, 21.0 / 31.0, 23.0 / 31.0, 25.0 / 31.0, 27.0 / 31.0, 29.0 / 31.0, 31.0 / 31.0, -31.0 / 31.0, -29.0 / 31.0, -27.0 / 31.0, -25.0 / 31.0, -23.0 / 31.0, -21.0 / 31.0, -19.0 / 31.0, -17.0 / 31.0, -15.0 / 31.0, -13.0 / 31.0, -11.0 / 31.0, -9.0 / 31.0, -7.0 / 31.0, -5.0 / 31.0, -3.0 / 31.0, -1.0 / 31.0])},
         { name: "double saw",      expression: 0.5,   samples: centerWave            ([0.0,  -0.2,  -0.4,  -0.6, -0.8, -1.0, 1.0, -0.8, -0.6, -0.4, -0.2, 1.0, 0.8, 0.6, 0.4, 0.2])},
@@ -404,11 +410,11 @@ export class Config {
         { name: "pan flute",       expression: 0.35,  samples: centerAndNormalizeWave([1.0,   4.0,   7.0,   6.0,  7.0, 9.0, 7.0, 7.0, 11.0, 12.0, 13.0, 15.0, 13.0, 11.0, 11.0, 12.0, 13.0, 10.0, 7.0, 5.0, 3.0, 6.0, 10.0, 7.0, 3.0, 3.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0])},
         { name: "glitch",          expression: 0.5,   samples: centerWave            ([1.0,   1.0,   1.0,   1.0,  1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0])},
         { name: "accurate sine",   expression: 0.1,   samples: centerWave            ([2, 7, 11, 14, 16, 18, 19, 20, 21, 22, 22, 23, 23, 23, 24, 24, 24, 24, 23, 23, 23, 22, 22, 21, 20, 19, 18, 16, 14, 11, 7, 2, -2, -7, -11, -14, -16, -18, -19, -20, -21, -22, -22, -23, -23, -23, -24, -24, -24, -24, -23, -23, -23, -22, -22, -21, -20, -19, -18, -16, -14, -11, -7, -2])},
-        { name: "accurate tri",    expression: 0.1,  samples: centerWave            ([1, 2, 4, 5, 7, 8, 10, 11, 13, 14, 16, 17, 19, 20, 22, 23, 23, 22, 20, 19, 17, 16, 14, 13, 11, 10, 8, 7, 5, 4, 2, 1, -1, -2, -4, -5, -7,-8, -10, -11, -13, -14, -16, -17, -19, -20, -22, -23, -23, -22, -20, -19, -17, -16, -14, -13, -11, -10, -8, -7, -5, -4, -2, -1])},
+        { name: "accurate tri",    expression: 0.1,   samples: centerWave            ([1, 2, 4, 5, 7, 8, 10, 11, 13, 14, 16, 17, 19, 20, 22, 23, 23, 22, 20, 19, 17, 16, 14, 13, 11, 10, 8, 7, 5, 4, 2, 1, -1, -2, -4, -5, -7,-8, -10, -11, -13, -14, -16, -17, -19, -20, -22, -23, -23, -22, -20, -19, -17, -16, -14, -13, -11, -10, -8, -7, -5, -4, -2, -1])},
         { name: "secant",          expression: 0.1,   samples: centerWave            ([23, 18, 13, 10, 8, 6, 5, 4, 3, 2, 2, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 2, 2, 3, 4, 5, 6, 8, 10, 13, 18, 23, -23, -18, -14, -10, -8, -6, -5, -4, -3, -2, -2, -1, -1, -1, 0, 0, 0, 0, -1, -1, -1, -2, -2, -3, -4, -5, -6, -8, -10, -14, -18, -23])},
         { name: "glitch 2",        expression: 0.1,   samples: centerWave            ([0, 24, 0, 24, 0, 24, 0, 24, 0, -24, 0, -24, 0, -24, 0, -24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -24, 0, -24, 0, -24, 0, -24, 0, 24, 0, 24, 0, 24, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])},
         { name: "trapezoid",       expression: 1.0,   samples: centerWave            ([1.0 / 15.0, 6.0 / 15.0, 10.0 / 15.0, 14.0 / 15.0, 15.0 / 15.0, 15.0 / 15.0, 15.0 / 15.0, 15.0 / 15.0, 15.0 / 15.0, 15.0 / 15.0, 15.0 / 15.0, 15.0 / 15.0, 14.0 / 15.0, 10.0 / 15.0, 6.0 / 15.0, 1.0 / 15.0, -1.0 / 15.0, -6.0 / 15.0, -10.0 / 15.0, -14.0 / 15.0, -15.0 / 15.0, -15.0 / 15.0, -15.0 / 15.0, -15.0 / 15.0, -15.0 / 15.0, -15.0 / 15.0, -15.0 / 15.0, -15.0 / 15.0, -14.0 / 15.0, -10.0 / 15.0, -6.0 / 15.0, -1.0 / 15.0,])},
-        { name: "accurate trapez", expression: 0.1,  samples: centerWave            ([1, 4, 7, 10, 13, 16, 19, 22, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 22, 19, 16, 13, 10, 7, 4, 1, -1, -4, -7, -10, -13, -16, -19, -22, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -22, -19, -16, -13, -10, -7, -4, -1])}
+        { name: "accurate trapez", expression: 0.1,   samples: centerWave            ([1, 4, 7, 10, 13, 16, 19, 22, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 22, 19, 16, 13, 10, 7, 4, 1, -1, -4, -7, -10, -13, -16, -19, -22, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -22, -19, -16, -13, -10, -7, -4, -1])}
     ]);
 
     public static readonly chipWaves:  DictionaryArray<ChipWave>  = rawChipToIntegrated(Config.rawChipWaves);
@@ -636,7 +642,9 @@ export class Config {
         { name: "64×",    mult: 64.0,  hzOffset:  0.0, amplitudeSign:  1.0 },
         { name: "128×",   mult: 128.0, hzOffset:  0.0, amplitudeSign:  1.0 },
     ]);
-
+//  Issue#22 - Find a way to put envelopes into categories. Try to find a way to do this only 
+//  visually, and if that can't be done, go through the process of updating the code to make the
+//  organized system below work.
 /*  public static readonly envelopeCategories: DictionaryArray<EnvelopeCategory> = toNameMap([
         {
             name: "None", envelopes: <DictionaryArray<Envelope>>toNameMap([
@@ -750,7 +758,7 @@ export class Config {
                 { name: "rise 5", type: EnvelopeType.rise, speed: 0.5   },
             ])
         },
-        This is an organized envelope system that I have yet to implement. We'll see how that goes.*/
+        */
 
     public static readonly envelopes: DictionaryArray<Envelope> = toNameMap([
         { name: "none",           type: EnvelopeType.none,         speed: 0.0   },
@@ -1020,6 +1028,7 @@ export class Config {
 		{ name: "supersawSpread",         computeIndex: EnvelopeComputeIndex.supersawSpread,         displayName: "spread",            interleave: false, isFilter: false, maxCount: 1,                       effect: null,                  compatibleInstruments: [InstrumentType.supersaw] },
 		{ name: "supersawShape",          computeIndex: EnvelopeComputeIndex.supersawShape,          displayName: "saw↔pulse",         interleave: false, isFilter: false, maxCount: 1,                       effect: null,                  compatibleInstruments: [InstrumentType.supersaw] },
         { name: "operatorPulseWidth",     computeIndex: EnvelopeComputeIndex.operatorPulseWidth0,    displayName: "fm # pwm",          interleave: false, isFilter: false, maxCount: Config.operatorCount+2,  effect: null,                  compatibleInstruments: [InstrumentType.fm, InstrumentType.advfm] },
+        // Issue#20 - Add envelope targets for effects.
         { name: "distortion",             computeIndex: EnvelopeComputeIndex.distortion,             displayName: "distortion",        interleave: false, isFilter: false, maxCount: 1,                       effect: EffectType.distortion, compatibleInstruments: null },
 /*      { name: "noteFilterGain",         computeIndex: EnvelopeComputeIndex.noteFilterGain0,        displayName: "n. filter # vol",   interleave: false, isFilter: true,  maxCount: Config.filterMaxPoints,  effect: EffectType.noteFilter, compatibleInstruments: null },
         { name: "bitcrusherQuantization", computeIndex: EnvelopeComputeIndex.bitcrusherQuantization, displayName: "bit crush",         interleave: false, isFilter: false, maxCount: 1,                       effect: EffectType.bitcrusher, compatibleInstruments: null },
@@ -1217,23 +1226,23 @@ export class Config {
         { name: "shape",           pianoName: "Shape",                  maxRawVol: Config.supersawShapeMax,                                newNoteVol: 0,                                                            forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.length,
             promptName: "Supersaw Shape",               promptDesc: ["This setting controls the supersaw shape of your instrument, just like the Saw↔Pulse slider.", "As the slider's name implies, this effect will give you a sawtooth wave at $LO, and a full pulse width wave at $HI, in which the width can be controlled via its slider/modulator. Values in between will be a blend of the two.", "[OVERWRITING] [$LO - $HI] [%]"]},
 
-        { name: "fm pwm 1", pianoName: "FM PWM 1", maxRawVol: Config.pulseWidthRange * 2, newNoteVol: Config.pulseWidthRange, forSong: false, convertRealFactor: 0, associatedEffect: EffectType.length,
-            promptName: "FM Pulse Width 1", promptDesc: ["This setting controls the width of the pulse wave for the first FM operator, just like the pulse width slider, with double the range.", "At $HI, your instrument will sound like a very thin pulse wave (on 99% of the time). It will gradually sound thicker towards $MID, where it will sound like a pure square wave (on 50% of the time), and narrower down after $MID down to $LO, where it will be inaudible (as it is on 0% of the time).", "Changing pulse width randomly between a few values is a common strategy in chiptune music to lend some personality to a lead instrument.", "[OVERWRITING] [$LO - $HI] [%Duty]"] },
+        { name: "fm pwm 1",        pianoName: "FM PWM 1",               maxRawVol: Config.pulseWidthRange * 2,                             newNoteVol: Config.pulseWidthRange,                                       forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.length,
+            promptName: "FM Pulse Width 1",             promptDesc: ["This setting controls the width of the pulse wave for the first FM operator, just like the pulse width slider, with double the range.", "At $HI, your instrument will sound like a very thin pulse wave (on 99% of the time). It will gradually sound thicker towards $MID, where it will sound like a pure square wave (on 50% of the time), and narrower down after $MID down to $LO, where it will be inaudible (as it is on 0% of the time).", "Changing pulse width randomly between a few values is a common strategy in chiptune music to lend some personality to a lead instrument.", "[OVERWRITING] [$LO - $HI] [%Duty]"] },
 
-        { name: "fm pwm 2", pianoName: "FM PWM 2", maxRawVol: Config.pulseWidthRange * 2, newNoteVol: Config.pulseWidthRange, forSong: false, convertRealFactor: 0, associatedEffect: EffectType.length,
-            promptName: "FM Pulse Width 2", promptDesc: ["This setting controls the width of the pulse wave for the second FM operator, just like the pulse width slider, with double the range.", "At $HI, your instrument will sound like a very thin pulse wave (on 99% of the time). It will gradually sound thicker towards $MID, where it will sound like a pure square wave (on 50% of the time), and narrower down after $MID down to $LO, where it will be inaudible (as it is on 0% of the time).", "Changing pulse width randomly between a few values is a common strategy in chiptune music to lend some personality to a lead instrument.", "[OVERWRITING] [$LO - $HI] [%Duty]"] },
+        { name: "fm pwm 2",        pianoName: "FM PWM 2",               maxRawVol: Config.pulseWidthRange * 2,                             newNoteVol: Config.pulseWidthRange,                                       forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.length,
+            promptName: "FM Pulse Width 2",             promptDesc: ["This setting controls the width of the pulse wave for the second FM operator, just like the pulse width slider, with double the range.", "At $HI, your instrument will sound like a very thin pulse wave (on 99% of the time). It will gradually sound thicker towards $MID, where it will sound like a pure square wave (on 50% of the time), and narrower down after $MID down to $LO, where it will be inaudible (as it is on 0% of the time).", "Changing pulse width randomly between a few values is a common strategy in chiptune music to lend some personality to a lead instrument.", "[OVERWRITING] [$LO - $HI] [%Duty]"] },
 
-        { name: "fm pwm 3", pianoName: "FM PWM 3", maxRawVol: Config.pulseWidthRange * 2, newNoteVol: Config.pulseWidthRange, forSong: false, convertRealFactor: 0, associatedEffect: EffectType.length,
-            promptName: "FM Pulse Width 3", promptDesc: ["This setting controls the width of the pulse wave for the third FM operator, just like the pulse width slider, with double the range.", "At $HI, your instrument will sound like a very thin pulse wave (on 99% of the time). It will gradually sound thicker towards $MID, where it will sound like a pure square wave (on 50% of the time), and narrower down after $MID down to $LO, where it will be inaudible (as it is on 0% of the time).", "Changing pulse width randomly between a few values is a common strategy in chiptune music to lend some personality to a lead instrument.", "[OVERWRITING] [$LO - $HI] [%Duty]"] },
+        { name: "fm pwm 3",        pianoName: "FM PWM 3",               maxRawVol: Config.pulseWidthRange * 2,                             newNoteVol: Config.pulseWidthRange,                                       forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.length,
+            promptName: "FM Pulse Width 3",             promptDesc: ["This setting controls the width of the pulse wave for the third FM operator, just like the pulse width slider, with double the range.", "At $HI, your instrument will sound like a very thin pulse wave (on 99% of the time). It will gradually sound thicker towards $MID, where it will sound like a pure square wave (on 50% of the time), and narrower down after $MID down to $LO, where it will be inaudible (as it is on 0% of the time).", "Changing pulse width randomly between a few values is a common strategy in chiptune music to lend some personality to a lead instrument.", "[OVERWRITING] [$LO - $HI] [%Duty]"] },
 
-        { name: "fm pwm 4", pianoName: "FM PWM 4", maxRawVol: Config.pulseWidthRange * 2, newNoteVol: Config.pulseWidthRange, forSong: false, convertRealFactor: 0, associatedEffect: EffectType.length,
-            promptName: "FM Pulse Width 4", promptDesc: ["This setting controls the width of the pulse wave for the fourth FM operator, just like the pulse width slider, with double the range.", "At $HI, your instrument will sound like a very thin pulse wave (on 99% of the time). It will gradually sound thicker towards $MID, where it will sound like a pure square wave (on 50% of the time), and narrower down after $MID down to $LO, where it will be inaudible (as it is on 0% of the time).", "Changing pulse width randomly between a few values is a common strategy in chiptune music to lend some personality to a lead instrument.", "[OVERWRITING] [$LO - $HI] [%Duty]"] },
+        { name: "fm pwm 4",        pianoName: "FM PWM 4",               maxRawVol: Config.pulseWidthRange * 2,                             newNoteVol: Config.pulseWidthRange,                                       forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.length,
+            promptName: "FM Pulse Width 4",             promptDesc: ["This setting controls the width of the pulse wave for the fourth FM operator, just like the pulse width slider, with double the range.", "At $HI, your instrument will sound like a very thin pulse wave (on 99% of the time). It will gradually sound thicker towards $MID, where it will sound like a pure square wave (on 50% of the time), and narrower down after $MID down to $LO, where it will be inaudible (as it is on 0% of the time).", "Changing pulse width randomly between a few values is a common strategy in chiptune music to lend some personality to a lead instrument.", "[OVERWRITING] [$LO - $HI] [%Duty]"] },
 
-        { name: "fm pwm 5", pianoName: "FM PWM 5", maxRawVol: Config.pulseWidthRange * 2, newNoteVol: Config.pulseWidthRange, forSong: false, convertRealFactor: 0, associatedEffect: EffectType.length,
-            promptName: "FM Pulse Width 5", promptDesc: ["This setting controls the width of the pulse wave for the fifth FM operator, just like the pulse width slider, with double the range.", "At $HI, your instrument will sound like a very thin pulse wave (on 99% of the time). It will gradually sound thicker towards $MID, where it will sound like a pure square wave (on 50% of the time), and narrower down after $MID down to $LO, where it will be inaudible (as it is on 0% of the time).", "Changing pulse width randomly between a few values is a common strategy in chiptune music to lend some personality to a lead instrument.", "[OVERWRITING] [$LO - $HI] [%Duty]"] },
+        { name: "fm pwm 5",        pianoName: "FM PWM 5",               maxRawVol: Config.pulseWidthRange * 2,                             newNoteVol: Config.pulseWidthRange,                                       forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.length,
+            promptName: "FM Pulse Width 5",             promptDesc: ["This setting controls the width of the pulse wave for the fifth FM operator, just like the pulse width slider, with double the range.", "At $HI, your instrument will sound like a very thin pulse wave (on 99% of the time). It will gradually sound thicker towards $MID, where it will sound like a pure square wave (on 50% of the time), and narrower down after $MID down to $LO, where it will be inaudible (as it is on 0% of the time).", "Changing pulse width randomly between a few values is a common strategy in chiptune music to lend some personality to a lead instrument.", "[OVERWRITING] [$LO - $HI] [%Duty]"] },
 
-        { name: "fm pwm 6", pianoName: "FM PWM 6", maxRawVol: Config.pulseWidthRange * 2, newNoteVol: Config.pulseWidthRange, forSong: false, convertRealFactor: 0, associatedEffect: EffectType.length,
-            promptName: "FM Pulse Width 6", promptDesc: ["This setting controls the width of the pulse wave for the sixth FM operator, just like the pulse width slider, with double the range.", "At $HI, your instrument will sound like a very thin pulse wave (on 99% of the time). It will gradually sound thicker towards $MID, where it will sound like a pure square wave (on 50% of the time), and narrower down after $MID down to $LO, where it will be inaudible (as it is on 0% of the time).", "Changing pulse width randomly between a few values is a common strategy in chiptune music to lend some personality to a lead instrument.", "[OVERWRITING] [$LO - $HI] [%Duty]"] },
+        { name: "fm pwm 6",        pianoName: "FM PWM 6",               maxRawVol: Config.pulseWidthRange * 2,                             newNoteVol: Config.pulseWidthRange,                                       forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.length,
+            promptName: "FM Pulse Width 6",             promptDesc: ["This setting controls the width of the pulse wave for the sixth FM operator, just like the pulse width slider, with double the range.", "At $HI, your instrument will sound like a very thin pulse wave (on 99% of the time). It will gradually sound thicker towards $MID, where it will sound like a pure square wave (on 50% of the time), and narrower down after $MID down to $LO, where it will be inaudible (as it is on 0% of the time).", "Changing pulse width randomly between a few values is a common strategy in chiptune music to lend some personality to a lead instrument.", "[OVERWRITING] [$LO - $HI] [%Duty]"] },
 
         { name: "slide speed",     pianoName: "Slide Speed",            maxRawVol: 23,                                                     newNoteVol: 0,                                                            forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.transition,
             promptName: "Slide Speed",                  promptDesc: ["This setting controls the speed at which your instrument 'slides' between notes.", "Note that the lower numbers will slide faster, while the higher numbers will slide slower.", "[OVERWRITING] [$HI - $LO]"]},
@@ -1246,6 +1255,8 @@ export class Config {
 
         { name: "envelope speed",  pianoName: "EnvelopeSpd",            maxRawVol: 50,                                                     newNoteVol: 12,                                                           forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.length,
             promptName: "Envelope Speed",               promptDesc: ["This setting controls how fast all of the envelopes for the instrument play.", "At $LO, your instrument's envelopes will be frozen, and at values near there they will change very slowly. At 12, the envelopes will work as usual, performing at normal speed. This increases up to $HI, where the envelopes will change very quickly. The speeds are given below:", "[0-4]: x0, x1/16, x⅛, x⅕, x¼,", "[5-9]: x⅓, x⅖, x½, x⅔, x¾,", "[10-14]: x⅘, x0.9, x1, x1.1, x1.2,", "[15-19]: x1.3, x1.4, x1.5, x1.6, x1.7,", "[20-24]: x1.8, x1.9, x2, x2.1, x2.2,", "[25-29]: x2.3, x2.4, x2.5, x2.6, x2.7,", "[30-34]: x2.8, x2.9, x3, x3.1, x3.2,", "[35-39]: x3.3, x3.4, x3.5, x3.6, x3.7," ,"[40-44]: x3.8, x3.9, x4, x4.15, x4.3,", "[45-50]: x4.5, x4.8, x5, x5.5, x6, x8", "[OVERWRITING] [$LO - $HI]"] }
+        
+        // Issue#7, Issue#9 - More modulators. The high priority ones are strum speed, slide speed, and limiter settings.
     ]);
 }
 

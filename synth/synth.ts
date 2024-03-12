@@ -1886,7 +1886,8 @@ export class Instrument {
         }
 
         if (this.type == InstrumentType.noise) {
-            //instrumentObject["unison"] = Config.unisons[this.unison].name; MID TODO
+            // Issue#10 - Unisons for basic noise.
+            // instrumentObject["unison"] = Config.unisons[this.unison].name;
             instrumentObject["wave"] = Config.chipNoises[this.chipNoise].name;
         } else if (this.type == InstrumentType.spectrum) {
             instrumentObject["unison"] = this.unison == Config.unisons.length ? "custom" : Config.unisons[this.unison].name;
@@ -3555,7 +3556,8 @@ export class Song {
                         buffer.push(base64IntToCharCode[(instrument.customChipWave[j] + 24) as number]);
                     }
                 } else if (instrument.type == InstrumentType.noise) {
-                    //buffer.push(SongTagCode.unison, base64IntToCharCode[instrument.unison]); MID TODO
+                    // Issue#10 - Unisons for basic noise.
+                    // buffer.push(SongTagCode.unison, base64IntToCharCode[instrument.unison]);
                     buffer.push(SongTagCode.wave, base64IntToCharCode[instrument.chipNoise]);
                 } else if (instrument.type == InstrumentType.spectrum) {
                     buffer.push(SongTagCode.unison, base64IntToCharCode[instrument.unison]);
@@ -3751,7 +3753,7 @@ export class Song {
                             shapeBits.write(bitsPerNoteSize, note.pins[0].size); // volume
                         }
                         else {
-                            shapeBits.write(9, note.pins[0].size); // Modulator value. 9 bits for now = 512 max mod value?
+                            shapeBits.write(11, note.pins[0].size); // Modulator value. 11 bits, which equals a max mod value of 2048.
                         }
 
                         let shapePart: number = 0;
@@ -3773,7 +3775,7 @@ export class Song {
                             if (!isModChannel) {
                                 shapeBits.write(bitsPerNoteSize, pin.size);
                             } else {
-                                shapeBits.write(9, pin.size);
+                                shapeBits.write(11, pin.size);
                             }
                         }
 
@@ -5599,7 +5601,7 @@ export class Song {
                                     } else if (!isModChannel) {
                                         shape.initialSize = bits.read(bitsPerNoteSize);
                                     } else {
-                                        shape.initialSize = bits.read(9);
+                                        shape.initialSize = bits.read(11);
                                     }
 
                                     shape.pins = [];
@@ -5619,7 +5621,7 @@ export class Song {
                                             pinObj.size = bits.read(bitsPerNoteSize);
                                         }
                                         else {
-                                            pinObj.size = bits.read(9);
+                                            pinObj.size = bits.read(11);
                                         }
                                         shape.pins.push(pinObj);
                                     }
@@ -7138,7 +7140,7 @@ class InstrumentState {
                 useDistortionStart = synth.getModValue(Config.modulators.dictionary["distortion"].index, channelIndex, instrumentIndex, false);
                 useDistortionEnd = synth.getModValue(Config.modulators.dictionary["distortion"].index, channelIndex, instrumentIndex, true);
             }
-            // MID TODO: Distortion Envelope.
+            // Issue#20 - Envelope for distortion.
             //const envelopeStart: number = envelopeStarts[EnvelopeComputeIndex.distortion];
             //const envelopeEnd: number = envelopeEnds[EnvelopeComputeIndex.distortion];
             const distortionSliderStart = Math.min(1.0, useDistortionStart / (Config.distortionRange - 1));
@@ -7208,7 +7210,8 @@ class InstrumentState {
             //    useTestStart = synth.getModValue(Config.modulators.dictionary["test"].index, channelIndex, instrumentIndex, false);
             //    useTestEnd = synth.getModValue(Config.modulators.dictionary["test"].index, channelIndex, instrumentIndex, true);
             //}
-            /// MID TODO: Test Envelope.
+
+            // Issue#20 - Envelope for "test".
             //const envelopeStart: number = envelopeStarts[EnvelopeComputeIndex.test];
             //const envelopeEnd: number = envelopeEnds[EnvelopeComputeIndex.test];
             const testSliderStart = Math.min(1.0, useTestStart / 15);
@@ -13002,4 +13005,4 @@ export class Synth {
 }
 
 // When compiling synth.ts as a standalone module named "beepbox", expose these classes as members to JavaScript:
-export { Dictionary, DictionaryArray, FilterType, EnvelopeType, InstrumentType, Transition, Chord, Envelope, Config };
+export { Dictionary, DictionaryArray, FilterType, EnvelopeType, InstrumentType, Transition, Chord, Envelope, Config, convertChipWaveToCustomChip };

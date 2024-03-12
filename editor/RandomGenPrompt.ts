@@ -47,8 +47,8 @@ export class RandomGenPrompt implements Prompt {
     private readonly _sustainBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _sustainTypeBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _spectrumEditorBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
-    private readonly _customChipWaveBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _customChipGenerationType: HTMLSelectElement = select({style: "width: 70%; margin-left: 1em;"},
+    option({value: "customChipGenerateNone"}, "Do Not Randomize"),
     option({value: "customChipGeneratePreset"}, "Random Waveform Preset"),
     option({value: "customChipGenerateAlgorithm"}, "Algorithmic Generation"),
     option({value: "customChipGenerateFully"}, "Fully Random"),
@@ -57,8 +57,8 @@ export class RandomGenPrompt implements Prompt {
     private readonly _drumsetSpectrumBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _drumsetEnvelopeBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _wavetableSpeedBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
-    private readonly _wavetableCustomChipWavesBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _wavetableCustomChipGenerationType: HTMLSelectElement = select({style: "width: 70%; margin-left: 1em;"},
+    option({value: "wavetableCustomChipGenerateNone"}, "Do Not Randomize"),
     option({value: "wavetableCustomChipGeneratePreset"}, "Random Waveform Preset"),
     option({value: "wavetableCustomChipGenerateAlgorithm"}, "Algorithmic Generation"),
     option({value: "wavetableCustomChipGenerateFully"}, "Fully Random"),
@@ -275,10 +275,6 @@ public readonly container: HTMLDivElement = div({class: "prompt noSelection", st
 			this._spectrumEditorBox,
         ),
     label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
-			"Custom Chip Waveform:",
-			this._customChipWaveBox,
-        ),
-    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
 			"Custom Chip Generation Type:",
 			this._customChipGenerationType,
         ),
@@ -293,10 +289,6 @@ public readonly container: HTMLDivElement = div({class: "prompt noSelection", st
     label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
 			"Drumset Envelopes:",
 			this._drumsetEnvelopeBox,
-        ),
-    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
-			"Wavetable Custom Chip Waveforms:",
-			this._wavetableCustomChipWavesBox,
         ),
     label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
 			"Wavetable Custom Chips Gen Type:",
@@ -455,6 +447,7 @@ public readonly container: HTMLDivElement = div({class: "prompt noSelection", st
 			"Discrete Envelopes:",
 			this._discreteEnvelopeBox,
         ),
+    // Issue#30 - Add a section here for randomizing through preset categories.
     label({style: "display: flex; flex-direction: row-reverse; justify-content: space-between;"},
 			this._okayButton,
 		),
@@ -503,13 +496,11 @@ constructor(private _doc: SongDocument) {
     this._sustainBox.checked = this._doc.sustainOnRandomization;
     this._sustainTypeBox.checked = this._doc.sustainTypeOnRandomization;
     this._spectrumEditorBox.checked = this._doc.spectrumEditorOnRandomization;
-    this._customChipWaveBox.checked = this._doc.customChipWaveOnRandomization;
-    this._customChipGenerationType.value = this._doc.customChipGenerationType;
+    this._customChipGenerationType.value = this._doc.prefs.customChipGenerationType;
     this._noiseTypeBox.checked = this._doc.noiseTypeOnRandomization;
     this._drumsetSpectrumBox.checked = this._doc.drumsetSpectrumOnRandomization;
     this._drumsetEnvelopeBox.checked = this._doc.drumsetEnvelopeOnRandomization;
-    this._wavetableCustomChipWavesBox.checked = this._doc.wavetableCustomChipWavesOnRandomization;
-    this._wavetableCustomChipGenerationType.value = this._doc.wavetableCustomChipGenerationType;
+    this._wavetableCustomChipGenerationType.value = this._doc.prefs.wavetableCustomChipGenerationType;
     this._wavetableSpeedBox.checked = this._doc.wavetableSpeedOnRandomization;
 
     this._FMAlgorithmBox.checked = this._doc.FMAlgorithmOnRandomization;
@@ -581,6 +572,9 @@ private _confirm = (): void => {
 
     this._doc.prefs.EQFilterOnRandomization = this._EQFilterBox.checked;
     this._doc.prefs.noteFilterOnRandomization = this._noteFilterBox.checked;
+
+    this._doc.prefs.customChipGenerationType = this._customChipGenerationType.value;
+    this._doc.prefs.wavetableCustomChipGenerationType = this._wavetableCustomChipGenerationType.value;
 
     this._doc.prefs.save();
 	this._close();
