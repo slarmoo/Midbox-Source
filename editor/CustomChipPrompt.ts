@@ -8,12 +8,17 @@ import { ChangeCustomWave } from "./changes";
 import { SongEditor } from "./SongEditor";
 import { Localization as _ } from "./Localization";
 
-//namespace beepbox {
 const { button, div, h2 } = HTML;
+const enum DrawMode {
+	Standard,
+	Line,
+	Curve,
+	Selection,
+}
 
 export class CustomChipPromptCanvas {
 	private readonly _doc: SongDocument;
-	public drawMode: number = 0;
+	public drawMode = DrawMode.Standard;
 	private _mouseX: number = 0;
 	private _mouseY: number = 0;
 	private _markedMouseX: number = 0;
@@ -159,9 +164,11 @@ export class CustomChipPromptCanvas {
 		if (isNaN(this._mouseX)) this._mouseX = 0;
 		if (isNaN(this._mouseY)) this._mouseY = 0;
 		this._lastIndex = -1;
-		if (this.drawMode == 1) {
+		if (this.drawMode == DrawMode.Line) {
 			this._markedMouseX = this._mouseX;
 			this._markedMouseY = this._mouseY;
+			this._markedMouseXEnd = this._mouseX;
+			this._markedMouseYEnd = this._mouseY;
 			for (let i = 0; i < 64; i++) this.temporaryArray[i] = this.chipData[i];
 		}
 
@@ -188,7 +195,7 @@ export class CustomChipPromptCanvas {
 		this._mouseY = ((event.clientY || event.pageY) - boundingRect.top) * this._editorHeight / (boundingRect.bottom - boundingRect.top);
 		if (isNaN(this._mouseX)) this._mouseX = 0;
 		if (isNaN(this._mouseY)) this._mouseY = 0;
-		if (this.drawMode == 1 && this._mouseDown) {
+		if (this.drawMode == DrawMode.Line && this._mouseDown) {
 			this._markedMouseXEnd = this._mouseX;
 			this._markedMouseYEnd = this._mouseY;
 		}
@@ -213,7 +220,7 @@ export class CustomChipPromptCanvas {
 			const amp: number = Math.min(48, Math.max(0, Math.floor(this._mouseY * 49 / this._editorHeight)));
 
 			// Paint between mouse drag indices unless a click just happened.
-			if (this.drawMode == 0) {
+			if (this.drawMode == DrawMode.Standard) {
 				if (this._lastIndex != -1 && this._lastIndex != index) {
 					var lowest = index;
 					var highest = this._lastIndex;
@@ -235,7 +242,7 @@ export class CustomChipPromptCanvas {
 					this.chipData[index] = amp - 24;
 					this._blocks.children[index].setAttribute("y", "" + (amp * (this._editorHeight / 49)));
 				}
-			} else if (this.drawMode == 1) {
+			} else if (this.drawMode == DrawMode.Line) {
 				for (let i = 0; i < 64; i++) {
  					this.chipData[i] = this.temporaryArray[i];
 					this._blocks.children[i].setAttribute("y", "" + ((this.temporaryArray[i] + 24) * (this._editorHeight / 49)));
@@ -244,21 +251,23 @@ export class CustomChipPromptCanvas {
 				let startingAmp: number = Math.min(48, Math.max(0, Math.floor(this._markedMouseY * 49 / this._editorHeight)));
 				let highest: number = Math.min(63, Math.max(0, Math.floor(this._markedMouseXEnd * 64 / this._editorWidth)));
 				let endingAmp: number = Math.min(48, Math.max(0, Math.floor(this._markedMouseYEnd * 49 / this._editorHeight)));
+				const temp1: number = lowest;
+				const temp2: number = startingAmp;
 				if (highest != lowest) {
 					if (highest < lowest) {
 						lowest = highest;
-						highest = lowest;
+						highest = temp1;
 						startingAmp = endingAmp;
-						endingAmp = startingAmp;
+						endingAmp = temp2;
 					}
 					for (var i = lowest; i <= highest; i++) {
 						const medAmp: number = Math.round(startingAmp + (endingAmp - startingAmp) * ((i - lowest) / (highest - lowest)));
-						this.temporaryArray[i] = medAmp - 24;
+						this.chipData[i] = medAmp - 24;
 						this._blocks.children[i].setAttribute("y", "" + (medAmp * (this._editorHeight / 49)));
 					}
 				}
 				else {
-					this.temporaryArray[lowest] = startingAmp - 24;
+					this.chipData[lowest] = startingAmp - 24;
 					this._blocks.children[lowest].setAttribute("y", "" + (startingAmp * (this._editorHeight / 49)));
 				}
 			} else throw new Error("Unknown draw mode selected.");
@@ -302,13 +311,20 @@ export class CustomChipPrompt implements Prompt {
 			SVG.path({ d: "M14 2.5a.5.5 0 0 0-.5-.5h-6a.5.5 0 0 0 0 1h4.793L2.146 13.146a.5.5 0 0 0 .708.708L13 3.707V8.5a.5.5 0 0 0 1 0z", fill: "currentColor" }),
 		]),
 	]);
+	public readonly _drawType_Curve: HTMLButtonElement = button({ style: "border-radius: 0px; width: 65px; height 50px;"}, [
+		// Curved-line icon:
+		SVG.svg({ class: "no-underline", style: "flex-shrink: 0; position: absolute; top: 4px; left: 24px; pointer-events: none;", width: "16", height: "16", viewBox: "0 0 16 16" }, [
+			SVG.path({ d: "M0 10.5A1.5 1.5 0 0 1 1.5 9h1A1.5 1.5 0 0 1 4 10.5v1A1.5 1.5 0 0 1 2.5 13h-1A1.5 1.5 0 0 1 0 11.5zm1.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm10.5.5A1.5 1.5 0 0 1 13.5 9h1a1.5 1.5 0 0 1 1.5 1.5v1a1.5 1.5 0 0 1-1.5 1.5h-1a1.5 1.5 0 0 1-1.5-1.5zm1.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM6 4.5A1.5 1.5 0 0 1 7.5 3h1A1.5 1.5 0 0 1 10 4.5v1A1.5 1.5 0 0 1 8.5 7h-1A1.5 1.5 0 0 1 6 5.5zM7.5 4a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5z", fill: "currentColor" }),
+			SVG.path({ d: "M6 4.5H1.866a1 1 0 1 0 0 1h2.668A6.52 6.52 0 0 0 1.814 9H2.5q.186 0 .358.043a5.52 5.52 0 0 1 3.185-3.185A1.5 1.5 0 0 1 6 5.5zm3.957 1.358A1.5 1.5 0 0 0 10 5.5v-1h4.134a1 1 0 1 1 0 1h-2.668a6.52 6.52 0 0 1 2.72 3.5H13.5q-.185 0-.358.043a5.52 5.52 0 0 0-3.185-3.185", fill: "currentColor"}),
+		]),
+	]);
 	public readonly _drawType_Selection: HTMLButtonElement = button({ style: "border-radius: 0px; width: 65px; height 50px;"}, [
 		// Dotted-outline box icon:
 		SVG.svg({ class: "no-underline", style: "flex-shrink: 0; position: absolute; top: 4px; left: 24px; pointer-events: none;", width: "16", height: "16", viewBox: "0 0 16 16" }, [
 			SVG.path({ d: "M2.5 0q-.25 0-.487.048l.194.98A1.5 1.5 0 0 1 2.5 1h.458V0zm2.292 0h-.917v1h.917zm1.833 0h-.917v1h.917zm1.833 0h-.916v1h.916zm1.834 0h-.917v1h.917zm1.833 0h-.917v1h.917zM13.5 0h-.458v1h.458q.151 0 .293.029l.194-.981A2.5 2.5 0 0 0 13.5 0m2.079 1.11a2.5 2.5 0 0 0-.69-.689l-.556.831q.248.167.415.415l.83-.556zM1.11.421a2.5 2.5 0 0 0-.689.69l.831.556c.11-.164.251-.305.415-.415zM16 2.5q0-.25-.048-.487l-.98.194q.027.141.028.293v.458h1zM.048 2.013A2.5 2.5 0 0 0 0 2.5v.458h1V2.5q0-.151.029-.293zM0 3.875v.917h1v-.917zm16 .917v-.917h-1v.917zM0 5.708v.917h1v-.917zm16 .917v-.917h-1v.917zM0 7.542v.916h1v-.916zm15 .916h1v-.916h-1zM0 9.375v.917h1v-.917zm16 .917v-.917h-1v.917zm-16 .916v.917h1v-.917zm16 .917v-.917h-1v.917zm-16 .917v.458q0 .25.048.487l.98-.194A1.5 1.5 0 0 1 1 13.5v-.458zm16 .458v-.458h-1v.458q0 .151-.029.293l.981.194Q16 13.75 16 13.5M.421 14.89c.183.272.417.506.69.689l.556-.831a1.5 1.5 0 0 1-.415-.415zm14.469.689c.272-.183.506-.417.689-.69l-.831-.556c-.11.164-.251.305-.415.415l.556.83zm-12.877.373Q2.25 16 2.5 16h.458v-1H2.5q-.151 0-.293-.029zM13.5 16q.25 0 .487-.048l-.194-.98A1.5 1.5 0 0 1 13.5 15h-.458v1zm-9.625 0h.917v-1h-.917zm1.833 0h.917v-1h-.917zm1.834-1v1h.916v-1zm1.833 1h.917v-1h-.917zm1.833 0h.917v-1h-.917zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z", fill: "currentColor" }),
 		]),
 	]);
-	private readonly drawToolsContainer: HTMLDivElement = div({ class: "instrument-bar", style: "margin-left: 66px; display: grid; grid-template-columns: repeat(3, 70px); grid-gap: 2px 0px; width: 270px;" }, this._drawType_Standard, this._drawType_Line, this._drawType_Selection);
+	private readonly drawToolsContainer: HTMLDivElement = div({ class: "instrument-bar", style: "margin-left: -3px; display: grid; grid-template-columns: repeat(4, 70px); grid-gap: 2px 0px; width: 270px;" }, this._drawType_Standard, this._drawType_Line, this._drawType_Curve, this._drawType_Selection);
 
 	private readonly _cancelButton: HTMLButtonElement = button({ class: "cancelButton" });
 	private readonly _okayButton: HTMLButtonElement = button({ class: "okayButton", style: "width:45%;" }, _.confirmLabel);
@@ -358,6 +374,7 @@ export class CustomChipPrompt implements Prompt {
 		this.updatePlayButton();
 		this._drawType_Standard.addEventListener("click", this._selectStandardDrawType);
 		this._drawType_Line.addEventListener("click", this._selectLineDrawType);
+		this._drawType_Curve.addEventListener("click", this._selectCurveDrawType);
 		this._drawType_Selection.addEventListener("click", this._selectSelectionDrawType);
 
 		let colors = ColorConfig.getChannelColor(this._doc.song, this._doc.channel);
@@ -394,22 +411,33 @@ export class CustomChipPrompt implements Prompt {
 	private _selectStandardDrawType = (): void => {
 		this._drawType_Standard.classList.add("selected-instrument");
 		this._drawType_Line.classList.remove("selected-instrument");
+		this._drawType_Curve.classList.remove("selected-instrument");
 		this._drawType_Selection.classList.remove("selected-instrument");
-		this.customChipCanvas.drawMode = 0;
+		this.customChipCanvas.drawMode = DrawMode.Standard;
 	}
 
 	private _selectLineDrawType = (): void => {
 		this._drawType_Standard.classList.remove("selected-instrument");
 		this._drawType_Line.classList.add("selected-instrument");
+		this._drawType_Curve.classList.remove("selected-instrument");
 		this._drawType_Selection.classList.remove("selected-instrument");
-		this.customChipCanvas.drawMode = 1;
+		this.customChipCanvas.drawMode = DrawMode.Line;
+	}
+
+	private _selectCurveDrawType = (): void => {
+		this._drawType_Standard.classList.remove("selected-instrument");
+		this._drawType_Line.classList.remove("selected-instrument");
+		this._drawType_Curve.classList.add("selected-instrument");
+		this._drawType_Selection.classList.remove("selected-instrument");
+		this.customChipCanvas.drawMode = DrawMode.Curve;
 	}
 
 	private _selectSelectionDrawType = (): void => {
 		this._drawType_Standard.classList.remove("selected-instrument");
 		this._drawType_Line.classList.remove("selected-instrument");
+		this._drawType_Curve.classList.remove("selected-instrument");
 		this._drawType_Selection.classList.add("selected-instrument");
-		this.customChipCanvas.drawMode = 2;
+		this.customChipCanvas.drawMode = DrawMode.Selection;
 	}
 
 	private _close = (): void => {
