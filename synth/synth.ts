@@ -8967,18 +8967,18 @@ export class Synth {
                                     wavetableSpeed = (1 - (wavetableSpeedModValue % 1)) * Config.wavetableSpeedScale[Math.floor(wavetableSpeedModValue)] + (wavetableSpeedModValue % 1) * Config.wavetableSpeedScale[Math.min(Config.wavetableSpeedScale.length - 1, Math.ceil(wavetableSpeedModValue))];
                                 }
                             }
-                            if (wavetableSpeed < 1) {
+                            if (wavetableSpeed <= 0) {
                                 // Nothing. Skip.
                             } else {
                                 // If the OneShotCycle checkbox is ticked, make it only cycle once. Otherwise, use the modulo to continue looping the cycle.
                                 if (instrument.oneShotCycle) {
-                                    if (wavetableSize < 1) {
+                                    if (wavetableSize <= 0) {
                                         // Do nothing?
                                     } else {
                                         instrumentState.currentWave = Math.min((instrumentState.currentWave + wavetableSpeed * (1.0 / (Config.ticksPerPart * Config.partsPerBeat))), (wavetableSize - 1));
                                     }
                                 } else {
-                                    if (wavetableSize < 1) {
+                                    if (wavetableSize <= 0) {
                                         // Do nothing?
                                     } else {
                                         instrumentState.currentWave = (instrumentState.currentWave + wavetableSpeed * (1.0 / (Config.ticksPerPart * Config.partsPerBeat))) % wavetableSize;

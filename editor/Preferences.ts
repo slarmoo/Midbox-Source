@@ -122,7 +122,7 @@ export class Preferences {
 		this.noteFilterOnRandomization = window.localStorage.getItem("noteFilterOnRandomization") != "false";
 
 		this.customChipGenerationType = window.localStorage.getItem("customChipGenerationType") || "customChipGenerateAlgorithm";
-		this.customChipGenerationType = window.localStorage.getItem("wavetableCustomChipGenerationType") || "wavetableCustomChipGenerateAlgorithm";
+		this.wavetableCustomChipGenerationType = window.localStorage.getItem("wavetableCustomChipGenerationType") || "wavetableCustomChipGenerateAlgorithm";
 		
 		// Keybind Setup
 		this.deactivateCapsLock = window.localStorage.getItem("deactivateCapsLock") != "false";

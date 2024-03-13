@@ -660,6 +660,7 @@ export class Localization {
     public static midboxMiscPresets44Label: string = "supersaw click";
     public static midboxMiscPresets45Label: string = "corrupted vocals 2";
     public static midboxMiscPresets46Label: string = "space pad";
+    public static midboxMiscPresets47Label: string = "chipped triangle bass";
     public static midboxDubstepPresets1Label: string = "dubstep bwayyyy";
     public static midboxDubstepPresets2Label: string = "dubstep bass hum";
     public static midboxDubstepPresets3Label: string = "dubstep yaa";
