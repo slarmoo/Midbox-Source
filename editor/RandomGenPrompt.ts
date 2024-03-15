@@ -63,6 +63,13 @@ export class RandomGenPrompt implements Prompt {
     option({value: "wavetableCustomChipGenerateAlgorithm"}, "Algorithmic Generation"),
     option({value: "wavetableCustomChipGenerateFully"}, "Fully Random"),
     );
+    private readonly _wavetableWavesInCycleBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _wavetableInterpolationBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _wavetableCycleType: HTMLSelectElement = select({style: "width: 70%; margin-left: 1em;"},
+    option({value: "wavetableCycleTypeNone"}, "Do Not Randomize"),
+    option({value: "wavetableCycleTypePerNote"}, "Possibly 'Per Note' Cycling"),
+    option({value: "wavetableCycleTypePerNoteAndOneShot"}, "'Per Note' Cycling and One Shot Cycling"),
+    );
 
     private readonly _FMAlgorithmBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _FMOpFrequencyBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
@@ -291,12 +298,24 @@ public readonly container: HTMLDivElement = div({class: "prompt noSelection", st
 			this._drumsetEnvelopeBox,
         ),
     label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
-			"Wavetable Custom Chips Gen Type:",
+			"Wavetable Custom Chip's Gen Type:",
 			this._wavetableCustomChipGenerationType,
         ),
     label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
 			"Wavetable Speed:",
 			this._wavetableSpeedBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Wavetable Cycle's Waves:",
+			this._wavetableWavesInCycleBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Wavetable Interpolation:",
+			this._wavetableInterpolationBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"Wavetable Cycle Type:",
+			this._wavetableCycleType,
         ),
     h4({style: "display: flex; flex-direction: row; text-align: center; align-items: center; height: 0.5em; justify-content: flex-end;"},
         "FM-Centric",
@@ -501,7 +520,10 @@ constructor(private _doc: SongDocument) {
     this._drumsetSpectrumBox.checked = this._doc.drumsetSpectrumOnRandomization;
     this._drumsetEnvelopeBox.checked = this._doc.drumsetEnvelopeOnRandomization;
     this._wavetableCustomChipGenerationType.value = this._doc.prefs.wavetableCustomChipGenerationType;
-    this._wavetableSpeedBox.checked = this._doc.wavetableSpeedOnRandomization;
+    this._wavetableSpeedBox.checked = this._doc.prefs.wavetableSpeedOnRandomization;
+    this._wavetableWavesInCycleBox.checked = this._doc.prefs.wavetableWavesInCycleOnRandomization;
+    this._wavetableInterpolationBox.checked = this._doc.prefs.wavetableInterpolationOnRandomization;
+    this._wavetableCycleType.value = this._doc.prefs.wavetableCycleType;
 
     this._FMAlgorithmBox.checked = this._doc.FMAlgorithmOnRandomization;
     this._FMOpFrequencyBox.checked = this._doc.FMOpFrequencyOnRandomization;
@@ -575,6 +597,10 @@ private _confirm = (): void => {
 
     this._doc.prefs.customChipGenerationType = this._customChipGenerationType.value;
     this._doc.prefs.wavetableCustomChipGenerationType = this._wavetableCustomChipGenerationType.value;
+    this._doc.prefs.wavetableSpeedOnRandomization = this._wavetableSpeedBox.checked;
+    this._doc.prefs.wavetableWavesInCycleOnRandomization = this._wavetableWavesInCycleBox.checked;
+    this._doc.prefs.wavetableInterpolationOnRandomization = this._wavetableInterpolationBox.checked;
+    this._doc.prefs.wavetableCycleType = this._wavetableCycleType.value;
 
     this._doc.prefs.save();
 	this._close();

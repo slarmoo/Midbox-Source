@@ -60,6 +60,10 @@ export class Preferences {
 
 		public customChipGenerationType: string;
 		public wavetableCustomChipGenerationType: string;
+		public wavetableSpeedOnRandomization: boolean;
+		public wavetableWavesInCycleOnRandomization: boolean;
+		public wavetableInterpolationOnRandomization: boolean;
+		public wavetableCycleType: string;
 
 	// Keybind Setup
 		public deactivateCapsLock: boolean;
@@ -113,7 +117,7 @@ export class Preferences {
 
 		this.drumSpectrumOnRandomization = window.localStorage.getItem("drumSpectrumOnRandomization") != "false";
 		this.drumNoiseOnRandomization = window.localStorage.getItem("drumNoiseOnRandomization") != "false";
-		this.drumsetOnRandomization = window.localStorage.getItem("drumsetOnRandomization") == "true";
+		this.drumsetOnRandomization = window.localStorage.getItem("drumsetOnRandomization") != "false";
 
 		this.fadeOnRandomization = window.localStorage.getItem("fadeOnRandomization") != "false";
 		this.unisonOnRandomization = window.localStorage.getItem("unisonOnRandomization") != "false";
@@ -123,6 +127,10 @@ export class Preferences {
 
 		this.customChipGenerationType = window.localStorage.getItem("customChipGenerationType") || "customChipGenerateAlgorithm";
 		this.wavetableCustomChipGenerationType = window.localStorage.getItem("wavetableCustomChipGenerationType") || "wavetableCustomChipGenerateAlgorithm";
+		this.wavetableSpeedOnRandomization = window.localStorage.getItem("wavetableSpeedOnRandomization") != "false";
+		this.wavetableWavesInCycleOnRandomization = window.localStorage.getItem("wavetableWavesInCycleOnRandomization") == "true";
+		this.wavetableInterpolationOnRandomization = window.localStorage.getItem("wavetableInterpolationOnRandomization") != "false";
+		this.wavetableCycleType = window.localStorage.getItem("wavetableCycleType") || "wavetableCycleTypePerNoteAndOneShot";
 		
 		// Keybind Setup
 		this.deactivateCapsLock = window.localStorage.getItem("deactivateCapsLock") != "false";
@@ -203,6 +211,10 @@ export class Preferences {
 
 		window.localStorage.setItem("customChipGenerationType", this.customChipGenerationType);
 		window.localStorage.setItem("wavetableCustomChipGenerationType", this.wavetableCustomChipGenerationType);
+		window.localStorage.setItem("wavetableSpeedOnRandomization", this.wavetableSpeedOnRandomization ? "true" : "false");
+		window.localStorage.setItem("wavetableWavesInCycleOnRandomization", this.wavetableWavesInCycleOnRandomization ? "true" : "false");
+		window.localStorage.setItem("wavetableInterpolationOnRandomization", this.wavetableInterpolationOnRandomization ? "true" : "false");
+		window.localStorage.setItem("wavetableCycleType", this.wavetableCycleType);
 
 		// Keybind Setup
 		window.localStorage.setItem("deactivateCapsLock", this.deactivateCapsLock ? "true" : "false");

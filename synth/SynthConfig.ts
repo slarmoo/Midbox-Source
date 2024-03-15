@@ -983,7 +983,7 @@ export class Config {
     public static readonly songDetuneMin:                    number = 0;
     public static readonly songDetuneMax:                    number = 500;
     public static readonly unisonVoicesMin:                  number = 1;
-    public static readonly unisonVoicesMax:                  number = 2; // Careful with this one.
+    public static readonly unisonVoicesMax:                  number = 2;
     public static readonly unisonSpreadMin:                  number = -96;
     public static readonly unisonSpreadMax:                  number = 96; 
     public static readonly unisonOffsetMin:                  number = -96;

@@ -16,7 +16,7 @@ export function sigma(a: number, b: (i: number) => number, c: number): number {
 /*
     The variables here look like this:
     A
-    Σ  B(i)
+    Σ  (i) => B
     C
 */
     return result;

@@ -2549,6 +2549,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     else if (doc.prefs.customChipGenerationType == "customChipGenerateNone") {
                         randomGeneratedArray = instrument.customChipWave;
                     }
+                    else throw new Error("Unknown preference selected for custom chip randomization.");
 
                     let sum: number = 0.0;
                     for (let i: number = 0; i < randomGeneratedArray.length; i++) sum += randomGeneratedArray[i];
@@ -2575,11 +2576,32 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     let checkboxRandomizer1: number = Math.round(Math.random());
                     let checkboxRandomizer2: number = Math.round(Math.random());
                     let checkboxRandomizer3: number = Math.round(Math.random());
-                    instrument.wavetableSpeed = Math.floor(Math.random() * Config.wavetableSpeedMax + 1);
-                    instrument.cyclePerNote = checkboxRandomizer1 == 0 ? true : false;
-                    instrument.oneShotCycle = (checkboxRandomizer2 == 0 && instrument.cyclePerNote) ? true : false;
-                    instrument.interpolateWaves = checkboxRandomizer3 == 0 ? true : false;
-                    instrument.currentCycle = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31];
+
+                    if (doc.prefs.wavetableSpeedOnRandomization) instrument.wavetableSpeed = Math.floor(Math.random() * Config.wavetableSpeedMax + 1);
+                    else instrument.wavetableSpeed = instrument.wavetableSpeed;
+
+                    if (doc.prefs.wavetableCycleType == "wavetableCycleTypeNone") {
+                        instrument.cyclePerNote = instrument.cyclePerNote;
+                        instrument.oneShotCycle = instrument.oneShotCycle;
+                    } else if (doc.prefs.wavetableCycleType == "wavetableCycleTypePerNote") {
+                        instrument.cyclePerNote = checkboxRandomizer1 == 0 ? true : false;
+                        instrument.oneShotCycle = false;
+                    } else if (doc.prefs.wavetableCycleType == "wavetableCycleTypePerNoteAndOneShot") {
+                        instrument.cyclePerNote = checkboxRandomizer1 == 0 ? true : false;
+                        instrument.oneShotCycle = (checkboxRandomizer2 == 0 && instrument.cyclePerNote) ? true : false;
+                    } else throw new Error("Unknown preference selected for wavetable cycle type randomization.");
+
+                    if (doc.prefs.wavetableInterpolationOnRandomization) instrument.interpolateWaves = checkboxRandomizer3 == 0 ? true : false;
+                    else instrument.interpolateWaves = instrument.interpolateWaves;
+
+                    if (doc.prefs.wavetableWavesInCycleOnRandomization) {
+                        instrument.currentCycle = [];
+                        for (let i: number = 0; i < 32; i++) {
+                            let isWaveInCycle: boolean = Math.random() <= 0.80;
+                            if (isWaveInCycle) instrument.currentCycle.push(i);
+                        }
+                    } else instrument.currentCycle = instrument.currentCycle;
+
                     for (let waveIndex: number = 0; waveIndex < 32; waveIndex++) {
                         randomGeneratedArray[waveIndex] = new Float32Array(64)
                         randomGeneratedArrayIntegral[waveIndex] = new Float32Array(65)
@@ -2605,6 +2627,8 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         else if (doc.prefs.wavetableCustomChipGenerationType == "wavetableCustomChipGenerateNone") {
                             randomGeneratedArray[waveIndex] = instrument.wavetableWaves[waveIndex];
                         }
+                        else throw new Error("Unknown preference selected for wavetable custom chip randomization.");
+
                         let sum: number = 0.0;
                         for (let i: number = 0; i < randomGeneratedArray[waveIndex].length; i++) sum += randomGeneratedArray[waveIndex][i];
                         const average: number = sum / randomGeneratedArray[waveIndex].length;

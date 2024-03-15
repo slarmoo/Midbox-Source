@@ -76,7 +76,7 @@ export class SongDocument {
 
 		public drumSpectrumOnRandomization: boolean = true;
 		public drumNoiseOnRandomization: boolean = true;
-		public drumsetOnRandomization: boolean = false;
+		public drumsetOnRandomization: boolean = true;
 
 		public volumeOnRandomization: boolean = false;
 		public panningOnRandomization: boolean = false;
@@ -109,6 +109,9 @@ export class SongDocument {
 		public drumsetEnvelopeOnRandomization: boolean = true;
     	public wavetableCustomChipGenerationType: string = "wavetableCustomChipGenerateAlgorithm";
 		public wavetableSpeedOnRandomization: boolean = true;
+		public wavetableWavesInCycleOnRandomization: boolean = false;
+		public wavetableInterpolationOnRandomization: boolean = true;
+		public wavetableCycleType: string = "wavetableCycleTypePerNoteAndOneShot";
 
 		public FMAlgorithmOnRandomization: boolean = true;
 		public FMOpFrequencyOnRandomization: boolean = true;
