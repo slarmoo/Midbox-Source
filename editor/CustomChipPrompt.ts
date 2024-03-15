@@ -76,6 +76,7 @@ export class CustomChipPromptCanvas {
 	private _lineY1: number = 0;
 	private _curveX0: number = 0;
 	private _curveY0: number = 0;
+	private _clickedInsideCanvas: boolean;
 	private temporaryArray: Float32Array = new Float32Array(64);
 	private _lastIndex: number = 0;
 	private _lastAmp: number = 0;
@@ -214,6 +215,7 @@ export class CustomChipPromptCanvas {
 		this._mouseY = ((event.clientY || event.pageY) - boundingRect.top) * this._editorHeight / (boundingRect.bottom - boundingRect.top);
 		if (isNaN(this._mouseX)) this._mouseX = 0;
 		if (isNaN(this._mouseY)) this._mouseY = 0;
+		this._clickedInsideCanvas = ((this._mouseX >= 0 && this._mouseX <= this._editorWidth) && (this._mouseY >= 0 && this._mouseY <= this._editorHeight));
 		this._lastIndex = -1;
 		if (this.drawMode == DrawMode.Line) {
 			this._lineX0 = this._mouseX;
@@ -221,7 +223,7 @@ export class CustomChipPromptCanvas {
 			this._lineX1 = this._mouseX;
 			this._lineY1 = this._mouseY;
 			for (let i = 0; i < 64; i++) this.temporaryArray[i] = this.chipData[i];
-		} else if (this.drawMode == DrawMode.Curve && ((this._mouseX >= 0 && this._mouseX < this._editorWidth) && (this._mouseY >= 0 && this._mouseY < this._editorHeight))) {
+		} else if (this.drawMode == DrawMode.Curve) {
 			switch (this.curveModeStep) {
 				case CurveModeStep.First: {
 					this._lineX0 = this._mouseX;
@@ -251,6 +253,7 @@ export class CustomChipPromptCanvas {
 		this._mouseY = (event.touches[0].clientY - boundingRect.top) * this._editorHeight / (boundingRect.bottom - boundingRect.top);
 		if (isNaN(this._mouseX)) this._mouseX = 0;
 		if (isNaN(this._mouseY)) this._mouseY = 0;
+		this._clickedInsideCanvas = ((this._mouseX >= 0 && this._mouseX <= this._editorWidth) && (this._mouseY >= 0 && this._mouseY <= this._editorHeight));
 		this._lastIndex = -1;
 		if (this.drawMode == DrawMode.Line) {
 			this._lineX0 = this._mouseX;
@@ -258,7 +261,7 @@ export class CustomChipPromptCanvas {
 			this._lineX1 = this._mouseX;
 			this._lineY1 = this._mouseY;
 			for (let i = 0; i < 64; i++) this.temporaryArray[i] = this.chipData[i];
-		} else if (this.drawMode == DrawMode.Curve && ((this._mouseX >= 0 && this._mouseX < this._editorWidth) && (this._mouseY >= 0 && this._mouseY < this._editorHeight))) {
+		} else if (this.drawMode == DrawMode.Curve) {
 			switch (this.curveModeStep) {
 				case CurveModeStep.First: {
 					this._lineX0 = this._mouseX;
@@ -290,7 +293,7 @@ export class CustomChipPromptCanvas {
 		if (this.drawMode == DrawMode.Line && this._mouseDown) {
 			this._lineX1 = this._mouseX;
 			this._lineY1 = this._mouseY;
-		} else if (this.drawMode == DrawMode.Curve && ((this._mouseX >= 0 && this._mouseX < this._editorWidth) && (this._mouseY >= 0 && this._mouseY < this._editorHeight))) {
+		} else if (this.drawMode == DrawMode.Curve) {
 			switch (this.curveModeStep) {
 				case CurveModeStep.First: {
 					this._lineX1 = this._mouseX;
@@ -320,7 +323,7 @@ export class CustomChipPromptCanvas {
 		if (this.drawMode == DrawMode.Line && this._mouseDown) {
 			this._lineX1 = this._mouseX;
 			this._lineY1 = this._mouseY;
-		} else if (this.drawMode == DrawMode.Curve && ((this._mouseX >= 0 && this._mouseX < this._editorWidth) && (this._mouseY >= 0 && this._mouseY < this._editorHeight))) {
+		} else if (this.drawMode == DrawMode.Curve) {
 			switch (this.curveModeStep) {
 				case CurveModeStep.First: {
 					this._lineX1 = this._mouseX;
@@ -478,7 +481,7 @@ export class CustomChipPromptCanvas {
 	}
 
 	public _whenCursorReleased = (event: Event): void => {
-		if (this.drawMode == DrawMode.Curve) {
+		if (this.drawMode == DrawMode.Curve && this._clickedInsideCanvas) {
 			switch (this.curveModeStep) {
 				case CurveModeStep.First: {
 					this._mouseDown = false;
