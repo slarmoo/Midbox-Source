@@ -7,6 +7,7 @@ import { Deque } from "./Deque";
 import { FilterCoefficients, FrequencyResponse, DynamicBiquadFilter, warpInfinityToNyquist } from "./filtering";
 import { Localization as _ } from "../editor/Localization";
 import { events } from "../global/Events";
+import { clamp } from "../editor/UsefulCodingStuff";
 
 declare global {
     interface Window {
@@ -20,16 +21,6 @@ const epsilon: number = (1.0e-24); // For detecting and avoiding float denormals
 // For performance debugging:
 //let samplesAccumulated: number = 0;
 //let samplePerformance: number = 0;
-
-export function clamp(min: number, max: number, val: number): number {
-    max = max - 1;
-    if (val <= max) {
-        if (val >= min) return val;
-        else return min;
-    } else {
-        return max;
-    }
-}
 
 function validateRange(min: number, max: number, val: number): number {
     if (min <= val && val <= max) return val;

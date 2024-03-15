@@ -224,6 +224,7 @@ export class Localization {
     public static copyLabel: string = "Copy";
     public static pasteLabel: string = "Paste";
     public static randomLabel: string = "Randomize ▾";
+    public static random2Label: string = "Randomize";
     public static randomPresetLabel: string = "Random Preset";
     public static randomGeneratedLabel: string = "Random Generated";
     public static newBlankSongLabel: string = "+ New Blank Song (⇧`)";
@@ -1129,6 +1130,7 @@ if (language == "spanish") {
     Localization.copyLabel = "Copiar";
     Localization.pasteLabel = "Pegar";
     Localization.randomLabel = "Aleatorizar ▾";
+    Localization.random2Label = "Aleatorizar";
     Localization.randomPresetLabel = "Prefijar Aleatorio";
     Localization.randomGeneratedLabel = "Generado Al Azar";
     Localization.newBlankSongLabel = "+ Nueva Canción (⇧`)";

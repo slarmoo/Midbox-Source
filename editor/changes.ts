@@ -1,12 +1,13 @@
 // Copyright (c) 2012-2022 John Nesky and contributing authors, distributed under the MIT license, see accompanying the LICENSE.md file.
 
 import { Algorithm, Dictionary, FilterType, SustainType, InstrumentType, EffectType, AutomationTarget, Config, effectsIncludeDistortion } from "../synth/SynthConfig";
-import { NotePin, Note, makeNotePin, Pattern, FilterSettings, FilterControlPoint, SpectrumWave, HarmonicsWave, Instrument, Channel, Song, Synth, convertChipWaveToCustomChip, clamp } from "../synth/synth";
+import { NotePin, Note, makeNotePin, Pattern, FilterSettings, FilterControlPoint, SpectrumWave, HarmonicsWave, Instrument, Channel, Song, Synth, convertChipWaveToCustomChip } from "../synth/synth";
 import { Preset, PresetCategory, EditorConfig } from "./EditorConfig";
 import { Change, ChangeGroup, ChangeSequence, UndoableChange } from "./Change";
 import { SongDocument } from "./SongDocument";
 import { ColorConfig } from "./ColorConfig";
 import { Slider } from "./HTMLWrapper";
+import { mod, sigma, clamp } from "./UsefulCodingStuff";
 
 export function patternsContainSameInstruments(pattern1Instruments: number[], pattern2Instruments: number[]): boolean {
     const pattern2Has1Instruments: boolean = pattern1Instruments.every(instrument => pattern2Instruments.indexOf(instrument) != -1);
@@ -220,20 +221,8 @@ function projectNoteIntoBar(oldNote: Note, timeOffset: number, noteStartPart: nu
     }
 }
 
-function mod(a: number, b: number): number {
-    return (a % b + b) % b;
-}
-
-function sigma(a: number, b: (i: number) => number, c: number): number {
-    let result = 0;
-    for (let i = c; i <= a; i++) {
-        result += b(i);
-    }
-    return result;
-}
-
 // The following functions are for custom chip generation seen later on.
-function randomRoundedWave(wave: Float32Array): void {
+export function randomRoundedWave(wave: Float32Array): void {
     let randomRoundWave: Float32Array = new Float32Array(64);
     let waveLength: number = 64;
     let foundNonZero = false;
@@ -278,7 +267,7 @@ function randomRoundedWave(wave: Float32Array): void {
     if (!foundNonZero) randomRoundedWave(wave);
 }
 
-function randomPulses(wave: Float32Array): void {
+export function randomPulses(wave: Float32Array): void {
     let randomPulse: Float32Array = new Float32Array(64);
     let waveLength: number = 64;
     let foundNonZero = false;
@@ -307,7 +296,7 @@ function randomPulses(wave: Float32Array): void {
     if (!foundNonZero) randomPulses(wave);
 }
 
-function randomChip(wave: Float32Array): void {
+export function randomChip(wave: Float32Array): void {
     let randomChipWave: Float32Array = new Float32Array(64);
     let waveLength: number = 64;
     let foundNonZero = false;
@@ -349,7 +338,7 @@ function randomChip(wave: Float32Array): void {
     if (!foundNonZero) randomChip(wave);
 }
 
-function biasedFullyRandom(wave: Float32Array): void {
+export function biasedFullyRandom(wave: Float32Array): void {
     let fullyRandomWave: Float32Array = new Float32Array(64);
     let waveLength: number = 64;
     let foundNonZero = false;

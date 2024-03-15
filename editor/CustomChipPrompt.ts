@@ -4,11 +4,33 @@ import { HTML, SVG } from "imperative-html/dist/esm/elements-strict";
 import { Prompt } from "./Prompt";
 import { SongDocument } from "./SongDocument";
 import { ColorConfig } from "./ColorConfig";
-import { ChangeCustomWave } from "./changes";
+import { ChangeCustomWave, randomRoundedWave, randomPulses, randomChip, biasedFullyRandom } from "./changes";
+import { Config } from "./main";
 import { SongEditor } from "./SongEditor";
 import { Localization as _ } from "./Localization";
+import { convertChipWaveToCustomChip} from "../synth/synth";
+import { clamp } from "./UsefulCodingStuff";
 
-const { button, div, h2 } = HTML;
+const { button, div, h2, select, option } = HTML;
+
+// Taken from changes.ts
+interface ItemWeight<T> {
+	readonly item: T;
+	readonly weight: number;
+}
+function selectWeightedRandom<T>(entries: ReadonlyArray<ItemWeight<T>>): T {
+	let total: number = 0;
+	for (const entry of entries) {
+		total += entry.weight;
+	}
+	let random: number = Math.random() * total;
+	for (const entry of entries) {
+		random -= entry.weight;
+		if (random <= 0.0) return entry.item;
+	}
+	return entries[(Math.random() * entries.length) | 0].item;
+}
+
 const enum DrawMode {
 	Standard,
 	Line,
@@ -16,15 +38,44 @@ const enum DrawMode {
 	Selection,
 }
 
+const enum CurveModeStep {
+	// In this step, the first two points are determined for a quadratic
+	// bezier curve. The third point is simply the midpoint between those
+	// two, until determined explicitly.
+	First,
+	// In this step, the third point of a quadratic bezier is determined.
+	Second,
+}
+
+function getCurveModeStepMessage(step: CurveModeStep): string {
+    switch (step) {
+        case CurveModeStep.First: return "Placing line...";
+        case CurveModeStep.Second: return "Curving...";
+    }
+}
+
+// Taken from SongEditor.ts
+function buildHeaderedOptions(header: string, menu: HTMLSelectElement, items: ReadonlyArray<string | number>): HTMLSelectElement {
+    menu.appendChild(option({ selected: true, disabled: true, value: header }, header));
+
+    for (const item of items) {
+        menu.appendChild(option({ value: item }, item));
+    }
+    return menu;
+}
+
 export class CustomChipPromptCanvas {
 	private readonly _doc: SongDocument;
 	public drawMode = DrawMode.Standard;
+	public curveModeStep: CurveModeStep = CurveModeStep.First;
 	private _mouseX: number = 0;
 	private _mouseY: number = 0;
-	private _markedMouseX: number = 0;
-	private _markedMouseY: number = 0;
-	private _markedMouseXEnd: number = 0;
-	private _markedMouseYEnd: number = 0;
+	private _lineX0: number = 0;
+	private _lineY0: number = 0;
+	private _lineX1: number = 0;
+	private _lineY1: number = 0;
+	private _curveX0: number = 0;
+	private _curveY0: number = 0;
 	private temporaryArray: Float32Array = new Float32Array(64);
 	private _lastIndex: number = 0;
 	private _lastAmp: number = 0;
@@ -48,8 +99,7 @@ export class CustomChipPromptCanvas {
 
 	public readonly container: HTMLElement = HTML.div({ class: "", style: "height: 294px; width: 768px; padding-bottom: 1.5em;" }, this._svg);
 
-	constructor(doc: SongDocument) {
-
+	constructor(doc: SongDocument, private _curveModeMessage: HTMLElement) {
 		this._doc = doc;
 
 		for (let i: number = 0; i <= 4; i += 2) {
@@ -91,6 +141,7 @@ export class CustomChipPromptCanvas {
 		this._svg.addEventListener("keydown", this._whenKeyPressed);
 		this.container.addEventListener("keydown", this._whenKeyPressed);
 
+		this._curveModeMessage.textContent = getCurveModeStepMessage(this.curveModeStep);
 	}
 
 	public _storeChange = (): void => {
@@ -165,11 +216,28 @@ export class CustomChipPromptCanvas {
 		if (isNaN(this._mouseY)) this._mouseY = 0;
 		this._lastIndex = -1;
 		if (this.drawMode == DrawMode.Line) {
-			this._markedMouseX = this._mouseX;
-			this._markedMouseY = this._mouseY;
-			this._markedMouseXEnd = this._mouseX;
-			this._markedMouseYEnd = this._mouseY;
+			this._lineX0 = this._mouseX;
+			this._lineY0 = this._mouseY;
+			this._lineX1 = this._mouseX;
+			this._lineY1 = this._mouseY;
 			for (let i = 0; i < 64; i++) this.temporaryArray[i] = this.chipData[i];
+		} else if (this.drawMode == DrawMode.Curve && ((this._mouseX >= 0 && this._mouseX <= this._editorWidth) && (this._mouseY >= 0 && this._mouseY <= this._editorHeight))) {
+			switch (this.curveModeStep) {
+				case CurveModeStep.First: {
+					this._lineX0 = this._mouseX;
+					this._lineY0 = this._mouseY;
+					this._lineX1 = this._mouseX;
+					this._lineY1 = this._mouseY;
+					// Set to the middle of the line.
+					this._curveX0 = this._lineX0 + (this._lineX1 - this._lineX0) * 0.5;
+					this._curveY0 = this._lineY0 + (this._lineY1 - this._lineY0) * 0.5;
+					for (let i = 0; i < 64; i++) this.temporaryArray[i] = this.chipData[i];
+				} break;
+				case CurveModeStep.Second: {
+					this._curveX0 = this._mouseX;
+					this._curveY0 = this._mouseY;
+				} break;
+			}
 		}
 
 		this._whenCursorMoved();
@@ -184,6 +252,30 @@ export class CustomChipPromptCanvas {
 		if (isNaN(this._mouseX)) this._mouseX = 0;
 		if (isNaN(this._mouseY)) this._mouseY = 0;
 		this._lastIndex = -1;
+		if (this.drawMode == DrawMode.Line) {
+			this._lineX0 = this._mouseX;
+			this._lineY0 = this._mouseY;
+			this._lineX1 = this._mouseX;
+			this._lineY1 = this._mouseY;
+			for (let i = 0; i < 64; i++) this.temporaryArray[i] = this.chipData[i];
+		} else if (this.drawMode == DrawMode.Curve && ((this._mouseX >= 0 && this._mouseX <= this._editorWidth) && (this._mouseY >= 0 && this._mouseY <= this._editorHeight))) {
+			switch (this.curveModeStep) {
+				case CurveModeStep.First: {
+					this._lineX0 = this._mouseX;
+					this._lineY0 = this._mouseY;
+					this._lineX1 = this._mouseX;
+					this._lineY1 = this._mouseY;
+					// Set to the middle of the line.
+					this._curveX0 = this._lineX0 + (this._lineX1 - this._lineX0) * 0.5;
+					this._curveY0 = this._lineY0 + (this._lineY1 - this._lineY0) * 0.5;
+					for (let i = 0; i < 64; i++) this.temporaryArray[i] = this.chipData[i];
+				} break;
+				case CurveModeStep.Second: {
+					this._curveX0 = this._mouseX;
+					this._curveY0 = this._mouseY;
+				} break;
+			}
+		}
 
 		this._whenCursorMoved();
 	}
@@ -196,8 +288,22 @@ export class CustomChipPromptCanvas {
 		if (isNaN(this._mouseX)) this._mouseX = 0;
 		if (isNaN(this._mouseY)) this._mouseY = 0;
 		if (this.drawMode == DrawMode.Line && this._mouseDown) {
-			this._markedMouseXEnd = this._mouseX;
-			this._markedMouseYEnd = this._mouseY;
+			this._lineX1 = this._mouseX;
+			this._lineY1 = this._mouseY;
+		} else if (this.drawMode == DrawMode.Curve && ((this._mouseX >= 0 && this._mouseX <= this._editorWidth) && (this._mouseY >= 0 && this._mouseY <= this._editorHeight))) {
+			switch (this.curveModeStep) {
+				case CurveModeStep.First: {
+					this._lineX1 = this._mouseX;
+					this._lineY1 = this._mouseY;
+					// Set to the middle of the line.
+					this._curveX0 = this._lineX0 + (this._lineX1 - this._lineX0) * 0.5;
+					this._curveY0 = this._lineY0 + (this._lineY1 - this._lineY0) * 0.5;
+				} break;
+				case CurveModeStep.Second: {
+					this._curveX0 = this._mouseX;
+					this._curveY0 = this._mouseY;
+				} break;
+			}
 		}
 		this._whenCursorMoved();
 	}
@@ -211,6 +317,24 @@ export class CustomChipPromptCanvas {
 		this._mouseY = (event.touches[0].clientY - boundingRect.top) * this._editorHeight / (boundingRect.bottom - boundingRect.top);
 		if (isNaN(this._mouseX)) this._mouseX = 0;
 		if (isNaN(this._mouseY)) this._mouseY = 0;
+		if (this.drawMode == DrawMode.Line && this._mouseDown) {
+			this._lineX1 = this._mouseX;
+			this._lineY1 = this._mouseY;
+		} else if (this.drawMode == DrawMode.Curve && ((this._mouseX >= 0 && this._mouseX <= this._editorWidth) && (this._mouseY >= 0 && this._mouseY <= this._editorHeight))) {
+			switch (this.curveModeStep) {
+				case CurveModeStep.First: {
+					this._lineX1 = this._mouseX;
+					this._lineY1 = this._mouseY;
+					// Set to the middle of the line.
+					this._curveX0 = this._lineX0 + (this._lineX1 - this._lineX0) * 0.5;
+					this._curveY0 = this._lineY0 + (this._lineY1 - this._lineY0) * 0.5;
+				} break;
+				case CurveModeStep.Second: {
+					this._curveX0 = this._mouseX;
+					this._curveY0 = this._mouseY;
+				} break;
+			}
+		}
 		this._whenCursorMoved();
 	}
 
@@ -247,10 +371,10 @@ export class CustomChipPromptCanvas {
  					this.chipData[i] = this.temporaryArray[i];
 					this._blocks.children[i].setAttribute("y", "" + ((this.temporaryArray[i] + 24) * (this._editorHeight / 49)));
 				}
-				let lowest: number = Math.min(63, Math.max(0, Math.floor(this._markedMouseX * 64 / this._editorWidth)));
-				let startingAmp: number = Math.min(48, Math.max(0, Math.floor(this._markedMouseY * 49 / this._editorHeight)));
-				let highest: number = Math.min(63, Math.max(0, Math.floor(this._markedMouseXEnd * 64 / this._editorWidth)));
-				let endingAmp: number = Math.min(48, Math.max(0, Math.floor(this._markedMouseYEnd * 49 / this._editorHeight)));
+				let lowest: number = Math.min(63, Math.max(0, Math.floor(this._lineX0 * 64 / this._editorWidth)));
+				let startingAmp: number = Math.min(48, Math.max(0, Math.floor(this._lineY0 * 49 / this._editorHeight)));
+				let highest: number = Math.min(63, Math.max(0, Math.floor(this._lineX1 * 64 / this._editorWidth)));
+				let endingAmp: number = Math.min(48, Math.max(0, Math.floor(this._lineY1 * 49 / this._editorHeight)));
 				const temp1: number = lowest;
 				const temp2: number = startingAmp;
 				if (highest != lowest) {
@@ -270,6 +394,79 @@ export class CustomChipPromptCanvas {
 					this.chipData[lowest] = startingAmp - 24;
 					this._blocks.children[lowest].setAttribute("y", "" + (startingAmp * (this._editorHeight / 49)));
 				}
+			} else if (this.drawMode == DrawMode.Curve) {
+				for (let i = 0; i < 64; i++) {
+ 					this.chipData[i] = this.temporaryArray[i];
+					this._blocks.children[i].setAttribute("y", "" + ((this.temporaryArray[i] + 24) * (this._editorHeight / 49)));
+				}
+
+				const startX: number = this._lineX0;
+				const startY: number = this._lineY0;
+				const endX: number = this._lineX1;
+				const endY: number = this._lineY1;
+				const bX: number = this._curveX0;
+				const bY: number = this._curveY0;
+				const chipStartX: number = Math.min(63, Math.max(0, Math.floor(startX * 64 / this._editorWidth)));
+				const chipStartY: number = Math.min(48, Math.max(0, Math.floor(startY * 49 / this._editorHeight)));
+				const chipEndX: number = Math.min(63, Math.max(0, Math.floor(endX * 64 / this._editorWidth)));
+				const chipEndY: number = Math.min(48, Math.max(0, Math.floor(endY * 49 / this._editorHeight)));
+				const chipBX: number = Math.min(63, Math.max(0, Math.floor(bX * 64 / this._editorWidth)));
+				const chipBY: number = Math.min(48, Math.max(0, Math.floor(bY * 49 / this._editorHeight)));
+
+				// https://stackoverflow.com/a/66463100
+				const d1tx: number = chipStartX - chipBX;
+				const d1ty: number = chipStartY - chipBY;
+				const d1t: number = Math.sqrt(d1tx * d1tx + d1ty * d1ty);
+				const d2tx: number = chipEndX - chipBX;
+				const d2ty: number = chipEndY - chipBY;
+				const d2t: number = Math.sqrt(d2tx * d2tx + d2ty * d2ty);
+				const sqrt: number = Math.sqrt(d1t * d2t);
+				const d1tIsZero: boolean = Math.abs(d1t) < 1.0e-24;
+				const d2tIsZero: boolean = Math.abs(d2t) < 1.0e-24;
+				const p1ptdx: number = d1tIsZero ? 0 : ((chipStartX - chipBX) / d1t);
+				const p1ptdy: number = d1tIsZero ? 0 : ((chipStartY - chipBY) / d1t);
+				const p2ptdx: number = d2tIsZero ? 0 : ((chipEndX - chipBX) / d2t);
+				const p2ptdy: number = d2tIsZero ? 0 : ((chipEndY - chipBY) / d2t);
+				const aX: number = Math.max(Math.min(chipStartX, chipEndX), Math.min(Math.max(chipStartX, chipEndX), chipBX - 0.5 * sqrt * (p1ptdx + p2ptdx)));
+				const aY: number = chipBY - 0.5 * sqrt * (p1ptdy + p2ptdy);
+
+				let lowest: number = Math.min(chipStartX, chipEndX);
+				let startingAmp: number = Math.min(chipStartY, chipEndY);
+				let highest: number = Math.max(chipStartX, chipEndX);
+				if (highest != lowest) {
+					// @TODO: Should really be automatically determined, but that's even more code
+					const steps: number = 100;
+					for (var i = 0; i < steps; i++) {
+						// https://pomax.github.io/bezierinfo/#whatis
+						const lt: number = i / steps;
+
+						const la0x: number = chipStartX;
+						const la0y: number = chipStartY;
+						const lb0x: number = aX;
+						const lb0y: number = aY;
+						const l0x: number = la0x + (lb0x - la0x) * lt;
+						const l0y: number = la0y + (lb0y - la0y) * lt;
+
+						const la1x: number = aX;
+						const la1y: number = aY;
+						const lb1x: number = chipEndX;
+						const lb1y: number = chipEndY;
+						const l1x: number = la1x + (lb1x - la1x) * lt;
+						const l1y: number = la1y + (lb1y - la1y) * lt;
+
+						const l2x: number = l0x + (l1x - l0x) * lt;
+						const l2y: number = l0y + (l1y - l0y) * lt;
+
+						const medIdx: number = Math.min(63, Math.max(0, Math.round(l2x)));
+						const medAmp: number = Math.min(48, Math.max(0, Math.round(l2y)));
+						this.chipData[medIdx] = medAmp - 24;
+						this._blocks.children[medIdx].setAttribute("y", "" + (medAmp * (this._editorHeight / 49)));
+					}
+				}
+				else {
+					this.chipData[lowest] = startingAmp - 24;
+					this._blocks.children[lowest].setAttribute("y", "" + (startingAmp * (this._editorHeight / 49)));
+				}
 			} else throw new Error("Unknown draw mode selected.");
 
 			// Make a change to the data but don't record it, since this prompt uses its own undo/redo queue
@@ -280,7 +477,23 @@ export class CustomChipPromptCanvas {
 		}
 	}
 
-	private _whenCursorReleased = (event: Event): void => {
+	public _whenCursorReleased = (event: Event): void => {
+		if (this.drawMode == DrawMode.Curve && ((this._mouseX >= 0 && this._mouseX <= this._editorWidth) && (this._mouseY >= 0 && this._mouseY <= this._editorHeight))) {
+			switch (this.curveModeStep) {
+				case CurveModeStep.First: {
+					this._mouseDown = false;
+					this.curveModeStep = CurveModeStep.Second;
+					this._curveModeMessage.textContent = getCurveModeStepMessage(this.curveModeStep);
+					// Don't commit the changes yet.
+					return;
+				} break;
+				case CurveModeStep.Second: {
+					this.curveModeStep = CurveModeStep.First;
+					this._curveModeMessage.textContent = getCurveModeStepMessage(this.curveModeStep);
+					// We can commit the changes now.
+				} break;
+			}
+		}
 		// Add current data into queue, if it is unique from last data
 		this._storeChange();
 		this._mouseDown = false;
@@ -291,52 +504,68 @@ export class CustomChipPromptCanvas {
 			this._blocks.children[i].setAttribute("y", "" + ((this.chipData[i] + 24) * (this._editorHeight / 49)));
 		}
 	}
+
+	public shiftSamplesUp(): void {
+		for (let i = 0; i < 64; i++) this.chipData[i] = Math.min(24, Math.max(-24, this.chipData[i] - 1));
+  		new ChangeCustomWave(this._doc, this.chipData);
+  		this._storeChange();
+  		this.render();
+	}
+
+	public shiftSamplesDown(): void {
+		for (let i = 0; i < 64; i++) this.chipData[i] = Math.min(24, Math.max(-24, this.chipData[i] + 1));
+  		new ChangeCustomWave(this._doc, this.chipData);
+  		this._storeChange();
+  		this.render();
+	}
 }
 
 export class CustomChipPrompt implements Prompt {
 
-	public customChipCanvas: CustomChipPromptCanvas = new CustomChipPromptCanvas(this._doc);
+	private curveModeStepText: HTMLDivElement = div({style: "position: absolute; align-self: center; bottom: 57px; font-size: 15px;"}, "");
+
+	public customChipCanvas: CustomChipPromptCanvas = new CustomChipPromptCanvas(this._doc, this.curveModeStepText);
 
 	public readonly _playButton: HTMLButtonElement = button({ style: "width: 55%;", type: "button" });
 
-	public readonly _drawType_Standard: HTMLButtonElement = button({ style: "border-radius: 0px; width: 65px; height 50px;"}, [
+	public readonly _drawType_Standard: HTMLButtonElement = button({ style: "border-radius: 0px; width: 65px; height 50px;", title: "Cursor"}, [
 		// Cursor icon:
 		SVG.svg({ class: "no-underline", style: "flex-shrink: 0; position: absolute; top: 4px; left: 24px; pointer-events: none;", width: "16", height: "16", viewBox: "0 0 16 16" }, [
-			SVG.path({ d: "M14.082 2.182a.5.5 0 0 1 .103.557L8.528 15.467a.5.5 0 0 1-.917-.007L5.57 10.694.803 8.652a.5.5 0 0 1-.006-.916l12.728-5.657a.5.5 0 0 1 .556.103z", fill: "currentColor" }),
+			SVG.path({ d: "M 14.082 2.182 a 0.5 0.5 0 0 1 0.103 0.557 L 8.528 15.467 a 0.5 0.5 0 0 1 -0.917 -0.007 L 8 8 L 0.803 8.652 a 0.5 0.5 0 0 1 -0.006 -0.916 l 12.728 -5.657 a 0.5 0.5 0 0 1 0.556 0.103 M 3 12 L 2 15 L 5 14 L 7.944 8.996 L 8 8 L 7.005 8.091 z", fill: "currentColor" }),
 		]),
 	]);
-	public readonly _drawType_Line: HTMLButtonElement = button({ style: "border-radius: 0px; width: 65px; height 50px;"}, [
+	public readonly _drawType_Line: HTMLButtonElement = button({ style: "border-radius: 0px; width: 65px; height 50px;", title: "Line"}, [
 		// Line icon:
 		SVG.svg({ class: "no-underline", style: "flex-shrink: 0; position: absolute; top: 4px; left: 24px; pointer-events: none;", width: "16", height: "16", viewBox: "0 0 16 16" }, [
-			SVG.path({ d: "M14 2.5a.5.5 0 0 0-.5-.5h-6a.5.5 0 0 0 0 1h4.793L2.146 13.146a.5.5 0 0 0 .708.708L13 3.707V8.5a.5.5 0 0 0 1 0z", fill: "currentColor" }),
+			SVG.path({ d: "M 14 2.5 a 12 12 0 0 0 -0.5 -0.5 h -6.967 a 0.5 0.5 0 0 0 0 1 h 5.483 L 2.146 13.146 a 0.5 0.5 0 0 0 0.708 0.708 L 13.009 3.991 V 9.504 a 0.5 0.5 0 0 0 1 0 z", fill: "currentColor" }),
 		]),
 	]);
-	public readonly _drawType_Curve: HTMLButtonElement = button({ style: "border-radius: 0px; width: 65px; height 50px;"}, [
+	public readonly _drawType_Curve: HTMLButtonElement = button({ style: "border-radius: 0px; width: 65px; height 50px;", title: "Curve"}, [
 		// Curved-line icon:
 		SVG.svg({ class: "no-underline", style: "flex-shrink: 0; position: absolute; top: 4px; left: 24px; pointer-events: none;", width: "16", height: "16", viewBox: "0 0 16 16" }, [
 			SVG.path({ d: "M0 10.5A1.5 1.5 0 0 1 1.5 9h1A1.5 1.5 0 0 1 4 10.5v1A1.5 1.5 0 0 1 2.5 13h-1A1.5 1.5 0 0 1 0 11.5zm1.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm10.5.5A1.5 1.5 0 0 1 13.5 9h1a1.5 1.5 0 0 1 1.5 1.5v1a1.5 1.5 0 0 1-1.5 1.5h-1a1.5 1.5 0 0 1-1.5-1.5zm1.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM6 4.5A1.5 1.5 0 0 1 7.5 3h1A1.5 1.5 0 0 1 10 4.5v1A1.5 1.5 0 0 1 8.5 7h-1A1.5 1.5 0 0 1 6 5.5zM7.5 4a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5z", fill: "currentColor" }),
 			SVG.path({ d: "M6 4.5H1.866a1 1 0 1 0 0 1h2.668A6.52 6.52 0 0 0 1.814 9H2.5q.186 0 .358.043a5.52 5.52 0 0 1 3.185-3.185A1.5 1.5 0 0 1 6 5.5zm3.957 1.358A1.5 1.5 0 0 0 10 5.5v-1h4.134a1 1 0 1 1 0 1h-2.668a6.52 6.52 0 0 1 2.72 3.5H13.5q-.185 0-.358.043a5.52 5.52 0 0 0-3.185-3.185", fill: "currentColor"}),
 		]),
 	]);
-	public readonly _drawType_Selection: HTMLButtonElement = button({ style: "border-radius: 0px; width: 65px; height 50px;"}, [
+	public readonly _drawType_Selection: HTMLButtonElement = button({ style: "border-radius: 0px; width: 65px; height 50px;", title: "Selection"}, [
 		// Dotted-outline box icon:
 		SVG.svg({ class: "no-underline", style: "flex-shrink: 0; position: absolute; top: 4px; left: 24px; pointer-events: none;", width: "16", height: "16", viewBox: "0 0 16 16" }, [
-			SVG.path({ d: "M2.5 0q-.25 0-.487.048l.194.98A1.5 1.5 0 0 1 2.5 1h.458V0zm2.292 0h-.917v1h.917zm1.833 0h-.917v1h.917zm1.833 0h-.916v1h.916zm1.834 0h-.917v1h.917zm1.833 0h-.917v1h.917zM13.5 0h-.458v1h.458q.151 0 .293.029l.194-.981A2.5 2.5 0 0 0 13.5 0m2.079 1.11a2.5 2.5 0 0 0-.69-.689l-.556.831q.248.167.415.415l.83-.556zM1.11.421a2.5 2.5 0 0 0-.689.69l.831.556c.11-.164.251-.305.415-.415zM16 2.5q0-.25-.048-.487l-.98.194q.027.141.028.293v.458h1zM.048 2.013A2.5 2.5 0 0 0 0 2.5v.458h1V2.5q0-.151.029-.293zM0 3.875v.917h1v-.917zm16 .917v-.917h-1v.917zM0 5.708v.917h1v-.917zm16 .917v-.917h-1v.917zM0 7.542v.916h1v-.916zm15 .916h1v-.916h-1zM0 9.375v.917h1v-.917zm16 .917v-.917h-1v.917zm-16 .916v.917h1v-.917zm16 .917v-.917h-1v.917zm-16 .917v.458q0 .25.048.487l.98-.194A1.5 1.5 0 0 1 1 13.5v-.458zm16 .458v-.458h-1v.458q0 .151-.029.293l.981.194Q16 13.75 16 13.5M.421 14.89c.183.272.417.506.69.689l.556-.831a1.5 1.5 0 0 1-.415-.415zm14.469.689c.272-.183.506-.417.689-.69l-.831-.556c-.11.164-.251.305-.415.415l.556.83zm-12.877.373Q2.25 16 2.5 16h.458v-1H2.5q-.151 0-.293-.029zM13.5 16q.25 0 .487-.048l-.194-.98A1.5 1.5 0 0 1 13.5 15h-.458v1zm-9.625 0h.917v-1h-.917zm1.833 0h.917v-1h-.917zm1.834-1v1h.916v-1zm1.833 1h.917v-1h-.917zm1.833 0h.917v-1h-.917zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z", fill: "currentColor" }),
+			SVG.path({ d: "M 2.5 0 q -0.25 0 -0.487 0.048 l 0.194 0.98 A 1.5 1.5 0 0 1 2.5 1 h 0.458 V 0 z m 2.292 0 h -0.917 v 1 h 0.917 z m 1.833 0 h -0.917 v 1 h 0.917 z m 1.833 0 h -0.916 v 1 h 0.916 z m 1.834 0 h -0.917 v 1 h 0.917 z m 1.833 0 h -0.917 v 1 h 0.917 z M 13.5 0 h -0.458 v 1 h 0.458 q 0.151 0 0.293 0.029 l 0.194 -0.981 A 2.5 2.5 0 0 0 13.5 0 m 2.079 1.11 a 2.5 2.5 0 0 0 -0.69 -0.689 l -0.556 0.831 q 0.248 0.167 0.415 0.415 l 0.83 -0.556 z M 1.11 0.421 a 2.5 2.5 0 0 0 -0.689 0.69 l 0.831 0.556 c 0.11 -0.164 0.251 -0.305 0.415 -0.415 z M 16 2.5 q 0 -0.25 -0.048 -0.487 l -0.98 0.194 q 0.027 0.141 0.028 0.293 v 0.458 h 1 z M 0.048 2.013 A 2.5 2.5 0 0 0 0 2.5 v 0.458 h 1 V 2.5 q 0 -0.151 0.029 -0.293 z M 0 3.875 v 0.917 h 1 v -0.917 z m 16 0.917 v -0.917 h -1 v 0.917 z M 0 5.708 v 0.917 h 1 v -0.917 z m 16 0.917 v -0.917 h -1 v 0.917 z M 0 7.542 v 0.916 h 1 v -0.916 z m 15 0.916 h 1 v -0.916 h -1 z M 0 9.375 v 0.917 h 1 v -0.917 z m 16 0.917 v -0.917 h -1 v 0.917 z m -16 0.916 v 0.917 h 1 v -0.917 z m 16 0.917 v -0.917 h -1 v 0.917 z m -16 0.917 v 0.458 q 0 0.25 0.048 0.487 l 0.98 -0.194 A 1.5 1.5 0 0 1 1 13.5 v -0.458 z m 16 0.458 v -0.458 h -1 v 0.458 q 0 0.151 -0.029 0.293 l 0.981 0.194 Q 16 13.75 16 13.5 M 0.421 14.89 c 0.183 0.272 0.417 0.506 0.69 0.689 l 0.556 -0.831 a 1.5 1.5 0 0 1 -0.415 -0.415 z m 14.469 0.689 c 0.272 -0.183 0.506 -0.417 0.689 -0.69 l -0.831 -0.556 c -0.11 0.164 -0.251 0.305 -0.415 0.415 l 0.556 0.83 z m -12.877 0.373 Q 2.25 16 2.5 16 h 0.458 v -1 H 2.5 q -0.151 0 -0.293 -0.029 z M 13.5 16 q 0.25 0 0.487 -0.048 l -0.194 -0.98 A 1.5 1.5 0 0 1 13.5 15 h -0.458 v 1 z m -9.625 0 h 0.917 v -1 h -0.917 z m 1.833 0 h 0.917 v -1 h -0.917 z m 1.834 -1 v 1 h 0.916 v -1 z m 1.833 1 h 0.917 v -1 h -0.917 z m 1.833 0 h 0.917 v -1 h -0.917 z", fill: "currentColor" }),
 		]),
 	]);
 	private readonly drawToolsContainer: HTMLDivElement = div({ class: "instrument-bar", style: "margin-left: -3px; display: grid; grid-template-columns: repeat(4, 70px); grid-gap: 2px 0px; width: 270px;" }, this._drawType_Standard, this._drawType_Line, this._drawType_Curve, this._drawType_Selection);
 
 	private readonly _cancelButton: HTMLButtonElement = button({ class: "cancelButton" });
-	private readonly _okayButton: HTMLButtonElement = button({ class: "okayButton", style: "width:45%;" }, _.confirmLabel);
+	private readonly _okayButton: HTMLButtonElement = button({ class: "okayButton", style: "width:45%; font-size: 15px;" }, _.confirmLabel);
 
-	private readonly copyButton: HTMLButtonElement = button({ style: "width:86px; margin-right: 5px;", class: "copyButton" }, [
+	private readonly copyButton: HTMLButtonElement = button({ style: "width:86px; margin-right: 5px; text-align: center;", class: "copyButton" }, [
 		_.copyLabel,
 		// Copy icon:
 		SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 0; top: 50%; margin-top: -1em; pointer-events: none;", width: "2em", height: "2em", viewBox: "-5 -21 26 26" }, [
 			SVG.path({ d: "M 0 -15 L 1 -15 L 1 0 L 13 0 L 13 1 L 0 1 L 0 -15 z M 2 -1 L 2 -17 L 10 -17 L 14 -13 L 14 -1 z M 3 -2 L 13 -2 L 13 -12 L 9 -12 L 9 -16 L 3 -16 z", fill: "currentColor" }),
 		]),
 	]);
-	private readonly pasteButton: HTMLButtonElement = button({ style: "width:86px;", class: "pasteButton" }, [
+	private readonly pasteButton: HTMLButtonElement = button({ style: "width:86px; text-align: center;", class: "pasteButton" }, [
 		_.pasteLabel,
 		// Paste icon:
 		SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 0; top: 50%; margin-top: -1em; pointer-events: none;", width: "2em", height: "2em", viewBox: "0 0 26 26" }, [
@@ -345,6 +574,27 @@ export class CustomChipPrompt implements Prompt {
 		]),
 	]);
 	private readonly copyPasteContainer: HTMLDivElement = div({ style: "width: 185px;" }, this.copyButton, this.pasteButton);
+
+	private readonly loadWaveformPresetSelect: HTMLSelectElement = buildHeaderedOptions(
+		_.loadPresetLabel, 
+		/* List icon:
+		SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 4px; margin-top: 0.05em; pointer-events: none;", width: "16", height: "16", viewBox: "0 0 16 16"}, [
+			SVG.path({ d: "M12 13c0 1.105-1.12 2-2.5 2S7 14.105 7 13s1.12-2 2.5-2 2.5.895 2.5 2", fill: "currentColor"}),
+			SVG.path({ d: "M12 3v10h-1V3z", fill: "currentColor"}),
+			SVG.path({ d: "M11 2.82a1 1 0 0 1 .804-.98l3-.6A1 1 0 0 1 16 2.22V4l-5 1z", fill: "currentColor"}),
+			SVG.path({ d: "M0 11.5a.5.5 0 0 1 .5-.5H4a.5.5 0 0 1 0 1H.5a.5.5 0 0 1-.5-.5m0-4A.5.5 0 0 1 .5 7H8a.5.5 0 0 1 0 1H.5a.5.5 0 0 1-.5-.5m0-4A.5.5 0 0 1 .5 3H8a.5.5 0 0 1 0 1H.5a.5.5 0 0 1-.5-.5", fill: "currentColor"}),
+		]), */
+		select({ style: "font-size: 15px; position: absolute; align-self: left; left: 20px; bottom: 54px; text-align: center; width: 30%; text-align-last: center;" }),
+		Config.chipWaves.map(wave => wave.name));
+
+	private readonly randomizeButton: HTMLButtonElement = button({ style: "font-size: 15px; position: absolute; align-self: right; right: 20px; bottom: 54px; text-align: center; width: 30%; text-align-last: center;" }, [
+		_.random2Label,
+		// Dice icon:
+		SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 4px; margin-top: 0.05em; pointer-events: none;", width: "16", height: "16", viewBox: "0 0 16 16"}, [
+			SVG.path({ d: "M13 1a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2zM3 0a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V3a3 3 0 0 0-3-3z", fill: "currentColor"}),
+			SVG.path({ d: "M5.5 4a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m8 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0 8a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m-8 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0", fill: "currentColor"}),
+		]),
+	]);
 
 	public readonly container: HTMLDivElement = div({ class: "prompt noSelection", style: "width: 600px;" },
 		h2("Edit Custom Chip Instrument"),
@@ -357,6 +607,9 @@ export class CustomChipPrompt implements Prompt {
 		div({ style: "margin-top: 2px; display: flex; flex-direction: row; align-items: center; justify-content: center;" },
 			this.customChipCanvas.container,
 		),
+		this.curveModeStepText,
+		this.loadWaveformPresetSelect,
+		this.randomizeButton,
 		div({ style: "display: flex; flex-direction: row-reverse; justify-content: space-between;" },
 			this._okayButton,
 			this.copyPasteContainer,
@@ -370,12 +623,15 @@ export class CustomChipPrompt implements Prompt {
 		this.container.addEventListener("keydown", this.whenKeyPressed);
 		this.copyButton.addEventListener("click", this._copySettings);
 		this.pasteButton.addEventListener("click", this._pasteSettings);
+		this.loadWaveformPresetSelect.addEventListener("change", this._customWavePresetHandler);
+		this.randomizeButton.addEventListener("click", this._randomizeCustomChip);
 		this._playButton.addEventListener("click", this._togglePlay);
 		this.updatePlayButton();
 		this._drawType_Standard.addEventListener("click", this._selectStandardDrawType);
 		this._drawType_Line.addEventListener("click", this._selectLineDrawType);
 		this._drawType_Curve.addEventListener("click", this._selectCurveDrawType);
 		this._drawType_Selection.addEventListener("click", this._selectSelectionDrawType);
+		this.curveModeStepText.style.display = "none";
 
 		let colors = ColorConfig.getChannelColor(this._doc.song, this._doc.channel);
 		this.drawToolsContainer.style.setProperty("--text-color-lit", colors.primaryNote);
@@ -414,6 +670,7 @@ export class CustomChipPrompt implements Prompt {
 		this._drawType_Curve.classList.remove("selected-instrument");
 		this._drawType_Selection.classList.remove("selected-instrument");
 		this.customChipCanvas.drawMode = DrawMode.Standard;
+		this.curveModeStepText.style.display = "none";
 	}
 
 	private _selectLineDrawType = (): void => {
@@ -422,6 +679,7 @@ export class CustomChipPrompt implements Prompt {
 		this._drawType_Curve.classList.remove("selected-instrument");
 		this._drawType_Selection.classList.remove("selected-instrument");
 		this.customChipCanvas.drawMode = DrawMode.Line;
+		this.curveModeStepText.style.display = "none";
 	}
 
 	private _selectCurveDrawType = (): void => {
@@ -430,6 +688,9 @@ export class CustomChipPrompt implements Prompt {
 		this._drawType_Curve.classList.add("selected-instrument");
 		this._drawType_Selection.classList.remove("selected-instrument");
 		this.customChipCanvas.drawMode = DrawMode.Curve;
+		this.customChipCanvas.curveModeStep = CurveModeStep.First;
+		this.curveModeStepText.style.display = "";
+		this.curveModeStepText.textContent = getCurveModeStepMessage(this.customChipCanvas.curveModeStep);
 	}
 
 	private _selectSelectionDrawType = (): void => {
@@ -438,6 +699,7 @@ export class CustomChipPrompt implements Prompt {
 		this._drawType_Curve.classList.remove("selected-instrument");
 		this._drawType_Selection.classList.add("selected-instrument");
 		this.customChipCanvas.drawMode = DrawMode.Selection;
+		this.curveModeStepText.style.display = "none";
 	}
 
 	private _close = (): void => {
@@ -467,6 +729,77 @@ export class CustomChipPrompt implements Prompt {
 		new ChangeCustomWave(this._doc, this.customChipCanvas.chipData);
     }
 
+	// Taken from SongEditor.ts
+	private _customWavePresetHandler = (event: Event): void => {
+        // Update custom wave value
+        let customWaveArray: Float32Array = new Float32Array(64);
+        let index: number = this.loadWaveformPresetSelect.selectedIndex - 1;
+        let maxValue: number = Number.MIN_VALUE;
+        let minValue: number = Number.MAX_VALUE;
+        let arrayPoint: number = 0;
+        let arrayStep: number = (Config.chipWaves[index].samples.length - 1) / 64.0;
+
+        for (let i: number = 0; i < 64; i++) {
+            // Compute derivative to get original wave.
+            customWaveArray[i] = (Config.chipWaves[index].samples[Math.floor(arrayPoint)] - Config.chipWaves[index].samples[(Math.floor(arrayPoint) + 1)]) / arrayStep;
+            if (customWaveArray[i] < minValue)
+                minValue = customWaveArray[i];
+            if (customWaveArray[i] > maxValue)
+                maxValue = customWaveArray[i];
+            // Scale an any-size array to 64 elements
+            arrayPoint += arrayStep;
+        }
+
+        for (let i: number = 0; i < 64; i++) {
+            // Change array range from Min~Max to 0~(Max-Min)
+            customWaveArray[i] -= minValue;
+            // Divide by (Max-Min) to get a range of 0~1,
+            customWaveArray[i] /= (maxValue - minValue);
+            //then multiply by 48 to get 0~48,
+            customWaveArray[i] *= 48.0;
+            //then subtract 24 to get - 24~24
+            customWaveArray[i] -= 24.0;
+            //need to force integers
+            customWaveArray[i] = Math.ceil(customWaveArray[i]);
+            // Copy back data to canvas
+            this.customChipCanvas.chipData[i] = customWaveArray[i];
+        }
+
+		this.customChipCanvas._storeChange();
+        new ChangeCustomWave(this._doc, customWaveArray);
+        this.loadWaveformPresetSelect.selectedIndex = 0;
+    }
+
+	// Taken from changes.ts
+	private _randomizeCustomChip = (): void => {
+		let randomGeneratedArray: Float32Array = new Float32Array(64);
+        if (this._doc.prefs.customChipGenerationType == "customChipGenerateFully") {
+            for (let i: number = 0; i < 64; i++) {
+                randomGeneratedArray[i] = clamp(-24, 24+1, ((Math.random() * 48) | 0) - 24);
+            }
+        } 
+        else if (this._doc.prefs.customChipGenerationType == "customChipGeneratePreset") {
+            let index = ((Math.random() * Config.chipWaves.length) | 0);
+            let waveformPreset = Config.chipWaves[index].samples;
+            randomGeneratedArray = convertChipWaveToCustomChip(waveformPreset)[0];
+    	}
+		// We'll put the "none" type here as it seems more intuitive if "none" only worked on fully randomized custom chips, not just its waveform.
+        else if (this._doc.prefs.customChipGenerationType == "customChipGenerateAlgorithm" || this._doc.prefs.customChipGenerationType == "customChipGenerateNone") {
+            const algorithmFunction: (wave: Float32Array) => void = selectWeightedRandom([
+                { item: randomRoundedWave, weight: 1},
+                { item: randomPulses, weight: 1},
+                { item: randomChip, weight: 1},
+                { item: biasedFullyRandom, weight: 1},
+            ]);
+            algorithmFunction(randomGeneratedArray);
+        }
+
+        this.customChipCanvas.chipData = randomGeneratedArray;
+
+		this.customChipCanvas._storeChange();
+        new ChangeCustomWave(this._doc, randomGeneratedArray);
+	}
+
 	public whenKeyPressed = (event: KeyboardEvent): void => {
 		if ((<Element>event.target).tagName != "BUTTON" && event.keyCode == 13) { // Enter key
 			this._saveChanges();
@@ -489,6 +822,33 @@ export class CustomChipPrompt implements Prompt {
 		else if (event.keyCode == 221) { // ]
 			this._doc.synth.goToNextBar();
 		}
+		else if (
+			event.keyCode == 187 // +
+			|| event.keyCode == 61 // Firefox +
+			|| event.keyCode == 171 // Some users may have this as +
+		){
+		  	this.customChipCanvas.shiftSamplesUp();
+		  	event.stopPropagation();
+		}
+		else if (
+			event.keyCode == 189 // -
+			|| event.keyCode == 173 // Firefox -
+		){
+		  	this.customChipCanvas.shiftSamplesDown();
+		  	event.stopPropagation();
+		}
+		else if (event.keyCode == 82 ) { // r
+		  	this._randomizeCustomChip();
+		  	event.stopPropagation();
+		}
+		else if (event.keyCode == 67 ) { // c
+			this._copySettings();
+			event.stopPropagation();
+	  	}
+		  else if (event.keyCode == 86 ) { // v
+			this._pasteSettings();
+			event.stopPropagation();
+	  	}
 	}
 
 	private _saveChanges = (): void => {
@@ -498,4 +858,3 @@ export class CustomChipPrompt implements Prompt {
 		this._doc.record(new ChangeCustomWave(this._doc, this.customChipCanvas.chipData), true);
 	}
 }
-//}

@@ -1359,9 +1359,25 @@ export class SongEditor {
     // Issue#12 - Spectrum improvements. Add a zoom-in prompt for spectrum (and possibly drumset/ADVdrumset).
     private readonly _spectrumRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("spectrum") }, span(_.spectrumLabel)), this._spectrumEditor.container);
     private readonly _harmonicsEditor: HarmonicsEditor = new HarmonicsEditor(this._doc);
+    /*private readonly _harmonicsCopyButton: HTMLButtonElement = button({ style: "max-width:40px; width: 40px;", class: "copyButton", title: _.copyLabel }, [
+        (_.copyLabel),
+        // Copy icon:
+        SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 0; top: 50%; margin-top: -0.75em; pointer-events: none;", width: "2em", height: "2em", viewBox: "-5 -21 26 26" }, [
+            SVG.path({ d: "M 0 -15 L 1 -15 L 1 0 L 13 0 L 13 1 L 0 1 L 0 -15 z M 2 -1 L 2 -17 L 10 -17 L 14 -13 L 14 -1 z M 3 -2 L 13 -2 L 13 -12 L 9 -12 L 9 -16 L 3 -16 z", fill: "currentColor" }),
+        ]),
+    ]);
+    private readonly _harmonicsPasteButton: HTMLButtonElement = button({ style: "max-width:40px;", class: "pasteButton", title: _.pasteLabel }, [
+        (_.pasteLabel),
+        // Paste icon:
+        SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 0; top: 50%; margin-top: -0.75em; pointer-events: none;", width: "2em", height: "2em", viewBox: "0 0 26 26" }, [
+            SVG.path({ d: "M 8 18 L 6 18 L 6 5 L 17 5 L 17 7 M 9 8 L 16 8 L 20 12 L 20 22 L 9 22 z", stroke: "currentColor", fill: "none" }),
+            SVG.path({ d: "M 9 3 L 14 3 L 14 6 L 9 6 L 9 3 z M 16 8 L 20 12 L 16 12 L 16 8 z", fill: "currentColor", }),
+        ]),
+    ]);*/
     // Issue#12 - Harmonics improvements. Add a zoom-in prompt for harmonics and picked string harmonics.
     // private readonly _harmonicsZoom: HTMLButtonElement = button({ style: "margin-left:0em; padding-left:0.2em; height:1.5em; max-width: 12px;", onclick: () => this._openPrompt("harmonicsSettings") }, "+");
     private readonly _harmonicsRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "font-size: smaller;", onclick: () => this._openPrompt("harmonics") }, span(_.harmonicsLabel)), /*this._harmonicsZoom,*/ this._harmonicsEditor.container);
+    //private readonly _harmonicsCopyPasteRow: HTMLDivElement = div({class: "selectRow", style: "width: 90px; align-content: space-between; align-self: right;" }, this._harmonicsCopyButton, this._harmonicsPasteButton);
     
     private readonly _envelopeEditor: EnvelopeEditor = new EnvelopeEditor(this._doc);
     private readonly _discreteEnvelopeBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
@@ -1422,11 +1438,9 @@ export class SongEditor {
     private readonly _wavetableCustomWaveDrawCanvas: WavetableCustomChipCanvas = new WavetableCustomChipCanvas(canvas({ width: 128, height: 52, style: "border:2px solid " + ColorConfig.uiWidgetBackground, id: "customWaveDrawCanvas" }), this._doc, (newArray: Float32Array) => new ChangeWavetableCustomWave(this._doc, newArray, this._wavetableIndices[this._doc.channel][this._doc.getCurrentInstrument()]));
 
     private readonly _customWavePresetDrop: HTMLSelectElement = buildHeaderedOptions(_.loadPresetLabel, select({ style: "width: 50%; height:1.5em; text-align: center; text-align-last: center;" }),
-        Config.chipWaves.map(wave => wave.name)
-    );
+        Config.chipWaves.map(wave => wave.name));
     private readonly _wavetableCustomWavePresetDrop: HTMLSelectElement = buildHeaderedOptions(_.loadPresetLabel, select({ style: "width: 50%; height:1.5em; text-align: center; text-align-last: center;" }),
-        Config.chipWaves.map(wave => wave.name)
-    );
+        Config.chipWaves.map(wave => wave.name));
 
     private readonly _customWaveZoom: HTMLButtonElement = button({ style: "margin-left:0.5em; height:1.5em; max-width: 20px;", onclick: () => this._openPrompt("customChipSettings") }, "+");
     private readonly _wavetableCustomWaveZoom: HTMLButtonElement = button({ style: "margin-left:0.5em; height:1.5em; max-width: 20px;", onclick: () => this._openPrompt("wavetableCustomChipSettings") }, "+");
@@ -1511,6 +1525,7 @@ export class SongEditor {
         this._feedbackRow2,
         this._spectrumRow,
         this._harmonicsRow,
+        //this._harmonicsCopyPasteRow,
         this._drumsetGroup,
         this._supersawDynamismRow,
 		this._supersawSpreadRow,
@@ -2788,9 +2803,11 @@ export class SongEditor {
             if (instrument.type == InstrumentType.harmonics || instrument.type == InstrumentType.pickedString) {
                 this._chipWaveSelectRow.style.display = "none";
                 this._harmonicsRow.style.display = "";
+                //this._harmonicsCopyPasteRow.style.display = "";
                 this._harmonicsEditor.render();
             } else {
                 this._harmonicsRow.style.display = "none";
+                //this._harmonicsCopyPasteRow.style.display = "none";
             }
             if (instrument.type == InstrumentType.pickedString) {
                 this._chipWaveSelectRow.style.display = "none";
@@ -3239,6 +3256,7 @@ export class SongEditor {
             this._chipWaveSelectRow.style.display = "none";
             this._spectrumRow.style.display = "none";
             this._harmonicsRow.style.display = "none";
+            //this._harmonicsCopyPasteRow.style.display = "none";
             this._transitionRow.style.display = "none";
             this._chordSelectRow.style.display = "none";
             this._chordDropdownGroup.style.display = "none";
