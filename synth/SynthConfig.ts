@@ -992,7 +992,7 @@ export class Config {
     public static readonly unisonExpressionMax:              number = 2; 
     public static readonly unisonSignMin:                    number = -2;
     public static readonly unisonSignMax:                    number = 2; 
-    public static readonly sineWaveLength:                   number = 1 << 15;
+    public static readonly sineWaveLength:                   number = 1 << 8/*15*/;
     public static readonly sineWaveMask:                     number = Config.sineWaveLength - 1;
     public static readonly sineWave:                         Float32Array = generateSineWave();
 //  Picked strings have an all-pass filter with a corner frequency based on the tone fundamental frequency, in order to add a slight inharmonicity. (Which is important for distortion.)

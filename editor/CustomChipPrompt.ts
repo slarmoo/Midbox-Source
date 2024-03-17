@@ -76,7 +76,9 @@ export class CustomChipPromptCanvas {
 	private _lineY1: number = 0;
 	private _curveX0: number = 0;
 	private _curveY0: number = 0;
-	private _clickedInsideCanvas: boolean;
+	private _selectionIsActive: boolean = false;
+	private _selectionStart: number = 0;
+	private _selectionEnd: number = 0;
 	private temporaryArray: Float32Array = new Float32Array(64);
 	private _lastIndex: number = 0;
 	private _lastAmp: number = 0;
@@ -91,11 +93,13 @@ export class CustomChipPromptCanvas {
 	private readonly _ticks: SVGSVGElement = SVG.svg({ "pointer-events": "none" });
 	private readonly _subticks: SVGSVGElement = SVG.svg({ "pointer-events": "none" });
 	private readonly _blocks: SVGSVGElement = SVG.svg({ "pointer-events": "none" });
+	private readonly _selectionBox: SVGRectElement = SVG.rect({ class: "dashed-line dash-move", fill: ColorConfig.boxSelectionFill, stroke: ColorConfig.hoverPreview, "stroke-width": 2, "stroke-dasharray": "5, 3", "fill-opacity": "0.4", "pointer-events": "none", visibility: "hidden" });
 	private readonly _svg: SVGSVGElement = SVG.svg({ style: `background-color: ${ColorConfig.editorBackground}; touch-action: none; overflow: visible;`, width: "100%", height: "100%", viewBox: "0 0 " + this._editorWidth + " " + this._editorHeight, preserveAspectRatio: "none" },
 		this._fill,
 		this._ticks,
 		this._subticks,
 		this._blocks,
+		this._selectionBox,
 	);
 
 	public readonly container: HTMLElement = HTML.div({ class: "", style: "height: 294px; width: 768px; padding-bottom: 1.5em;" }, this._svg);
@@ -207,6 +211,18 @@ export class CustomChipPromptCanvas {
 		}
 	}
 
+	public _renderSelection(): void {
+		if (this._selectionIsActive) {
+		  this._selectionBox.setAttribute("visibility", "visible");
+		  this._selectionBox.setAttribute("x", String(this._selectionStart / 64 * this._editorWidth));
+		  this._selectionBox.setAttribute("width", String((this._selectionEnd - this._selectionStart) / 64 * this._editorWidth));
+		  this._selectionBox.setAttribute("y", "0");
+		  this._selectionBox.setAttribute("height", "" + this._editorHeight);
+		} else {
+		  this._selectionBox.setAttribute("visibility", "hidden");
+		}
+	}
+
 	private _whenMousePressed = (event: MouseEvent): void => {
 		event.preventDefault();
 		this._mouseDown = true;
@@ -215,7 +231,6 @@ export class CustomChipPromptCanvas {
 		this._mouseY = ((event.clientY || event.pageY) - boundingRect.top) * this._editorHeight / (boundingRect.bottom - boundingRect.top);
 		if (isNaN(this._mouseX)) this._mouseX = 0;
 		if (isNaN(this._mouseY)) this._mouseY = 0;
-		this._clickedInsideCanvas = ((this._mouseX >= 0 && this._mouseX <= this._editorWidth) && (this._mouseY >= 0 && this._mouseY <= this._editorHeight));
 		this._lastIndex = -1;
 		if (this.drawMode == DrawMode.Line) {
 			this._lineX0 = this._mouseX;
@@ -240,6 +255,9 @@ export class CustomChipPromptCanvas {
 					this._curveY0 = this._mouseY;
 				} break;
 			}
+		} else if (this.drawMode == DrawMode.Selection) {
+			this._selectionIsActive = true;
+			this._renderSelection();
 		}
 
 		this._whenCursorMoved();
@@ -253,7 +271,6 @@ export class CustomChipPromptCanvas {
 		this._mouseY = (event.touches[0].clientY - boundingRect.top) * this._editorHeight / (boundingRect.bottom - boundingRect.top);
 		if (isNaN(this._mouseX)) this._mouseX = 0;
 		if (isNaN(this._mouseY)) this._mouseY = 0;
-		this._clickedInsideCanvas = ((this._mouseX >= 0 && this._mouseX <= this._editorWidth) && (this._mouseY >= 0 && this._mouseY <= this._editorHeight));
 		this._lastIndex = -1;
 		if (this.drawMode == DrawMode.Line) {
 			this._lineX0 = this._mouseX;
@@ -278,6 +295,9 @@ export class CustomChipPromptCanvas {
 					this._curveY0 = this._mouseY;
 				} break;
 			}
+		} else if (this.drawMode == DrawMode.Selection) {
+			this._selectionIsActive = true;
+			this._renderSelection();
 		}
 
 		this._whenCursorMoved();
@@ -307,6 +327,10 @@ export class CustomChipPromptCanvas {
 					this._curveY0 = this._mouseY;
 				} break;
 			}
+		} else if (this.drawMode == DrawMode.Selection) {
+			this._selectionStart = this._mouseX;
+			this._selectionEnd = this._mouseX + 3;
+			this._renderSelection();
 		}
 		this._whenCursorMoved();
 	}
@@ -337,6 +361,10 @@ export class CustomChipPromptCanvas {
 					this._curveY0 = this._mouseY;
 				} break;
 			}
+		} else if (this.drawMode == DrawMode.Selection) {
+			this._selectionStart = this._mouseX;
+			this._selectionEnd = this._mouseX + 3;
+			this._renderSelection();
 		}
 		this._whenCursorMoved();
 	}
@@ -441,7 +469,7 @@ export class CustomChipPromptCanvas {
 					const steps: number = 100;
 					for (var i = 0; i < steps; i++) {
 						// https://pomax.github.io/bezierinfo/#whatis
-						const lt: number = i / steps;
+						const lt: number = i / (steps - 1);
 
 						const la0x: number = chipStartX;
 						const la0y: number = chipStartY;
@@ -470,6 +498,8 @@ export class CustomChipPromptCanvas {
 					this.chipData[lowest] = startingAmp - 24;
 					this._blocks.children[lowest].setAttribute("y", "" + (startingAmp * (this._editorHeight / 49)));
 				}
+			} else if (this.drawMode == DrawMode.Selection) {
+				this._renderSelection();
 			} else throw new Error("Unknown draw mode selected.");
 
 			// Make a change to the data but don't record it, since this prompt uses its own undo/redo queue
@@ -481,7 +511,7 @@ export class CustomChipPromptCanvas {
 	}
 
 	public _whenCursorReleased = (event: Event): void => {
-		if (this.drawMode == DrawMode.Curve && this._clickedInsideCanvas) {
+		if (this.drawMode == DrawMode.Curve && this._mouseDown) {
 			switch (this.curveModeStep) {
 				case CurveModeStep.First: {
 					this._mouseDown = false;
@@ -558,17 +588,24 @@ export class CustomChipPrompt implements Prompt {
 	]);
 	private readonly drawToolsContainer: HTMLDivElement = div({ class: "instrument-bar", style: "margin-left: -3px; display: grid; grid-template-columns: repeat(4, 70px); grid-gap: 2px 0px; width: 270px;" }, this._drawType_Standard, this._drawType_Line, this._drawType_Curve, this._drawType_Selection);
 
-	private readonly _cancelButton: HTMLButtonElement = button({ class: "cancelButton" });
-	private readonly _okayButton: HTMLButtonElement = button({ class: "okayButton", style: "width:45%; font-size: 15px;" }, _.confirmLabel);
+	private readonly _removeSelectionButton: HTMLButtonElement = button({ style: "position: absolute; width:30%; align-self: center; bottom: 54px; font-size: 13px;" }, [
+		"Cancel Selection",
+	]);
+	private readonly _confirmSelectionButton: HTMLButtonElement = button({ style: "position: absolute; width:30%; align-self: center; bottom: 20px; font-size: 13px;" }, [
+		"Confirm Selection",
+	]);
 
-	private readonly copyButton: HTMLButtonElement = button({ style: "width:86px; margin-right: 5px; text-align: center;", class: "copyButton" }, [
+	private readonly _cancelButton: HTMLButtonElement = button({ class: "cancelButton" });
+	private readonly _okayButton: HTMLButtonElement = button({ class: "okayButton", style: "width:32%; font-size: 15px;" }, _.confirmLabel);
+
+	private readonly copyButton: HTMLButtonElement = button({ style: "width: 36.66%; margin-right: 5px; text-align: center;", class: "copyButton" }, [
 		_.copyLabel,
 		// Copy icon:
 		SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 0; top: 50%; margin-top: -1em; pointer-events: none;", width: "2em", height: "2em", viewBox: "-5 -21 26 26" }, [
 			SVG.path({ d: "M 0 -15 L 1 -15 L 1 0 L 13 0 L 13 1 L 0 1 L 0 -15 z M 2 -1 L 2 -17 L 10 -17 L 14 -13 L 14 -1 z M 3 -2 L 13 -2 L 13 -12 L 9 -12 L 9 -16 L 3 -16 z", fill: "currentColor" }),
 		]),
 	]);
-	private readonly pasteButton: HTMLButtonElement = button({ style: "width:86px; text-align: center;", class: "pasteButton" }, [
+	private readonly pasteButton: HTMLButtonElement = button({ style: "width: 36.66%; text-align: center;", class: "pasteButton" }, [
 		_.pasteLabel,
 		// Paste icon:
 		SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 0; top: 50%; margin-top: -1em; pointer-events: none;", width: "2em", height: "2em", viewBox: "0 0 26 26" }, [
@@ -576,7 +613,7 @@ export class CustomChipPrompt implements Prompt {
 			SVG.path({ d: "M 9 3 L 14 3 L 14 6 L 9 6 L 9 3 z M 16 8 L 20 12 L 16 12 L 16 8 z", fill: "currentColor", }),
 		]),
 	]);
-	private readonly copyPasteContainer: HTMLDivElement = div({ style: "width: 185px;" }, this.copyButton, this.pasteButton);
+	private readonly copyPasteContainer: HTMLDivElement = div({ style: "position: absolute; left: -11px; bottom: 20px; width: 40%;" }, this.copyButton, this.pasteButton);
 
 	private readonly loadWaveformPresetSelect: HTMLSelectElement = buildHeaderedOptions(
 		_.loadPresetLabel, 
@@ -611,6 +648,8 @@ export class CustomChipPrompt implements Prompt {
 			this.customChipCanvas.container,
 		),
 		this.curveModeStepText,
+		this._removeSelectionButton,
+		this._confirmSelectionButton,
 		this.loadWaveformPresetSelect,
 		this.randomizeButton,
 		div({ style: "display: flex; flex-direction: row-reverse; justify-content: space-between;" },
@@ -630,11 +669,14 @@ export class CustomChipPrompt implements Prompt {
 		this.randomizeButton.addEventListener("click", this._randomizeCustomChip);
 		this._playButton.addEventListener("click", this._togglePlay);
 		this.updatePlayButton();
+		this.customChipCanvas._renderSelection();
 		this._drawType_Standard.addEventListener("click", this._selectStandardDrawType);
 		this._drawType_Line.addEventListener("click", this._selectLineDrawType);
 		this._drawType_Curve.addEventListener("click", this._selectCurveDrawType);
 		this._drawType_Selection.addEventListener("click", this._selectSelectionDrawType);
 		this.curveModeStepText.style.display = "none";
+		this._removeSelectionButton.style.display = "none";
+		this._confirmSelectionButton.style.display = "none";
 
 		let colors = ColorConfig.getChannelColor(this._doc.song, this._doc.channel);
 		this.drawToolsContainer.style.setProperty("--text-color-lit", colors.primaryNote);
@@ -674,6 +716,8 @@ export class CustomChipPrompt implements Prompt {
 		this._drawType_Selection.classList.remove("selected-instrument");
 		this.customChipCanvas.drawMode = DrawMode.Standard;
 		this.curveModeStepText.style.display = "none";
+		this._removeSelectionButton.style.display = "none";
+		this._confirmSelectionButton.style.display = "none";
 	}
 
 	private _selectLineDrawType = (): void => {
@@ -683,6 +727,8 @@ export class CustomChipPrompt implements Prompt {
 		this._drawType_Selection.classList.remove("selected-instrument");
 		this.customChipCanvas.drawMode = DrawMode.Line;
 		this.curveModeStepText.style.display = "none";
+		this._removeSelectionButton.style.display = "none";
+		this._confirmSelectionButton.style.display = "none";
 	}
 
 	private _selectCurveDrawType = (): void => {
@@ -693,6 +739,8 @@ export class CustomChipPrompt implements Prompt {
 		this.customChipCanvas.drawMode = DrawMode.Curve;
 		this.customChipCanvas.curveModeStep = CurveModeStep.First;
 		this.curveModeStepText.style.display = "";
+		this._removeSelectionButton.style.display = "none";
+		this._confirmSelectionButton.style.display = "none";
 		this.curveModeStepText.textContent = getCurveModeStepMessage(this.customChipCanvas.curveModeStep);
 	}
 
@@ -703,6 +751,8 @@ export class CustomChipPrompt implements Prompt {
 		this._drawType_Selection.classList.add("selected-instrument");
 		this.customChipCanvas.drawMode = DrawMode.Selection;
 		this.curveModeStepText.style.display = "none";
+		this._removeSelectionButton.style.display = "";
+		this._confirmSelectionButton.style.display = "";
 	}
 
 	private _close = (): void => {
@@ -730,6 +780,8 @@ export class CustomChipPrompt implements Prompt {
 		}
 		this.customChipCanvas._storeChange();
 		new ChangeCustomWave(this._doc, this.customChipCanvas.chipData);
+		this.customChipCanvas.curveModeStep = CurveModeStep.First;
+		this.curveModeStepText.textContent = getCurveModeStepMessage(this.customChipCanvas.curveModeStep);
     }
 
 	// Taken from SongEditor.ts
@@ -770,6 +822,8 @@ export class CustomChipPrompt implements Prompt {
 
 		this.customChipCanvas._storeChange();
         new ChangeCustomWave(this._doc, customWaveArray);
+		this.customChipCanvas.curveModeStep = CurveModeStep.First;
+		this.curveModeStepText.textContent = getCurveModeStepMessage(this.customChipCanvas.curveModeStep);
         this.loadWaveformPresetSelect.selectedIndex = 0;
     }
 
@@ -802,6 +856,8 @@ export class CustomChipPrompt implements Prompt {
 
 		this.customChipCanvas._storeChange();
         new ChangeCustomWave(this._doc, randomGeneratedArray);
+		this.customChipCanvas.curveModeStep = CurveModeStep.First;
+		this.curveModeStepText.textContent = getCurveModeStepMessage(this.customChipCanvas.curveModeStep);
 	}
 
 	public whenKeyPressed = (event: KeyboardEvent): void => {

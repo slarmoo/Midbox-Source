@@ -6788,6 +6788,8 @@ class Tone {
 
     public reset(): void {
         this.noiseSample = 0.0;
+        this.noiseSampleA = 0.0;
+        this.noiseSampleB = 0.0;
         for (let i: number = 0; i < Config.maxPitchOrOperatorCount; i++) {
             this.phases[i] = 0.0;
             this.operatorWaves[i] = Config.operatorWaves[0];
@@ -10517,7 +10519,7 @@ export class Synth {
                 const unisonSpread: number = instrument.unisonSpread;
                 const unisonOffset: number = instrument.unisonOffset;
                 const unisonExpression: number = instrument.unisonExpression;
-                const voiceCountExpression: number = (instrument.type == InstrumentType.pickedString && InstrumentType.pwm && InstrumentType.spectrum) ? 1 : unisonVoices / 2.0;
+                const voiceCountExpression: number = (instrument.type == InstrumentType.pickedString || instrument.type == InstrumentType.pwm || instrument.type == InstrumentType.spectrum) ? 1 : unisonVoices / 2.0;
                 settingsExpressionMult *= unisonExpression * voiceCountExpression;
                 const unisonEnvelopeStart = envelopeStarts[EnvelopeComputeIndex.unison];
                 const unisonEnvelopeEnd = envelopeEnds[EnvelopeComputeIndex.unison];
