@@ -1,6 +1,6 @@
 // Copyright (c) 2012-2022 John Nesky and contributing authors, distributed under the MIT license, see accompanying the LICENSE.md file.
 
-import { Dictionary, DictionaryArray, FilterType, SustainType, EnvelopeType, InstrumentType, EffectType, EnvelopeComputeIndex, Transition, Unison, Chord, Vibrato, Envelope, AutomationTarget, Config, getDrumWave, drawNoiseSpectrum, getArpeggioPitchIndex, performIntegralOld, getPulseWidthRatio, effectsIncludeTransition, effectsIncludeChord, effectsIncludePitchShift, effectsIncludeDetune, effectsIncludeVibrato, effectsIncludeNoteFilter, effectsIncludeDistortion, effectsIncludeBitcrusher, effectsIncludeTest, effectsIncludePanning, effectsIncludeChorus, effectsIncludeEcho, effectsIncludeReverb, effectsIncludePercussion, OperatorWave } from "./SynthConfig";
+import { Dictionary, DictionaryArray, FilterType, SustainType, EnvelopeType, InstrumentType, EffectType, EnvelopeComputeIndex, Transition, Unison, Chord, Vibrato, Envelope, AutomationTarget, Config, getDrumWave, drawNoiseSpectrum, getArpeggioPitchIndex, performIntegralOld, getPulseWidthRatio, effectsIncludeTransition, effectsIncludeChord, effectsIncludePitchShift, effectsIncludeDetune, effectsIncludeVibrato, effectsIncludeNoteFilter, effectsIncludeDistortion, effectsIncludeBitcrusher, effectsIncludeWavefold, effectsIncludePanning, effectsIncludeChorus, effectsIncludeEcho, effectsIncludeReverb, effectsIncludePercussion, OperatorWave } from "./SynthConfig";
 import { EditorConfig } from "../editor/EditorConfig";
 import { scaleElementsByFactor, inverseRealFourierTransform } from "./FFT";
 import { Deque } from "./Deque";
@@ -1385,7 +1385,8 @@ export class Instrument {
     public distortion: number = 0;
     public bitcrusherFreq: number = 0;
     public bitcrusherQuantization: number = 0;
-    public test: number = 0;
+    public wavefoldLower: number = Config.wavefoldLowerMax;
+    public wavefoldUpper: number = Config.wavefoldUpperMax;
     public chorus: number = 0;
     public reverb: number = 0;
     public echoSustain: number = 0;
@@ -1406,6 +1407,8 @@ export class Instrument {
     public cyclePerNote: boolean = false;
     public oneShotCycle: boolean = false;
     public currentCycle: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31];
+    public noiseSeedRandomization: boolean = false;
+    public noiseSeed: number = 0;
     public readonly operators: Operator[] = [];
     public readonly spectrumWave: SpectrumWave;
     public readonly harmonicsWave: HarmonicsWave = new HarmonicsWave();
@@ -1505,7 +1508,8 @@ export class Instrument {
         this.distortion = Math.floor((Config.distortionRange - 1) * 0.75);
         this.bitcrusherFreq = Math.floor((Config.bitcrusherFreqRange - 1) * 0.5)
         this.bitcrusherQuantization = Math.floor((Config.bitcrusherQuantizationRange - 1) * 0.5);
-        this.test = Math.floor((15) * 0.5);
+        this.wavefoldLower = Config.wavefoldLowerMax;
+        this.wavefoldUpper = Config.wavefoldUpperMax;
         this.pan = Config.panCenter;
         this.panDelay = 10;
         this.pitchShift = Config.pitchShiftCenter;
@@ -1840,8 +1844,9 @@ export class Instrument {
             instrumentObject["bitcrusherOctave"] = (Config.bitcrusherFreqRange - 1 - this.bitcrusherFreq) * Config.bitcrusherOctaveStep;
             instrumentObject["bitcrusherQuantization"] = Math.round(100 * this.bitcrusherQuantization / (Config.bitcrusherQuantizationRange - 1));
         }
-        if (effectsIncludeTest(this.effects)) {
-            instrumentObject["test"] = Math.round(100 * this.test / 15);
+        if (effectsIncludeWavefold(this.effects)) {
+            instrumentObject["wavefoldLower"] = this.wavefoldLower;
+            instrumentObject["wavefoldUpper"] = this.wavefoldUpper;
         }
         if (effectsIncludePanning(this.effects)) {
             instrumentObject["pan"] = Math.round(100 * (this.pan - Config.panCenter) / Config.panCenter);
@@ -1877,8 +1882,14 @@ export class Instrument {
         }
 
         if (this.type == InstrumentType.noise) {
-            // Issue#10 - Unisons for basic noise.
-            // instrumentObject["unison"] = Config.unisons[this.unison].name;
+            instrumentObject["unison"] = Config.unisons[this.unison].name;
+            if (this.unison == Config.unisons.length) {
+                instrumentObject["unisonVoices"] = this.unisonVoices;
+                instrumentObject["unisonSpread"] = this.unisonSpread;
+                instrumentObject["unisonOffset"] = this.unisonOffset;
+                instrumentObject["unisonExpression"] = this.unisonExpression;
+                instrumentObject["unisonSign"] = this.unisonSign;
+            }
             instrumentObject["wave"] = Config.chipNoises[this.chipNoise].name;
         } else if (this.type == InstrumentType.spectrum) {
             instrumentObject["unison"] = this.unison == Config.unisons.length ? "custom" : Config.unisons[this.unison].name;
@@ -2268,8 +2279,15 @@ export class Instrument {
             this.bitcrusherQuantization = clamp(0, Config.bitcrusherQuantizationRange, Math.round((Config.bitcrusherQuantizationRange - 1) * (instrumentObject["bitcrusherQuantization"] | 0) / 100));
         }
 
-        if (instrumentObject["test"] != undefined) {
-            this.test = clamp(0, 15, Math.round(15 * (instrumentObject["test"] | 0) / 100));
+        if (instrumentObject["wavefoldLower"] != undefined) {
+            this.wavefoldLower = instrumentObject["wavefoldLower"];
+        } else {
+            this.wavefoldLower = Config.wavefoldLowerMax;
+        }
+        if (instrumentObject["wavefoldUpper"] != undefined) {
+            this.wavefoldUpper = instrumentObject["wavefoldUpper"];
+        } else {
+            this.wavefoldUpper = Config.wavefoldUpperMax;
         }
 
         if (instrumentObject["echoSustain"] != undefined) {
@@ -3440,8 +3458,8 @@ export class Song {
                 if (effectsIncludeBitcrusher(instrument.effects)) {
                     buffer.push(base64IntToCharCode[instrument.bitcrusherFreq], base64IntToCharCode[instrument.bitcrusherQuantization]);
                 }
-                if (effectsIncludeTest(instrument.effects)) {
-                    buffer.push(base64IntToCharCode[instrument.test]);
+                if (effectsIncludeWavefold(instrument.effects)) {
+                    buffer.push(base64IntToCharCode[instrument.wavefoldLower], base64IntToCharCode[instrument.wavefoldUpper]);
                 }
                 if (effectsIncludePanning(instrument.effects)) {
                     buffer.push(base64IntToCharCode[instrument.pan >> 6], base64IntToCharCode[instrument.pan & 0x3f]);
@@ -3547,8 +3565,8 @@ export class Song {
                         buffer.push(base64IntToCharCode[(instrument.customChipWave[j] + 24) as number]);
                     }
                 } else if (instrument.type == InstrumentType.noise) {
-                    // Issue#10 - Unisons for basic noise.
-                    // buffer.push(SongTagCode.unison, base64IntToCharCode[instrument.unison]);
+                    buffer.push(SongTagCode.unison, base64IntToCharCode[instrument.unison]);
+                    if (instrument.unison == Config.unisons.length) encodeUnisonSettings(buffer, instrument.unisonVoices, instrument.unisonSpread, instrument.unisonOffset, instrument.unisonExpression, instrument.unisonSign);
                     buffer.push(SongTagCode.wave, base64IntToCharCode[instrument.chipNoise]);
                 } else if (instrument.type == InstrumentType.spectrum) {
                     buffer.push(SongTagCode.unison, base64IntToCharCode[instrument.unison]);
@@ -4830,8 +4848,9 @@ export class Song {
                         instrument.bitcrusherFreq = clamp(0, Config.bitcrusherFreqRange, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                         instrument.bitcrusherQuantization = clamp(0, Config.bitcrusherQuantizationRange, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                     }
-                    if (effectsIncludeTest(instrument.effects)) {
-                        instrument.test = clamp(0, 15, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
+                    if (effectsIncludeWavefold(instrument.effects)) {
+                        instrument.wavefoldLower = clamp(0, Config.wavefoldLowerMax, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
+                        instrument.wavefoldUpper = clamp(0, Config.wavefoldUpperMax, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                     }
                     if (effectsIncludePanning(instrument.effects)) {
                         if (fromBeepBox) {
@@ -6884,15 +6903,8 @@ class InstrumentState {
     public bitcrusherFoldLevel: number = 1.0;
     public bitcrusherFoldLevelScale: number = 1.0;
 
-    public test: number = 0.0;
-    public testDelta: number = 0.0;
-    public testDrive: number = 0.0;
-    public testDriveDelta: number = 0.0;
-    public testFractionalInput1: number = 0.0;
-    public testFractionalInput2: number = 0.0;
-    public testFractionalInput3: number = 0.0;
-    public testPrevInput: number = 0.0;
-    public testNextOutput: number = 0.0;
+    public wavefoldLowerBound: number = 1.0;
+    public wavefoldUpperBound: number = 1.0;
 
     public readonly eqFilters: DynamicBiquadFilter[] = [];
     public eqFilterCount: number = 0;
@@ -7032,11 +7044,6 @@ class InstrumentState {
         this.distortionFractionalInput3 = 0.0;
         this.distortionPrevInput = 0.0;
         this.distortionNextOutput = 0.0;
-        this.testFractionalInput1 = 0.0;
-        this.testFractionalInput2 = 0.0;
-        this.testFractionalInput3 = 0.0;
-        this.testPrevInput = 0.0;
-        this.testNextOutput = 0.0;
         this.panningDelayPos = 0;
         if (this.panningDelayLine != null) for (let i: number = 0; i < this.panningDelayLine.length; i++) this.panningDelayLine[i] = 0.0;
         this.echoDelayOffsetEnd = null;
@@ -7117,7 +7124,7 @@ class InstrumentState {
 
         const usesDistortion: boolean = effectsIncludeDistortion(this.effects);
         const usesBitcrusher: boolean = effectsIncludeBitcrusher(this.effects);
-        const usesTest: boolean = effectsIncludeTest(this.effects);
+        const usesWavefold: boolean = effectsIncludeWavefold(this.effects);
         const usesPanning: boolean = effectsIncludePanning(this.effects);
         const usesChorus: boolean = effectsIncludeChorus(this.effects);
         const usesEcho: boolean = effectsIncludeEcho(this.effects);
@@ -7194,29 +7201,8 @@ class InstrumentState {
             this.bitcrusherFoldLevelScale = Math.pow(foldLevelEnd / foldLevelStart, 1.0 / roundedSamplesPerTick);
         }
 
-        if (usesTest) {
-            let useTestStart: number = instrument.test;
-            let useTestEnd: number = instrument.test;
-
-            /// Check for test mods
-            //if (synth.isModActive(Config.modulators.dictionary["test"].index, channelIndex, instrumentIndex)) {
-            //    useTestStart = synth.getModValue(Config.modulators.dictionary["test"].index, channelIndex, instrumentIndex, false);
-            //    useTestEnd = synth.getModValue(Config.modulators.dictionary["test"].index, channelIndex, instrumentIndex, true);
-            //}
-
-            // Issue#20 - Envelope for "test".
-            //const envelopeStart: number = envelopeStarts[EnvelopeComputeIndex.test];
-            //const envelopeEnd: number = envelopeEnds[EnvelopeComputeIndex.test];
-            const testSliderStart = Math.min(1.0, useTestStart / 15);
-            const testSliderEnd = Math.min(1.0, useTestEnd / 15);
-            const testStart: number = Math.pow(1.0 - 0.895 * (Math.pow(20.0, testSliderStart) - 1.0) / 19.0, 2.0);
-            const testEnd: number = Math.pow(1.0 - 0.895 * (Math.pow(20.0, testSliderEnd) - 1.0) / 19.0, 2.0);
-            const testDriveStart: number = (1.0 + 2.0 * testSliderStart) / Config.testBaseVolume;
-            const testDriveEnd: number = (1.0 + 2.0 * testSliderEnd) / Config.testBaseVolume;
-            this.test = testStart;
-            this.testDelta = (testEnd - testStart) / roundedSamplesPerTick;
-            this.testDrive = testDriveStart;
-            this.testDriveDelta = (testDriveEnd - testDriveStart) / roundedSamplesPerTick;
+        if (usesWavefold) {
+            // Nothing.
         }
 
         let eqFilterVolume: number = 1.0; //this.envelopeComputer.lowpassCutoffDecayVolumeCompensation;
@@ -7582,6 +7568,11 @@ class InstrumentState {
             this.unisonSign = instrument.unisonSign;
         } else if (instrument.type == InstrumentType.noise) {
             this.wave = getDrumWave(instrument.chipNoise, inverseRealFourierTransform, scaleElementsByFactor);
+            this.unisonVoices = instrument.unisonVoices;
+            this.unisonSpread = instrument.unisonSpread;
+            this.unisonOffset = instrument.unisonOffset;
+            this.unisonExpression = instrument.unisonExpression;
+            this.unisonSign = instrument.unisonSign;
         } else if (instrument.type == InstrumentType.harmonics) {
             this.wave = this.harmonicsWave.getCustomWave(instrument.harmonicsWave, instrument.type);
             this.unisonVoices = instrument.unisonVoices;
@@ -10513,7 +10504,7 @@ export class Synth {
             }
 
             const startFreq: number = Instrument.frequencyFromPitch(startPitch);
-            if (instrument.type == InstrumentType.chip || instrument.type == InstrumentType.customChipWave || instrument.type == InstrumentType.harmonics || instrument.type == InstrumentType.pickedString || instrument.type == InstrumentType.spectrum || instrument.type == InstrumentType.pwm || instrument.type == InstrumentType.noise || instrument.type == InstrumentType.wavetable) {
+            if (instrument.type == InstrumentType.chip || instrument.type == InstrumentType.customChipWave || instrument.type == InstrumentType.harmonics || instrument.type == InstrumentType.pickedString || instrument.type == InstrumentType.spectrum || instrument.type == InstrumentType.pwm || instrument.type == InstrumentType.wavetable || instrument.type == InstrumentType.noise) {
                 // These instruments have two waves at different frequencies for the unison feature.
                 const unisonVoices: number = instrument.unisonVoices;
                 const unisonSpread: number = instrument.unisonSpread;
@@ -10541,7 +10532,7 @@ export class Synth {
 			if (instrument.type == InstrumentType.supersaw) {
 				const minFirstVoiceAmplitude: number = 1.0 / Math.sqrt(Config.supersawVoiceCount);
 
-				 // Dynamism mods
+				// Dynamism mods
                 let useDynamismStart: number = instrument.supersawDynamism / Config.supersawDynamismMax;
                 let useDynamismEnd: number = instrument.supersawDynamism / Config.supersawDynamismMax;
                 if (this.isModActive(Config.modulators.dictionary["dynamism"].index, channelIndex, tone.instrumentIndex)) {
@@ -11264,7 +11255,7 @@ export class Synth {
 
         const usesDistortion: boolean = effectsIncludeDistortion(instrumentState.effects);
         const usesBitcrusher: boolean = effectsIncludeBitcrusher(instrumentState.effects);
-        const usesTest: boolean = effectsIncludeTest(instrumentState.effects);
+        const usesWavefold: boolean = effectsIncludeWavefold(instrumentState.effects);
         const usesEqFilter: boolean = instrumentState.eqFilterCount > 0;
         const usesPanning: boolean = effectsIncludePanning(instrumentState.effects);
         const usesChorus: boolean = effectsIncludeChorus(instrumentState.effects);
@@ -11272,7 +11263,7 @@ export class Synth {
         const usesReverb: boolean = effectsIncludeReverb(instrumentState.effects);
         let signature: number = 0; if (usesDistortion) signature = signature | 1;
         signature = signature << 1; if (usesBitcrusher) signature = signature | 1;
-        signature = signature << 1; if (usesTest) signature = signature | 1; // New line
+        signature = signature << 1; if (usesWavefold) signature = signature | 1;
         signature = signature << 1; if (usesEqFilter) signature = signature | 1;
         signature = signature << 1; if (usesPanning) signature = signature | 1;
         signature = signature << 1; if (usesChorus) signature = signature | 1;
@@ -11354,36 +11345,11 @@ export class Synth {
 				const bitcrusherFoldLevelScale = +instrumentState.bitcrusherFoldLevelScale;`
             }
 
-            if (usesTest) {
-                // The test effect is a copy of distortion really. 
-
+            if (usesWavefold) {
+                // MID TODO: Base it off of bitcrushes wavefolding?
                 effectsSource += `
-				
-				const testBaseVolume = +Config.testBaseVolume;
-				let test = instrumentState.test;
-				const testDelta = instrumentState.testDelta;
-				let testDrive = instrumentState.testDrive;
-				const testDriveDelta = instrumentState.testDriveDelta;
-				const testFractionalResolution = 4.0;
-				const testOversampleCompensation = testBaseVolume / testFractionalResolution;
-				const testFractionalDelay1 = 1.0 / testFractionalResolution;
-				const testFractionalDelay2 = 2.0 / testFractionalResolution;
-				const testFractionalDelay3 = 3.0 / testFractionalResolution;
-				const testFractionalDelayG1 = (1.0 - testFractionalDelay1) / (1.0 + testFractionalDelay1); // Inlined version of FilterCoefficients.prototype.allPass1stOrderFractionalDelay
-				const testFractionalDelayG2 = (1.0 - testFractionalDelay2) / (1.0 + testFractionalDelay2); // Inlined version of FilterCoefficients.prototype.allPass1stOrderFractionalDelay
-				const testFractionalDelayG3 = (1.0 - testFractionalDelay3) / (1.0 + testFractionalDelay3); // Inlined version of FilterCoefficients.prototype.allPass1stOrderFractionalDelay
-				const testNextOutputWeight1 = Math.cos(Math.PI * testFractionalDelay1) * 0.5 + 0.5;
-				const testNextOutputWeight2 = Math.cos(Math.PI * testFractionalDelay2) * 0.5 + 0.5;
-				const testNextOutputWeight3 = Math.cos(Math.PI * testFractionalDelay3) * 0.5 + 0.5;
-				const testPrevOutputWeight1 = 1.0 - testNextOutputWeight1;
-				const testPrevOutputWeight2 = 1.0 - testNextOutputWeight2;
-				const testPrevOutputWeight3 = 1.0 - testNextOutputWeight3;
-				
-				let testFractionalInput1 = +instrumentState.testFractionalInput1;
-				let testFractionalInput2 = +instrumentState.testFractionalInput2;
-				let testFractionalInput3 = +instrumentState.testFractionalInput3;
-				let testPrevInput = +instrumentState.testPrevInput;
-				let testNextOutput = +instrumentState.testNextOutput;`
+				// Nothing.
+                `
             }
 
             if (usesEqFilter) {
@@ -11570,25 +11536,10 @@ export class Synth {
 					bitcrusherFoldLevel *= bitcrusherFoldLevelScale;`
             }
 
-            if (usesTest) {
+            if (usesWavefold) {
                 effectsSource += `
-					
-					const testReverse = 100.0 - testDrive;
-					const testNextInput = sample * testDrive;
-					sample = testNextOutput;
-					testNextOutput = testNextInput / (testReverse * Math.abs(testNextInput) + test);
-					testFractionalInput1 = testFractionalDelayG1 * testNextInput + testPrevInput - testFractionalDelayG1 * testFractionalInput1;
-					testFractionalInput2 = testFractionalDelayG2 * testNextInput + testPrevInput - testFractionalDelayG2 * testFractionalInput2;
-					testFractionalInput3 = testFractionalDelayG3 * testNextInput + testPrevInput - testFractionalDelayG3 * testFractionalInput3;
-					const testOutput1 = testFractionalInput1 / (testReverse * Math.abs(testFractionalInput1) + test);
-					const testOutput2 = testFractionalInput2 / (testReverse * Math.abs(testFractionalInput2) + test);
-					const testOutput3 = testFractionalInput3 / (testReverse * Math.abs(testFractionalInput3) + test);
-					testNextOutput += testOutput1 * testNextOutputWeight1 + testOutput2 * testNextOutputWeight2 + testOutput3 * testNextOutputWeight3;
-					sample += testOutput1 * testPrevOutputWeight1 + testOutput2 * testPrevOutputWeight2 + testOutput3 * testPrevOutputWeight3;
-					sample *= testOversampleCompensation;
-					testPrevInput = testNextInput;
-					test += testDelta;
-					testDrive += testDriveDelta;`
+					// Nothing.
+                    `
             }
 
             if (usesEqFilter) {
@@ -11801,23 +11752,10 @@ export class Synth {
 
             }
 
-            if (usesTest) {
+            if (usesWavefold) {
                 effectsSource += `
-				
-				instrumentState.test = test;
-				instrumentState.testDrive = testDrive;
-				
-				if (!Number.isFinite(testFractionalInput1) || Math.abs(testFractionalInput1) < epsilon) testFractionalInput1 = 0.0;
-				if (!Number.isFinite(testFractionalInput2) || Math.abs(testFractionalInput2) < epsilon) testFractionalInput2 = 0.0;
-				if (!Number.isFinite(testFractionalInput3) || Math.abs(testFractionalInput3) < epsilon) testFractionalInput3 = 0.0;
-				if (!Number.isFinite(testPrevInput) || Math.abs(testPrevInput) < epsilon) testPrevInput = 0.0;
-				if (!Number.isFinite(testNextOutput) || Math.abs(testNextOutput) < epsilon) testNextOutput = 0.0;
-				
-				instrumentState.testFractionalInput1 = testFractionalInput1;
-				instrumentState.testFractionalInput2 = testFractionalInput2;
-				instrumentState.testFractionalInput3 = testFractionalInput3;
-				instrumentState.testPrevInput = testPrevInput;
-				instrumentState.testNextOutput = testNextOutput;`
+				// Nothing.
+                `
             }
 
             if (usesEqFilter) {
@@ -12232,17 +12170,22 @@ export class Synth {
     private static noiseSynth(synth: Synth, bufferIndex: number, runLength: number, tone: Tone, instrumentState: InstrumentState): void {
         const data: Float32Array = synth.tempMonoInstrumentSampleBuffer!;
         const wave: Float32Array = instrumentState.wave!;
-        let phaseDelta: number = +tone.phaseDeltas[0];
-        const phaseDeltaScale: number = +tone.phaseDeltaScales[0];
+        const unisonSign: number = tone.specialIntervalExpressionMult * instrumentState.unisonSign;
+        if (instrumentState.unisonVoices == 1 && !instrumentState.chord!.customInterval) tone.phases[1] = tone.phases[0];
+        let phaseDeltaA: number = +tone.phaseDeltas[0];
+        let phaseDeltaB: number = +tone.phaseDeltas[1];
+        const phaseDeltaScaleA: number = +tone.phaseDeltaScales[0];
+        const phaseDeltaScaleB: number = +tone.phaseDeltaScales[1];
         let expression: number = +tone.expression;
         const expressionDelta: number = +tone.expressionDelta;
-        let phase: number = (tone.phases[0] % 1) * Config.chipNoiseLength;
-        if (tone.phases[0] == 0.0) {
-            // Zero phase means the tone was reset, just give noise a random start phase instead.
-            phase = Math.random() * Config.chipNoiseLength;
-        }
+        let phaseA: number = (tone.phases[0] % 1) * Config.chipNoiseLength;
+        let phaseB: number = (tone.phases[1] % 1) * Config.chipNoiseLength;
+        // Zero phase means the tone was reset, just give noise a random start phase instead.
+        if (tone.phases[0] == 0) phaseA = Math.random() * Config.chipNoiseLength;
+        if (tone.phases[1] == 0) phaseB = Math.random() * Config.chipNoiseLength;
         const phaseMask: number = Config.chipNoiseLength - 1;
-        let noiseSample: number = +tone.noiseSample;
+        let noiseSampleA: number = +tone.noiseSampleA;
+        let noiseSampleB: number = +tone.noiseSampleB;
 
         const filters: DynamicBiquadFilter[] = tone.noteFilters;
         const filterCount: number = tone.noteFilterCount | 0;
@@ -12252,21 +12195,26 @@ export class Synth {
 
         // This is for a "legacy" style simplified 1st order lowpass filter with
         // a cutoff frequency that is relative to the tone's fundamental frequency.
-        const pitchRelativefilter: number = Math.min(1.0, phaseDelta * instrumentState.noisePitchFilterMult);
+        const pitchRelativefilterA: number = Math.min(1.0, phaseDeltaA * instrumentState.noisePitchFilterMult);
+        const pitchRelativefilterB: number = Math.min(1.0, phaseDeltaB * instrumentState.noisePitchFilterMult);
 
         const stopIndex: number = bufferIndex + runLength;
         for (let sampleIndex: number = bufferIndex; sampleIndex < stopIndex; sampleIndex++) {
-            const waveSample: number = wave[phase & phaseMask];
+            const waveSampleA: number = wave[phaseA & phaseMask];
+            const waveSampleB: number = wave[phaseB & phaseMask];
 
-            noiseSample += (waveSample - noiseSample) * pitchRelativefilter;
+            noiseSampleA += (waveSampleA - noiseSampleA) * pitchRelativefilterA;
+            noiseSampleB += (waveSampleB - noiseSampleB) * pitchRelativefilterB;
 
-            const inputSample: number = noiseSample;
+            const inputSample: number = noiseSampleA + noiseSampleB * unisonSign;
             const sample: number = applyFilters(inputSample, initialFilterInput1, initialFilterInput2, filterCount, filters);
             initialFilterInput2 = initialFilterInput1;
             initialFilterInput1 = inputSample;
 
-            phase += phaseDelta;
-            phaseDelta *= phaseDeltaScale;
+            phaseA += phaseDeltaA;
+            phaseB += phaseDeltaB;
+            phaseDeltaA *= phaseDeltaScaleA;
+            phaseDeltaB *= phaseDeltaScaleB;
 
             const output: number = sample * expression;
             expression += expressionDelta;
@@ -12274,10 +12222,13 @@ export class Synth {
             data[sampleIndex] += output;
         }
 
-        tone.phases[0] = phase / Config.chipNoiseLength;
-        tone.phaseDeltas[0] = phaseDelta;
+        tone.phases[0] = phaseA / Config.chipNoiseLength;
+        tone.phases[1] = phaseB / Config.chipNoiseLength;
+        tone.phaseDeltas[0] = phaseDeltaA;
+        tone.phaseDeltas[1] = phaseDeltaB;
         tone.expression = expression;
-        tone.noiseSample = noiseSample;
+        tone.noiseSampleA = noiseSampleA;
+        tone.noiseSampleB = noiseSampleB;
 
         synth.sanitizeFilters(filters);
         tone.initialNoteFilterInput1 = initialFilterInput1;

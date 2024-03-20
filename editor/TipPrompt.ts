@@ -213,7 +213,20 @@ export class TipPrompt implements Prompt {
 				message = div(
 					h2("Noise"),
 					p("Midbox comes with several basic noise sounds. These do not have any distinct musical pitch, and can be used like drums to create beats and emphasize your song's rhythm."),
-					p("In most other mods of Beepbox, noise is typically in drum channels. However, Midbox allows noise types in instrument channels as well."),
+					p("In most other mods of BeepBox, noise is typically in drum channels. However, Midbox allows noise types in instrument channels as well."),
+				);
+			} break;
+			case "randomOrSeed": {
+				message = div(
+					h2("Randomization Type"),
+					p("Some things in instruments are typically picked randomly. This checkbox toggles this behavior and puts their randomization into a 'seed', which is used to pick a certain set of randomized values, and can be used to get the same sound over and over again."),
+					p("This can be desirable if you want instruments to sound a certain way/feel like random aspects of instruments may unintentionally make them sound worse.")
+				);
+			} break;
+			case "seed": {
+				message = div(
+					h2("Seed Number"),
+					p("The instrument will now use seeds to pick sets of randomized values for sound. Each number will have a different set of randomized numbers, and will consistently have that set of numbers. Try it out and see what you get!")
 				);
 			} break;
 			case "supersawDynamism": {
@@ -457,10 +470,18 @@ export class TipPrompt implements Prompt {
 					p("Every other notch on this slider is aligned with the currently selected key of the song, and the in-between notches are aligned with the tritones of the key. High amounts of this settings will typically make your instrument sound more retro or corrupt, but don't always expect the same results!"),
 				);
 			} break;
-			case "test": {
+			case "wavefoldLower": {
 				message = div(
-					h2("Test Effect"),
-					p("This effect has been made for testing purposes. Mid should make a proper tip prompt for this in the future."),
+					h2("Wavefolding"),
+					p("The wavefold effect allows you to put two boundaries on the instrument's waveform, and when the waveform hits them, it will invert direction/bounce off. This can make various unique sounds."),
+					p("This input box sets the lower limit of the wavefold."),
+				);
+			} break;
+			case "wavefoldUpper": {
+				message = div(
+					h2("Wavefolding"),
+					p("The wavefold effect allows you to put two boundaries on the instrument's waveform, and when the waveform hits them, it will invert direction/bounce off. This can make various unique sounds."),
+					p("This input box sets the upper limit of the wavefold."),
 				);
 			} break;
 			case "envelopes": {

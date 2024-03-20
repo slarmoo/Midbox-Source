@@ -118,7 +118,7 @@ export const enum EffectType {
     transition,
     chord,
     percussion,
-    test,
+    wavefold,
     length,
 }
 
@@ -379,7 +379,6 @@ export class Config {
     public static readonly wavetableBaseExpression:          number = 0.03375;   // Gonna keep it the same as chipBaseExpression for now.
     public static readonly distortionBaseVolume:             number = 0.011;     // Distortion is not affected by pitchDamping, which otherwise approximately halves expression for notes around the middle of the range.
     public static readonly bitcrusherBaseVolume:             number = 0.010;     // Also not affected by pitchDamping, used when bit crushing is maxed out (aka "1-bit" output).
-    public static readonly testBaseVolume:                   number = 0.011;     // The "Test" effect is not affected by pitchDamping, which otherwise approximately halves expression for notes around the middle of the range.
 
     public static readonly rawChipWaves: DictionaryArray<ChipWave> = toNameMap([
         { name: "rounded",         expression: 0.94,  samples: centerWave            ([0.0,   0.2,   0.4,   0.5,  0.6, 0.7, 0.8, 0.85, 0.9, 0.95, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.95, 0.9, 0.85, 0.8, 0.7, 0.6, 0.5, 0.4, 0.2, 0.0, -0.2, -0.4, -0.5, -0.6, -0.7, -0.8, -0.85, -0.9, -0.95, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -0.95, -0.9, -0.85, -0.8, -0.7, -0.6, -0.5, -0.4, -0.2])},
@@ -509,8 +508,8 @@ export class Config {
         { name: "hecking gosh",    voices: 2, spread: 6.25,     offset: -6.0,    expression: 0.8,  sign: -0.7 },
     ]);
 
-    public static readonly effectNames: ReadonlyArray<string> =     ["reverb", "chorus", "panning", "distortion", "bitcrusher", "note filter", "echo", "pitch shift", "detune", "vibrato", "transition type", "chord type", "percussion", "test"];
-    public static readonly effectOrder: ReadonlyArray<EffectType> = [EffectType.panning, EffectType.transition, EffectType.chord, EffectType.pitchShift, EffectType.detune, EffectType.vibrato, EffectType.noteFilter, EffectType.distortion, EffectType.bitcrusher, EffectType.test, EffectType.chorus, EffectType.echo, EffectType.reverb, EffectType.percussion];
+    public static readonly effectNames: ReadonlyArray<string> =     ["reverb", "chorus", "panning", "distortion", "bitcrusher", "note filter", "echo", "pitch shift", "detune", "vibrato", "transition type", "chord type", "percussion", "wavefold"];
+    public static readonly effectOrder: ReadonlyArray<EffectType> = [EffectType.panning, EffectType.transition, EffectType.chord, EffectType.pitchShift, EffectType.detune, EffectType.vibrato, EffectType.noteFilter, EffectType.distortion, EffectType.bitcrusher, EffectType.wavefold, EffectType.chorus, EffectType.echo, EffectType.reverb, EffectType.percussion];
 
     public static readonly noteSizeMax:         number = 6;
     public static readonly volumeRange:         number = 50;
@@ -1008,14 +1007,19 @@ export class Config {
     public static readonly bitcrusherFreqRange:              number = 14;
     public static readonly bitcrusherOctaveStep:             number = 0.5;
     public static readonly bitcrusherQuantizationRange:      number = 8;
+    public static readonly wavefoldLowerMin:                 number = 1;
+    public static readonly wavefoldUpperMin:                 number = 1;
+    public static readonly wavefoldLowerMax:                 number = 128;
+    public static readonly wavefoldUpperMax:                 number = 128;
     public static readonly maxEnvelopeCount:                 number = 12;
     public static readonly defaultAutomationRange:           number = 13;
+    public static readonly maxAmountOfRandomSeeds:           number = 32;
     public static readonly instrumentAutomationTargets: DictionaryArray<AutomationTarget> = toNameMap([
         { name: "none",                   computeIndex: null,                                        displayName: "none",              interleave: false, isFilter: false, maxCount: 1,                       effect: null,                  compatibleInstruments: null },
         { name: "noteVolume",             computeIndex: EnvelopeComputeIndex.noteVolume,             displayName: "note volume",       interleave: false, isFilter: false, maxCount: 1,                       effect: null,                  compatibleInstruments: null },
         { name: "pulseWidth",             computeIndex: EnvelopeComputeIndex.pulseWidth,             displayName: "pulse width",       interleave: false, isFilter: false, maxCount: 1,                       effect: null,                  compatibleInstruments: [InstrumentType.pwm, InstrumentType.supersaw] },
         { name: "stringSustain",          computeIndex: EnvelopeComputeIndex.stringSustain,          displayName: "sustain",           interleave: false, isFilter: false, maxCount: 1,                       effect: null,                  compatibleInstruments: [InstrumentType.pickedString] },
-        { name: "unison",                 computeIndex: EnvelopeComputeIndex.unison,                 displayName: "unison",            interleave: false, isFilter: false, maxCount: 1,                       effect: null,                  compatibleInstruments: [InstrumentType.chip, InstrumentType.harmonics, InstrumentType.pickedString, InstrumentType.customChipWave, InstrumentType.spectrum, InstrumentType.pwm, InstrumentType.wavetable] },
+        { name: "unison",                 computeIndex: EnvelopeComputeIndex.unison,                 displayName: "unison",            interleave: false, isFilter: false, maxCount: 1,                       effect: null,                  compatibleInstruments: [InstrumentType.chip, InstrumentType.harmonics, InstrumentType.pickedString, InstrumentType.customChipWave, InstrumentType.spectrum, InstrumentType.pwm, InstrumentType.wavetable, InstrumentType.noise] },
         { name: "operatorFrequency",      computeIndex: EnvelopeComputeIndex.operatorFrequency0,     displayName: "fm# freq",          interleave: true,  isFilter: false, maxCount: Config.operatorCount+2,  effect: null,                  compatibleInstruments: [InstrumentType.fm, InstrumentType.advfm] },
         { name: "operatorAmplitude",      computeIndex: EnvelopeComputeIndex.operatorAmplitude0,     displayName: "fm# volume",        interleave: false, isFilter: false, maxCount: Config.operatorCount+2,  effect: null,                  compatibleInstruments: [InstrumentType.fm, InstrumentType.advfm] },
         { name: "feedbackAmplitude",      computeIndex: EnvelopeComputeIndex.feedbackAmplitude,      displayName: "fm feedback",       interleave: false, isFilter: false, maxCount: 1,                       effect: null,                  compatibleInstruments: [InstrumentType.fm, InstrumentType.advfm] },
@@ -1060,6 +1064,7 @@ export class Config {
         { name: "white noise", samples: generateWhiteNoise()      },
     ]);
 
+    // This one is not really needed.
     public static readonly pwmOperatorWaves: DictionaryArray<OperatorWave> = toNameMap([
         { name: "1%",     samples: generateSquareWave(0.01)   },
         { name: "2.5%",   samples: generateSquareWave(0.025)  },
@@ -1693,8 +1698,8 @@ export function effectsIncludeDistortion(effects: number): boolean {
 export function effectsIncludeBitcrusher(effects: number): boolean {
     return (effects & (1 << EffectType.bitcrusher)) != 0;
 }
-export function effectsIncludeTest(effects: number): boolean {
-    return (effects & (1 << EffectType.test)) != 0;
+export function effectsIncludeWavefold(effects: number): boolean {
+    return (effects & (1 << EffectType.wavefold)) != 0;
 }
 export function effectsIncludePanning(effects: number): boolean {
     return (effects & (1 << EffectType.panning)) != 0;

@@ -1,7 +1,7 @@
 // Copyright (c) 2012-2022 John Nesky and contributing authors, distributed under the MIT license, see accompanying the LICENSE.md file.
 
 //import {Layout} from "./Layout";
-import { InstrumentType, EffectType, Config, getPulseWidthRatio, effectsIncludeTransition, effectsIncludeChord, effectsIncludePitchShift, effectsIncludeDetune, effectsIncludeVibrato, effectsIncludeNoteFilter, effectsIncludeDistortion, effectsIncludeBitcrusher, effectsIncludeTest, effectsIncludePanning, effectsIncludeChorus, effectsIncludeEcho, effectsIncludeReverb, effectsIncludePercussion, DropdownID } from "../synth/SynthConfig";
+import { InstrumentType, EffectType, Config, getPulseWidthRatio, effectsIncludeTransition, effectsIncludeChord, effectsIncludePitchShift, effectsIncludeDetune, effectsIncludeVibrato, effectsIncludeNoteFilter, effectsIncludeDistortion, effectsIncludeBitcrusher, effectsIncludeWavefold, effectsIncludePanning, effectsIncludeChorus, effectsIncludeEcho, effectsIncludeReverb, effectsIncludePercussion, DropdownID } from "../synth/SynthConfig";
 import { BarScrollBar } from "./BarScrollBar";
 import { BeatsPerBarPrompt } from "./BeatsPerBarPrompt";
 import { Change, ChangeGroup } from "./Change";
@@ -48,7 +48,7 @@ import { ThemePrompt } from "./ThemePrompt";
 import { TipPrompt } from "./TipPrompt";
 import { LanguagePrompt } from "./LanguagePrompt";
 import { Localization as _ } from "./Localization";
-import { ChangeTempo, ChangeKeyOctave, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangeSupersawDynamism, ChangeSupersawSpread, ChangeSupersawShape, ChangeWavetableSpeed, ChangeWaveInterpolation, ChangeCyclePerNote, ChangeOneShotCycle, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeCustomAlgorithmOrFeedback, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, pickRandomPresetValue, ChangeRandomGeneratedInstrument, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, Change6OpFeedbackType, Change6OpAlgorithm, ChangeChipWave, ChangeNoiseWave, ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeUnisonVoices, ChangeUnisonSpread, ChangeUnisonOffset, ChangeUnisonExpression, ChangeUnisonSign, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeTest, ChangeAddEnvelope, ChangeEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeWavetableCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeArpeggioPattern, ChangeClicklessTransition, ChangeContinueThruPattern, ChangeAliasing, ChangePercussion, ChangeSDAffected, ChangeSOAffected, ChangeStrumSpeed, ChangeSlideSpeed, ChangeSongSubtitle, ChangeSetPatternInstruments, ChangeHoldingModRecording } from "./changes";
+import { ChangeTempo, ChangeKeyOctave, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangeSupersawDynamism, ChangeSupersawSpread, ChangeSupersawShape, ChangeWavetableSpeed, ChangeWaveInterpolation, ChangeCyclePerNote, ChangeOneShotCycle, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeCustomAlgorithmOrFeedback, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, pickRandomPresetValue, ChangeRandomGeneratedInstrument, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, Change6OpFeedbackType, Change6OpAlgorithm, ChangeChipWave, ChangeNoiseWave, ChangeNoiseSeedRandomization, ChangeNoiseSeed, ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeUnisonVoices, ChangeUnisonSpread, ChangeUnisonOffset, ChangeUnisonExpression, ChangeUnisonSign, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeLowerWavefold, ChangeUpperWavefold, ChangeAddEnvelope, ChangeEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeWavetableCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeArpeggioPattern, ChangeClicklessTransition, ChangeContinueThruPattern, ChangeAliasing, ChangePercussion, ChangeSDAffected, ChangeSOAffected, ChangeStrumSpeed, ChangeSlideSpeed, ChangeSongSubtitle, ChangeSetPatternInstruments, ChangeHoldingModRecording } from "./changes";
 import { oscilloscopeCanvas } from "../global/Oscilloscope"
 import { TrackEditor } from "./TrackEditor";
 
@@ -76,9 +76,6 @@ function buildHeaderedOptions(header: string, menu: HTMLSelectElement, items: Re
 function buildPresetOptions(isNoise: boolean, idSet: string): HTMLSelectElement {
     const menu: HTMLSelectElement = select({ id: idSet });
 
-
-    // Show the "spectrum" custom type in both pitched and noise channels.
-    //const customTypeGroup: HTMLElement = optgroup({label: EditorConfig.presetCategories[0].name});
     if (isNoise) {
         menu.appendChild(option({ value: InstrumentType.noise }, EditorConfig.valueToPreset(InstrumentType.noise)!.name));
         menu.appendChild(option({ value: InstrumentType.spectrum }, EditorConfig.valueToPreset(InstrumentType.spectrum)!.name));
@@ -102,7 +99,6 @@ function buildPresetOptions(isNoise: boolean, idSet: string): HTMLSelectElement 
     randomGroup.appendChild(option({ value: "randomGenerated" }, (_.randomGeneratedLabel)));
     menu.appendChild(randomGroup);
 
-
     for (let categoryIndex: number = 1; categoryIndex < EditorConfig.presetCategories.length; categoryIndex++) {
         const category: PresetCategory = EditorConfig.presetCategories[categoryIndex];
         const group: HTMLElement = optgroup({ label: category.name + " ▾" });
@@ -117,21 +113,18 @@ function buildPresetOptions(isNoise: boolean, idSet: string): HTMLSelectElement 
 
         // Need to re-sort some elements for readability. Can't just do this in the menu, because indices are saved in URLs and would get broken if the ordering actually changed.
         if (category.name == (_.stringPresetsLabel) && foundAny) {
-
             // Put violin 2 after violin 1
             let moveViolin2 = group.removeChild(group.children[11]);
             group.insertBefore(moveViolin2, group.children[1]);
         }
 
         if (category.name == (_.flutePresetsLabel) && foundAny) {
-
             // Put flute 2 after flute 1
             let moveFlute2 = group.removeChild(group.children[11]);
             group.insertBefore(moveFlute2, group.children[1]);
         }
 
         if (category.name == (_.keyboardPresetsLabel) && foundAny) {
-
             // Put grand piano 2 after grand piano 1
             let moveGrandPiano2 = group.removeChild(group.children[9]);
             group.insertBefore(moveGrandPiano2, group.children[1]);
@@ -147,7 +140,6 @@ function setSelectedValue(menu: HTMLSelectElement, value: number, isSelect2: boo
     const stringValue = value.toString();
     if (menu.value != stringValue) {
         menu.value = stringValue;
-
         // Change select2 value, if this select is a member of that class.
         if (isSelect2) {
             $(menu).val(value).trigger('change.select2');
@@ -183,7 +175,6 @@ class CustomChipCanvas {
 
         // Init waveform
         this.redrawCanvas();
-
     }
 
     public redrawCanvas(): void {
@@ -234,7 +225,6 @@ class CustomChipCanvas {
 
     private _onMouseMove = (event: MouseEvent): void => {
         if (this.mouseDown) {
-
             var x = (event.clientX || event.pageX) - this.canvas.getBoundingClientRect().left;
             var y = Math.floor((event.clientY || event.pageY) - this.canvas.getBoundingClientRect().top);
 
@@ -268,7 +258,6 @@ class CustomChipCanvas {
                     // Actually update current instrument's custom waveform
                     this.newArray[Math.floor(i / 2)] = (j - 26);
                 }
-
             }
             else {
 
@@ -284,7 +273,6 @@ class CustomChipCanvas {
 
                 // Actually update current instrument's custom waveform
                 this.newArray[Math.floor(x / 2)] = (y - 26);
-
             }
 
             this.continuousEdit = true;
@@ -293,13 +281,11 @@ class CustomChipCanvas {
 
             // Preview - update integral used for sound synthesis based on new array, not actual stored array. When mouse is released, real update will happen.
             let instrument: Instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
-
             let sum: number = 0.0;
             for (let i: number = 0; i < this.newArray.length; i++) {
                 sum += this.newArray[i];
             }
             const average: number = sum / this.newArray.length;
-
             // Perform the integral on the wave. The chipSynth will perform the derivative to get the original wave back but with antialiasing.
             let cumulative: number = 0;
             let wavePrev: number = 0;
@@ -308,30 +294,24 @@ class CustomChipCanvas {
                 wavePrev = this.newArray[i] - average;
                 instrument.customChipWaveIntegral[i] = cumulative;
             }
-
             instrument.customChipWaveIntegral[64] = 0.0;
         }
-
     }
 
     private _onMouseDown = (event: MouseEvent): void => {
         this.mouseDown = true;
-
         // Allow single-click edit
         this._onMouseMove(event);
     }
     private _onMouseUp = (): void => {
         this.mouseDown = false;
         this.continuousEdit = false;
-
         this._whenChange();
     }
 
     private _whenChange = (): void => {
         this._change = this._getChange(this.newArray);
-
         this._doc.record(this._change!);
-
         this._change = null;
     };
 
@@ -633,7 +613,6 @@ class CustomAlgorithmCanvas {
                                 this.lookUpArray[i] = [this.drawArray.length - (testPos[0] + 1), testPos[1]];
                                 break;
                             }
-                            //console.log(testPos[1])
                         }
                     } else {
                         this.drawArray[testPos[0] ][testPos[1]] = i + 1;
@@ -1097,10 +1076,16 @@ export class SongEditor {
         _.noise14Label,
         _.noise15Label,
         _.noise16Label
-
     ]);
     private readonly _chipWaveSelectRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("chipWave") }, span(_.waveLabel)), div({ class: "selectContainer" }, this._chipWaveSelect));
     private readonly _chipNoiseSelectRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("chipNoise") }, span(_.noiseLabel)), div({ class: "selectContainer" }, this._chipNoiseSelect));
+    private readonly _isNoiseSeedRandomizedBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
+    private readonly _isNoiseSeedRandomizedRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("randomOrSeed") }, span(_.useSeedLabel)), this._isNoiseSeedRandomizedBox);
+    private readonly _noiseSeedInputBox: HTMLInputElement = input({ style: "width: 150%; height: 1.5em; font-size: 80%; margin-left: 0.4em; vertical-align: middle;", id: "noiseSeedInputBox", type: "number", step: "1", min: "0", max: Config.maxAmountOfRandomSeeds, value: "0" });
+    private readonly _noiseSeedRow: HTMLDivElement = div({ class: "selectRow" }, div({},
+        span({ class: "tip", style: "height:1em; font-size: 14px;", onclick: () => this._openPrompt("seed") }, _.seedLabel),
+        div({ style: "margin-top: -1px;"}, this._noiseSeedInputBox),
+    ));
     private readonly _fadeInOutEditor: FadeInOutEditor = new FadeInOutEditor(this._doc);
     // Issue#36 - Add input boxes for the fade in/out editor that target post-fade-in, pre-fade-out, and post-fade-out.
     private readonly _fadeInOutRow: HTMLElement = div({ class: "selectRow" }, span({ style: "font-size: smaller;", class: "tip", onclick: () => this._openPrompt("fadeInOut") }, span(_.fadeLabel)), this._fadeInOutEditor.container);
@@ -1109,7 +1094,6 @@ export class SongEditor {
         _.transition2Label,
         _.transition3Label,
         _.transition4Label
-
     ]);
     private readonly _transitionDropdown: HTMLButtonElement = button({ style: "margin-left:0em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.Transition) }, "▼");
     private readonly _transitionRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("transition") }, span(_.transitionLabel)), this._transitionDropdown, div({ class: "selectContainer", style: "width: 52.5%;" }, this._transitionSelect));
@@ -1230,8 +1214,16 @@ export class SongEditor {
     private readonly _bitcrusherQuantizationRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", title: (_.bitCrushHover), onclick: () => this._openPrompt("bitcrusherQuantization") }, span(_.bitCrushLabel)), this._bitcrusherQuantizationSlider.container);
     private readonly _bitcrusherFreqSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.bitcrusherFreqRange - 1, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeBitcrusherFreq(this._doc, oldValue, newValue), false);
     private readonly _bitcrusherFreqRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", title: (_.freqCrushHover), onclick: () => this._openPrompt("bitcrusherFreq") }, span(_.freqCrushLabel)), this._bitcrusherFreqSlider.container);
-    private readonly _testSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: "15", value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeTest(this._doc, oldValue, newValue), false);
-    private readonly _testRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", title: (_.testHover), onclick: () => this._openPrompt("test") }, span(_.testLabel)), this._testSlider.container);
+    private readonly _wavefoldLowerInputBox: HTMLInputElement = input({ style: "width: 150%; height: 1.5em; font-size: 75%; margin-left: 0.4em; vertical-align: middle;", id: "wavefoldLowerInputBox", type: "number", step: "0.5", min: Config.wavefoldLowerMin, max: Config.wavefoldLowerMax, value: Config.wavefoldLowerMax });
+    private readonly _wavefoldLowerRow: HTMLDivElement = div({ class: "selectRow" }, div({},
+        span({ class: "tip", style: "height:1em; font-size: smaller; margin-top: 2px;", onclick: () => this._openPrompt("wavefoldLower") }, _.wavefoldLowerLabel),
+        div({ style: "margin-top: -1px;"}, this._wavefoldLowerInputBox),
+    ));
+    private readonly _wavefoldUpperInputBox: HTMLInputElement = input({ style: "width: 150%; height: 1.5em; font-size: 75%; margin-left: 0.4em; vertical-align: middle;", id: "wavefoldUpperInputBox", type: "number", step: "0.5", min: Config.wavefoldUpperMin, max: Config.wavefoldUpperMax, value: Config.wavefoldUpperMax });
+    private readonly _wavefoldUpperRow: HTMLDivElement = div({ class: "selectRow" }, div({},
+        span({ class: "tip", style: "height:1em; font-size: smaller; margin-top: 2px;", onclick: () => this._openPrompt("wavefoldUpper") }, _.wavefoldUpperLabel),
+        div({ style: "margin-top: -1px;"}, this._wavefoldUpperInputBox),
+    ));
     private readonly _stringSustainSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.stringSustainRange - 1, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeStringSustain(this._doc, oldValue, newValue), false);
     private readonly _stringSustainLabel: HTMLSpanElement = span({class: "tip", onclick: ()=>this._openPrompt("stringSustain")}, span(_.sustainLabel));
     private readonly _stringSustainRow: HTMLDivElement = div({class: "selectRow"}, this._stringSustainLabel, this._stringSustainSlider.container);
@@ -1264,7 +1256,6 @@ export class SongEditor {
         _.unison25Label
     ]);
     private readonly _unisonSelectRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("unison") }, span(_.unisonLabel)), this._unisonDropdown, div({ class: "selectContainer", style: "width: 61.5%;" }, this._unisonSelect));
-//  Custom unison shenanigans.
     private readonly _unisonVoicesInputBox: HTMLInputElement = input({ style: "width: 150%; height: 1.5em; font-size: 80%; margin-left: 0.4em; vertical-align: middle;", id: "unisonVoicesInputBox", type: "number", step: "1", min: Config.unisonVoicesMin, max: Config.unisonVoicesMax, value: 1 });
     private readonly _unisonVoicesRow: HTMLDivElement = div({ class: "selectRow" }, div({},
         span({ class: "tip", style: "height:1em; font-size: smaller;", onclick: () => this._openPrompt("unisonVoices") }, _.unisonVoicesLabel),
@@ -1509,6 +1500,8 @@ export class SongEditor {
         this._panDropdownGroup,
         this._chipWaveSelectRow,
         this._chipNoiseSelectRow,
+        this._isNoiseSeedRandomizedRow,
+        this._noiseSeedRow,
         this._wavetableWaveButtonsContainer,
         this._customWaveDraw,
         this._wavetableCustomWaveDraw,
@@ -1559,7 +1552,8 @@ export class SongEditor {
         this._aliasingRow,
         this._bitcrusherQuantizationRow,
         this._bitcrusherFreqRow,
-        this._testRow,
+        this._wavefoldLowerRow,
+        this._wavefoldUpperRow,
         this._chorusRow,
         this._echoSustainRow,
         this._echoDelayRow,
@@ -2136,16 +2130,20 @@ export class SongEditor {
         this._panSliderInputBox.addEventListener("input", () => { this._doc.record(new ChangePan(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].pan, Math.min(100.0, Math.max(0.0, Math.round(+this._panSliderInputBox.value))))) });
         this._pwmSliderInputBox.addEventListener("input", () => { this._doc.record(new ChangePulseWidth(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].pulseWidth, Math.min(Config.pulseWidthRange, Math.max(1.0, Math.round(+this._pwmSliderInputBox.value))))) });
         this._detuneSliderInputBox.addEventListener("input", () => { this._doc.record(new ChangeDetune(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].detune, Math.min(Config.detuneMax - Config.detuneCenter, Math.max(Config.detuneMin - Config.detuneCenter, Math.round(+this._detuneSliderInputBox.value))))) });
-        this._unisonVoicesInputBox.addEventListener("input", () => { this._doc.record(new ChangeUnisonVoices(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].unisonVoices, Math.min(2.0, Math.max(1.0, Math.round(+this._unisonVoicesInputBox.value))))) });
-        this._unisonSpreadInputBox.addEventListener("input", () => { this._doc.record(new ChangeUnisonSpread(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].unisonSpread, Math.min(96.0, Math.max(-96.0, +this._unisonSpreadInputBox.value)))) });
-        this._unisonOffsetInputBox.addEventListener("input", () => { this._doc.record(new ChangeUnisonOffset(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].unisonOffset, Math.min(96.0, Math.max(-96.0, +this._unisonOffsetInputBox.value)))) });
-        this._unisonExpressionInputBox.addEventListener("input", () => { this._doc.record(new ChangeUnisonExpression(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].unisonExpression, Math.min(2.0, Math.max(-2.0, +this._unisonExpressionInputBox.value)))) });
-        this._unisonSignInputBox.addEventListener("input", () => { this._doc.record(new ChangeUnisonSign(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].unisonSign, Math.min(2.0, Math.max(-2.0, +this._unisonSignInputBox.value)))) });
+        this._noiseSeedInputBox.addEventListener("input", () => { this._doc.record(new ChangeNoiseSeed(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].noiseSeed, Math.min(0, Math.max(Config.maxAmountOfRandomSeeds, Math.round(+this._noiseSeedInputBox.value))))) });
+        this._unisonVoicesInputBox.addEventListener("input", () => { this._doc.record(new ChangeUnisonVoices(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].unisonVoices, Math.min(Config.unisonVoicesMax, Math.max(Config.unisonVoicesMin, Math.round(+this._unisonVoicesInputBox.value))))) });
+        this._unisonSpreadInputBox.addEventListener("input", () => { this._doc.record(new ChangeUnisonSpread(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].unisonSpread, Math.min(Config.unisonSpreadMax, Math.max(Config.unisonSpreadMin, +this._unisonSpreadInputBox.value)))) });
+        this._unisonOffsetInputBox.addEventListener("input", () => { this._doc.record(new ChangeUnisonOffset(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].unisonOffset, Math.min(Config.unisonOffsetMax, Math.max(Config.unisonOffsetMin, +this._unisonOffsetInputBox.value)))) });
+        this._unisonExpressionInputBox.addEventListener("input", () => { this._doc.record(new ChangeUnisonExpression(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].unisonExpression, Math.min(Config.unisonExpressionMax, Math.max(Config.unisonExpressionMin, +this._unisonExpressionInputBox.value)))) });
+        this._unisonSignInputBox.addEventListener("input", () => { this._doc.record(new ChangeUnisonSign(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].unisonSign, Math.min(Config.unisonSignMax, Math.max(Config.unisonSignMin, +this._unisonSignInputBox.value)))) });
+        this._wavefoldLowerInputBox.addEventListener("input", () => { this._doc.record(new ChangeLowerWavefold(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].wavefoldLower, Math.min(Config.wavefoldLowerMax, Math.max(Config.wavefoldLowerMin, +this._wavefoldLowerInputBox.value)))) });
+        this._wavefoldUpperInputBox.addEventListener("input", () => { this._doc.record(new ChangeUpperWavefold(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].wavefoldUpper, Math.min(Config.wavefoldUpperMax, Math.max(Config.wavefoldUpperMin, +this._wavefoldUpperInputBox.value)))) });
 
         this._customWaveDraw.addEventListener("input", () => { this._doc.record(new ChangeCustomWave(this._doc, this._customWaveDrawCanvas.newArray)) });
         this._interpolateWavesBox.addEventListener("input", () => { this._doc.record(new ChangeWaveInterpolation(this._doc, this._interpolateWavesBox.checked)) });
         this._resetCyclePerNoteBox.addEventListener("input", () => { this._doc.record(new ChangeCyclePerNote(this._doc, this._resetCyclePerNoteBox.checked)) });
         this._oneShotCycleBox.addEventListener("input", () => { this._doc.record(new ChangeOneShotCycle(this._doc, this._oneShotCycleBox.checked)) });
+        this._isNoiseSeedRandomizedBox.addEventListener("input", () => { this._doc.record(new ChangeNoiseSeedRandomization(this._doc, this._isNoiseSeedRandomizedBox.checked)) });
         this._twoNoteArpBox.addEventListener("input", () => { this._doc.record(new ChangeFastTwoNoteArp(this._doc, this._twoNoteArpBox.checked)) });
         this._clicklessTransitionBox.addEventListener("input", () => { this._doc.record(new ChangeClicklessTransition(this._doc, this._clicklessTransitionBox.checked)) });
         this._continueThruPatternBox.addEventListener("input", () => { this._doc.record(new ChangeContinueThruPattern(this._doc, this._continueThruPatternBox.checked)) });
@@ -2271,28 +2269,23 @@ export class SongEditor {
 
         if (!this._doc.synth.playing) {
             this._hasActiveModSliders = false;
-
             for (let setting: number = 0; setting < Config.modulators.length; setting++) {
                 if (this._showModSliders[setting] == true) {
                     this._showModSliders[setting] = false;
                     this._newShowModSliders[setting] = false;
                     let slider: Slider | null = this.getSliderForModSetting(setting);
-
                     if (slider != null) {
                         slider.container.classList.remove("modSlider");
-
                     }
                 }
             }
         }
         else {
-
             let instrument: number = this._doc.getCurrentInstrument();
             const anyModActive: boolean = this._doc.synth.isAnyModActive(this._doc.channel, instrument);
 
             // Check and update mod values on sliders
             if (anyModActive) {
-
                 let instrument: number = this._doc.getCurrentInstrument();
 
                 function updateModSlider(editor: SongEditor, slider: Slider, setting: number, channel: number, instrument: number): boolean {
@@ -2311,14 +2304,12 @@ export class SongEditor {
                 for (let setting: number = 0; setting < Config.modulators.length; setting++) {
                     // Set to last value
                     this._newShowModSliders[setting] = this._showModSliders[setting];
-
                     // Check for newer value
                     let slider: Slider | null = this.getSliderForModSetting(setting);
                     if (slider != null) {
                         this._newShowModSliders[setting] = updateModSlider(this, slider, setting, this._doc.channel, instrument);
                     }
                 }
-
             }
             else if (this._hasActiveModSliders) {
                 // Zero out show-mod-slider settings (since none are active) to kill active mod slider flag
@@ -2329,36 +2320,27 @@ export class SongEditor {
 
             // Class or unclass mod sliders based on present status
             if (anyModActive || this._hasActiveModSliders) {
-
                 let anySliderActive: boolean = false;
 
                 for (let setting: number = 0; setting < Config.modulators.length; setting++) {
                     if (this._newShowModSliders[setting] != this._showModSliders[setting]) {
                         this._showModSliders[setting] = this._newShowModSliders[setting];
                         let slider: Slider | null = this.getSliderForModSetting(setting);
-
                         if (slider != null) {
-
                             if (this._showModSliders[setting] == true) {
                                 slider.container.classList.add("modSlider");
                             }
                             else {
                                 slider.container.classList.remove("modSlider");
                             }
-
                         }
                     }
-
                     if (this._newShowModSliders[setting] == true)
                         anySliderActive = true;
                 }
-
                 this._hasActiveModSliders = anySliderActive;
-
             }
-
         }
-
     }
 
     public getSliderForModSetting(setting: number): Slider | null {
@@ -2448,9 +2430,9 @@ export class SongEditor {
             case Config.modulators.dictionary["fm pwm 4"].index:
                 return this._operatorWaveformPulsewidthSliders[3];
             case Config.modulators.dictionary["fm pwm 5"].index:
-                    return this._operatorWaveformPulsewidthSliders[4];
+                return this._operatorWaveformPulsewidthSliders[4];
             case Config.modulators.dictionary["fm pwm 6"].index:
-                    return this._operatorWaveformPulsewidthSliders[5];
+                return this._operatorWaveformPulsewidthSliders[5];
             case Config.modulators.dictionary["slide speed"].index:
                 return this._slideSpeedSlider;
             case Config.modulators.dictionary["wavetable speed"].index:
@@ -2460,7 +2442,6 @@ export class SongEditor {
             default:
                 return null;
         }
-
     }
 
     private _openPrompt(promptName: string): void {
@@ -2701,7 +2682,7 @@ export class SongEditor {
             (_.transitionEffectLabel),
             (_.chordEffectLabel),
             (_.percussionEffectLabel),
-            (_.testEffectLabel)
+            (_.wavefoldEffectLabel)
         ];
         for (let i: number = 0; i < Config.effectOrder.length; i++) {
             let effectFlag: number = Config.effectOrder[i];
@@ -2789,9 +2770,17 @@ export class SongEditor {
             if (instrument.type == InstrumentType.noise) {
                 this._chipWaveSelectRow.style.display = "none";
                 this._chipNoiseSelectRow.style.display = "";
+                this._isNoiseSeedRandomizedRow.style.display = "";
+                if (instrument.noiseSeedRandomization) {
+                    this._noiseSeedRow.style.display = "";
+                } else {
+                    this._noiseSeedRow.style.display = "none";
+                }
                 setSelectedValue(this._chipNoiseSelect, instrument.chipNoise, true);
             } else {
                 this._chipNoiseSelectRow.style.display = "none";
+                this._isNoiseSeedRandomizedRow.style.display = "none";
+                this._noiseSeedRow.style.display = "none";
             }
             if (instrument.type == InstrumentType.spectrum) {
                 this._chipWaveSelectRow.style.display = "none";
@@ -2835,6 +2824,7 @@ export class SongEditor {
                 this._chipWaveSelectRow.style.display = "";
                 setSelectedValue(this._chipWaveSelect, instrument.chipWave);
             }
+            // Place else statement here?
 
             if (instrument.type == InstrumentType.pwm) {
                 this._chipWaveSelectRow.style.display = "none";
@@ -3076,11 +3066,12 @@ export class SongEditor {
                 this._bitcrusherFreqRow.style.display = "none";
             }
 
-            if (effectsIncludeTest(instrument.effects)) {
-                this._testRow.style.display = "";
-                this._testSlider.updateValue(instrument.test);
+            if (effectsIncludeWavefold(instrument.effects)) {
+                this._wavefoldLowerRow.style.display = "";
+                this._wavefoldUpperRow.style.display = "";
             } else {
-                this._testRow.style.display = "none";
+                this._wavefoldLowerRow.style.display = "none";
+                this._wavefoldUpperRow.style.display = "none";
             }
 
             if (effectsIncludePanning(instrument.effects)) {
@@ -3128,7 +3119,7 @@ export class SongEditor {
                 this._songOctaveEffectedRow.style.display = "none";
             }
 
-            if (instrument.type == InstrumentType.chip || instrument.type == InstrumentType.customChipWave || instrument.type == InstrumentType.harmonics || instrument.type == InstrumentType.pickedString || instrument.type == InstrumentType.spectrum || instrument.type == InstrumentType.pwm || instrument.type == InstrumentType.noise || instrument.type == InstrumentType.wavetable) {
+            if (instrument.type == InstrumentType.chip || instrument.type == InstrumentType.customChipWave || instrument.type == InstrumentType.harmonics || instrument.type == InstrumentType.pickedString || instrument.type == InstrumentType.spectrum || instrument.type == InstrumentType.pwm || instrument.type == InstrumentType.wavetable || instrument.type == InstrumentType.noise) {
                 this._unisonSelectRow.style.display = "";
                 setSelectedValue(this._unisonSelect, instrument.unison);
                 this._unisonVoicesInputBox.value = instrument.unisonVoices + "";
@@ -3254,6 +3245,7 @@ export class SongEditor {
 
             this._chipNoiseSelectRow.style.display = "none";
             this._chipWaveSelectRow.style.display = "none";
+            this._isNoiseSeedRandomizedRow.style.display = "none";
             this._spectrumRow.style.display = "none";
             this._harmonicsRow.style.display = "none";
             //this._harmonicsCopyPasteRow.style.display = "none";
@@ -3818,6 +3810,7 @@ export class SongEditor {
         this._interpolateWavesBox.checked = instrument.interpolateWaves ? true : false;
         this._resetCyclePerNoteBox.checked = instrument.cyclePerNote ? true : false;
         this._oneShotCycleBox.checked = instrument.oneShotCycle ? true : false;
+        this._isNoiseSeedRandomizedBox.checked = instrument.noiseSeedRandomization ? true : false;
         this._twoNoteArpBox.checked = instrument.fastTwoNoteArp ? true : false;
         this._clicklessTransitionBox.checked = instrument.clicklessTransition ? true : false;
         this._continueThruPatternBox.checked = instrument.continueThruPattern ? true : false;
@@ -4190,10 +4183,11 @@ export class SongEditor {
             return;
         }
 
-        // Defer to actively editing volume/pan rows
+        // Defer to actively editing other input boxes.
         if   ( document.activeElement == this._panSliderInputBox 
             || document.activeElement == this._pwmSliderInputBox 
             || document.activeElement == this._detuneSliderInputBox 
+            || document.activeElement == this._noiseSeedInputBox 
             || document.activeElement == this._instrumentVolumeSliderInputBox 
             || document.activeElement == this._octaveStepper 
             || document.activeElement == this._unisonVoicesInputBox
@@ -4201,6 +4195,8 @@ export class SongEditor {
             || document.activeElement == this._unisonOffsetInputBox
             || document.activeElement == this._unisonExpressionInputBox
             || document.activeElement == this._unisonSignInputBox
+            || document.activeElement == this._wavefoldLowerInputBox
+            || document.activeElement == this._wavefoldUpperInputBox
             ){
             // Enter/esc returns focus to form
             if (event.keyCode == 13 || event.keyCode == 27) {

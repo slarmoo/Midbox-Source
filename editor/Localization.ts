@@ -53,7 +53,8 @@ export class Localization {
     public static aliasingLabel: string = "Aliasing:";
     public static bitCrushLabel: string = "Bit Crush:";
     public static freqCrushLabel: string = "Freq Crush:";
-    public static testLabel: string = "Test:";
+    public static wavefoldLowerLabel: string = "Lower Threshold:";
+    public static wavefoldUpperLabel: string = "Upper Threshold:";
     public static fadeLabel: string = "Fade:";
     public static unisonLabel: string = "Unison:";
     public static unisonVoicesLabel: string = "‣ Voices: ";
@@ -118,7 +119,6 @@ export class Localization {
     public static preferenceSettingsLabel: string = "Preferences";
     public static bitCrushHover: string = "Bitcrusher Quantization";
     public static freqCrushHover: string = "Frequency Quantization";
-    public static testHover: string = "This slider is a test.";
     public static scale1Label: string = "Free / Chromatic";
     public static scale2Label: string = "Major";
     public static scale3Label: string = "Minor";
@@ -141,16 +141,10 @@ export class Localization {
     public static scale20Label: string = "Hexatonic";
     public static scale21Label: string = "Custom Scale";
     public static customizeScaleLabel: string = "Configure Custom Scale";
-    // public static rhythmBy2Label: string = "÷2 (Quavers)";
     public static rhythmBy3Label: string = "÷3 (Triplets)";
     public static rhythmBy4Label: string = "÷4 (Semiquavers)";
-    // public static rhythmBy5Label: string = "÷5 (Quintuplets)";
     public static rhythmBy6Label: string = "÷6 (Sextuplets)";
-    // public static rhythmBy7Label: string = "÷7 (Septuplets)";
     public static rhythmBy8Label: string = "÷8 (Demisemiquavers)";
-    // public static rhythmBy9Label: string = "÷9 (Nontuplets)";
-    // public static rhythmBy12Label: string = "÷12 (Duodectuplets)";
-    // public static rhythmBy16Label: string = "÷16 (Hemidemisemiquavers)";
     public static rhythmBy24Label: string = "÷24 (Quattuorvigintuplets)";
     public static percussionLabel: string = "Key-Affected:";
     public static editLabel: string = "Edit";
@@ -165,7 +159,7 @@ export class Localization {
     public static noteFiltEffectLabel: string = "note filter";
     public static distortionEffectLabel: string = "distortion";
     public static bitCrushEffectLabel: string = "bitcrusher";
-    public static testEffectLabel: string = "TEST";
+    public static wavefoldEffectLabel: string = "wavefold";
     public static chorusEffectLabel: string = "chorus";
     public static echoEffectLabel: string = "echo";
     public static reverbEffectLabel: string = "reverb";
@@ -227,6 +221,8 @@ export class Localization {
     public static random2Label: string = "Randomize";
     public static randomPresetLabel: string = "Random Preset";
     public static randomGeneratedLabel: string = "Random Generated";
+    public static useSeedLabel: string = "Use Seed Generation:";
+    public static seedLabel: string = "Seed: ";
     public static newBlankSongLabel: string = "+ New Blank Song (⇧`)";
     public static importSongLabel: string = "↑ Import Song... (";
     public static exportSongLabel: string = "↓ Export Song...(";
@@ -1133,6 +1129,8 @@ if (language == "spanish") {
     Localization.random2Label = "Aleatorizar";
     Localization.randomPresetLabel = "Prefijar Aleatorio";
     Localization.randomGeneratedLabel = "Generado Al Azar";
+    Localization.useSeedLabel = "Utilice Generación Semilla:";
+    Localization.seedLabel = "Semilla: ";
     Localization.newBlankSongLabel = "+ Nueva Canción (⇧`)";
     Localization.importSongLabel = "↑ Importar Canción... (";
     Localization.exportSongLabel = "↓ Exportar Canción... (";

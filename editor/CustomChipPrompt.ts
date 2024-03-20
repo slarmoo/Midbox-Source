@@ -257,6 +257,8 @@ export class CustomChipPromptCanvas {
 			}
 		} else if (this.drawMode == DrawMode.Selection) {
 			this._selectionIsActive = true;
+			this._selectionStart = this._mouseX;
+			this._selectionEnd = this._mouseX;
 			this._renderSelection();
 		}
 
@@ -297,6 +299,8 @@ export class CustomChipPromptCanvas {
 			}
 		} else if (this.drawMode == DrawMode.Selection) {
 			this._selectionIsActive = true;
+			this._selectionStart = this._mouseX;
+			this._selectionEnd = this._mouseX;
 			this._renderSelection();
 		}
 
@@ -327,9 +331,8 @@ export class CustomChipPromptCanvas {
 					this._curveY0 = this._mouseY;
 				} break;
 			}
-		} else if (this.drawMode == DrawMode.Selection) {
-			this._selectionStart = this._mouseX;
-			this._selectionEnd = this._mouseX + 3;
+		} else if (this.drawMode == DrawMode.Selection && this._mouseDown) {
+			this._selectionEnd = this._mouseX;
 			this._renderSelection();
 		}
 		this._whenCursorMoved();
@@ -361,9 +364,8 @@ export class CustomChipPromptCanvas {
 					this._curveY0 = this._mouseY;
 				} break;
 			}
-		} else if (this.drawMode == DrawMode.Selection) {
-			this._selectionStart = this._mouseX;
-			this._selectionEnd = this._mouseX + 3;
+		} else if (this.drawMode == DrawMode.Selection && this._mouseDown) {
+			this._selectionEnd = this._mouseX;
 			this._renderSelection();
 		}
 		this._whenCursorMoved();
@@ -561,6 +563,9 @@ export class CustomChipPrompt implements Prompt {
 
 	public readonly _playButton: HTMLButtonElement = button({ style: "width: 55%;", type: "button" });
 
+	public readonly _undoButton: HTMLButtonElement = button({ style: "width: 15%; position: absolute; margin-left: 0px; left: 127px; top: 53px;" }, _.undoLabel);
+	public readonly _redoButton: HTMLButtonElement = button({ style: "width: 15%; position: absolute; margin-right: 0px; right: 127px; top: 53px;" }, _.redoLabel);
+
 	public readonly _drawType_Standard: HTMLButtonElement = button({ style: "border-radius: 0px; width: 65px; height 50px;", title: "Cursor"}, [
 		// Cursor icon:
 		SVG.svg({ class: "no-underline", style: "flex-shrink: 0; position: absolute; top: 4px; left: 24px; pointer-events: none;", width: "16", height: "16", viewBox: "0 0 16 16" }, [
@@ -638,6 +643,8 @@ export class CustomChipPrompt implements Prompt {
 
 	public readonly container: HTMLDivElement = div({ class: "prompt noSelection", style: "width: 600px;" },
 		h2("Edit Custom Chip Instrument"),
+		this._undoButton,
+		this._redoButton,
 		div({ style: "display: flex; width: 55%; align-self: center; flex-direction: row; align-items: center; justify-content: center;" },
 			this._playButton,
 		),
@@ -667,6 +674,8 @@ export class CustomChipPrompt implements Prompt {
 		this.pasteButton.addEventListener("click", this._pasteSettings);
 		this.loadWaveformPresetSelect.addEventListener("change", this._customWavePresetHandler);
 		this.randomizeButton.addEventListener("click", this._randomizeCustomChip);
+		this._undoButton.addEventListener("click", this.customChipCanvas.undo);
+		this._redoButton.addEventListener("click", this.customChipCanvas.redo);
 		this._playButton.addEventListener("click", this._togglePlay);
 		this.updatePlayButton();
 		this.customChipCanvas._renderSelection();
@@ -736,8 +745,8 @@ export class CustomChipPrompt implements Prompt {
 		this._drawType_Line.classList.remove("selected-instrument");
 		this._drawType_Curve.classList.add("selected-instrument");
 		this._drawType_Selection.classList.remove("selected-instrument");
+		if (this.customChipCanvas.drawMode != DrawMode.Curve) this.customChipCanvas.curveModeStep = CurveModeStep.First;
 		this.customChipCanvas.drawMode = DrawMode.Curve;
-		this.customChipCanvas.curveModeStep = CurveModeStep.First;
 		this.curveModeStepText.style.display = "";
 		this._removeSelectionButton.style.display = "none";
 		this._confirmSelectionButton.style.display = "none";
@@ -775,8 +784,9 @@ export class CustomChipPrompt implements Prompt {
 
 	private _pasteSettings = (): void => {
 		const storedChipWave: any = JSON.parse(String(window.localStorage.getItem("chipCopy")));
+		if (storedChipWave == null) return;
 		for (let i: number = 0; i < 64; i++) {
-    	this.customChipCanvas.chipData[i] = storedChipWave[i];
+    		this.customChipCanvas.chipData[i] = storedChipWave[i];
 		}
 		this.customChipCanvas._storeChange();
 		new ChangeCustomWave(this._doc, this.customChipCanvas.chipData);
@@ -905,8 +915,24 @@ export class CustomChipPrompt implements Prompt {
 			this._copySettings();
 			event.stopPropagation();
 	  	}
-		  else if (event.keyCode == 86 ) { // v
+		else if (event.keyCode == 86 ) { // v
 			this._pasteSettings();
+			event.stopPropagation();
+	  	}
+		else if (event.keyCode == 49 ) { // 1
+			this._selectStandardDrawType();
+			event.stopPropagation();
+	  	}
+		else if (event.keyCode == 50 ) { // 2
+			this._selectLineDrawType();
+			event.stopPropagation();
+	  	}
+		else if (event.keyCode == 51 ) { // 3
+			this._selectCurveDrawType();
+			event.stopPropagation();
+	  	}
+		else if (event.keyCode == 52 ) { // 4
+			this._selectSelectionDrawType();
 			event.stopPropagation();
 	  	}
 	}

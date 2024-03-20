@@ -1198,7 +1198,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
             instrument.fadeOut = selectCurvedDistribution(0, Config.fadeOutTicks.length - 1, Config.fadeOutNeutral, 2);
             }
 
-            if (doc.prefs.unisonOnRandomization && (type == InstrumentType.chip || type == InstrumentType.harmonics || type == InstrumentType.pickedString || type == InstrumentType.customChipWave || type == InstrumentType.pwm || type == InstrumentType.spectrum || type == InstrumentType.wavetable)) {
+            if (doc.prefs.unisonOnRandomization && (type == InstrumentType.chip || type == InstrumentType.harmonics || type == InstrumentType.pickedString || type == InstrumentType.customChipWave || type == InstrumentType.pwm || type == InstrumentType.spectrum || type == InstrumentType.wavetable || type == InstrumentType.noise)) {
                 instrument.unison = Config.unisons.dictionary[selectWeightedRandom([
                     { item: "none", weight: 20 },
                     { item: "shimmer", weight: 2 },
@@ -3532,13 +3532,27 @@ export class ChangeBitcrusherQuantization extends ChangeInstrumentSlider {
     }
 }
 
-export class ChangeTest extends ChangeInstrumentSlider {
+export class ChangeLowerWavefold extends Change {
     constructor(doc: SongDocument, oldValue: number, newValue: number) {
-        super(doc);
-        this._instrument.test = newValue;
-        doc.notifier.changed();
-        //doc.synth.unsetMod(Config.modulators.dictionary["test"].index, doc.channel, doc.getCurrentInstrument());
-        if (oldValue != newValue) this._didSomething();
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        if (oldValue != newValue) {
+            instrument.wavefoldLower = newValue;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
+export class ChangeUpperWavefold extends Change {
+    constructor(doc: SongDocument, oldValue: number, newValue: number) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        if (oldValue != newValue) {
+            instrument.wavefoldUpper = newValue;
+            doc.notifier.changed();
+            this._didSomething();
+        }
     }
 }
 
@@ -5962,6 +5976,32 @@ export class ChangeNoiseWave extends Change {
         if (instrument.chipNoise != newValue) {
             instrument.chipNoise = newValue;
             instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
+export class ChangeNoiseSeedRandomization extends Change {
+    constructor(doc: SongDocument, newValue: boolean) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        const oldValue = instrument.noiseSeedRandomization;
+
+        doc.notifier.changed();
+        if (oldValue != newValue) {
+            instrument.noiseSeedRandomization = newValue;
+            this._didSomething();
+        }
+    }
+}
+
+export class ChangeNoiseSeed extends Change {
+    constructor(doc: SongDocument, oldValue: number, newValue: number) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        if (oldValue != newValue) {
+            instrument.noiseSeed = newValue;
             doc.notifier.changed();
             this._didSomething();
         }
