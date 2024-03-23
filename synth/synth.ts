@@ -2071,7 +2071,7 @@ export class Instrument {
     }
 
 
-    public fromJsonObject(instrumentObject: any, isNoiseChannel: boolean, isModChannel: boolean, useSlowerRhythm: boolean, useFastTwoNoteArp: boolean, legacyGlobalReverb: number = 0): void {
+    public fromJsonObject(instrumentObject: any, isNoiseChannel: boolean, isModChannel: boolean, useSlowerRhythm: boolean, useFastTwoNoteArp: boolean, legacyGlobalReverb: number = 0, jsonFormat: string = Config.jsonFormat): void {
         if (instrumentObject == undefined) instrumentObject = {};
 
         let type: InstrumentType = Config.instrumentTypeNames.indexOf(instrumentObject["type"]);
@@ -3022,13 +3022,15 @@ export class Channel {
 }
 
 export class Song {
-    private static readonly _format: string = "JummBox";
+    private static readonly _format: string = Config.jsonFormat;
     private static readonly _oldestBeepboxVersion: number = 2;
     private static readonly _latestBeepboxVersion: number = 9;
     private static readonly _oldestJummBoxVersion: number = 1;
     private static readonly _latestJummBoxVersion: number = 6;
-    // One-character variant detection at the start of URL to distinguish variants such as JummBox.
-    private static readonly _variant = 0x6A; //"j" ~ jummbox
+    private static readonly _oldestMidboxVersion: number = 0;
+    private static readonly _latestMidboxVersion: number = 0;
+    // One-character variant detection at the start of URL to distinguish variants such as Midbox.
+    private static readonly _variant = 0x6d; // m (0x6d) is for Midbox. Note to self: If Modbox takes m, move to "mid".
 
     public title: string;
     public subtitle: string;
@@ -3242,7 +3244,7 @@ export class Song {
         let buffer: number[] = [];
 
         buffer.push(Song._variant);
-        buffer.push(base64IntToCharCode[Song._latestJummBoxVersion]);
+        buffer.push(base64IntToCharCode[Song._latestMidboxVersion]);
 
         // Length of the song name string
         buffer.push(SongTagCode.songTitle);
@@ -3882,7 +3884,7 @@ export class Song {
         return Config.envelopes[clamp(0, Config.envelopes.length, legacyIndex)];
     }
 
-    public fromBase64String(compressed: string): void {
+    public fromBase64String(compressed: string, jsonFormat: string = "automatic"): void {
         if (compressed == null || compressed == "") {
             this.initToDefault(true);
             return;
@@ -3894,27 +3896,36 @@ export class Song {
         if (compressed.charCodeAt(charIndex) == CharCode.HASH) charIndex++;
         // if it starts with curly brace, treat it as JSON.
         if (compressed.charCodeAt(charIndex) == CharCode.LEFT_CURLY_BRACE) {
-            this.fromJsonObject(JSON.parse(charIndex == 0 ? compressed : compressed.substring(charIndex)));
+            this.fromJsonObject(JSON.parse(charIndex == 0 ? compressed : compressed.substring(charIndex)), jsonFormat);
             return;
         }
 
         const variantTest: number = compressed.charCodeAt(charIndex);
         let fromBeepBox: boolean;
         let fromJummBox: boolean;
+        let fromMidbox:  boolean;
 
-        // Detect variant here. If version doesn't match known variant, assume it is a vanilla string which does not report variant.
-        if (variantTest == 0x6A) { //"j"
+        // Detect variant here.
+        if (variantTest == 0x6d) { // m
+            fromBeepBox = false;
+            fromJummBox = false;
+            fromMidbox = true;
+            charIndex++;
+        } else if (variantTest == 0x6A) { // j
             fromBeepBox = false;
             fromJummBox = true;
+            fromMidbox = false;
             charIndex++;
-        } else {
+        } else { // vanilla
             fromBeepBox = true;
             fromJummBox = false;
+            fromMidbox = false;
         }
 
         const version: number = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
         if (fromBeepBox && (version == -1 || version > Song._latestBeepboxVersion || version < Song._oldestBeepboxVersion)) return;
         if (fromJummBox && (version == -1 || version > Song._latestJummBoxVersion || version < Song._oldestJummBoxVersion)) return;
+        if (fromMidbox && (version == -1 || version > Song._latestMidboxVersion || version < Song._oldestMidboxVersion)) return;
         const beforeTwo: boolean = version < 2;
         const beforeThree: boolean = version < 3;
         const beforeFour: boolean = version < 4;
@@ -4133,7 +4144,7 @@ export class Song {
             case SongTagCode.rhythm: {
                 this.rhythm = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
                 // Port all arpeggio speeds over to match what they were, before arpeggio speed was decoupled from rhythm.
-                if (fromJummBox && beforeThree || fromBeepBox) {
+                if (fromJummBox && beforeThree || fromBeepBox || fromMidbox) {
                     // These are all the rhythms that had 4 ticks/arpeggio instead of 3.
                     if (this.rhythm == Config.rhythms.dictionary["÷3 (triplets)"].index || this.rhythm == Config.rhythms.dictionary["÷6"].index) {
                         useSlowerArpSpeed = true;
@@ -4179,7 +4190,7 @@ export class Song {
                     }
                 }
                 // Similar story here, JB before v5 had custom chip and mod before supersaw was added. Index +1.
-                else if ( fromJummBox && beforeSix) {
+                else if ((fromJummBox && beforeSix) || fromMidbox) {
                     if (instrumentType == InstrumentType.customChipWave || instrumentType == InstrumentType.mod) {
                         instrumentType += 1;
                     }
@@ -4187,7 +4198,7 @@ export class Song {
                 instrument.setTypeAndReset(instrumentType, instrumentChannelIterator >= this.pitchChannelCount && instrumentChannelIterator < this.pitchChannelCount + this.noiseChannelCount, instrumentChannelIterator >= this.pitchChannelCount + this.noiseChannelCount);
 
                 // Anti-aliasing was added in BeepBox 3.0 (v6->v7) and JummBox 1.3 (v1->v2 roughly but some leakage possible)
-                if (((beforeSeven && fromBeepBox) || (beforeTwo && fromJummBox)) && (instrumentType == InstrumentType.chip || instrumentType == InstrumentType.customChipWave || instrumentType == InstrumentType.pwm)) {
+                if (((beforeSeven && fromBeepBox) || (beforeTwo && fromJummBox) || fromMidbox) && (instrumentType == InstrumentType.chip || instrumentType == InstrumentType.customChipWave || instrumentType == InstrumentType.pwm)) {
                     instrument.aliases = true;
                     instrument.distortion = 0;
                     instrument.effects |= 1 << EffectType.distortion;
@@ -4220,7 +4231,7 @@ export class Song {
                     }
                 }
                 // Similar story, supersaw is also before custom chip (and mod, but mods can't have presets).
-                else if (fromJummBox && beforeSix) {
+                else if ((fromJummBox && beforeSix) || fromMidbox) {
                     if (this.channels[instrumentChannelIterator].instruments[instrumentIndexIterator].preset == InstrumentType.supersaw) {
                         this.channels[instrumentChannelIterator].instruments[instrumentIndexIterator].preset = InstrumentType.customChipWave;
                         this.channels[instrumentChannelIterator].instruments[instrumentIndexIterator].type = InstrumentType.customChipWave;
@@ -4319,7 +4330,7 @@ export class Song {
 
                     if (fromBeepBox || typeCheck == 0) {
                         instrument.eqFilterType = false;
-                        if (fromJummBox)
+                        if (fromJummBox || fromMidbox)
                             typeCheck = base64CharCodeToInt[compressed.charCodeAt(charIndex++)]; // Skip to next to get control point count
                         const originalControlPointCount: number = typeCheck;
                         instrument.eqFilter.controlPointCount = clamp(0, Config.filterMaxPoints + 1, originalControlPointCount);
@@ -4338,7 +4349,7 @@ export class Song {
 
                         // Get subfilters as well. Skip Index 0, is a copy of the base filter.
                         instrument.eqSubFilters[0] = instrument.eqFilter;
-                        if (fromJummBox && !beforeFive) {
+                        if ((fromJummBox && !beforeFive) || fromMidbox) {
                             let usingSubFilterBitfield: number = (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] << 6) | (base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                             for (let j: number = 0; j < Config.filterMorphCount - 1; j++) {
                                 if (usingSubFilterBitfield & (1 << j)) {
@@ -4406,14 +4417,14 @@ export class Song {
             } break;
             case SongTagCode.pulseWidth: {
                 const instrument: Instrument = this.channels[instrumentChannelIterator].instruments[instrumentIndexIterator];
-                instrument.pulseWidth = clamp(0, Config.pulseWidthRange + (+(fromJummBox)), base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
+                instrument.pulseWidth = clamp(0, Config.pulseWidthRange + (+(fromJummBox || fromMidbox)), base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                 if (fromBeepBox) {
                     // BeepBox formula
                     instrument.pulseWidth = Math.round(Math.pow(0.5, (7 - instrument.pulseWidth) * Config.pulseWidthStepPower) * Config.pulseWidthRange);
 
                 }
 
-                if ((beforeNine && fromBeepBox) || (beforeFive && fromJummBox)) {
+                if ((beforeNine && fromBeepBox) || (beforeFive && fromJummBox) || fromMidbox) {
                     const legacySettings: LegacySettings = legacySettingsCache![instrumentChannelIterator][instrumentIndexIterator];
                     legacySettings.pulseEnvelope = Song._envelopeFromLegacyIndex(base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                     instrument.convertLegacySettings(legacySettings, forceSimpleFilter);
@@ -4502,7 +4513,7 @@ export class Song {
                     const instrument: Instrument = this.channels[instrumentChannelIterator].instruments[instrumentIndexIterator];
                     instrument.fadeIn = clamp(0, Config.fadeInRange, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                     instrument.fadeOut = clamp(0, Config.fadeOutTicks.length, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
-                    if (fromJummBox) {
+                    if (fromJummBox || fromMidbox) {
                         instrument.clicklessTransition = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] ? true : false;
                         instrument.continueThruPattern = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] ? true : false;
                     }
@@ -4546,7 +4557,7 @@ export class Song {
                                         // Enable vibrato if it was used.
                                         instrument.effects |= 1 << EffectType.vibrato;
                                     }
-                                    if ((legacyGlobalReverb != 0 || (fromJummBox && beforeFive)) && !this.getChannelIsNoise(channelIndex)) {
+                                    if ((legacyGlobalReverb != 0 || (fromJummBox && beforeFive) || fromMidbox) && !this.getChannelIsNoise(channelIndex)) {
                                         // Enable reverb if it was used globaly before. (Global reverb was added before the effects option so I need to pick somewhere else to initialize instrument reverb, and I picked the vibrato command.)
                                         instrument.effects |= 1 << EffectType.reverb;
                                         instrument.reverb = legacyGlobalReverb;
@@ -4569,7 +4580,7 @@ export class Song {
                                 // Enable vibrato if it was used.
                                 instrument.effects |= 1 << EffectType.vibrato;
                             }
-                            if (legacyGlobalReverb != 0 || (fromJummBox && beforeFive)) {
+                            if (legacyGlobalReverb != 0 || (fromJummBox && beforeFive) || fromMidbox) {
                                 // Enable reverb if it was used globaly before. (Global reverb was added before the effects option so I need to pick somewhere else to initialize instrument reverb, and I picked the vibrato command.)
                                 instrument.effects |= 1 << EffectType.reverb;
                                 instrument.reverb = legacyGlobalReverb;
@@ -4696,7 +4707,7 @@ export class Song {
                 const instrument: Instrument = this.channels[instrumentChannelIterator].instruments[instrumentIndexIterator];
                 if ((beforeNine && fromBeepBox) || (beforeFive && fromJummBox)) {
                     instrument.effects = (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] & ((1 << EffectType.length) - 1));
-                    if (legacyGlobalReverb == 0 && !(fromJummBox && beforeFive)) {
+                    if (legacyGlobalReverb == 0 && !(fromJummBox && beforeFive) || fromMidbox) {
                         // Disable reverb if legacy song reverb was zero.
                         instrument.effects &= ~(1 << EffectType.reverb);
                     } else if (effectsIncludeReverb(instrument.effects)) {
@@ -4739,7 +4750,7 @@ export class Song {
                         let typeCheck: number = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
                         if (fromBeepBox || typeCheck == 0) {
                             instrument.noteFilterType = false;
-                            if (fromJummBox)
+                            if (fromJummBox || fromMidbox)
                                 typeCheck = base64CharCodeToInt[compressed.charCodeAt(charIndex++)]; // Skip to next index in jummbox to get actual count
                             instrument.noteFilter.controlPointCount = clamp(0, Config.filterMaxPoints + 1, typeCheck);
                             for (let i: number = instrument.noteFilter.controlPoints.length; i < instrument.noteFilter.controlPointCount; i++) {
@@ -4757,7 +4768,7 @@ export class Song {
 
                             // Get subfilters as well. Skip Index 0, is a copy of the base filter.
                             instrument.noteSubFilters[0] = instrument.noteFilter;
-                            if (fromJummBox && !beforeFive) {
+                            if ((fromJummBox && !beforeFive) || fromMidbox) {
                                 let usingSubFilterBitfield: number = (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] << 6) | (base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                                 for (let j: number = 0; j < Config.filterMorphCount - 1; j++) {
                                     if (usingSubFilterBitfield & (1 << j)) {
@@ -4799,13 +4810,13 @@ export class Song {
                     if (effectsIncludeChord(instrument.effects)) {
                         instrument.chord = clamp(0, Config.chords.length, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                         // Custom arpeggio speed... only in JB, and only if the instrument arpeggiates.
-                        if (instrument.chord == Config.chords.dictionary["arpeggio"].index && fromJummBox) {
+                        if (instrument.chord == Config.chords.dictionary["arpeggio"].index && (fromJummBox || fromMidbox)) {
                             instrument.arpeggioSpeed = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
                             instrument.fastTwoNoteArp = (base64CharCodeToInt[compressed.charCodeAt(charIndex++)]) ? true : false;
                             instrument.arpeggioPattern = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
                         }
                         // Custom strum speed!
-                        else if (Config.chords[instrument.chord].strumParts > 0 && fromJummBox) {
+                        else if (Config.chords[instrument.chord].strumParts > 0 && (fromMidbox)) {
                             instrument.strumSpeed = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
                         }
                     }
@@ -4825,7 +4836,7 @@ export class Song {
                         instrument.vibrato = clamp(0, Config.vibratos.length + 1, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
 
                         // Custom vibrato
-                        if (instrument.vibrato == Config.vibratos.length && fromJummBox) {
+                        if (instrument.vibrato == Config.vibratos.length && (fromJummBox || fromMidbox)) {
                             instrument.vibratoDepth = clamp(0, Config.modulators.dictionary["vibrato depth"].maxRawVol + 1, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]) / 25;
                             instrument.vibratoSpeed = clamp(0, Config.modulators.dictionary["vibrato speed"].maxRawVol + 1, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                             instrument.vibratoDelay = clamp(0, Config.modulators.dictionary["vibrato delay"].maxRawVol + 1, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
@@ -4841,7 +4852,7 @@ export class Song {
                     }
                     if (effectsIncludeDistortion(instrument.effects)) {
                         instrument.distortion = clamp(0, Config.distortionRange, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
-                        if (fromJummBox && !beforeFive)
+                        if ((fromJummBox && !beforeFive) || fromMidbox)
                             instrument.aliases = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] ? true : false;
                     }
                     if (effectsIncludeBitcrusher(instrument.effects)) {
@@ -4862,7 +4873,7 @@ export class Song {
                         }
 
                         // Now, pan delay follows on new versions of jummbox.
-                        if (fromJummBox && !beforeTwo)
+                        if ((fromJummBox && !beforeTwo) || fromMidbox)
                             instrument.panDelay = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
                     }
                     if (effectsIncludeChorus(instrument.effects)) {
@@ -4923,11 +4934,11 @@ export class Song {
                     // Beepbox has a panMax of 8 (9 total positions), Jummbox has a panMax of 100 (101 total positions)
                     const instrument: Instrument = this.channels[instrumentChannelIterator].instruments[instrumentIndexIterator];
                     instrument.pan = clamp(0, Config.panMax + 1, base64CharCodeToInt[compressed.charCodeAt(charIndex++)] * ((Config.panMax) / 8.0));
-                } else if (beforeFive && fromJummBox) {
+                } else if ((beforeFive && fromJummBox) || fromMidbox) {
                     const instrument: Instrument = this.channels[instrumentChannelIterator].instruments[instrumentIndexIterator];
                     instrument.pan = clamp(0, Config.panMax + 1, (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] << 6) + base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                     // Pan delay follows on v3 + v4
-                    if (fromJummBox && !beforeThree) {
+                    if ((fromJummBox && !beforeThree)) {
                         instrument.panDelay = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
                     }
                 } else {
@@ -5105,7 +5116,7 @@ export class Song {
                 } else {
                     const envelopeCount: number = clamp(0, Config.maxEnvelopeCount + 1, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                     // JB v6 adds some envelope options here in the sequence.
-                    if (fromJummBox && !beforeSix) {
+                    if ((fromJummBox && !beforeSix) || fromMidbox) {
                         instrument.envelopeSpeed = clamp(0, Config.modulators.dictionary["envelope speed"].maxRawVol + 1, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                         instrument.discreteEnvelope = (base64CharCodeToInt[compressed.charCodeAt(charIndex++)]) ? true : false;
                     }
@@ -5326,7 +5337,7 @@ export class Song {
                 charIndex += byteCount;
             } break;
             case SongTagCode.aliases: {
-                if (fromJummBox && beforeFive) {
+                if ((fromJummBox && beforeFive) || fromMidbox) {
                     const instrument: Instrument = this.channels[instrumentChannelIterator].instruments[instrumentIndexIterator];
                     instrument.aliases = (base64CharCodeToInt[compressed.charCodeAt(charIndex++)]) ? true : false;
                     if (instrument.aliases) {
@@ -5513,7 +5524,7 @@ export class Song {
                     for (let j: number = 0; j < channel.instruments.length; j++) {
                         detuneScaleNotes[j] = [];
                         for (let i: number = 0; i < Config.modCount; i++) {
-                            detuneScaleNotes[j][Config.modCount - 1 - i] = 1 + 3 * +(beforeFive && fromJummBox && isModChannel && (channel.instruments[j].modulators[i] == Config.modulators.dictionary["detune"].index));
+                            detuneScaleNotes[j][Config.modCount - 1 - i] = 1 + 3 * +(((beforeFive && fromJummBox) || fromMidbox) && isModChannel && (channel.instruments[j].modulators[i] == Config.modulators.dictionary["detune"].index));
                         }
                     }
                     const octaveOffset: number = (isNoiseChannel || isModChannel) ? 0 : channel.octave * 12;
@@ -5746,7 +5757,7 @@ export class Song {
                 } // while (true)
 
                 // Correction for old JB songs that had song reverb mods. Change all instruments using reverb to max reverb
-                if (fromJummBox && beforeFive && songReverbIndex >= 0) {
+                if (((fromJummBox && beforeFive) || fromMidbox) && songReverbIndex >= 0) {
                     for (let channelIndex: number = 0; channelIndex < this.channels.length; channelIndex++) {
                         for (let instrumentIndex: number = 0; instrumentIndex < this.channels[channelIndex].instruments.length; instrumentIndex++) {
                             const instrument: Instrument = this.channels[channelIndex].instruments[instrumentIndex];
@@ -5880,7 +5891,7 @@ export class Song {
             "name": this.title,
             "subname": this.subtitle,
             "format": Song._format,
-            "version": Song._latestJummBoxVersion,
+            "version": Song._latestMidboxVersion,
             "scale": Config.scales[this.scale].name,
             "customScale": this.scaleCustom,
             "key": Config.keys[this.key].name,
@@ -5906,12 +5917,13 @@ export class Song {
         };
     }
 
-    public fromJsonObject(jsonObject: any): void {
+    public fromJsonObject(jsonObject: any, jsonFormat: string = "automatic"): void {
         this.initToDefault(true);
         if (!jsonObject) return;
 
         //const version: number = jsonObject["version"] | 0;
         //if (version > Song._latestVersion) return; // Go ahead and try to parse something from the future I guess? JSON is pretty easy-going!
+        const format: string = jsonFormat == "automatic" ? jsonObject["format"] : jsonFormat;
 
         if (jsonObject["name"] != undefined) {
             this.title = jsonObject["name"];
@@ -6114,9 +6126,8 @@ export class Song {
                         if (i >= this.getMaxInstrumentsPerChannel()) break;
                         const instrument: Instrument = new Instrument(isNoiseChannel, isModChannel);
                         channel.instruments[i] = instrument;
-                        instrument.fromJsonObject(instrumentObjects[i], isNoiseChannel, isModChannel, false, false, legacyGlobalReverb);
+                        instrument.fromJsonObject(instrumentObjects[i], isNoiseChannel, isModChannel, false, false, legacyGlobalReverb, format);
                     }
-
                 }
 
                 for (let i: number = 0; i < this.patternsPerChannel; i++) {

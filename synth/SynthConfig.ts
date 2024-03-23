@@ -275,6 +275,8 @@ export class Config {
     public static attackVal:    number = 0;
     public static releaseVal:   number = 0.25;
 
+    public static jsonFormat: string = "midbox";
+
     public static readonly scales: DictionaryArray<Scale> = toNameMap([
 //        The keys in a scale:                                         C     Db     D      Eb     E      F      F#     G      Ab     A      Bb     B      
         { name: "Free",              realName: _.scale1Label,  flags: [true, true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true ]}, 

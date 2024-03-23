@@ -12,7 +12,7 @@ import { AnalogousDrum, analogousDrumMap, MidiChunkType, MidiFileFormat, MidiEve
 import { ArrayBufferReader } from "./ArrayBufferReader";
 import { Localization as _ } from "./Localization";
 
-const {button, p, div, h2, input, select, optgroup} = HTML;
+const {button, p, div, h2, input, select, optgroup, option} = HTML;
 
 export interface ModCategories extends BeepBoxOption {
     readonly modSelect: DictionaryArray<ModList>;
@@ -28,7 +28,13 @@ function buildModListOptions(idSet: string, htmlObject: DictionaryArray<ModCateg
 	for (let categoryIndex: number = 0; categoryIndex < htmlObject.length; categoryIndex++) {
         const category: ModCategories = htmlObject[categoryIndex];
         const group: HTMLElement = optgroup({ label: category.name + " ▾" });
-		menu.appendChild(group);
+		let foundAny: boolean = false;
+        for (let modIndex: number = 0; modIndex < category.modSelect.length; modIndex++) {
+            const mod: ModList = category.modSelect[modIndex];
+            group.appendChild(option({ value: mod.value }, mod.name));
+            foundAny = true;
+        }
+		if (foundAny) menu.appendChild(group);
 	}
 
 	return menu;
@@ -82,7 +88,7 @@ export class ImportPrompt implements Prompt {
 			},
 		]);
 		private readonly _modSelectBuildOptions: HTMLSelectElement = buildModListOptions("modList", this._modSelect);
-		private readonly _modSelectRow: HTMLElement = div({style: "width: 75%; align-self: center; margin-top: 5px;"}, this._modSelectBuildOptions);
+		private readonly _modSelectRow: HTMLElement = div({style: "width: 100%; align-self: center; margin-top: 5px;"}, this._modSelectBuildOptions);
 		
 		public readonly container: HTMLDivElement = div({class: "prompt noSelection", style: "width: 300px;"},
 		h2(_.importPrompt1Label),
@@ -129,7 +135,7 @@ export class ImportPrompt implements Prompt {
 			reader.addEventListener("load", (event: Event): void => {
 				this._doc.prompt = null;
 				this._doc.goBackToStart();
-				this._doc.record(new ChangeSong(this._doc, <string>reader.result), true, true);
+				this._doc.record(new ChangeSong(this._doc, <string>reader.result, this._modSelectBuildOptions.value), true, true);
 			});
 			reader.readAsText(file);
 		} else if (extension == "midi" || extension == "mid") {
