@@ -4,12 +4,11 @@ import { HTML, SVG } from "imperative-html/dist/esm/elements-strict";
 import { Prompt } from "./Prompt";
 import { SongDocument } from "./SongDocument";
 import { ColorConfig } from "./ColorConfig";
-import { ChangeCustomWave, randomRoundedWave, randomPulses, randomChip, biasedFullyRandom } from "./changes";
+import { ChangeCustomWave, randomRoundedWave, randomPulses, randomChip, biasedFullyRandom, randomizeWave } from "./changes";
 import { Config } from "./main";
 import { SongEditor } from "./SongEditor";
 import { Localization as _ } from "./Localization";
 import { convertChipWaveToCustomChip} from "../synth/synth";
-import { clamp } from "./UsefulCodingStuff";
 
 const { button, div, h2, select, option } = HTML;
 
@@ -54,6 +53,201 @@ function getCurveModeStepMessage(step: CurveModeStep): string {
     }
 }
 
+const enum SelectionModeStep {
+	// Initial state.
+	NoSelection,
+	// Pressed (-> moved) -> released chain of events, where the selection
+	// start and end are determined. If no moved event happens, a selection
+	// is still made, with a length of 1.
+	MakingSelection,
+	// Selection start and end have been determined. This can now go to a
+	// few different states:
+	// - A moved event that happens after a pressed event with a click
+	//   inside the selection goes to the MovingFloatingSelection state.
+	//   This implicitly creates a "floating selection" out of the current
+	//   selection, but only if any (less than or greater than 0)
+	//   horizontal movement happened, and no floating selection exists
+	//   already.
+	// - A pressed event with a click outside the selection goes to the
+	//   MakingSelection state. The determined selection can be empty in
+	//   this case, where this goes to the NoSelection state if it is
+	//   empty during a released event.
+	//   If a floating selection exists, this implicitly "confirms" the
+	//   selection, i.e., commits the changes made with this tool.
+	//   (@TODO: the above may need to change?)
+	// - A pressed event with a click on the line made by the start of the
+	//   selection goes to the MovingSelectionStart state.
+	//   If a floating selection exists, this implicitly "confirms" the
+	//   selection, i.e., commits the changes made with this tool.
+	//   (@TODO: the above may need to change?)
+	// - A pressed event with a click on the line made by the end of the
+	//   selection goes to the MovingSelectionEnd state.
+	//   If a floating selection exists, this implicitly "confirms" the
+	//   selection, i.e., commits the changes made with this tool.
+	//   (@TODO: the above may need to change?)
+	// - A pressed event with a click on the line made by the start of the
+	//   selection goes to the StretchingFromStart state, if the stretching
+	//   toggle is on.
+	//   This implicitly creates a "floating selection" out of the current
+	//   selection, but only if any (less than or greater than 0)
+	//   horizontal movement happened, and no floating selection exists
+	//   already.
+	// - A pressed event with a click on the line made by the end of the
+	//   selection goes to the StretchingFromEnd state, if the stretching
+	//   toggle is on.
+	//   This implicitly creates a "floating selection" out of the current
+	//   selection, but only if any (less than or greater than 0)
+	//   horizontal movement happened, and no floating selection exists
+	//   already.
+	// This state should also be entered after pasting something (with the
+	// selection tool on, of course).
+	HasSelection,
+	// In this state, the left side of the selection is being dragged.
+	// After release, this goes to the HasSelection state, but only if the
+	// selection start is less than the selection end. If the selection
+	// start is greater than or equal to the selection end, this goes to
+	// the NoSelection state.
+	MovingSelectionStart,
+	// In this state, the right side of the selection is being dragged.
+	// After release, this goes to the HasSelection state, but only if the
+	// selection end is greater than the selection start. If the selection
+	// end is less than or equal to the selection start, this goes to
+	// the NoSelection state.
+	MovingSelectionEnd,
+	// After release, this goes to the HasSelection state.
+	MovingFloatingSelection,
+	// In this state, the left side of the floating selection is being
+	// stretched.
+	// After release, this goes to the HasSelection state, but only if the
+	// selection start is less than the selection end. If the selection
+	// start is greater than or equal to the selection end, this goes to
+	// the NoSelection state.
+	StretchingFromStart,
+	// In this state, the right side of the floating selection is being
+	// stretched.
+	// After release, this goes to the HasSelection state, but only if the
+	// selection end is greater than the selection start. If the selection
+	// end is less than or equal to the selection start, this goes to
+	// the NoSelection state.
+	StretchingFromEnd,
+}
+
+interface SelectionBounds {
+	// Index of the first selected value in the chip wave.
+	start: number;
+	// One past the index of the last selected value in the chip wave.
+	// For example, if only the first value is supposed to be selected,
+	// then start is 0, and end is 1.
+	end: number;
+}
+
+// Inspired by some image editors, the selection tool can operate on a slice of
+// the chip wave that temporarily stays on top of the existing data, only
+// overwriting (or "stamping") it when that's desired.
+interface FloatingSelection {
+	// Can be larger or smaller than the chip wave. The excess will be
+	// dropped when stamping it, of course.
+	data: Float32Array;
+
+	// Index of the first value in the chip wave to stamp data on top of.
+	// The stretching done when stamping this is derived from these bounds,
+	// if they happen to be larger or smaller than the size of data.
+	destinationStart: number;
+	// One past the index of the last value in the chip wave to stamp data
+	// on top of.
+	destinationEnd: number;
+
+	// Vertical position used when stamping the floating selection onto the
+	// chip wave.
+	amplitudeOffset: number;
+}
+
+function createFloatingSelectionFromBounds(wave: Float32Array, bounds: SelectionBounds): FloatingSelection {
+	const selectionStart: number = bounds.start;
+	const selectionEnd: number = bounds.end;
+	if (selectionEnd < selectionStart) {
+		throw new Error("Selection end comes before start");
+	} else if (selectionEnd == selectionStart) {
+		throw new Error("Selection is empty");
+	}
+	const selectionLength: number = selectionEnd - selectionStart;
+
+	const data: Float32Array = new Float32Array(selectionLength);
+	const destinationStart: number = selectionStart;
+	const destinationEnd: number = selectionEnd;
+	const amplitudeOffset: number = 0;
+	for (let i: number = selectionStart; i < selectionEnd; i++) {
+		data[i - selectionStart] = wave[i];
+	}
+
+	return { data, destinationStart, destinationEnd, amplitudeOffset };
+}
+
+function stampFloatingSelectionOntoChipWave(
+	wave: Float32Array,
+	// @TODO: I'm not sure what to do with these parameters. They're here
+	// because the code wants to work with "tentative" values for these
+	// sometimes, and other times not. It's silly to have them and also
+	// track these in FloatingSelection...
+	floatingSelectionData: Float32Array,
+	destinationStart: number,
+	destinationEnd: number,
+	amplitudeOffset: number
+): void {
+	const start: number = destinationStart;
+	const end: number = destinationEnd;
+	if (end < start) {
+		throw new Error("Destination end comes before start");
+	} else if (end == start) {
+		// Destination range is empty.
+		return;
+	}
+	for (let i: number = start; i < end; i++) {
+		if (i < 0 || i >= wave.length) {
+			// Outside of the chip wave.
+			continue;
+		}
+		const dataIndex: number = Math.min(floatingSelectionData.length - 1, Math.max(0, Math.floor(floatingSelectionData.length * ((i - start) / (end - start)))));
+		const dataValue: number = floatingSelectionData[dataIndex] + amplitudeOffset;
+		wave[i] = Math.min(24, Math.max(-24, dataValue));
+	}
+}
+
+/*this.customChipCanvas._storeChange();
+new ChangeCustomWave(this._doc, randomGeneratedArray);
+this.customChipCanvas.curveModeStep = CurveModeStep.First;
+this.curveModeStepText.textContent = getCurveModeStepMessage(this.customChipCanvas.curveModeStep);*/
+
+function flipChipWaveHorizontally(wave: Float32Array, startIndex: number, onePastTheEndIndex: number): void {
+	const length: number = onePastTheEndIndex - startIndex;
+	const halfLength: number = Math.floor(length / 2);
+	for (let i: number = 0; i < halfLength; i++) {
+		const indexA: number = startIndex + i;
+		const indexB: number = startIndex + ((length - 1) - i);
+		const a: number = wave[indexA];
+		const b: number = wave[indexB];
+		wave[indexA] = b;
+		wave[indexB] = a;
+	}
+}
+
+function flipChipWaveVertically(wave: Float32Array, aroundZero: boolean, startIndex: number, onePastTheEndIndex: number): void {
+	let middle: number = 0;
+	if (!aroundZero) {
+		let min: number = Infinity;
+		let max: number = -Infinity;
+		for (let i: number = startIndex; i < onePastTheEndIndex; i++) {
+			const val: number = wave[i];
+			min = Math.min(min, val);
+			max = Math.max(max, val);
+		}
+		middle = (min + max) / 2;
+	}
+	for (let i: number = startIndex; i < onePastTheEndIndex; i++) {
+		wave[i] = Math.min(24, Math.max(-24, Math.floor(-wave[i] + middle * 2)));
+	}
+}
+
 // Taken from SongEditor.ts
 function buildHeaderedOptions(header: string, menu: HTMLSelectElement, items: ReadonlyArray<string | number>): HTMLSelectElement {
     menu.appendChild(option({ selected: true, disabled: true, value: header }, header));
@@ -76,10 +270,33 @@ export class CustomChipPromptCanvas {
 	private _lineY1: number = 0;
 	private _curveX0: number = 0;
 	private _curveY0: number = 0;
-	private _selectionIsActive: boolean = false;
-	private _selectionStart: number = 0;
-	private _selectionEnd: number = 0;
+
+	// How many pixels to symmetrically increase the area around a
+	// selection edge by, so you can drag it around with ease.
+	private readonly _selectionEdgeMargin: number = 4;
+
+	public selectionModeStep: SelectionModeStep = SelectionModeStep.NoSelection;
+	public _selectionBounds: SelectionBounds | null = null;
+	private _lockSelectionHorizontally: boolean = false;
+	// "Tentative" here is another word for "temporary". This is so that we
+	// can, while dragging, remember the values for things at the point
+	// when we started dragging, and can recompute new temporary values by
+	// taking the initial values and "displacing" them, either based on the
+	// line drawn by the starting and ending mouse positions of the dragging
+	// action, or when e.g. changing the selection bounds, just the
+	// current mouse position.
+	private _tentativeSelectionBounds: SelectionBounds | null = null;
+	private _tentativeDestinationStart: number | null = null;
+	private _tentativeDestinationEnd: number | null = null;
+	private _tentativeAmplitudeOffset: number | null = null;
+	private _floatingSelection: FloatingSelection | null = null;
+	private _floatingSelectionDragStartX: number | null = null;
+	private _floatingSelectionDragStartY: number | null = null;
+
+	// @TODO: The way this is used is a bit error-prone I think. The logic
+	// for how to use this should be at least noted somewhere in here.
 	private temporaryArray: Float32Array = new Float32Array(64);
+
 	private _lastIndex: number = 0;
 	private _lastAmp: number = 0;
 	private _mouseDown: boolean = false;
@@ -94,12 +311,14 @@ export class CustomChipPromptCanvas {
 	private readonly _subticks: SVGSVGElement = SVG.svg({ "pointer-events": "none" });
 	private readonly _blocks: SVGSVGElement = SVG.svg({ "pointer-events": "none" });
 	private readonly _selectionBox: SVGRectElement = SVG.rect({ class: "dashed-line dash-move", fill: ColorConfig.boxSelectionFill, stroke: ColorConfig.hoverPreview, "stroke-width": 2, "stroke-dasharray": "5, 3", "fill-opacity": "0.4", "pointer-events": "none", visibility: "hidden" });
+	private readonly _selectionBoxOverlay: SVGPathElement = SVG.path({ fill: "none", stroke: ColorConfig.hoverPreview, "stroke-width": "2", "pointer-events": "none" });
 	private readonly _svg: SVGSVGElement = SVG.svg({ style: `background-color: ${ColorConfig.editorBackground}; touch-action: none; overflow: visible;`, width: "100%", height: "100%", viewBox: "0 0 " + this._editorWidth + " " + this._editorHeight, preserveAspectRatio: "none" },
 		this._fill,
 		this._ticks,
 		this._subticks,
 		this._blocks,
 		this._selectionBox,
+		this._selectionBoxOverlay,
 	);
 
 	public readonly container: HTMLElement = HTML.div({ class: "", style: "height: 294px; width: 768px; padding-bottom: 1.5em;" }, this._svg);
@@ -149,6 +368,18 @@ export class CustomChipPromptCanvas {
 		this._curveModeMessage.textContent = getCurveModeStepMessage(this.curveModeStep);
 	}
 
+	public cleanUp(): void {
+		this.container.removeEventListener("mousedown", this._whenMousePressed);
+		document.removeEventListener("mousemove", this._whenMouseMoved);
+		document.removeEventListener("mouseup", this._whenCursorReleased);
+		this.container.removeEventListener("touchstart", this._whenTouchPressed);
+		this.container.removeEventListener("touchmove", this._whenTouchMoved);
+		this.container.removeEventListener("touchend", this._whenCursorReleased);
+		this.container.removeEventListener("touchcancel", this._whenCursorReleased);
+		this._svg.removeEventListener("keydown", this._whenKeyPressed);
+		this.container.removeEventListener("keydown", this._whenKeyPressed);
+	}
+
 	public _storeChange = (): void => {
 		// Check if change is unique compared to the current history state
 		var sameCheck = true;
@@ -179,6 +410,8 @@ export class CustomChipPromptCanvas {
 	}
 
 	public undo = (): void => {
+		this.clearSelection();
+
 		// Go backward, if there is a change to go back to
 		if (this._undoHistoryState < this._changeQueue.length - 1) {
 			this._undoHistoryState++;
@@ -190,6 +423,8 @@ export class CustomChipPromptCanvas {
 	}
 
 	public redo = (): void => {
+		this.clearSelection();
+
 		// Go forward, if there is a change to go to
 		if (this._undoHistoryState > 0) {
 			this._undoHistoryState--;
@@ -211,15 +446,353 @@ export class CustomChipPromptCanvas {
 		}
 	}
 
-	public _renderSelection(): void {
-		if (this._selectionIsActive) {
-		  this._selectionBox.setAttribute("visibility", "visible");
-		  this._selectionBox.setAttribute("x", String(this._selectionStart / 64 * this._editorWidth));
-		  this._selectionBox.setAttribute("width", String((this._selectionEnd - this._selectionStart) / 64 * this._editorWidth));
-		  this._selectionBox.setAttribute("y", "0");
-		  this._selectionBox.setAttribute("height", "" + this._editorHeight);
+	public copy(): void {
+		let storedData: number[] = Array.from(this.chipData);
+		let storedDestinationStart: number = 0;
+		let storedDestinationEnd: number = this.chipData.length;
+		let storedAmplitudeOffset: number = 0;
+		if (this.drawMode == DrawMode.Selection && this.selectionModeStep == SelectionModeStep.HasSelection) {
+			const bounds: SelectionBounds = this._selectionBounds!;
+			if (this._floatingSelection == null) {
+				for (let i = 0; i < 64; i++) this.temporaryArray[i] = this.chipData[i];
+				this._floatingSelection = createFloatingSelectionFromBounds(this.chipData, bounds);
+			}
+			storedData = Array.from(this._floatingSelection.data);
+			storedDestinationStart = this._floatingSelection.destinationStart;
+			storedDestinationEnd = this._floatingSelection.destinationEnd;
+			storedAmplitudeOffset = this._floatingSelection.amplitudeOffset;
+		}
+		window.localStorage.setItem("chipCopy", JSON.stringify({
+			copiedData: storedData,
+			destinationStart: storedDestinationStart,
+			destinationEnd: storedDestinationEnd,
+			amplitudeOffset: storedAmplitudeOffset,
+		}));
+		this.clearSelection();
+	}
+
+	public paste(): void {
+		const storedChipWaveData: any = JSON.parse(String(window.localStorage.getItem("chipCopy")));
+		// Assume array format, with no destination info.
+		let storedRawData: number[] = storedChipWaveData;
+		let storedDestinationStart: number = 0;
+		let storedDestinationEnd: number = this.chipData.length;
+		let storedAmplitudeOffset: number = 0;
+		if (!Array.isArray(storedChipWaveData)) {
+			// Assume object format.
+			storedRawData = storedChipWaveData.copiedData;
+			storedDestinationStart = storedChipWaveData.destinationStart;
+			storedDestinationEnd = storedChipWaveData.destinationEnd;
+			storedAmplitudeOffset = storedChipWaveData.amplitudeOffset;
+		}
+		let storedData: Float32Array = new Float32Array(storedRawData);
+		if (this.drawMode == DrawMode.Selection) {
+			// Overwrite floating selection.
+			this.commitFloatingSelection();
+			this.clearSelection();
+			this.selectionModeStep = SelectionModeStep.HasSelection;
+			this._selectionBounds = {
+				start: Math.min(64, Math.max(0, storedDestinationStart)),
+				end: Math.min(64, Math.max(0, storedDestinationEnd)),
+			};
+			for (let i = 0; i < 64; i++) this.temporaryArray[i] = this.chipData[i];
+			this._floatingSelection = {
+				data: storedData,
+				destinationStart: storedDestinationStart,
+				destinationEnd: storedDestinationEnd,
+				amplitudeOffset: storedAmplitudeOffset,
+			};
+			for (let i = 0; i < 64; i++) this.chipData[i] = this.temporaryArray[i];
+			stampFloatingSelectionOntoChipWave(
+				this.chipData,
+				storedData,
+				storedDestinationStart,
+				storedDestinationEnd,
+				storedAmplitudeOffset
+			);
 		} else {
-		  this._selectionBox.setAttribute("visibility", "hidden");
+			this.clearSelection();
+			stampFloatingSelectionOntoChipWave(
+				this.chipData,
+				storedData,
+				storedDestinationStart,
+				storedDestinationEnd,
+				storedAmplitudeOffset
+			);
+			this._storeChange();
+		}
+		new ChangeCustomWave(this._doc, this.chipData);
+		this.curveModeStep = CurveModeStep.First;
+		this._curveModeMessage.textContent = getCurveModeStepMessage(this.curveModeStep);
+		this._renderSelection();
+	}
+
+	public _randomizeCustomChip = (): void => {
+		let randomGeneratedArray: Float32Array = new Float32Array(64);
+        if (this._doc.prefs.customChipGenerationType == "customChipGenerateFully") {
+            randomizeWave(randomGeneratedArray, 0, 64);
+        } 
+        else if (this._doc.prefs.customChipGenerationType == "customChipGeneratePreset") {
+            let index = ((Math.random() * Config.chipWaves.length) | 0);
+            let waveformPreset = Config.chipWaves[index].samples;
+            randomGeneratedArray = convertChipWaveToCustomChip(waveformPreset)[0];
+    	}
+		// We'll put the "none" type here as it seems more intuitive if "none" only worked on fully randomized custom chips, not just its waveform.
+        else if (this._doc.prefs.customChipGenerationType == "customChipGenerateAlgorithm" || this._doc.prefs.customChipGenerationType == "customChipGenerateNone") {
+            const algorithmFunction: (wave: Float32Array) => void = selectWeightedRandom([
+                { item: randomRoundedWave, weight: 1},
+                { item: randomPulses, weight: 1},
+                { item: randomChip, weight: 1},
+                { item: biasedFullyRandom, weight: 1},
+            ]);
+            algorithmFunction(randomGeneratedArray);
+        }
+		else throw new Error("Unknown preference selected for custom chip randomization.");
+
+		this.chipData = randomGeneratedArray;
+		this._storeChange();
+        new ChangeCustomWave(this._doc, randomGeneratedArray);
+		this.curveModeStep = CurveModeStep.First;
+	}
+
+	public _randomizeSelection = (): void => {
+		if (this.selectionModeStep == SelectionModeStep.HasSelection) {
+			const bounds: SelectionBounds = this._selectionBounds!;
+			if (this._selectionBounds == null) return;
+			if (this._floatingSelection == null) {
+				for (let i = 0; i < 64; i++) this.temporaryArray[i] = this.chipData[i];
+				this._floatingSelection = createFloatingSelectionFromBounds(this.chipData, bounds);
+			}
+			randomizeWave(this._floatingSelection!.data, 0, this._floatingSelection!.data.length);
+			for (let i = 0; i < 64; i++) this.chipData[i] = this.temporaryArray[i];
+			stampFloatingSelectionOntoChipWave(
+				this.chipData,
+				this._floatingSelection!.data,
+				this._floatingSelection!.destinationStart,
+				this._floatingSelection!.destinationEnd,
+				this._floatingSelection!.amplitudeOffset
+			);
+			this._storeChange();
+        	new ChangeCustomWave(this._doc, this.chipData);
+		} else {
+			throw new Error("Attempted to randomize waveform during an intermediate selection tool state.");
+		}
+	}
+
+	public flipHorizontally = (): void => {
+		if (this.drawMode == DrawMode.Selection) {
+			if (this.selectionModeStep == SelectionModeStep.HasSelection) {
+				const bounds: SelectionBounds = this._selectionBounds!;
+				if (this._floatingSelection == null) {
+					for (let i = 0; i < 64; i++) this.temporaryArray[i] = this.chipData[i];
+					this._floatingSelection = createFloatingSelectionFromBounds(this.chipData, bounds);
+				}
+				flipChipWaveHorizontally(this._floatingSelection!.data, 0, this._floatingSelection!.data.length);
+				for (let i = 0; i < 64; i++) this.chipData[i] = this.temporaryArray[i];
+				stampFloatingSelectionOntoChipWave(
+					this.chipData,
+					this._floatingSelection!.data,
+					this._floatingSelection!.destinationStart,
+					this._floatingSelection!.destinationEnd,
+					this._floatingSelection!.amplitudeOffset
+				);
+				new ChangeCustomWave(this._doc, this.chipData);
+			} else if (this.selectionModeStep == SelectionModeStep.NoSelection) {
+				this.clearSelection();
+				flipChipWaveHorizontally(this.chipData, 0, this.chipData.length);
+				new ChangeCustomWave(this._doc, this.chipData);
+				this._storeChange();
+				this.render();
+			} else {
+				throw new Error("Attempted to flip during an intermediate selection tool state.");
+			}
+		} else {
+			this.clearSelection();
+			flipChipWaveHorizontally(this.chipData, 0, this.chipData.length);
+			new ChangeCustomWave(this._doc, this.chipData);
+			this._storeChange();
+			this.render();
+		}
+	}
+
+	public flipVertically = (): void => {
+		if (this.drawMode == DrawMode.Selection) {
+			if (this.selectionModeStep == SelectionModeStep.HasSelection) {
+				const bounds: SelectionBounds = this._selectionBounds!;
+				if (this._floatingSelection == null) {
+					for (let i = 0; i < 64; i++) this.temporaryArray[i] = this.chipData[i];
+					this._floatingSelection = createFloatingSelectionFromBounds(this.chipData, bounds);
+				}
+				flipChipWaveVertically(this._floatingSelection!.data, false, 0, this._floatingSelection!.data.length);
+				for (let i = 0; i < 64; i++) this.chipData[i] = this.temporaryArray[i];
+				stampFloatingSelectionOntoChipWave(
+					this.chipData,
+					this._floatingSelection!.data,
+					this._floatingSelection!.destinationStart,
+					this._floatingSelection!.destinationEnd,
+					this._floatingSelection!.amplitudeOffset
+				);
+				new ChangeCustomWave(this._doc, this.chipData);
+			} else if (this.selectionModeStep == SelectionModeStep.NoSelection) {
+				this.clearSelection();
+				flipChipWaveVertically(this.chipData, true, 0, this.chipData.length);
+				new ChangeCustomWave(this._doc, this.chipData);
+				this._storeChange();
+				this.render();
+			} else {
+				throw new Error("Attempted to flip during an intermediate selection tool state.");
+			}
+		} else {
+			this.clearSelection();
+			flipChipWaveVertically(this.chipData, true, 0, this.chipData.length);
+			new ChangeCustomWave(this._doc, this.chipData);
+			this._storeChange();
+			this.render();
+		}
+	}
+
+	public clearSelection(): void {
+		if (this.drawMode != DrawMode.Selection) return;
+		if (this.selectionModeStep != SelectionModeStep.NoSelection) {
+			if (this._floatingSelection != null) {
+				for (let i = 0; i < 64; i++) this.chipData[i] = this.temporaryArray[i];
+				new ChangeCustomWave(this._doc, this.chipData);
+			}
+		}
+		this.selectionModeStep = SelectionModeStep.NoSelection;
+		this._selectionBounds = null;
+		this._tentativeSelectionBounds = null;
+		this._tentativeDestinationStart = null;
+		this._tentativeDestinationEnd = null;
+		this._tentativeAmplitudeOffset = null;
+		this._floatingSelection = null;
+		this._floatingSelectionDragStartX = null;
+		this._floatingSelectionDragStartY = null;
+		this._renderSelection();
+	}
+
+	public commitFloatingSelection(): void {
+		if (this._floatingSelection != null) {
+			for (let i = 0; i < 64; i++) this.chipData[i] = this.temporaryArray[i];
+			stampFloatingSelectionOntoChipWave(
+				this.chipData,
+				this._floatingSelection.data,
+				this._floatingSelection.destinationStart,
+				this._floatingSelection.destinationEnd,
+				this._floatingSelection.amplitudeOffset
+			);
+			new ChangeCustomWave(this._doc, this.chipData);
+			this._storeChange();
+			this._floatingSelection = null;
+		}
+	}
+
+	private _renderSelection(): void {
+		const bounds: SelectionBounds | null = (
+			this._tentativeSelectionBounds != null
+			? this._tentativeSelectionBounds
+			: this._selectionBounds
+		);
+		if (bounds != null) {
+			const selectionBoxWidth: number = (bounds.end - bounds.start) / 64 * this._editorWidth;
+
+			const selectionBoxX0: number = bounds.start / 64 * this._editorWidth;
+			const selectionBoxX1: number = selectionBoxX0 + selectionBoxWidth;
+
+			const selectionBoxStartX0: number = selectionBoxX0 - this._selectionEdgeMargin;
+			const selectionBoxStartX1: number = selectionBoxX0 + this._selectionEdgeMargin;
+
+			const selectionBoxEndX0: number = selectionBoxX1 - this._selectionEdgeMargin;
+			const selectionBoxEndX1: number = selectionBoxX1 + this._selectionEdgeMargin;
+
+			const mouseIsInsideSelection: boolean = (
+				!this._mouseDown // This is to match the way selection overlays look like on the piano roll.
+				&& this._mouseX >= selectionBoxX0
+				&& this._mouseX <= selectionBoxX1
+				&& this._mouseY >= 0
+				&& this._mouseY <= this._editorHeight
+			);
+			const mouseIsAtStartOfSelection: boolean = (
+				!this._mouseDown // This is to match the way selection overlays look like on the piano roll.
+				&& this._mouseX >= selectionBoxStartX0
+				&& this._mouseX <= selectionBoxStartX1
+				&& this._mouseY >= 0
+				&& this._mouseY <= this._editorHeight
+
+				// @TODO: There is a slight issue here where if a click happens
+				// just on the outside of this.container, this event handler will
+				// not be called, and so despite the edge highlighting, dragging
+				// one will not be possible in that case.
+				// I'm not sure what is the best fix for that.
+				// For now, I've made the rendering reflect this constraint.
+				&& this._mouseX >= 0
+				&& this._mouseX <= this._editorWidth
+			);
+			const mouseIsAtEndOfSelection: boolean = (
+				!this._mouseDown // This is to match the way selection overlays look like on the piano roll.
+				&& this._mouseX >= selectionBoxEndX0
+				&& this._mouseX <= selectionBoxEndX1
+				&& this._mouseY >= 0
+				&& this._mouseY <= this._editorHeight
+
+				// See above.
+				&& this._mouseX >= 0
+				&& this._mouseX <= this._editorWidth
+			);
+
+			this._selectionBox.setAttribute("visibility", "visible");
+			this._selectionBox.setAttribute("x", String(selectionBoxX0));
+			this._selectionBox.setAttribute("width", String(selectionBoxWidth));
+			this._selectionBox.setAttribute("y", "0");
+			this._selectionBox.setAttribute("height", "" + this._editorHeight);
+
+			const horizontalMargin: number = 2;
+			const verticalMargin: number = 0.5;
+			if (mouseIsAtStartOfSelection) {
+				this._selectionBoxOverlay.setAttribute("visibility", "visible");
+				const boxX0: number = selectionBoxStartX0;
+				const boxY0: number = 0 - verticalMargin;
+				const boxX1: number = selectionBoxStartX1;
+				const boxY1: number = this._editorHeight + verticalMargin;
+				this._selectionBoxOverlay.setAttribute("d",
+					"M " + boxX0 + " " + boxY0
+					+ "L " + boxX1 + " " + boxY0
+					+ "L " + boxX1 + " " + boxY1
+					+ "L " + boxX0 + " " + boxY1
+					+ "z"
+				);
+			} else if (mouseIsAtEndOfSelection) {
+				this._selectionBoxOverlay.setAttribute("visibility", "visible");
+				const boxX0: number = selectionBoxEndX0;
+				const boxY0: number = 0 - verticalMargin;
+				const boxX1: number = selectionBoxEndX1;
+				const boxY1: number = this._editorHeight + verticalMargin;
+				this._selectionBoxOverlay.setAttribute("d",
+					"M " + boxX0 + " " + boxY0
+					+ "L " + boxX1 + " " + boxY0
+					+ "L " + boxX1 + " " + boxY1
+					+ "L " + boxX0 + " " + boxY1
+					+ "z"
+				);
+			} else if (mouseIsInsideSelection) {
+				this._selectionBoxOverlay.setAttribute("visibility", "visible");
+				const boxX0: number = selectionBoxX0 - horizontalMargin;
+				const boxY0: number = 0 - verticalMargin;
+				const boxX1: number = selectionBoxX1 + horizontalMargin;
+				const boxY1: number = this._editorHeight + verticalMargin;
+				this._selectionBoxOverlay.setAttribute("d",
+					"M " + boxX0 + " " + boxY0
+					+ "L " + boxX1 + " " + boxY0
+					+ "L " + boxX1 + " " + boxY1
+					+ "L " + boxX0 + " " + boxY1
+					+ "z"
+				);
+			} else {
+				this._selectionBoxOverlay.setAttribute("visibility", "hidden");
+			}
+		} else {
+			this._selectionBox.setAttribute("visibility", "hidden");
+			this._selectionBoxOverlay.setAttribute("visibility", "hidden");
 		}
 	}
 
@@ -256,9 +829,177 @@ export class CustomChipPromptCanvas {
 				} break;
 			}
 		} else if (this.drawMode == DrawMode.Selection) {
-			this._selectionIsActive = true;
-			this._selectionStart = this._mouseX;
-			this._selectionEnd = this._mouseX;
+			switch (this.selectionModeStep) {
+				case SelectionModeStep.NoSelection: {
+					this.selectionModeStep = SelectionModeStep.MakingSelection;
+
+					const newSelectionStart: number = Math.min(63, Math.max(0, Math.floor(this._mouseX * 64 / this._editorWidth)));
+					const newSelectionEnd: number = newSelectionStart + 1;
+					this._selectionBounds = {
+						start: newSelectionStart,
+						end: newSelectionEnd,
+					};
+					this._tentativeSelectionBounds = {
+						start: newSelectionStart,
+						end: newSelectionEnd,
+					};
+				} break;
+				case SelectionModeStep.MakingSelection: {
+					// Why is this supposed to be unreachable?
+					// Well, while this is a state that's entered in this event,
+					// only subsequent events will have it as a current state, at the
+					// point where switch (this.selectionModeStep) starts.
+					// Similar reasoning applies to the other unreachable cases below.
+					throw new Error("This should be unreachable!");
+				} break;
+				case SelectionModeStep.HasSelection: {
+					const bounds: SelectionBounds = this._selectionBounds!;
+
+					const selectionBoxWidth: number = (bounds.end - bounds.start) / 64 * this._editorWidth;
+
+					const selectionBoxX0: number = bounds.start / 64 * this._editorWidth;
+					const selectionBoxX1: number = selectionBoxX0 + selectionBoxWidth;
+
+					const selectionBoxStartX0: number = selectionBoxX0 - this._selectionEdgeMargin;
+					const selectionBoxStartX1: number = selectionBoxX0 + this._selectionEdgeMargin;
+
+					const selectionBoxEndX0: number = selectionBoxX1 - this._selectionEdgeMargin;
+					const selectionBoxEndX1: number = selectionBoxX1 + this._selectionEdgeMargin;
+
+					const mouseIsInsideSelection: boolean = (
+						this._mouseX >= selectionBoxX0
+						&& this._mouseX <= selectionBoxX1
+						&& this._mouseY >= 0
+						&& this._mouseY <= this._editorHeight
+					);
+					const mouseIsAtStartOfSelection: boolean = (
+						this._mouseX >= selectionBoxStartX0
+						&& this._mouseX <= selectionBoxStartX1
+						&& this._mouseY >= 0
+						&& this._mouseY <= this._editorHeight
+					);
+					const mouseIsAtEndOfSelection: boolean = (
+						this._mouseX >= selectionBoxEndX0
+						&& this._mouseX <= selectionBoxEndX1
+						&& this._mouseY >= 0
+						&& this._mouseY <= this._editorHeight
+					);
+
+					if (mouseIsAtStartOfSelection) {
+						if (event.shiftKey) {
+							if (this._floatingSelection == null) {
+								for (let i = 0; i < 64; i++) this.temporaryArray[i] = this.chipData[i];
+								this._floatingSelection = createFloatingSelectionFromBounds(this.chipData, bounds);
+							}
+
+							this.selectionModeStep = SelectionModeStep.StretchingFromStart;
+
+							this._floatingSelectionDragStartX = this._mouseX;
+							this._floatingSelectionDragStartY = this._mouseY;
+
+							this._tentativeSelectionBounds = {
+								start: Math.min(64, Math.max(0, this._floatingSelection.destinationStart)),
+								end: Math.min(64, Math.max(0, this._floatingSelection.destinationEnd)),
+							};
+
+							this._tentativeDestinationStart = this._floatingSelection.destinationStart;
+							this._tentativeDestinationEnd = this._floatingSelection.destinationEnd;
+						} else {
+							this.commitFloatingSelection();
+
+							this.selectionModeStep = SelectionModeStep.MovingSelectionStart;
+
+							this._tentativeSelectionBounds = {
+								start: this._selectionBounds!.start,
+								end: this._selectionBounds!.end,
+							};
+						}
+					} else if (mouseIsAtEndOfSelection) {
+						if (event.shiftKey) {
+							if (this._floatingSelection == null) {
+								for (let i = 0; i < 64; i++) this.temporaryArray[i] = this.chipData[i];
+								this._floatingSelection = createFloatingSelectionFromBounds(this.chipData, bounds);
+							}
+
+							this.selectionModeStep = SelectionModeStep.StretchingFromEnd;
+
+							this._tentativeSelectionBounds = {
+								start: Math.min(64, Math.max(0, this._floatingSelection.destinationStart)),
+								end: Math.min(64, Math.max(0, this._floatingSelection.destinationEnd)),
+							};
+
+							this._floatingSelectionDragStartX = this._mouseX;
+							this._floatingSelectionDragStartY = this._mouseY;
+
+							this._tentativeDestinationStart = this._floatingSelection.destinationStart;
+							this._tentativeDestinationEnd = this._floatingSelection.destinationEnd;
+						} else {
+							this.commitFloatingSelection();
+
+							this.selectionModeStep = SelectionModeStep.MovingSelectionEnd;
+
+							this._tentativeSelectionBounds = {
+								start: this._selectionBounds!.start,
+								end: this._selectionBounds!.end,
+							};
+						}
+					} else if (mouseIsInsideSelection) {
+						this.selectionModeStep = SelectionModeStep.MovingFloatingSelection;
+						if (this._floatingSelection == null) {
+							for (let i = 0; i < 64; i++) this.temporaryArray[i] = this.chipData[i];
+							this._floatingSelection = createFloatingSelectionFromBounds(this.chipData, bounds);
+						}
+
+						this._floatingSelectionDragStartX = this._mouseX;
+						this._floatingSelectionDragStartY = this._mouseY;
+
+						this._tentativeSelectionBounds = {
+							start: Math.min(64, Math.max(0, this._floatingSelection.destinationStart)),
+							end: Math.min(64, Math.max(0, this._floatingSelection.destinationEnd)),
+						};
+
+						this._tentativeDestinationStart = this._floatingSelection.destinationStart;
+						this._tentativeDestinationEnd = this._floatingSelection.destinationEnd;
+						this._tentativeAmplitudeOffset = this._floatingSelection.amplitudeOffset;
+
+						if (event.shiftKey) {
+							this._lockSelectionHorizontally = true;
+						} else {
+							this._lockSelectionHorizontally = false;
+						}
+					} else {
+						this.commitFloatingSelection();
+
+						this.selectionModeStep = SelectionModeStep.MakingSelection;
+
+						const newSelectionStart: number = Math.min(63, Math.max(0, Math.floor(this._mouseX * 64 / this._editorWidth)));
+						const newSelectionEnd: number = newSelectionStart;
+						this._selectionBounds = {
+							start: newSelectionStart,
+							end: newSelectionEnd,
+						};
+						this._tentativeSelectionBounds = {
+							start: newSelectionStart,
+							end: newSelectionEnd,
+						};
+					}
+				} break;
+				case SelectionModeStep.MovingSelectionStart: {
+					throw new Error("This should be unreachable!");
+				} break;
+				case SelectionModeStep.MovingSelectionEnd: {
+					throw new Error("This should be unreachable!");
+				} break;
+				case SelectionModeStep.MovingFloatingSelection: {
+					throw new Error("This should be unreachable!");
+				} break;
+				case SelectionModeStep.StretchingFromStart: {
+					throw new Error("This should be unreachable!");
+				} break;
+				case SelectionModeStep.StretchingFromEnd: {
+					throw new Error("This should be unreachable!");
+				} break;
+			}
 			this._renderSelection();
 		}
 
@@ -298,9 +1039,6 @@ export class CustomChipPromptCanvas {
 				} break;
 			}
 		} else if (this.drawMode == DrawMode.Selection) {
-			this._selectionIsActive = true;
-			this._selectionStart = this._mouseX;
-			this._selectionEnd = this._mouseX;
 			this._renderSelection();
 		}
 
@@ -331,8 +1069,157 @@ export class CustomChipPromptCanvas {
 					this._curveY0 = this._mouseY;
 				} break;
 			}
-		} else if (this.drawMode == DrawMode.Selection && this._mouseDown) {
-			this._selectionEnd = this._mouseX;
+		} else if (this.drawMode == DrawMode.Selection) {
+			switch (this.selectionModeStep) {
+				case SelectionModeStep.NoSelection: {
+					// Do nothing.
+				} break;
+				case SelectionModeStep.MakingSelection: {
+					if (this._mouseDown) {
+						const newSelectionEnd: number = Math.min(64, Math.max(0, Math.floor(this._mouseX * 64 / this._editorWidth)));
+						if (newSelectionEnd > this._selectionBounds!.start) {
+							this._tentativeSelectionBounds!.start = this._selectionBounds!.start;
+							this._tentativeSelectionBounds!.end = newSelectionEnd;
+						} else if (newSelectionEnd < this._selectionBounds!.start) {
+							this._tentativeSelectionBounds!.start = newSelectionEnd;
+							this._tentativeSelectionBounds!.end = this._selectionBounds!.start + 1;
+						} else {
+							// newSelectionEnd is the same as this._selectionBounds.start.
+							// In this case the selection bounds remain what they initially
+							// were when entering the MakingSelection state.
+							this._tentativeSelectionBounds!.start = this._selectionBounds!.start;
+							this._tentativeSelectionBounds!.end = this._selectionBounds!.end;
+						}
+					} else {
+						// throw new Error("This should be unreachable!");
+					}
+				} break;
+				case SelectionModeStep.HasSelection: {
+					// Do nothing.
+				} break;
+				case SelectionModeStep.MovingSelectionStart: {
+					if (this._mouseDown) {
+						// This uses 64 as the maximum x coordinate because we want
+						// to be able to make this selection empty by moving
+						// the start edge.
+						const newSelectionStart: number = Math.min(64, Math.max(0, Math.floor(this._mouseX * 64 / this._editorWidth)));
+						if (newSelectionStart < this._selectionBounds!.end) {
+							this._tentativeSelectionBounds!.start = newSelectionStart;
+							this._tentativeSelectionBounds!.end = this._selectionBounds!.end;
+						} else {
+							// Make selection empty, just like in the piano roll.
+							this._tentativeSelectionBounds!.start = this._selectionBounds!.start;
+							this._tentativeSelectionBounds!.end = this._selectionBounds!.start;
+						}
+					} else {
+						// throw new Error("This should be unreachable!");
+					}
+				} break;
+				case SelectionModeStep.MovingSelectionEnd: {
+					if (this._mouseDown) {
+						const newSelectionEnd: number = Math.min(64, Math.max(0, Math.floor(this._mouseX * 64 / this._editorWidth)));
+						if (newSelectionEnd > this._selectionBounds!.start) {
+							this._tentativeSelectionBounds!.start = this._selectionBounds!.start;
+							this._tentativeSelectionBounds!.end = newSelectionEnd;
+						} else {
+							// Make selection empty, just like in the piano roll.
+							this._tentativeSelectionBounds!.start = this._selectionBounds!.start;
+							this._tentativeSelectionBounds!.end = this._selectionBounds!.start;
+						}
+					} else {
+						// throw new Error("This should be unreachable!");
+					}
+				} break;
+				case SelectionModeStep.MovingFloatingSelection: {
+					if (this._mouseDown) {
+						const chipMouseX: number = Math.floor(this._mouseX * 64 / this._editorWidth);
+						const chipMouseY: number = Math.floor(this._mouseY * 49 / this._editorHeight);
+						const chipDragStartX: number = Math.floor(this._floatingSelectionDragStartX! * 64 / this._editorWidth);
+						const chipDragStartY: number = Math.floor(this._floatingSelectionDragStartY! * 49 / this._editorHeight);
+						const displacementX: number = chipMouseX - chipDragStartX;
+						let displacementY: number = chipMouseY - chipDragStartY;
+						if (this._lockSelectionHorizontally) {
+							displacementY = 0;
+						}
+
+						this._tentativeDestinationStart = this._floatingSelection!.destinationStart + displacementX;
+						this._tentativeDestinationEnd = this._floatingSelection!.destinationEnd + displacementX;
+						this._tentativeSelectionBounds!.start = Math.min(64, Math.max(0, this._tentativeDestinationStart));
+						this._tentativeSelectionBounds!.end = Math.min(64, Math.max(0, this._tentativeDestinationEnd));
+						this._tentativeAmplitudeOffset = this._floatingSelection!.amplitudeOffset + displacementY;
+
+						for (let i = 0; i < 64; i++) this.chipData[i] = this.temporaryArray[i];
+						stampFloatingSelectionOntoChipWave(
+							this.chipData,
+							this._floatingSelection!.data,
+							this._tentativeDestinationStart,
+							this._tentativeDestinationEnd,
+							this._tentativeAmplitudeOffset
+						);
+						new ChangeCustomWave(this._doc, this.chipData);
+					} else {
+						// throw new Error("This should be unreachable!");
+					}
+				} break;
+				case SelectionModeStep.StretchingFromStart: {
+					if (this._mouseDown) {
+						const chipMouseX: number = Math.floor(this._mouseX * 64 / this._editorWidth);
+						const chipDragStartX: number = Math.floor(this._floatingSelectionDragStartX! * 64 / this._editorWidth);
+						const displacementX: number = chipMouseX - chipDragStartX;
+
+						this._tentativeDestinationStart = this._floatingSelection!.destinationStart + displacementX;
+						this._tentativeDestinationEnd = this._floatingSelection!.destinationEnd;
+						this._tentativeSelectionBounds!.start = Math.min(64, Math.max(0, this._tentativeDestinationStart));
+						this._tentativeSelectionBounds!.end = Math.min(64, Math.max(0, this._tentativeDestinationEnd));
+
+						if (this._tentativeSelectionBounds!.start < this._tentativeSelectionBounds!.end) {
+							for (let i = 0; i < 64; i++) this.chipData[i] = this.temporaryArray[i];
+							stampFloatingSelectionOntoChipWave(
+								this.chipData,
+								this._floatingSelection!.data,
+								this._tentativeDestinationStart,
+								this._tentativeDestinationEnd,
+								this._floatingSelection!.amplitudeOffset
+							);
+							new ChangeCustomWave(this._doc, this.chipData);
+						} else {
+							for (let i = 0; i < 64; i++) this.chipData[i] = this.temporaryArray[i];
+							new ChangeCustomWave(this._doc, this.chipData);
+						}
+					} else {
+						// throw new Error("This should be unreachable!");
+					}
+				} break;
+				case SelectionModeStep.StretchingFromEnd: {
+					if (this._mouseDown) {
+						const chipMouseX: number = Math.floor(this._mouseX * 64 / this._editorWidth);
+						const chipDragStartX: number = Math.floor(this._floatingSelectionDragStartX! * 64 / this._editorWidth);
+						const displacementX: number = chipMouseX - chipDragStartX;
+
+						this._tentativeDestinationStart = this._floatingSelection!.destinationStart;
+						this._tentativeDestinationEnd = this._floatingSelection!.destinationEnd + displacementX;
+						this._tentativeSelectionBounds!.start = Math.min(64, Math.max(0, this._tentativeDestinationStart));
+						this._tentativeSelectionBounds!.end = Math.min(64, Math.max(0, this._tentativeDestinationEnd));
+
+						if (this._tentativeSelectionBounds!.start < this._tentativeSelectionBounds!.end) {
+							for (let i = 0; i < 64; i++) this.chipData[i] = this.temporaryArray[i];
+							stampFloatingSelectionOntoChipWave(
+								this.chipData,
+								this._floatingSelection!.data,
+								this._tentativeDestinationStart,
+								this._tentativeDestinationEnd,
+								this._floatingSelection!.amplitudeOffset
+							);
+							new ChangeCustomWave(this._doc, this.chipData);
+						} else {
+							for (let i = 0; i < 64; i++) this.chipData[i] = this.temporaryArray[i];
+							new ChangeCustomWave(this._doc, this.chipData);
+						}
+					} else {
+						// throw new Error("This should be unreachable!");
+					}
+				} break;
+			}
 			this._renderSelection();
 		}
 		this._whenCursorMoved();
@@ -364,8 +1251,7 @@ export class CustomChipPromptCanvas {
 					this._curveY0 = this._mouseY;
 				} break;
 			}
-		} else if (this.drawMode == DrawMode.Selection && this._mouseDown) {
-			this._selectionEnd = this._mouseX;
+		} else if (this.drawMode == DrawMode.Selection) {
 			this._renderSelection();
 		}
 		this._whenCursorMoved();
@@ -501,7 +1387,7 @@ export class CustomChipPromptCanvas {
 					this._blocks.children[lowest].setAttribute("y", "" + (startingAmp * (this._editorHeight / 49)));
 				}
 			} else if (this.drawMode == DrawMode.Selection) {
-				this._renderSelection();
+				// Do nothing.
 			} else throw new Error("Unknown draw mode selected.");
 
 			// Make a change to the data but don't record it, since this prompt uses its own undo/redo queue
@@ -528,6 +1414,236 @@ export class CustomChipPromptCanvas {
 					// We can commit the changes now.
 				} break;
 			}
+		} else if (this.drawMode == DrawMode.Selection) {
+			switch (this.selectionModeStep) {
+				case SelectionModeStep.NoSelection: {
+					if (this._mouseDown) {
+						throw new Error("This should be unreachable!");
+					}
+				} break;
+				case SelectionModeStep.MakingSelection: {
+					if (this._mouseDown) {
+						const bounds: SelectionBounds | null = this._tentativeSelectionBounds;
+						if (bounds != null && bounds.start < bounds.end) {
+							this.selectionModeStep = SelectionModeStep.HasSelection;
+
+							this._selectionBounds!.start = bounds.start;
+							this._selectionBounds!.end = bounds.end;
+							this._tentativeSelectionBounds = null;
+						} else {
+							this.selectionModeStep = SelectionModeStep.NoSelection;
+
+							this._selectionBounds = null;
+							this._tentativeSelectionBounds = null;
+						}
+					}
+
+
+					// There shouldn't be any changes to commit,
+					// other than the potential one in the pressed event.
+					this._mouseDown = false;
+					return;
+				} break;
+				case SelectionModeStep.HasSelection: {
+					// If this happens, it most likely means that
+					// the mouse is outside of the canvas.
+				} break;
+				case SelectionModeStep.MovingSelectionStart: {
+					if (this._mouseDown) {
+						const bounds: SelectionBounds | null = this._tentativeSelectionBounds;
+						if (bounds != null && bounds.start < bounds.end) {
+							this.selectionModeStep = SelectionModeStep.HasSelection;
+
+							this._selectionBounds!.start = bounds.start;
+							this._selectionBounds!.end = bounds.end;
+							this._tentativeSelectionBounds = null;
+						} else {
+							this.selectionModeStep = SelectionModeStep.NoSelection;
+
+							this._selectionBounds = null;
+							this._tentativeSelectionBounds = null;
+						}
+					}
+
+
+					// There shouldn't be any changes to commit,
+					// other than the potential one in the pressed event.
+					this._mouseDown = false;
+					return;
+				} break;
+				case SelectionModeStep.MovingSelectionEnd: {
+					if (this._mouseDown) {
+						const bounds: SelectionBounds | null = this._tentativeSelectionBounds;
+						if (bounds != null && bounds.start < bounds.end) {
+							this.selectionModeStep = SelectionModeStep.HasSelection;
+
+							this._selectionBounds!.start = bounds.start;
+							this._selectionBounds!.end = bounds.end;
+							this._tentativeSelectionBounds = null;
+						} else {
+							this.selectionModeStep = SelectionModeStep.NoSelection;
+
+							this._selectionBounds = null;
+							this._tentativeSelectionBounds = null;
+						}
+					}
+
+
+					// There shouldn't be any changes to commit,
+					// other than the potential one in the pressed event.
+					this._mouseDown = false;
+					return;
+				} break;
+				case SelectionModeStep.MovingFloatingSelection: {
+					if (this._mouseDown) {
+						const bounds: SelectionBounds = this._tentativeSelectionBounds!;
+
+						const differenceX: number = Math.abs(this._tentativeDestinationStart! - this._floatingSelection!.destinationStart);
+						const differenceY: number = Math.abs(this._tentativeAmplitudeOffset! - this._floatingSelection!.amplitudeOffset);
+
+						if (differenceX != 0 || differenceY != 0) {
+							if (bounds.start < bounds.end) {
+								this.selectionModeStep = SelectionModeStep.HasSelection;
+
+								this._selectionBounds!.start = bounds.start;
+								this._selectionBounds!.end = bounds.end;
+
+								this._floatingSelection!.destinationStart = this._tentativeDestinationStart!;
+								this._floatingSelection!.destinationEnd = this._tentativeDestinationEnd!;
+								this._floatingSelection!.amplitudeOffset = this._tentativeAmplitudeOffset!;
+
+								for (let i = 0; i < 64; i++) this.chipData[i] = this.temporaryArray[i];
+								stampFloatingSelectionOntoChipWave(
+									this.chipData,
+									this._floatingSelection!.data,
+									this._floatingSelection!.destinationStart,
+									this._floatingSelection!.destinationEnd,
+									this._floatingSelection!.amplitudeOffset
+								);
+								new ChangeCustomWave(this._doc, this.chipData);
+							} else {
+								this.selectionModeStep = SelectionModeStep.NoSelection;
+
+								this._selectionBounds = null;
+								this._floatingSelection = null;
+
+								for (let i = 0; i < 64; i++) this.chipData[i] = this.temporaryArray[i];
+								new ChangeCustomWave(this._doc, this.chipData);
+							}
+						} else {
+							this.selectionModeStep = SelectionModeStep.HasSelection;
+						}
+
+						this._tentativeSelectionBounds = null;
+						this._tentativeDestinationStart = null;
+						this._tentativeDestinationEnd = null;
+						this._tentativeAmplitudeOffset = null;
+						this._floatingSelectionDragStartX = null;
+						this._floatingSelectionDragStartY = null;
+						this._lockSelectionHorizontally = false;
+					}
+
+					// There shouldn't be any changes to commit.
+					this._mouseDown = false;
+					return;
+				} break;
+				case SelectionModeStep.StretchingFromStart: {
+					if (this._mouseDown) {
+						const newSelectionStart: number = Math.min(64, Math.max(0, this._tentativeDestinationStart!));
+						const newSelectionEnd: number = Math.min(64, Math.max(0, this._tentativeDestinationEnd!));
+
+						const differenceX: number = Math.abs(this._tentativeDestinationStart! - this._floatingSelection!.destinationStart);
+
+						if (differenceX != 0) {
+							if (newSelectionStart < newSelectionEnd) {
+								this.selectionModeStep = SelectionModeStep.HasSelection;
+
+								this._selectionBounds!.start = newSelectionStart;
+								this._selectionBounds!.end = newSelectionEnd;
+
+								this._floatingSelection!.destinationStart = this._tentativeDestinationStart!;
+								this._floatingSelection!.destinationEnd = this._tentativeDestinationEnd!;
+
+								for (let i = 0; i < 64; i++) this.chipData[i] = this.temporaryArray[i];
+								stampFloatingSelectionOntoChipWave(
+									this.chipData,
+									this._floatingSelection!.data,
+									this._floatingSelection!.destinationStart,
+									this._floatingSelection!.destinationEnd,
+									this._floatingSelection!.amplitudeOffset
+								);
+								new ChangeCustomWave(this._doc, this.chipData);
+							} else {
+								this.selectionModeStep = SelectionModeStep.NoSelection;
+
+								this._selectionBounds = null;
+								this._floatingSelection = null;
+
+								for (let i = 0; i < 64; i++) this.chipData[i] = this.temporaryArray[i];
+								new ChangeCustomWave(this._doc, this.chipData);
+							}
+						}
+
+						this._tentativeSelectionBounds = null;
+						this._tentativeDestinationStart = null;
+						this._tentativeDestinationEnd = null;
+						this._floatingSelectionDragStartX = null;
+						this._floatingSelectionDragStartY = null;
+					}
+
+					// There shouldn't be any changes to commit.
+					this._mouseDown = false;
+					return;
+				} break;
+				case SelectionModeStep.StretchingFromEnd: {
+					if (this._mouseDown) {
+						const newSelectionStart: number = Math.min(64, Math.max(0, this._tentativeDestinationStart!));
+						const newSelectionEnd: number = Math.min(64, Math.max(0, this._tentativeDestinationEnd!));
+
+						const differenceX: number = Math.abs(this._tentativeDestinationEnd! - this._floatingSelection!.destinationEnd);
+
+						if (differenceX != 0) {
+							if (newSelectionStart < newSelectionEnd) {
+								this.selectionModeStep = SelectionModeStep.HasSelection;
+
+								this._selectionBounds!.start = newSelectionStart;
+								this._selectionBounds!.end = newSelectionEnd;
+
+								this._floatingSelection!.destinationStart = this._tentativeDestinationStart!;
+								this._floatingSelection!.destinationEnd = this._tentativeDestinationEnd!;
+
+								for (let i = 0; i < 64; i++) this.chipData[i] = this.temporaryArray[i];
+								stampFloatingSelectionOntoChipWave(
+									this.chipData,
+									this._floatingSelection!.data,
+									this._floatingSelection!.destinationStart,
+									this._floatingSelection!.destinationEnd,
+									this._floatingSelection!.amplitudeOffset
+								);
+								new ChangeCustomWave(this._doc, this.chipData);
+							} else {
+								this.selectionModeStep = SelectionModeStep.NoSelection;
+
+								this._selectionBounds = null;
+								this._floatingSelection = null;
+
+								for (let i = 0; i < 64; i++) this.chipData[i] = this.temporaryArray[i];
+								new ChangeCustomWave(this._doc, this.chipData);
+							}
+						}
+
+						this._tentativeSelectionBounds = null;
+						this._tentativeDestinationStart = null;
+						this._tentativeDestinationEnd = null;
+						this._floatingSelectionDragStartX = null;
+						this._floatingSelectionDragStartY = null;
+					}
+
+					// There shouldn't be any changes to commit.
+					this._mouseDown = false;
+					return;
+				} break;
+			}
 		}
 		// Add current data into queue, if it is unique from last data
 		this._storeChange();
@@ -541,14 +1657,58 @@ export class CustomChipPromptCanvas {
 	}
 
 	public shiftSamplesUp(): void {
+		if (this.drawMode != DrawMode.Selection || this.selectionModeStep == SelectionModeStep.NoSelection) {
 		for (let i = 0; i < 64; i++) this.chipData[i] = Math.min(24, Math.max(-24, this.chipData[i] - 1));
+		} else {
+			if (this.selectionModeStep == SelectionModeStep.HasSelection) {
+				const bounds: SelectionBounds = this._selectionBounds!;
+				if (this._selectionBounds == null) return;
+				if (this._floatingSelection == null) {
+					for (let i = 0; i < 64; i++) this.temporaryArray[i] = this.chipData[i];
+					this._floatingSelection = createFloatingSelectionFromBounds(this.chipData, bounds);
+				}
+				for (let i = 0; i < this._floatingSelection!.data.length; i++) this._floatingSelection!.data[i] = Math.min(24, Math.max(-24, this._floatingSelection!.data[i] - 1));
+				for (let i = 0; i < 64; i++) this.chipData[i] = this.temporaryArray[i];
+				stampFloatingSelectionOntoChipWave(
+					this.chipData,
+					this._floatingSelection!.data,
+					this._floatingSelection!.destinationStart,
+					this._floatingSelection!.destinationEnd,
+					this._floatingSelection!.amplitudeOffset
+				);
+			} else {
+				throw new Error("Attempted to shift waveform points during an intermediate selection tool state.");
+			}
+		}
   		new ChangeCustomWave(this._doc, this.chipData);
   		this._storeChange();
   		this.render();
 	}
 
 	public shiftSamplesDown(): void {
-		for (let i = 0; i < 64; i++) this.chipData[i] = Math.min(24, Math.max(-24, this.chipData[i] + 1));
+		if (this.drawMode != DrawMode.Selection || this.selectionModeStep == SelectionModeStep.NoSelection) {
+			for (let i = 0; i < 64; i++) this.chipData[i] = Math.min(24, Math.max(-24, this.chipData[i] + 1));
+			} else {
+				if (this.selectionModeStep == SelectionModeStep.HasSelection) {
+					const bounds: SelectionBounds = this._selectionBounds!;
+					if (this._selectionBounds == null) return;
+					if (this._floatingSelection == null) {
+						for (let i = 0; i < 64; i++) this.temporaryArray[i] = this.chipData[i];
+						this._floatingSelection = createFloatingSelectionFromBounds(this.chipData, bounds);
+					}
+					for (let i = 0; i < this._floatingSelection!.data.length; i++) this._floatingSelection!.data[i] = Math.min(24, Math.max(-24, this._floatingSelection!.data[i] + 1));
+					for (let i = 0; i < 64; i++) this.chipData[i] = this.temporaryArray[i];
+					stampFloatingSelectionOntoChipWave(
+						this.chipData,
+						this._floatingSelection!.data,
+						this._floatingSelection!.destinationStart,
+						this._floatingSelection!.destinationEnd,
+						this._floatingSelection!.amplitudeOffset
+					);
+				} else {
+					throw new Error("Attempted to shift waveform points during an intermediate selection tool state.");
+				}
+			}
   		new ChangeCustomWave(this._doc, this.chipData);
   		this._storeChange();
   		this.render();
@@ -566,26 +1726,26 @@ export class CustomChipPrompt implements Prompt {
 	public readonly _undoButton: HTMLButtonElement = button({ style: "width: 15%; position: absolute; margin-left: 0px; left: 127px; top: 53px;" }, _.undoLabel);
 	public readonly _redoButton: HTMLButtonElement = button({ style: "width: 15%; position: absolute; margin-right: 0px; right: 127px; top: 53px;" }, _.redoLabel);
 
-	public readonly _drawType_Standard: HTMLButtonElement = button({ style: "border-radius: 0px; width: 65px; height 50px;", title: "Cursor"}, [
+	public readonly _drawType_Standard: HTMLButtonElement = button({ style: "border-radius: 0px; width: 65px;", title: "Cursor"}, [
 		// Cursor icon:
 		SVG.svg({ class: "no-underline", style: "flex-shrink: 0; position: absolute; top: 4px; left: 24px; pointer-events: none;", width: "16", height: "16", viewBox: "0 0 16 16" }, [
 			SVG.path({ d: "M 14.082 2.182 a 0.5 0.5 0 0 1 0.103 0.557 L 8.528 15.467 a 0.5 0.5 0 0 1 -0.917 -0.007 L 8 8 L 0.803 8.652 a 0.5 0.5 0 0 1 -0.006 -0.916 l 12.728 -5.657 a 0.5 0.5 0 0 1 0.556 0.103 M 3 12 L 2 15 L 5 14 L 7.944 8.996 L 8 8 L 7.005 8.091 z", fill: "currentColor" }),
 		]),
 	]);
-	public readonly _drawType_Line: HTMLButtonElement = button({ style: "border-radius: 0px; width: 65px; height 50px;", title: "Line"}, [
+	public readonly _drawType_Line: HTMLButtonElement = button({ style: "border-radius: 0px; width: 65px;", title: "Line"}, [
 		// Line icon:
 		SVG.svg({ class: "no-underline", style: "flex-shrink: 0; position: absolute; top: 4px; left: 24px; pointer-events: none;", width: "16", height: "16", viewBox: "0 0 16 16" }, [
 			SVG.path({ d: "M 14 2.5 a 12 12 0 0 0 -0.5 -0.5 h -6.967 a 0.5 0.5 0 0 0 0 1 h 5.483 L 2.146 13.146 a 0.5 0.5 0 0 0 0.708 0.708 L 13.009 3.991 V 9.504 a 0.5 0.5 0 0 0 1 0 z", fill: "currentColor" }),
 		]),
 	]);
-	public readonly _drawType_Curve: HTMLButtonElement = button({ style: "border-radius: 0px; width: 65px; height 50px;", title: "Curve"}, [
+	public readonly _drawType_Curve: HTMLButtonElement = button({ style: "border-radius: 0px; width: 65px;", title: "Curve"}, [
 		// Curved-line icon:
 		SVG.svg({ class: "no-underline", style: "flex-shrink: 0; position: absolute; top: 4px; left: 24px; pointer-events: none;", width: "16", height: "16", viewBox: "0 0 16 16" }, [
 			SVG.path({ d: "M0 10.5A1.5 1.5 0 0 1 1.5 9h1A1.5 1.5 0 0 1 4 10.5v1A1.5 1.5 0 0 1 2.5 13h-1A1.5 1.5 0 0 1 0 11.5zm1.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm10.5.5A1.5 1.5 0 0 1 13.5 9h1a1.5 1.5 0 0 1 1.5 1.5v1a1.5 1.5 0 0 1-1.5 1.5h-1a1.5 1.5 0 0 1-1.5-1.5zm1.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM6 4.5A1.5 1.5 0 0 1 7.5 3h1A1.5 1.5 0 0 1 10 4.5v1A1.5 1.5 0 0 1 8.5 7h-1A1.5 1.5 0 0 1 6 5.5zM7.5 4a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5z", fill: "currentColor" }),
 			SVG.path({ d: "M6 4.5H1.866a1 1 0 1 0 0 1h2.668A6.52 6.52 0 0 0 1.814 9H2.5q.186 0 .358.043a5.52 5.52 0 0 1 3.185-3.185A1.5 1.5 0 0 1 6 5.5zm3.957 1.358A1.5 1.5 0 0 0 10 5.5v-1h4.134a1 1 0 1 1 0 1h-2.668a6.52 6.52 0 0 1 2.72 3.5H13.5q-.185 0-.358.043a5.52 5.52 0 0 0-3.185-3.185", fill: "currentColor"}),
 		]),
 	]);
-	public readonly _drawType_Selection: HTMLButtonElement = button({ style: "border-radius: 0px; width: 65px; height 50px;", title: "Selection"}, [
+	public readonly _drawType_Selection: HTMLButtonElement = button({ style: "border-radius: 0px; width: 65px;", title: "Selection"}, [
 		// Dotted-outline box icon:
 		SVG.svg({ class: "no-underline", style: "flex-shrink: 0; position: absolute; top: 4px; left: 24px; pointer-events: none;", width: "16", height: "16", viewBox: "0 0 16 16" }, [
 			SVG.path({ d: "M 2.5 0 q -0.25 0 -0.487 0.048 l 0.194 0.98 A 1.5 1.5 0 0 1 2.5 1 h 0.458 V 0 z m 2.292 0 h -0.917 v 1 h 0.917 z m 1.833 0 h -0.917 v 1 h 0.917 z m 1.833 0 h -0.916 v 1 h 0.916 z m 1.834 0 h -0.917 v 1 h 0.917 z m 1.833 0 h -0.917 v 1 h 0.917 z M 13.5 0 h -0.458 v 1 h 0.458 q 0.151 0 0.293 0.029 l 0.194 -0.981 A 2.5 2.5 0 0 0 13.5 0 m 2.079 1.11 a 2.5 2.5 0 0 0 -0.69 -0.689 l -0.556 0.831 q 0.248 0.167 0.415 0.415 l 0.83 -0.556 z M 1.11 0.421 a 2.5 2.5 0 0 0 -0.689 0.69 l 0.831 0.556 c 0.11 -0.164 0.251 -0.305 0.415 -0.415 z M 16 2.5 q 0 -0.25 -0.048 -0.487 l -0.98 0.194 q 0.027 0.141 0.028 0.293 v 0.458 h 1 z M 0.048 2.013 A 2.5 2.5 0 0 0 0 2.5 v 0.458 h 1 V 2.5 q 0 -0.151 0.029 -0.293 z M 0 3.875 v 0.917 h 1 v -0.917 z m 16 0.917 v -0.917 h -1 v 0.917 z M 0 5.708 v 0.917 h 1 v -0.917 z m 16 0.917 v -0.917 h -1 v 0.917 z M 0 7.542 v 0.916 h 1 v -0.916 z m 15 0.916 h 1 v -0.916 h -1 z M 0 9.375 v 0.917 h 1 v -0.917 z m 16 0.917 v -0.917 h -1 v 0.917 z m -16 0.916 v 0.917 h 1 v -0.917 z m 16 0.917 v -0.917 h -1 v 0.917 z m -16 0.917 v 0.458 q 0 0.25 0.048 0.487 l 0.98 -0.194 A 1.5 1.5 0 0 1 1 13.5 v -0.458 z m 16 0.458 v -0.458 h -1 v 0.458 q 0 0.151 -0.029 0.293 l 0.981 0.194 Q 16 13.75 16 13.5 M 0.421 14.89 c 0.183 0.272 0.417 0.506 0.69 0.689 l 0.556 -0.831 a 1.5 1.5 0 0 1 -0.415 -0.415 z m 14.469 0.689 c 0.272 -0.183 0.506 -0.417 0.689 -0.69 l -0.831 -0.556 c -0.11 0.164 -0.251 0.305 -0.415 0.415 l 0.556 0.83 z m -12.877 0.373 Q 2.25 16 2.5 16 h 0.458 v -1 H 2.5 q -0.151 0 -0.293 -0.029 z M 13.5 16 q 0.25 0 0.487 -0.048 l -0.194 -0.98 A 1.5 1.5 0 0 1 13.5 15 h -0.458 v 1 z m -9.625 0 h 0.917 v -1 h -0.917 z m 1.833 0 h 0.917 v -1 h -0.917 z m 1.834 -1 v 1 h 0.916 v -1 z m 1.833 1 h 0.917 v -1 h -0.917 z m 1.833 0 h 0.917 v -1 h -0.917 z", fill: "currentColor" }),
@@ -596,8 +1756,11 @@ export class CustomChipPrompt implements Prompt {
 	private readonly _removeSelectionButton: HTMLButtonElement = button({ style: "position: absolute; width:30%; align-self: center; bottom: 54px; font-size: 13px;" }, [
 		"Cancel Selection",
 	]);
-	private readonly _confirmSelectionButton: HTMLButtonElement = button({ style: "position: absolute; width:30%; align-self: center; bottom: 20px; font-size: 13px;" }, [
-		"Confirm Selection",
+	private readonly _flipHorizontalButton: HTMLButtonElement = button({ style: "position: absolute; width: 14%; align-self: center; left: 224px; bottom: 20px; font-size: 10.35px;" }, [
+		"Flip Left ↔ Right (H)",
+	]);
+	private readonly _flipVerticalButton: HTMLButtonElement = button({ style: "position: absolute; width: 14%; align-self: center; right: 224px; bottom: 20px; font-size: 10.35px;" }, [
+		"Flip Top ↔ Bottom (N)",
 	]);
 
 	private readonly _cancelButton: HTMLButtonElement = button({ class: "cancelButton" });
@@ -656,7 +1819,8 @@ export class CustomChipPrompt implements Prompt {
 		),
 		this.curveModeStepText,
 		this._removeSelectionButton,
-		this._confirmSelectionButton,
+		this._flipHorizontalButton,
+		this._flipVerticalButton,
 		this.loadWaveformPresetSelect,
 		this.randomizeButton,
 		div({ style: "display: flex; flex-direction: row-reverse; justify-content: space-between;" },
@@ -673,19 +1837,20 @@ export class CustomChipPrompt implements Prompt {
 		this.copyButton.addEventListener("click", this._copySettings);
 		this.pasteButton.addEventListener("click", this._pasteSettings);
 		this.loadWaveformPresetSelect.addEventListener("change", this._customWavePresetHandler);
-		this.randomizeButton.addEventListener("click", this._randomizeCustomChip);
+		this.randomizeButton.addEventListener("click", this._decideRandomization);
 		this._undoButton.addEventListener("click", this.customChipCanvas.undo);
 		this._redoButton.addEventListener("click", this.customChipCanvas.redo);
 		this._playButton.addEventListener("click", this._togglePlay);
 		this.updatePlayButton();
-		this.customChipCanvas._renderSelection();
 		this._drawType_Standard.addEventListener("click", this._selectStandardDrawType);
 		this._drawType_Line.addEventListener("click", this._selectLineDrawType);
 		this._drawType_Curve.addEventListener("click", this._selectCurveDrawType);
 		this._drawType_Selection.addEventListener("click", this._selectSelectionDrawType);
+		this._removeSelectionButton.addEventListener("click", this._removeSelection);
+		this._flipHorizontalButton.addEventListener("click", this.customChipCanvas.flipHorizontally);
+		this._flipVerticalButton.addEventListener("click", this.customChipCanvas.flipVertically);
 		this.curveModeStepText.style.display = "none";
 		this._removeSelectionButton.style.display = "none";
-		this._confirmSelectionButton.style.display = "none";
 
 		let colors = ColorConfig.getChannelColor(this._doc.song, this._doc.channel);
 		this.drawToolsContainer.style.setProperty("--text-color-lit", colors.primaryNote);
@@ -718,15 +1883,19 @@ export class CustomChipPrompt implements Prompt {
 		}
 	}
 
+	private _removeSelection = (): void => {
+		this.customChipCanvas.clearSelection();
+	}
+
 	private _selectStandardDrawType = (): void => {
 		this._drawType_Standard.classList.add("selected-instrument");
 		this._drawType_Line.classList.remove("selected-instrument");
 		this._drawType_Curve.classList.remove("selected-instrument");
 		this._drawType_Selection.classList.remove("selected-instrument");
 		this.customChipCanvas.drawMode = DrawMode.Standard;
+		this.customChipCanvas.clearSelection();
 		this.curveModeStepText.style.display = "none";
 		this._removeSelectionButton.style.display = "none";
-		this._confirmSelectionButton.style.display = "none";
 	}
 
 	private _selectLineDrawType = (): void => {
@@ -735,9 +1904,9 @@ export class CustomChipPrompt implements Prompt {
 		this._drawType_Curve.classList.remove("selected-instrument");
 		this._drawType_Selection.classList.remove("selected-instrument");
 		this.customChipCanvas.drawMode = DrawMode.Line;
+		this.customChipCanvas.clearSelection();
 		this.curveModeStepText.style.display = "none";
 		this._removeSelectionButton.style.display = "none";
-		this._confirmSelectionButton.style.display = "none";
 	}
 
 	private _selectCurveDrawType = (): void => {
@@ -747,9 +1916,9 @@ export class CustomChipPrompt implements Prompt {
 		this._drawType_Selection.classList.remove("selected-instrument");
 		if (this.customChipCanvas.drawMode != DrawMode.Curve) this.customChipCanvas.curveModeStep = CurveModeStep.First;
 		this.customChipCanvas.drawMode = DrawMode.Curve;
+		this.customChipCanvas.clearSelection();
 		this.curveModeStepText.style.display = "";
 		this._removeSelectionButton.style.display = "none";
-		this._confirmSelectionButton.style.display = "none";
 		this.curveModeStepText.textContent = getCurveModeStepMessage(this.customChipCanvas.curveModeStep);
 	}
 
@@ -759,9 +1928,9 @@ export class CustomChipPrompt implements Prompt {
 		this._drawType_Curve.classList.remove("selected-instrument");
 		this._drawType_Selection.classList.add("selected-instrument");
 		this.customChipCanvas.drawMode = DrawMode.Selection;
+		this.customChipCanvas.clearSelection();
 		this.curveModeStepText.style.display = "none";
 		this._removeSelectionButton.style.display = "";
-		this._confirmSelectionButton.style.display = "";
 	}
 
 	private _close = (): void => {
@@ -770,29 +1939,31 @@ export class CustomChipPrompt implements Prompt {
 	}
 
 	public cleanUp = (): void => {
+		this.customChipCanvas.cleanUp();
 		this._okayButton.removeEventListener("click", this._saveChanges);
 		this._cancelButton.removeEventListener("click", this._close);
 		this.container.removeEventListener("keydown", this.whenKeyPressed);
-
+		this.copyButton.removeEventListener("click", this._copySettings);
+		this.pasteButton.removeEventListener("click", this._pasteSettings);
+		this.loadWaveformPresetSelect.removeEventListener("change", this._customWavePresetHandler);
+		this.randomizeButton.removeEventListener("click", this._decideRandomization);
 		this._playButton.removeEventListener("click", this._togglePlay);
+		this._drawType_Standard.removeEventListener("click", this._selectStandardDrawType);
+		this._drawType_Line.removeEventListener("click", this._selectLineDrawType);
+		this._drawType_Curve.removeEventListener("click", this._selectCurveDrawType);
+		this._drawType_Selection.removeEventListener("click", this._selectSelectionDrawType);
+		this._removeSelectionButton.removeEventListener("click", this._removeSelection);
+		this._flipHorizontalButton.removeEventListener("click", this.customChipCanvas.flipHorizontally);
+		this._flipVerticalButton.removeEventListener("click", this.customChipCanvas.flipVertically);
 	}
 
 	private _copySettings = (): void => {
-		const chipCopy: Float32Array = this.customChipCanvas.chipData;
-		window.localStorage.setItem("chipCopy", JSON.stringify(Array.from(chipCopy)));
+		this.customChipCanvas.copy();
 	}
 
 	private _pasteSettings = (): void => {
-		const storedChipWave: any = JSON.parse(String(window.localStorage.getItem("chipCopy")));
-		if (storedChipWave == null) return;
-		for (let i: number = 0; i < 64; i++) {
-    		this.customChipCanvas.chipData[i] = storedChipWave[i];
-		}
-		this.customChipCanvas._storeChange();
-		new ChangeCustomWave(this._doc, this.customChipCanvas.chipData);
-		this.customChipCanvas.curveModeStep = CurveModeStep.First;
-		this.curveModeStepText.textContent = getCurveModeStepMessage(this.customChipCanvas.curveModeStep);
-    }
+		this.customChipCanvas.paste();
+	}
 
 	// Taken from SongEditor.ts
 	private _customWavePresetHandler = (event: Event): void => {
@@ -837,36 +2008,12 @@ export class CustomChipPrompt implements Prompt {
         this.loadWaveformPresetSelect.selectedIndex = 0;
     }
 
-	// Taken from changes.ts
-	private _randomizeCustomChip = (): void => {
-		let randomGeneratedArray: Float32Array = new Float32Array(64);
-        if (this._doc.prefs.customChipGenerationType == "customChipGenerateFully") {
-            for (let i: number = 0; i < 64; i++) {
-                randomGeneratedArray[i] = clamp(-24, 24+1, ((Math.random() * 48) | 0) - 24);
-            }
-        } 
-        else if (this._doc.prefs.customChipGenerationType == "customChipGeneratePreset") {
-            let index = ((Math.random() * Config.chipWaves.length) | 0);
-            let waveformPreset = Config.chipWaves[index].samples;
-            randomGeneratedArray = convertChipWaveToCustomChip(waveformPreset)[0];
-    	}
-		// We'll put the "none" type here as it seems more intuitive if "none" only worked on fully randomized custom chips, not just its waveform.
-        else if (this._doc.prefs.customChipGenerationType == "customChipGenerateAlgorithm" || this._doc.prefs.customChipGenerationType == "customChipGenerateNone") {
-            const algorithmFunction: (wave: Float32Array) => void = selectWeightedRandom([
-                { item: randomRoundedWave, weight: 1},
-                { item: randomPulses, weight: 1},
-                { item: randomChip, weight: 1},
-                { item: biasedFullyRandom, weight: 1},
-            ]);
-            algorithmFunction(randomGeneratedArray);
-        }
-		else throw new Error("Unknown preference selected for custom chip randomization.");
-
-        this.customChipCanvas.chipData = randomGeneratedArray;
-
-		this.customChipCanvas._storeChange();
-        new ChangeCustomWave(this._doc, randomGeneratedArray);
-		this.customChipCanvas.curveModeStep = CurveModeStep.First;
+	private _decideRandomization = (): void => {
+		if (this.customChipCanvas.drawMode != DrawMode.Selection || this.customChipCanvas.selectionModeStep == SelectionModeStep.NoSelection) {
+			this.customChipCanvas._randomizeCustomChip();
+		} else {
+			this.customChipCanvas._randomizeSelection();
+		}
 		this.curveModeStepText.textContent = getCurveModeStepMessage(this.customChipCanvas.curveModeStep);
 	}
 
@@ -908,17 +2055,25 @@ export class CustomChipPrompt implements Prompt {
 		  	event.stopPropagation();
 		}
 		else if (event.keyCode == 82 ) { // r
-		  	this._randomizeCustomChip();
+			this._decideRandomization();
 		  	event.stopPropagation();
 		}
 		else if (event.keyCode == 67 ) { // c
-			this._copySettings();
+			this.customChipCanvas.copy();
 			event.stopPropagation();
 	  	}
 		else if (event.keyCode == 86 ) { // v
-			this._pasteSettings();
+			this.customChipCanvas.paste();
 			event.stopPropagation();
 	  	}
+		else if (event.keyCode == 72) { // h
+			this.customChipCanvas.flipHorizontally();
+			event.stopPropagation();
+		}
+		else if (event.keyCode == 78) { // n
+			this.customChipCanvas.flipVertically();
+			event.stopPropagation();
+		}
 		else if (event.keyCode == 49 ) { // 1
 			this._selectStandardDrawType();
 			event.stopPropagation();

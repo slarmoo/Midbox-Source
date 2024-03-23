@@ -48,7 +48,7 @@ import { ThemePrompt } from "./ThemePrompt";
 import { TipPrompt } from "./TipPrompt";
 import { LanguagePrompt } from "./LanguagePrompt";
 import { Localization as _ } from "./Localization";
-import { ChangeTempo, ChangeKeyOctave, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangeSupersawDynamism, ChangeSupersawSpread, ChangeSupersawShape, ChangeWavetableSpeed, ChangeWaveInterpolation, ChangeCyclePerNote, ChangeOneShotCycle, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeCustomAlgorithmOrFeedback, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, pickRandomPresetValue, ChangeRandomGeneratedInstrument, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, Change6OpFeedbackType, Change6OpAlgorithm, ChangeChipWave, ChangeNoiseWave, ChangeNoiseSeedRandomization, ChangeNoiseSeed, ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeUnisonVoices, ChangeUnisonSpread, ChangeUnisonOffset, ChangeUnisonExpression, ChangeUnisonSign, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeLowerWavefold, ChangeUpperWavefold, ChangeAddEnvelope, ChangeEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeWavetableCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeArpeggioPattern, ChangeClicklessTransition, ChangeContinueThruPattern, ChangeAliasing, ChangePercussion, ChangeSDAffected, ChangeSOAffected, ChangeStrumSpeed, ChangeSlideSpeed, ChangeSongSubtitle, ChangeSetPatternInstruments, ChangeHoldingModRecording } from "./changes";
+import { ChangeTempo, ChangeKeyOctave, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangeSupersawDynamism, ChangeSupersawSpread, ChangeSupersawShape, ChangeWavetableSpeed, ChangeWaveInterpolation, ChangeCyclePerNote, ChangeOneShotCycle, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeCustomAlgorithmOrFeedback, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, pickRandomPresetValue, ChangeRandomGeneratedInstrument, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, Change6OpFeedbackType, Change6OpAlgorithm, ChangeChipWave, ChangeNoiseWave, /*ChangeNoiseSeedRandomization, ChangeNoiseSeed,*/ ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeUnisonVoices, ChangeUnisonSpread, ChangeUnisonOffset, ChangeUnisonExpression, ChangeUnisonSign, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeLowerWavefold, ChangeUpperWavefold, ChangeAddEnvelope, ChangeEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeWavetableCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeArpeggioPattern, ChangeClicklessTransition, ChangeContinueThruPattern, ChangeAliasing, ChangePercussion, ChangeSDAffected, ChangeSOAffected, ChangeStrumSpeed, ChangeSlideSpeed, ChangeSongSubtitle, ChangeSetPatternInstruments, ChangeHoldingModRecording } from "./changes";
 import { oscilloscopeCanvas } from "../global/Oscilloscope"
 import { TrackEditor } from "./TrackEditor";
 
@@ -1079,13 +1079,13 @@ export class SongEditor {
     ]);
     private readonly _chipWaveSelectRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("chipWave") }, span(_.waveLabel)), div({ class: "selectContainer" }, this._chipWaveSelect));
     private readonly _chipNoiseSelectRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("chipNoise") }, span(_.noiseLabel)), div({ class: "selectContainer" }, this._chipNoiseSelect));
-    private readonly _isNoiseSeedRandomizedBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
-    private readonly _isNoiseSeedRandomizedRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("randomOrSeed") }, span(_.useSeedLabel)), this._isNoiseSeedRandomizedBox);
-    private readonly _noiseSeedInputBox: HTMLInputElement = input({ style: "width: 150%; height: 1.5em; font-size: 80%; margin-left: 0.4em; vertical-align: middle;", id: "noiseSeedInputBox", type: "number", step: "1", min: "0", max: Config.maxAmountOfRandomSeeds, value: "0" });
-    private readonly _noiseSeedRow: HTMLDivElement = div({ class: "selectRow" }, div({},
-        span({ class: "tip", style: "height:1em; font-size: 14px;", onclick: () => this._openPrompt("seed") }, _.seedLabel),
-        div({ style: "margin-top: -1px;"}, this._noiseSeedInputBox),
-    ));
+    //private readonly _isNoiseSeedRandomizedBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
+    //private readonly _isNoiseSeedRandomizedRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("randomOrSeed") }, span(_.useSeedLabel)), this._isNoiseSeedRandomizedBox);
+    //private readonly _noiseSeedInputBox: HTMLInputElement = input({ style: "width: 150%; height: 1.5em; font-size: 80%; margin-left: 0.4em; vertical-align: middle;", id: "noiseSeedInputBox", type: "number", step: "1", min: "0", max: Config.maxAmountOfRandomSeeds, value: "0" });
+    //private readonly _noiseSeedRow: HTMLDivElement = div({ class: "selectRow" }, div({},
+    //    span({ class: "tip", style: "height:1em; font-size: 14px;", onclick: () => this._openPrompt("seed") }, _.seedLabel),
+    //    div({ style: "margin-top: -1px;"}, this._noiseSeedInputBox),
+    //));
     private readonly _fadeInOutEditor: FadeInOutEditor = new FadeInOutEditor(this._doc);
     // Issue#36 - Add input boxes for the fade in/out editor that target post-fade-in, pre-fade-out, and post-fade-out.
     private readonly _fadeInOutRow: HTMLElement = div({ class: "selectRow" }, span({ style: "font-size: smaller;", class: "tip", onclick: () => this._openPrompt("fadeInOut") }, span(_.fadeLabel)), this._fadeInOutEditor.container);
@@ -1500,8 +1500,8 @@ export class SongEditor {
         this._panDropdownGroup,
         this._chipWaveSelectRow,
         this._chipNoiseSelectRow,
-        this._isNoiseSeedRandomizedRow,
-        this._noiseSeedRow,
+        //this._isNoiseSeedRandomizedRow,
+        //this._noiseSeedRow,
         this._wavetableWaveButtonsContainer,
         this._customWaveDraw,
         this._wavetableCustomWaveDraw,
@@ -2130,7 +2130,7 @@ export class SongEditor {
         this._panSliderInputBox.addEventListener("input", () => { this._doc.record(new ChangePan(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].pan, Math.min(100.0, Math.max(0.0, Math.round(+this._panSliderInputBox.value))))) });
         this._pwmSliderInputBox.addEventListener("input", () => { this._doc.record(new ChangePulseWidth(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].pulseWidth, Math.min(Config.pulseWidthRange, Math.max(1.0, Math.round(+this._pwmSliderInputBox.value))))) });
         this._detuneSliderInputBox.addEventListener("input", () => { this._doc.record(new ChangeDetune(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].detune, Math.min(Config.detuneMax - Config.detuneCenter, Math.max(Config.detuneMin - Config.detuneCenter, Math.round(+this._detuneSliderInputBox.value))))) });
-        this._noiseSeedInputBox.addEventListener("input", () => { this._doc.record(new ChangeNoiseSeed(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].noiseSeed, Math.min(0, Math.max(Config.maxAmountOfRandomSeeds, Math.round(+this._noiseSeedInputBox.value))))) });
+        //this._noiseSeedInputBox.addEventListener("input", () => { this._doc.record(new ChangeNoiseSeed(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].noiseSeed, Math.min(0, Math.max(Config.maxAmountOfRandomSeeds, Math.round(+this._noiseSeedInputBox.value))))) });
         this._unisonVoicesInputBox.addEventListener("input", () => { this._doc.record(new ChangeUnisonVoices(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].unisonVoices, Math.min(Config.unisonVoicesMax, Math.max(Config.unisonVoicesMin, Math.round(+this._unisonVoicesInputBox.value))))) });
         this._unisonSpreadInputBox.addEventListener("input", () => { this._doc.record(new ChangeUnisonSpread(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].unisonSpread, Math.min(Config.unisonSpreadMax, Math.max(Config.unisonSpreadMin, +this._unisonSpreadInputBox.value)))) });
         this._unisonOffsetInputBox.addEventListener("input", () => { this._doc.record(new ChangeUnisonOffset(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].unisonOffset, Math.min(Config.unisonOffsetMax, Math.max(Config.unisonOffsetMin, +this._unisonOffsetInputBox.value)))) });
@@ -2143,7 +2143,7 @@ export class SongEditor {
         this._interpolateWavesBox.addEventListener("input", () => { this._doc.record(new ChangeWaveInterpolation(this._doc, this._interpolateWavesBox.checked)) });
         this._resetCyclePerNoteBox.addEventListener("input", () => { this._doc.record(new ChangeCyclePerNote(this._doc, this._resetCyclePerNoteBox.checked)) });
         this._oneShotCycleBox.addEventListener("input", () => { this._doc.record(new ChangeOneShotCycle(this._doc, this._oneShotCycleBox.checked)) });
-        this._isNoiseSeedRandomizedBox.addEventListener("input", () => { this._doc.record(new ChangeNoiseSeedRandomization(this._doc, this._isNoiseSeedRandomizedBox.checked)) });
+        //this._isNoiseSeedRandomizedBox.addEventListener("input", () => { this._doc.record(new ChangeNoiseSeedRandomization(this._doc, this._isNoiseSeedRandomizedBox.checked)) });
         this._twoNoteArpBox.addEventListener("input", () => { this._doc.record(new ChangeFastTwoNoteArp(this._doc, this._twoNoteArpBox.checked)) });
         this._clicklessTransitionBox.addEventListener("input", () => { this._doc.record(new ChangeClicklessTransition(this._doc, this._clicklessTransitionBox.checked)) });
         this._continueThruPatternBox.addEventListener("input", () => { this._doc.record(new ChangeContinueThruPattern(this._doc, this._continueThruPatternBox.checked)) });
@@ -2770,17 +2770,17 @@ export class SongEditor {
             if (instrument.type == InstrumentType.noise) {
                 this._chipWaveSelectRow.style.display = "none";
                 this._chipNoiseSelectRow.style.display = "";
-                this._isNoiseSeedRandomizedRow.style.display = "";
-                if (instrument.noiseSeedRandomization) {
-                    this._noiseSeedRow.style.display = "";
-                } else {
-                    this._noiseSeedRow.style.display = "none";
-                }
+                //this._isNoiseSeedRandomizedRow.style.display = "";
+                //if (instrument.noiseSeedRandomization) {
+                //    this._noiseSeedRow.style.display = "";
+                //} else {
+                //    this._noiseSeedRow.style.display = "none";
+                //}
                 setSelectedValue(this._chipNoiseSelect, instrument.chipNoise, true);
             } else {
                 this._chipNoiseSelectRow.style.display = "none";
-                this._isNoiseSeedRandomizedRow.style.display = "none";
-                this._noiseSeedRow.style.display = "none";
+                //this._isNoiseSeedRandomizedRow.style.display = "none";
+                //this._noiseSeedRow.style.display = "none";
             }
             if (instrument.type == InstrumentType.spectrum) {
                 this._chipWaveSelectRow.style.display = "none";
@@ -3245,7 +3245,7 @@ export class SongEditor {
 
             this._chipNoiseSelectRow.style.display = "none";
             this._chipWaveSelectRow.style.display = "none";
-            this._isNoiseSeedRandomizedRow.style.display = "none";
+            //this._isNoiseSeedRandomizedRow.style.display = "none";
             this._spectrumRow.style.display = "none";
             this._harmonicsRow.style.display = "none";
             //this._harmonicsCopyPasteRow.style.display = "none";
@@ -3810,7 +3810,7 @@ export class SongEditor {
         this._interpolateWavesBox.checked = instrument.interpolateWaves ? true : false;
         this._resetCyclePerNoteBox.checked = instrument.cyclePerNote ? true : false;
         this._oneShotCycleBox.checked = instrument.oneShotCycle ? true : false;
-        this._isNoiseSeedRandomizedBox.checked = instrument.noiseSeedRandomization ? true : false;
+        //this._isNoiseSeedRandomizedBox.checked = instrument.noiseSeedRandomization ? true : false;
         this._twoNoteArpBox.checked = instrument.fastTwoNoteArp ? true : false;
         this._clicklessTransitionBox.checked = instrument.clicklessTransition ? true : false;
         this._continueThruPatternBox.checked = instrument.continueThruPattern ? true : false;
@@ -4187,7 +4187,7 @@ export class SongEditor {
         if   ( document.activeElement == this._panSliderInputBox 
             || document.activeElement == this._pwmSliderInputBox 
             || document.activeElement == this._detuneSliderInputBox 
-            || document.activeElement == this._noiseSeedInputBox 
+            //|| document.activeElement == this._noiseSeedInputBox 
             || document.activeElement == this._instrumentVolumeSliderInputBox 
             || document.activeElement == this._octaveStepper 
             || document.activeElement == this._unisonVoicesInputBox

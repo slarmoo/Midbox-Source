@@ -1,6 +1,6 @@
 // Copyright (c) 2012-2022 John Nesky and contributing authors, distributed under the MIT license, see accompanying the LICENSE.md file.
 
-import { InstrumentType, Config } from "../synth/SynthConfig";
+import { DictionaryArray, BeepBoxOption, InstrumentType, Config, toNameMap } from "../synth/SynthConfig";
 import { NotePin, Note, makeNotePin, Pattern, Instrument, Channel, Song, Synth } from "../synth/synth";
 import { Preset, EditorConfig } from "./EditorConfig";
 import { SongDocument } from "./SongDocument";
@@ -12,19 +12,77 @@ import { AnalogousDrum, analogousDrumMap, MidiChunkType, MidiFileFormat, MidiEve
 import { ArrayBufferReader } from "./ArrayBufferReader";
 import { Localization as _ } from "./Localization";
 
-	const {button, p, div, h2, input, select, option} = HTML;
+const {button, p, div, h2, input, select, optgroup} = HTML;
+
+export interface ModCategories extends BeepBoxOption {
+    readonly modSelect: DictionaryArray<ModList>;
+}
+
+export interface ModList extends BeepBoxOption {
+    readonly value: string;
+}
+
+function buildModListOptions(idSet: string, htmlObject: DictionaryArray<ModCategories>): HTMLSelectElement {
+    const menu: HTMLSelectElement = select({ id: idSet });
+
+	for (let categoryIndex: number = 0; categoryIndex < htmlObject.length; categoryIndex++) {
+        const category: ModCategories = htmlObject[categoryIndex];
+        const group: HTMLElement = optgroup({ label: category.name + " ▾" });
+		menu.appendChild(group);
+	}
+
+	return menu;
+}
 
 export class ImportPrompt implements Prompt {
 		private readonly _fileInput: HTMLInputElement = input({type: "file", accept: ".json,application/json,.mid,.midi,audio/midi,audio/x-midi"});
 		private readonly _cancelButton: HTMLButtonElement = button({class: "cancelButton"});
-		private readonly _modSelect: HTMLSelectElement = select({style: "width: 75%; align-self: center; margin-top: 5px;"},
-    	option({value: "beepboxJson"}, "Beepbox"),
-    	option({value: "jummboxJson"}, "Jummbox"),
-		option({value: "midboxJson"}, "Midbox"),
-    	option({value: "goldboxJson"}, "Goldbox"),
-		option({value: "ultraboxJson"}, "Ultrabox"),
-		option({value: "somethingJson"}, "What other mods..."),
-    	);
+		public readonly _modSelect: DictionaryArray<ModCategories> = toNameMap([
+			{
+				name: "Automatic", modSelect: <DictionaryArray<ModList>>toNameMap([
+					{name: "Auto-Detect", value: "automatic"},
+				])
+			},
+			{
+				name: "BeepBox-Based", modSelect: <DictionaryArray<ModList>>toNameMap([
+					{name: "BeepBox", value: "beepbox"},
+					{name: "FoxBox", value: "foxbox"},
+					{name: "Wackybox", value: "wackybox"},
+					{name: "TodBox", value: "todbox"},
+					{name: "CardboardBox", value: "cardboardbox"},
+					{name: "PaandorasBox", value: "paandorasbox"},
+					{name: "Sandbox", value: "sandbox"},
+				])
+			},
+			{
+				name: "ModBox-Based", modSelect: <DictionaryArray<ModList>>toNameMap([
+					{name: "ModBox", value: "modbox"},
+					{name: "WideBox", value: "widebox"},
+					{name: "Nepbox", value: "nepbox"},
+				])
+			},
+			{
+				name: "JummBox-Based", modSelect: <DictionaryArray<ModList>>toNameMap([
+					{name: "JummBox", value: "jummbox"},
+					{name: "Midbox", value: "midbox"},
+					{name: "SynthBox", value: "synthbox"},
+					{name: "Thurmbox", value: "thurmbox"},
+					{name: "WeebBox", value: "weebbox"},
+					{name: "DogeBox2", value: "dogebox2"},
+					{name: "GoldBox", value: "goldbox"},
+				])
+			},
+			{
+				name: "UltraBox-Based", modSelect: <DictionaryArray<ModList>>toNameMap([
+					{name: "UltraBox", value: "ultrabox"},
+					{name: "AbyssBox", value: "abyssbox"},
+					{name: "Unbox", value: "unbox"},
+					{name: "Baribox", value: "baribox"},
+				])
+			},
+		]);
+		private readonly _modSelectBuildOptions: HTMLSelectElement = buildModListOptions("modList", this._modSelect);
+		private readonly _modSelectRow: HTMLElement = div({style: "width: 75%; align-self: center; margin-top: 5px;"}, this._modSelectBuildOptions);
 		
 		public readonly container: HTMLDivElement = div({class: "prompt noSelection", style: "width: 300px;"},
 		h2(_.importPrompt1Label),
@@ -38,7 +96,7 @@ export class ImportPrompt implements Prompt {
 			p({style: "text-align: left; margin: 0.5em 0;"},
 			_.importPromptLargeText3Label,
 		),
-		this._modSelect,
+		this._modSelectRow,
 		this._cancelButton,
 	);
 		

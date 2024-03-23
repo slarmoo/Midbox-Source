@@ -1327,7 +1327,7 @@ export function getPulseWidthRatio(pulseWidth: number): number {
 // depend on FFT here. synth.ts will take care of importing FFT.ts.
 //function inverseRealFourierTransform(array: {length: number, [index: number]: number}, fullArrayLength: number): void;
 //function scaleElementsByFactor(array: {length: number, [index: number]: number}, factor: number): void;
-export function getDrumWave(index: number, inverseRealFourierTransform: Function | null, scaleElementsByFactor: Function | null): Float32Array {
+export function getDrumWave(index: number, inverseRealFourierTransform: Function | null, scaleElementsByFactor: Function | null/*, seed: number, seedAlgorithm: Function | null*/): Float32Array {
     let wave: Float32Array | null = Config.chipNoises[index].samples;
     if (wave == null) {
         wave = new Float32Array(Config.chipNoiseLength + 1);
@@ -1490,7 +1490,6 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
         } else {
             throw new Error("Unrecognized drum index: " + index);
         }
-
         wave[Config.chipNoiseLength] = wave[0];
     }
     return wave;

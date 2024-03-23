@@ -367,6 +367,13 @@ export function biasedFullyRandom(wave: Float32Array): void {
     if (!foundNonZero) biasedFullyRandom(wave);
 }
 
+export function randomizeWave(wave: Float32Array, start: number, end: number): void {
+    // Randomize whatever is inside of the start-end parameter.
+    for (let i: number = start; i < end; i++) {
+        wave[i] = clamp(-24, 24 + 1, ((Math.random() * 48) | 0) - 24);
+    }
+}
+
 export class ChangeMoveAndOverflowNotes extends ChangeGroup {
     constructor(doc: SongDocument, newBeatsPerBar: number, partsToMove: number) {
         super();
@@ -2526,9 +2533,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     let randomGeneratedArray: Float32Array = new Float32Array(64);
                     let randomGeneratedArrayIntegral: Float32Array = new Float32Array(65);
                     if (doc.prefs.customChipGenerationType == "customChipGenerateFully") {
-                        for (let i: number = 0; i < 64; i++) {
-                            randomGeneratedArray[i] = clamp(-24, 24+1, ((Math.random() * 48) | 0) - 24);
-                        }
+                        randomizeWave(randomGeneratedArray, 0, 64);
                     } 
                     else if (doc.prefs.customChipGenerationType == "customChipGeneratePreset") {
                         let index = ((Math.random() * Config.chipWaves.length) | 0);
@@ -5982,7 +5987,7 @@ export class ChangeNoiseWave extends Change {
     }
 }
 
-export class ChangeNoiseSeedRandomization extends Change {
+/*export class ChangeNoiseSeedRandomization extends Change {
     constructor(doc: SongDocument, newValue: boolean) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
@@ -6006,7 +6011,7 @@ export class ChangeNoiseSeed extends Change {
             this._didSomething();
         }
     }
-}
+}*/
 
 export class ChangeAddEnvelope extends Change {
     constructor(doc: SongDocument) {
