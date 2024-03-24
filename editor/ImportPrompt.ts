@@ -27,7 +27,7 @@ function buildModListOptions(idSet: string, htmlObject: DictionaryArray<ModCateg
 
 	for (let categoryIndex: number = 0; categoryIndex < htmlObject.length; categoryIndex++) {
         const category: ModCategories = htmlObject[categoryIndex];
-        const group: HTMLElement = optgroup({ label: category.name + " ▾" });
+        const group: HTMLElement = optgroup({ label: category.name });
 		let foundAny: boolean = false;
         for (let modIndex: number = 0; modIndex < category.modSelect.length; modIndex++) {
             const mod: ModList = category.modSelect[modIndex];
@@ -88,39 +88,39 @@ export class ImportPrompt implements Prompt {
 			},
 		]);
 		private readonly _modSelectBuildOptions: HTMLSelectElement = buildModListOptions("modList", this._modSelect);
-		private readonly _modSelectRow: HTMLElement = div({style: "width: 100%; align-self: center; margin-top: 5px;"}, this._modSelectBuildOptions);
+		private readonly _modSelectRow: HTMLElement = div({style: "width: 100%;"}, this._modSelectBuildOptions);
 		
 		public readonly container: HTMLDivElement = div({class: "prompt noSelection", style: "width: 300px;"},
 		h2(_.importPrompt1Label),
-			p({style: "text-align: left; margin: 0.5em 0;"},
+		p({style: "text-align: left; margin: 0.5em 0;"},
 			_.importPromptLargeText1Label,
 		),
-			p({style: "text-align: left; margin: 0.5em 0;"},
+		p({style: "text-align: left; margin: 0.5em 0;"},
 			_.importPromptLargeText2Label,
 		),
 		this._fileInput,
-			p({style: "text-align: left; margin: 0.5em 0;"},
+		p({style: "text-align: left; margin: 0.5em 0;"},
 			_.importPromptLargeText3Label,
 		),
-		this._modSelectRow,
+		div({style: "align-self: center; margin-top: 5px;"},
+			this._modSelectRow,
+		),
 		this._cancelButton,
 	);
 		
 	constructor(private _doc: SongDocument) {
 		this._fileInput.select();
-			setTimeout(()=>this._fileInput.focus());
-
-		//this._modSelect.value = ???
+		setTimeout(()=>this._fileInput.focus());
 			
 		this._fileInput.addEventListener("change", this._whenFileSelected);
 		this._cancelButton.addEventListener("click", this._close);
 	}
 		
-		private _close = (): void => { 
+	private _close = (): void => { 
 		this._doc.undo();
 	}
 		
-		public cleanUp = (): void => { 
+	public cleanUp = (): void => { 
 		this._fileInput.removeEventListener("change", this._whenFileSelected);
 		this._cancelButton.removeEventListener("click", this._close);
 	}

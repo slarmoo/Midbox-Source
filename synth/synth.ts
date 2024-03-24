@@ -2074,6 +2074,33 @@ export class Instrument {
     public fromJsonObject(instrumentObject: any, isNoiseChannel: boolean, isModChannel: boolean, useSlowerRhythm: boolean, useFastTwoNoteArp: boolean, legacyGlobalReverb: number = 0, jsonFormat: string = Config.jsonFormat): void {
         if (instrumentObject == undefined) instrumentObject = {};
 
+        // The automatic mode will follow plenty of rules to find which jsonFormat the song is in.
+        /*if (jsonFormat == "automatic") {
+            if (instrumentObject["format"] == "BeepBox") 
+                jsonFormat = "beepbox";
+
+            if (instrumentObject["format"] == "BeepBox"
+            || instrumentObject["blend"] != null
+            || instrumentObject["riff"] != null) 
+                jsonFormat = "modbox";
+
+            if (instrumentObject["format"] == "BeepBox" 
+            && instrumentObject["type"] == "duty cycle"
+            && instrumentObject["cycleTime"] != null) 
+                jsonFormat = "sandbox";
+
+            if (instrumentObject["format"] == "JummBox") 
+                jsonFormat = "jummbox";
+
+            if (instrumentObject["format"] == "BeepBox" 
+            && instrumentObject["type"] == "FM6op") 
+                jsonFormat = "goldbox";
+
+            if (instrumentObject["format"] == "UltraBox") 
+                jsonFormat = "ultrabox";
+        }*/
+        // Assuming it worked, that is...
+
         let type: InstrumentType = Config.instrumentTypeNames.indexOf(instrumentObject["type"]);
         if (<any>type == -1) type = isModChannel ? InstrumentType.mod : (isNoiseChannel ? InstrumentType.noise : InstrumentType.chip);
         this.setTypeAndReset(type, isNoiseChannel, isModChannel);
@@ -2083,7 +2110,12 @@ export class Instrument {
         }
 
         if (instrumentObject["volume"] != undefined) {
-            this.volume = clamp(-Config.volumeRange / 2, (Config.volumeRange / 2) + 1, instrumentObject["volume"] | 0);
+            if (jsonFormat == "beepbox") {
+                // BeepBox-like mods had a lot less options for volume and couldn't go above 0 in JummBox-like volumes.
+                this.volume = Math.round(-clamp(0, 8, Math.round(5 - (instrumentObject["volume"] | 0) / 20)) * 25.0 / 7.0);
+            } else {
+                this.volume = clamp(-Config.volumeRange / 2, (Config.volumeRange / 2) + 1, instrumentObject["volume"] | 0);
+            }
         } else {
             this.volume = 0;
         }
@@ -2909,8 +2941,125 @@ export class Instrument {
                 for (let i = 0; i < envelopeArray.length; i++) {
                     if (this.envelopeCount >= Config.maxEnvelopeCount) break;
                     const tempEnvelope: EnvelopeSettings = new EnvelopeSettings();
+                    let needAnother: boolean = false;
+                    let skipAssign: boolean = false;
+                    const extraEnvelope: EnvelopeSettings = new EnvelopeSettings();
+                    const envelopeObject: any = envelopeArray[i];
+                    const rawEnvelopeName: string = envelopeObject["envelope"];
+                    tempEnvelope.fromJsonObject(envelopeObject);
+                    if (jsonFormat != "midbox") {
+                        // Midbox changes the names and values of various envelopes. Change them here.
+                        const oldNameToNewIndex: Dictionary<number> = {
+                            // -1/-2 to 0. Inherited from GoldBox and forks.
+                            // Note: NPA = Not Perfectly Accurate: Original speed to Midbox
+                            "flare -1": Config.envelopes.dictionary["flare 0"].index, // NPA: 128 to 64
+                            "twang -1": Config.envelopes.dictionary["twang 0"].index, // NPA: 128 to 64
+                            "swell -1": Config.envelopes.dictionary["swell 0"].index, // NPA: 128 to 64
+                            "decay -1": Config.envelopes.dictionary["decay 0"].index, // NPA: 40 to 18
+                            "wibble-1": Config.envelopes.dictionary["wibble 0"].index,
+                            "linear-2": Config.envelopes.dictionary["linear 0"].index,
+                            "linear-1": Config.envelopes.dictionary["linear 1"].index,
+                            "rise -2": Config.envelopes.dictionary["rise 0"].index,
+                            "rise -1": Config.envelopes.dictionary["rise 1"].index,
+                            // Value change. 
+                            // Often, this change is 2 -> 3, 3 -> 5.
+                            "flare 2": Config.envelopes.dictionary["flare 3"].index,
+                            "flare 3": Config.envelopes.dictionary["flare 5"].index,
+                            "twang 2": Config.envelopes.dictionary["twang 3"].index,
+                            "twang 3": Config.envelopes.dictionary["twang 5"].index,
+                            "swell 2": Config.envelopes.dictionary["swell 3"].index,
+                            "swell 3": Config.envelopes.dictionary["swell 5"].index,
+                            // Name change.
+                            // This type of stuff occurs frequently with tremolos/tripolos.
+                            "tremolo0": Config.envelopes.dictionary["full tremolo 0"].index,
+                            "tremolo1": Config.envelopes.dictionary["full tremolo 1"].index,
+                            "tremolo2": Config.envelopes.dictionary["full tremolo 2"].index,
+                            "tremolo3": Config.envelopes.dictionary["full tremolo 3"].index,
+                            "tremolo4": Config.envelopes.dictionary["semi tremolo 1"].index,
+                            "tremolo5": Config.envelopes.dictionary["semi tremolo 2"].index,
+                            "tremolo6": Config.envelopes.dictionary["semi tremolo 3"].index,
+                            "tripolo1": Config.envelopes.dictionary["full tripolo 0"].index, // NPA: Cycles 9 times per beat to 12.
+                            "tripolo2": Config.envelopes.dictionary["full tripolo 1"].index, 
+                            "tripolo3": Config.envelopes.dictionary["full tripolo 2"].index, 
+                            "tripolo4": Config.envelopes.dictionary["semi tripolo 0"].index, // NPA: Cycles 9 times per beat to 12.
+                            "tripolo5": Config.envelopes.dictionary["semi tripolo 1"].index, 
+                            "tripolo6": Config.envelopes.dictionary["semi tripolo 2"].index, 
+                            // JummBox Blip.
+                            // For this envelope, its name was changed and its values were inverted to fit with all other envelopes.
+                            // Dogebox2's blip also gets confused here. That is handled later on.
+                            "blip 1": Config.envelopes.dictionary["jummbox blip 3"].index, // NPA: 6 to 8
+                            "blip 2": Config.envelopes.dictionary["jummbox blip 2"].index,
+                            "blip 3": Config.envelopes.dictionary["jummbox blip 1"].index,
+                            // Missing Envelopes.
+                            // Flute is just a copy of wibble. Try to translate accurately.
+                            "flute 1": Config.envelopes.dictionary["wibble 2"].index, // NPA: 16 to 12
+                            "flute 2": Config.envelopes.dictionary["wibble 2"].index, // NPA: 8 to 12
+                                // Funnily enough, in UltraBox this comparison is perfect as well.
+                            "flute 3": Config.envelopes.dictionary["wibble 3"].index, 
+                            // Pentolo is impossible to do in this scenario as there is no 1/5 tremolo in Midbox. Convert to tremolo/tripolo.
+                            "pentolo1": Config.envelopes.dictionary["full tremolo 0"].index, // NPA: 10 to 8
+                            "pentolo2": Config.envelopes.dictionary["full tremolo 1"].index, // NPA: 5 to 4
+                            "pentolo3": Config.envelopes.dictionary["full tripolo 2"].index, // NPA: 2.5 to 3
+                            "pentolo4": Config.envelopes.dictionary["semi tremolo 0"].index, // NPA: 10 to 8
+                            "pentolo5": Config.envelopes.dictionary["semi tremolo 1"].index, // NPA: 5 to 4
+                            "pentolo6": Config.envelopes.dictionary["semi tripolo 2"].index, // NPA: 2.5 to 3
+                            // Flutter envelopes are just very fast tremolos/tripolos. Convert to the fastest tripolo as that is closest.
+                            "flutter 1": Config.envelopes.dictionary["full tripolo 0"].index, // NPA: 14 to 12
+                            "flutter 2": Config.envelopes.dictionary["semi tripolo 0"].index, // NPA: 11 to 12
+                                // Same translation as tripolo1 as they are the same.
+                            "water-y flutter": Config.envelopes.dictionary["full tripolo 0"].index, // NPA: Cycles 9 times per beat to 12.
+                            // By sound, clap is very similar to twang. It is later layered with modbox trill.
+                            "clap 1": Config.envelopes.dictionary["twang 0"].index,
+                            "clap 2": Config.envelopes.dictionary["twang 1"].index,
+                            "clap 3": Config.envelopes.dictionary["twang 2"].index,
+                        };
+
+                        // This process is for extra-accurate envelopes.
+                        if (jsonFormat == "dogebox2" && (rawEnvelopeName == "clap 1" || rawEnvelopeName == "clap 2" || rawEnvelopeName == "clap 3")) {
+                            needAnother = true;
+                            extraEnvelope.envelope = Config.envelopes.dictionary["modbox trill"].index;
+                        }
+                        if (jsonFormat == "dogebox2" && (rawEnvelopeName == "blip 1" || rawEnvelopeName == "blip 2" || rawEnvelopeName == "blip 3")) {
+                            needAnother = true;
+                            skipAssign = true;
+                            if (rawEnvelopeName == "blip 1") {
+                                tempEnvelope.envelope = Config.envelopes.dictionary["jummbox blip 1"].index;
+                                extraEnvelope.envelope = Config.envelopes.dictionary["swell 2"].index;
+                            }
+                            if (rawEnvelopeName == "blip 2") {
+                                tempEnvelope.envelope = Config.envelopes.dictionary["jummbox blip 4"].index;
+                                extraEnvelope.envelope = Config.envelopes.dictionary["swell 3"].index;
+                            }
+                            if (rawEnvelopeName == "blip 3") {
+                                tempEnvelope.envelope = Config.envelopes.dictionary["jummbox blip 5"].index;
+                                extraEnvelope.envelope = Config.envelopes.dictionary["swell 3"].index;
+                            }
+                        }
+
+                        // Now, detect ModBox's old transitions and turn them into envelopes.
+                        if (jsonFormat == ("modbox" || "widebox" || "nepbox")){
+                            const oldTransitionToEnvelope = (<any>{
+                                "trill": { target: "noteVolume", envelope: "modbox trill" },
+                                "click": { target: "pitchShift", envelope: "modbox click" },
+                                "bow": { target: "pitchShift", envelope: "modbox bow" },
+                                "blip": { target: "noteVolume", envelope: "modbox blip" },
+                            });
+                            let transitionOrEnvelope: any = instrumentObject["transition"] || instrumentObject["envelope"];
+                            const possibleEnvelope = oldTransitionToEnvelope[transitionOrEnvelope];
+                            if (possibleEnvelope != null) {
+                                const env: EnvelopeSettings = new EnvelopeSettings();
+                                env.fromJsonObject(possibleEnvelope);
+                                this.addEnvelope(env.target, env.index, env.envelope);
+                            }
+                        }
+
+                        const newIndex: number | null = oldNameToNewIndex[rawEnvelopeName];
+                        // I'll use skipAssign for envelopes with the same name but different properties.
+                        if (newIndex != null && !(skipAssign)) tempEnvelope.envelope = newIndex;
+                    }
                     tempEnvelope.fromJsonObject(envelopeArray[i]);
                     this.addEnvelope(tempEnvelope.target, tempEnvelope.index, tempEnvelope.envelope);
+                    if (needAnother) this.addEnvelope(tempEnvelope.target, tempEnvelope.index, extraEnvelope.envelope);
                 }
             }
         }
@@ -4479,6 +4628,8 @@ export class Song {
                                 }
                             }
                         }
+                    // @TODO: This seems suspicious/wrong... but the if around
+                    // this entire section may keep it from causing problems?
                     } else if (beforeFour || fromBeepBox) {
                         const settings = legacySettings[clamp(0, legacySettings.length, base64CharCodeToInt[compressed.charCodeAt(charIndex++)])];
                         const instrument: Instrument = this.channels[instrumentChannelIterator].instruments[instrumentIndexIterator];
@@ -5006,7 +5157,7 @@ export class Song {
                 for (let channel: number = 0; channel < this.getChannelCount(); channel++) {
                     // Length of channel name string. Due to some crazy Unicode characters this needs to be 2 bytes...
                     var channelNameLength;
-                    if (beforeFour)
+                    if (fromJummBox && beforeFour)
                         channelNameLength = base64CharCodeToInt[compressed.charCodeAt(charIndex++)]
                     else
                         channelNameLength = ((base64CharCodeToInt[compressed.charCodeAt(charIndex++)] << 6) + base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
@@ -5429,7 +5580,7 @@ export class Song {
                     if (isModChannel) {
 
                         // 2 more indices for 'all' and 'active'
-                        const neededModInstrumentIndexBits: number = (beforeFive) ? neededInstrumentIndexBits : Song.getNeededBits(this.getMaxInstrumentsPerChannel() + 2);
+                        const neededModInstrumentIndexBits: number = (fromJummBox && beforeFive) ? neededInstrumentIndexBits : Song.getNeededBits(this.getMaxInstrumentsPerChannel() + 2);
 
                         for (let instrumentIndex: number = 0; instrumentIndex < channel.instruments.length; instrumentIndex++) {
 
@@ -5466,11 +5617,11 @@ export class Song {
                                     instrument.modulators[mod] = bits.read(6);
                                 }
 
-                                if (!beforeFive && (Config.modulators[instrument.modulators[mod]].name == "eq filter" || Config.modulators[instrument.modulators[mod]].name == "note filter")) {
+                                if (((fromJummBox && !beforeFive) || fromMidbox) && (Config.modulators[instrument.modulators[mod]].name == "eq filter" || Config.modulators[instrument.modulators[mod]].name == "note filter")) {
                                     instrument.modFilterTypes[mod] = bits.read(6);
                                 }
 
-                                if (beforeFive && instrument.modChannels[mod] >= 0) {
+                                if ((fromJummBox && beforeFive) && instrument.modChannels[mod] >= 0) {
                                     let forNoteFilter: boolean = effectsIncludeNoteFilter(this.channels[instrument.modChannels[mod]].instruments[instrument.modInstruments[mod]].effects);
 
                                     // For legacy filter cut/peak, need to denote since scaling must be applied
@@ -5500,7 +5651,7 @@ export class Song {
                                         instrument.modFilterTypes[mod] = 2; // Dot 1 Y
                                     }
                                 }
-                                else if (beforeFive) {
+                                else if (fromJummBox && beforeFive) {
                                     // Check for song reverb mod, which must be handled differently now that it is a multiplier
                                     if (instrument.modulators[mod] == Config.modulators.dictionary["song reverb"].index) {
                                         songReverbChannel = channelIndex;
@@ -5512,7 +5663,7 @@ export class Song {
                                 // Based on setting, enable some effects for the modulated instrument. This isn't always set, say if the instrument's pan was right in the center.
                                 // Only used on import of old songs, because sometimes an invalid effect can be set in a mod in the new version that is actually unused. In that case,
                                 // keeping the mod invalid is better since it preserves the state.
-                                if (beforeFive && Config.modulators[instrument.modulators[mod]].associatedEffect != EffectType.length) {
+                                if ((fromJummBox && beforeFive) && Config.modulators[instrument.modulators[mod]].associatedEffect != EffectType.length) {
                                     this.channels[instrument.modChannels[mod]].instruments[instrument.modInstruments[mod]].effects |= 1 << Config.modulators[instrument.modulators[mod]].associatedEffect;
                                 }
                             }
@@ -5734,6 +5885,7 @@ export class Song {
                                     if (!((beforeNine && fromBeepBox) || (beforeFive && fromJummBox))) {
                                         note.continuesLastPattern = (bits.read(1) == 1);
                                     } else {
+                                        // @TODO: This seems suspicious/wrong...
                                         if (beforeFour || fromBeepBox) {
                                             note.continuesLastPattern = false;
                                         } else {
