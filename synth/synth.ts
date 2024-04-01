@@ -1711,7 +1711,7 @@ export class Instrument {
             }
         }
 
-        this.envelopeCount = 0;
+        //this.envelopeCount = 0;
 
         if (this.type == InstrumentType.fm || this.type == InstrumentType.advfm) {
             if (allCarriersControlledByNoteSize && noteSizeControlsSomethingElse) {
@@ -2110,7 +2110,7 @@ export class Instrument {
         }
 
         if (instrumentObject["volume"] != undefined) {
-            if (jsonFormat == "beepbox") {
+            if (jsonFormat == "beepbox" || jsonFormat == "modbox" || jsonFormat == "foxbox" || jsonFormat == "nepbox" || jsonFormat == "sandbox" || jsonFormat == "todbox" || jsonFormat == "cardboardbox" || jsonFormat == "paandorasbox" || jsonFormat == "wackybox") {
                 // BeepBox-like mods had a lot less options for volume and couldn't go above 0 in JummBox-like volumes.
                 this.volume = Math.round(-clamp(0, 8, Math.round(5 - (instrumentObject["volume"] | 0) / 20)) * 25.0 / 7.0);
             } else {
@@ -2161,18 +2161,58 @@ export class Instrument {
                     // Note that the old slide transition has the same name as a new slide transition that is different.
                     // Only apply legacy settings if the instrument JSON was created before, based on the presence
                     // of the fade in/out fields.
-                    "slide": { transition: "slide in pattern", fadeInSeconds: 0.025, fadeOutTicks: -3 },
+                    "slide": { transition: "slide", fadeInSeconds: 0.025, fadeOutTicks: -3 },
                     "cross fade": { transition: "normal", fadeInSeconds: 0.04, fadeOutTicks: 6 },
                     "hard fade": { transition: "normal", fadeInSeconds: 0.0, fadeOutTicks: 48 },
                     "medium fade": { transition: "normal", fadeInSeconds: 0.0125, fadeOutTicks: 72 },
                     "soft fade": { transition: "normal", fadeInSeconds: 0.06, fadeOutTicks: 96 },
                 })[transitionProperty];
                 if (legacySettings != undefined) {
+                    // Slide in pattern no longer exists, so use the checkbox.
+                    if (legacySettings == "slide") {
+                        this.continueThruPattern = false;
+                    }
                     transition = Config.transitions.dictionary[legacySettings.transition];
                     // These may be overridden below.
                     this.fadeIn = Synth.secondsToFadeInSetting(legacySettings.fadeInSeconds);
                     this.fadeOut = Synth.ticksToFadeOutSetting(legacySettings.fadeOutTicks);
                 }
+
+                // Detect ModBox's old transitions and turn them into envelopes.
+                if (jsonFormat == "modbox" || jsonFormat == "nepbox"){
+                    const oldTransitionToEnvelope = (<any>{
+                        "trill": { target: "noteVolume", envelope: "modbox trill" },
+                        "click": { target: "pitchShift", envelope: "modbox click" },
+                        "bow": { target: "pitchShift", envelope: "modbox bow" },
+                        "blip": { target: "noteVolume", envelope: "modbox blip" },
+                    });
+                    const possibleEnvelope = oldTransitionToEnvelope[transitionProperty];
+                    if (possibleEnvelope != null) {
+                        const env: EnvelopeSettings = new EnvelopeSettings();
+                        env.fromJsonObject(possibleEnvelope);
+                        if (transitionProperty == "click" || transitionProperty == "bow") {
+                            this.effects |= 1 << 7;
+                            this.effects |= 1 << 8;
+                            // Trick to make the envelope work properly.
+                            // Note: pitchShift does not go negative.
+                            if (transitionProperty == "bow") {
+                                this.pitchShift = 14;
+                                instrumentObject["detuneCents"] = Config.detuneCenter - 800;
+                            } else if (transitionProperty == "click") {
+                                this.pitchShift = 18;
+                                instrumentObject["detuneCents"] = Config.detuneCenter - 1200;
+                            }
+                            // @TODO - Probably should come back to this when individual envelope
+                            // speeds are implemented, that a way these can be made a bit more accurate. 
+                            // The actual transitions are about 3x faster than the envelopes.
+                        }
+                        this.addEnvelope(env.target, env.index, env.envelope);
+                    }
+                }
+            }
+            if (transitionProperty == "slide in pattern") {
+                this.transition = Config.transitions.dictionary["slide"].index;
+                this.continueThruPattern = false;
             }
             if (transition != undefined) this.transition = transition.index;
 
@@ -2297,7 +2337,11 @@ export class Instrument {
             this.detune = clamp(Config.detuneMin, Config.detuneMax + 1, (instrumentObject["detune"] | 0));
         }
         else if (instrumentObject["detuneCents"] == undefined) {
-            this.detune = Config.detuneCenter;
+            if (jsonFormat != "modbox" || !effectsIncludeDetune(this.effects)) {
+                // Do not overwrite detune.
+            } else {
+                this.detune = Config.detuneCenter;
+            }
         }
 
         if (instrumentObject["distortion"] != undefined) {
@@ -3015,6 +3059,8 @@ export class Instrument {
                         };
 
                         // This process is for extra-accurate envelopes.
+                        // It commonly will add another envelope. Thinking about increasing the envelope limit to x2 the original size
+                        // to fix any issue where there are more envelopes on an instrument than the envelope limit.
                         if (jsonFormat == "dogebox2" && (rawEnvelopeName == "clap 1" || rawEnvelopeName == "clap 2" || rawEnvelopeName == "clap 3")) {
                             needAnother = true;
                             extraEnvelope.envelope = Config.envelopes.dictionary["modbox trill"].index;
@@ -3036,28 +3082,10 @@ export class Instrument {
                             }
                         }
 
-                        // Now, detect ModBox's old transitions and turn them into envelopes.
-                        if (jsonFormat == ("modbox" || "widebox" || "nepbox")){
-                            const oldTransitionToEnvelope = (<any>{
-                                "trill": { target: "noteVolume", envelope: "modbox trill" },
-                                "click": { target: "pitchShift", envelope: "modbox click" },
-                                "bow": { target: "pitchShift", envelope: "modbox bow" },
-                                "blip": { target: "noteVolume", envelope: "modbox blip" },
-                            });
-                            let transitionOrEnvelope: any = instrumentObject["transition"] || instrumentObject["envelope"];
-                            const possibleEnvelope = oldTransitionToEnvelope[transitionOrEnvelope];
-                            if (possibleEnvelope != null) {
-                                const env: EnvelopeSettings = new EnvelopeSettings();
-                                env.fromJsonObject(possibleEnvelope);
-                                this.addEnvelope(env.target, env.index, env.envelope);
-                            }
-                        }
-
                         const newIndex: number | null = oldNameToNewIndex[rawEnvelopeName];
                         // I'll use skipAssign for envelopes with the same name but different properties.
                         if (newIndex != null && !(skipAssign)) tempEnvelope.envelope = newIndex;
                     }
-                    tempEnvelope.fromJsonObject(envelopeArray[i]);
                     this.addEnvelope(tempEnvelope.target, tempEnvelope.index, tempEnvelope.envelope);
                     if (needAnother) this.addEnvelope(tempEnvelope.target, tempEnvelope.index, extraEnvelope.envelope);
                 }

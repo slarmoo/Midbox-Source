@@ -162,6 +162,16 @@ interface FloatingSelection {
 	amplitudeOffset: number;
 }
 
+const enum SelectionDragEvent {
+	// In this state, dragging on the edges of the selection will extend/retract the 
+	// selection, not changing the items inside but increasing/decreasing the range of 
+	// what is applied to the area.
+	Extending,
+	// In this state, dragging on the edges of the selection will stretch/squish the 
+	// selection, changing the items inside of the selection to fit in its new bounds.
+	Stretching,
+}
+
 function createFloatingSelectionFromBounds(wave: Float32Array, bounds: SelectionBounds): FloatingSelection {
 	const selectionStart: number = bounds.start;
 	const selectionEnd: number = bounds.end;
@@ -292,6 +302,7 @@ export class CustomChipPromptCanvas {
 	private _floatingSelection: FloatingSelection | null = null;
 	private _floatingSelectionDragStartX: number | null = null;
 	private _floatingSelectionDragStartY: number | null = null;
+	public selectionDragEvent: SelectionDragEvent = SelectionDragEvent.Extending;
 
 	// @TODO: The way this is used is a bit error-prone I think. The logic
 	// for how to use this should be at least noted somewhere in here.
@@ -323,7 +334,7 @@ export class CustomChipPromptCanvas {
 
 	public readonly container: HTMLElement = HTML.div({ class: "", style: "height: 294px; width: 768px; padding-bottom: 1.5em;" }, this._svg);
 
-	constructor(doc: SongDocument, private _curveModeMessage: HTMLElement) {
+	constructor(doc: SongDocument, private _curveModeMessage: HTMLElement, private _removeSelectionButton: HTMLElement) {
 		this._doc = doc;
 
 		for (let i: number = 0; i <= 4; i += 2) {
@@ -366,6 +377,7 @@ export class CustomChipPromptCanvas {
 		this.container.addEventListener("keydown", this._whenKeyPressed);
 
 		this._curveModeMessage.textContent = getCurveModeStepMessage(this.curveModeStep);
+		this._removeSelectionButton.style.display = "none";
 	}
 
 	public cleanUp(): void {
@@ -491,6 +503,7 @@ export class CustomChipPromptCanvas {
 			this.commitFloatingSelection();
 			this.clearSelection();
 			this.selectionModeStep = SelectionModeStep.HasSelection;
+			this._removeSelectionButton.style.display = "";
 			this._selectionBounds = {
 				start: Math.min(64, Math.max(0, storedDestinationStart)),
 				end: Math.min(64, Math.max(0, storedDestinationEnd)),
@@ -660,6 +673,7 @@ export class CustomChipPromptCanvas {
 			}
 		}
 		this.selectionModeStep = SelectionModeStep.NoSelection;
+		this._removeSelectionButton.style.display = "none";
 		this._selectionBounds = null;
 		this._tentativeSelectionBounds = null;
 		this._tentativeDestinationStart = null;
@@ -886,13 +900,14 @@ export class CustomChipPromptCanvas {
 					);
 
 					if (mouseIsAtStartOfSelection) {
-						if (event.shiftKey) {
+						if (this.selectionDragEvent == SelectionDragEvent.Stretching) {
 							if (this._floatingSelection == null) {
 								for (let i = 0; i < 64; i++) this.temporaryArray[i] = this.chipData[i];
 								this._floatingSelection = createFloatingSelectionFromBounds(this.chipData, bounds);
 							}
 
 							this.selectionModeStep = SelectionModeStep.StretchingFromStart;
+							this._removeSelectionButton.style.display = "";
 
 							this._floatingSelectionDragStartX = this._mouseX;
 							this._floatingSelectionDragStartY = this._mouseY;
@@ -908,6 +923,7 @@ export class CustomChipPromptCanvas {
 							this.commitFloatingSelection();
 
 							this.selectionModeStep = SelectionModeStep.MovingSelectionStart;
+							this._removeSelectionButton.style.display = "";
 
 							this._tentativeSelectionBounds = {
 								start: this._selectionBounds!.start,
@@ -915,13 +931,14 @@ export class CustomChipPromptCanvas {
 							};
 						}
 					} else if (mouseIsAtEndOfSelection) {
-						if (event.shiftKey) {
+						if (this.selectionDragEvent == SelectionDragEvent.Stretching) {
 							if (this._floatingSelection == null) {
 								for (let i = 0; i < 64; i++) this.temporaryArray[i] = this.chipData[i];
 								this._floatingSelection = createFloatingSelectionFromBounds(this.chipData, bounds);
 							}
 
 							this.selectionModeStep = SelectionModeStep.StretchingFromEnd;
+							this._removeSelectionButton.style.display = "";
 
 							this._tentativeSelectionBounds = {
 								start: Math.min(64, Math.max(0, this._floatingSelection.destinationStart)),
@@ -937,6 +954,7 @@ export class CustomChipPromptCanvas {
 							this.commitFloatingSelection();
 
 							this.selectionModeStep = SelectionModeStep.MovingSelectionEnd;
+							this._removeSelectionButton.style.display = "";
 
 							this._tentativeSelectionBounds = {
 								start: this._selectionBounds!.start,
@@ -945,6 +963,7 @@ export class CustomChipPromptCanvas {
 						}
 					} else if (mouseIsInsideSelection) {
 						this.selectionModeStep = SelectionModeStep.MovingFloatingSelection;
+						this._removeSelectionButton.style.display = "";
 						if (this._floatingSelection == null) {
 							for (let i = 0; i < 64; i++) this.temporaryArray[i] = this.chipData[i];
 							this._floatingSelection = createFloatingSelectionFromBounds(this.chipData, bounds);
@@ -1426,12 +1445,14 @@ export class CustomChipPromptCanvas {
 						const bounds: SelectionBounds | null = this._tentativeSelectionBounds;
 						if (bounds != null && bounds.start < bounds.end) {
 							this.selectionModeStep = SelectionModeStep.HasSelection;
+							this._removeSelectionButton.style.display = "";
 
 							this._selectionBounds!.start = bounds.start;
 							this._selectionBounds!.end = bounds.end;
 							this._tentativeSelectionBounds = null;
 						} else {
 							this.selectionModeStep = SelectionModeStep.NoSelection;
+							this._removeSelectionButton.style.display = "none";
 
 							this._selectionBounds = null;
 							this._tentativeSelectionBounds = null;
@@ -1453,12 +1474,14 @@ export class CustomChipPromptCanvas {
 						const bounds: SelectionBounds | null = this._tentativeSelectionBounds;
 						if (bounds != null && bounds.start < bounds.end) {
 							this.selectionModeStep = SelectionModeStep.HasSelection;
+							this._removeSelectionButton.style.display = "";
 
 							this._selectionBounds!.start = bounds.start;
 							this._selectionBounds!.end = bounds.end;
 							this._tentativeSelectionBounds = null;
 						} else {
 							this.selectionModeStep = SelectionModeStep.NoSelection;
+							this._removeSelectionButton.style.display = "none";
 
 							this._selectionBounds = null;
 							this._tentativeSelectionBounds = null;
@@ -1476,12 +1499,14 @@ export class CustomChipPromptCanvas {
 						const bounds: SelectionBounds | null = this._tentativeSelectionBounds;
 						if (bounds != null && bounds.start < bounds.end) {
 							this.selectionModeStep = SelectionModeStep.HasSelection;
+							this._removeSelectionButton.style.display = "";
 
 							this._selectionBounds!.start = bounds.start;
 							this._selectionBounds!.end = bounds.end;
 							this._tentativeSelectionBounds = null;
 						} else {
 							this.selectionModeStep = SelectionModeStep.NoSelection;
+							this._removeSelectionButton.style.display = "none";
 
 							this._selectionBounds = null;
 							this._tentativeSelectionBounds = null;
@@ -1504,6 +1529,7 @@ export class CustomChipPromptCanvas {
 						if (differenceX != 0 || differenceY != 0) {
 							if (bounds.start < bounds.end) {
 								this.selectionModeStep = SelectionModeStep.HasSelection;
+								this._removeSelectionButton.style.display = "";
 
 								this._selectionBounds!.start = bounds.start;
 								this._selectionBounds!.end = bounds.end;
@@ -1523,6 +1549,7 @@ export class CustomChipPromptCanvas {
 								new ChangeCustomWave(this._doc, this.chipData);
 							} else {
 								this.selectionModeStep = SelectionModeStep.NoSelection;
+								this._removeSelectionButton.style.display = "none";
 
 								this._selectionBounds = null;
 								this._floatingSelection = null;
@@ -1532,6 +1559,7 @@ export class CustomChipPromptCanvas {
 							}
 						} else {
 							this.selectionModeStep = SelectionModeStep.HasSelection;
+							this._removeSelectionButton.style.display = "";
 						}
 
 						this._tentativeSelectionBounds = null;
@@ -1557,6 +1585,7 @@ export class CustomChipPromptCanvas {
 						if (differenceX != 0) {
 							if (newSelectionStart < newSelectionEnd) {
 								this.selectionModeStep = SelectionModeStep.HasSelection;
+								this._removeSelectionButton.style.display = "";
 
 								this._selectionBounds!.start = newSelectionStart;
 								this._selectionBounds!.end = newSelectionEnd;
@@ -1575,6 +1604,7 @@ export class CustomChipPromptCanvas {
 								new ChangeCustomWave(this._doc, this.chipData);
 							} else {
 								this.selectionModeStep = SelectionModeStep.NoSelection;
+								this._removeSelectionButton.style.display = "none";
 
 								this._selectionBounds = null;
 								this._floatingSelection = null;
@@ -1605,6 +1635,7 @@ export class CustomChipPromptCanvas {
 						if (differenceX != 0) {
 							if (newSelectionStart < newSelectionEnd) {
 								this.selectionModeStep = SelectionModeStep.HasSelection;
+								this._removeSelectionButton.style.display = "";
 
 								this._selectionBounds!.start = newSelectionStart;
 								this._selectionBounds!.end = newSelectionEnd;
@@ -1623,6 +1654,7 @@ export class CustomChipPromptCanvas {
 								new ChangeCustomWave(this._doc, this.chipData);
 							} else {
 								this.selectionModeStep = SelectionModeStep.NoSelection;
+								this._removeSelectionButton.style.display = "none";
 
 								this._selectionBounds = null;
 								this._floatingSelection = null;
@@ -1719,7 +1751,11 @@ export class CustomChipPrompt implements Prompt {
 
 	private curveModeStepText: HTMLDivElement = div({style: "position: absolute; align-self: center; bottom: 57px; font-size: 15px;"}, "");
 
-	public customChipCanvas: CustomChipPromptCanvas = new CustomChipPromptCanvas(this._doc, this.curveModeStepText);
+	public removeSelectionButton: HTMLButtonElement = button({ style: "position: absolute; width:30%; align-self: center; bottom: 54px; font-size: 13px;" }, [
+		"Cancel Selection (Esc)",
+	]);
+
+	public customChipCanvas: CustomChipPromptCanvas = new CustomChipPromptCanvas(this._doc, this.curveModeStepText, this.removeSelectionButton);
 
 	public readonly _playButton: HTMLButtonElement = button({ style: "width: 55%;", type: "button" });
 
@@ -1751,11 +1787,21 @@ export class CustomChipPrompt implements Prompt {
 			SVG.path({ d: "M 2.5 0 q -0.25 0 -0.487 0.048 l 0.194 0.98 A 1.5 1.5 0 0 1 2.5 1 h 0.458 V 0 z m 2.292 0 h -0.917 v 1 h 0.917 z m 1.833 0 h -0.917 v 1 h 0.917 z m 1.833 0 h -0.916 v 1 h 0.916 z m 1.834 0 h -0.917 v 1 h 0.917 z m 1.833 0 h -0.917 v 1 h 0.917 z M 13.5 0 h -0.458 v 1 h 0.458 q 0.151 0 0.293 0.029 l 0.194 -0.981 A 2.5 2.5 0 0 0 13.5 0 m 2.079 1.11 a 2.5 2.5 0 0 0 -0.69 -0.689 l -0.556 0.831 q 0.248 0.167 0.415 0.415 l 0.83 -0.556 z M 1.11 0.421 a 2.5 2.5 0 0 0 -0.689 0.69 l 0.831 0.556 c 0.11 -0.164 0.251 -0.305 0.415 -0.415 z M 16 2.5 q 0 -0.25 -0.048 -0.487 l -0.98 0.194 q 0.027 0.141 0.028 0.293 v 0.458 h 1 z M 0.048 2.013 A 2.5 2.5 0 0 0 0 2.5 v 0.458 h 1 V 2.5 q 0 -0.151 0.029 -0.293 z M 0 3.875 v 0.917 h 1 v -0.917 z m 16 0.917 v -0.917 h -1 v 0.917 z M 0 5.708 v 0.917 h 1 v -0.917 z m 16 0.917 v -0.917 h -1 v 0.917 z M 0 7.542 v 0.916 h 1 v -0.916 z m 15 0.916 h 1 v -0.916 h -1 z M 0 9.375 v 0.917 h 1 v -0.917 z m 16 0.917 v -0.917 h -1 v 0.917 z m -16 0.916 v 0.917 h 1 v -0.917 z m 16 0.917 v -0.917 h -1 v 0.917 z m -16 0.917 v 0.458 q 0 0.25 0.048 0.487 l 0.98 -0.194 A 1.5 1.5 0 0 1 1 13.5 v -0.458 z m 16 0.458 v -0.458 h -1 v 0.458 q 0 0.151 -0.029 0.293 l 0.981 0.194 Q 16 13.75 16 13.5 M 0.421 14.89 c 0.183 0.272 0.417 0.506 0.69 0.689 l 0.556 -0.831 a 1.5 1.5 0 0 1 -0.415 -0.415 z m 14.469 0.689 c 0.272 -0.183 0.506 -0.417 0.689 -0.69 l -0.831 -0.556 c -0.11 0.164 -0.251 0.305 -0.415 0.415 l 0.556 0.83 z m -12.877 0.373 Q 2.25 16 2.5 16 h 0.458 v -1 H 2.5 q -0.151 0 -0.293 -0.029 z M 13.5 16 q 0.25 0 0.487 -0.048 l -0.194 -0.98 A 1.5 1.5 0 0 1 13.5 15 h -0.458 v 1 z m -9.625 0 h 0.917 v -1 h -0.917 z m 1.833 0 h 0.917 v -1 h -0.917 z m 1.834 -1 v 1 h 0.916 v -1 z m 1.833 1 h 0.917 v -1 h -0.917 z m 1.833 0 h 0.917 v -1 h -0.917 z", fill: "currentColor" }),
 		]),
 	]);
-	private readonly drawToolsContainer: HTMLDivElement = div({ class: "instrument-bar", style: "margin-left: -3px; display: grid; grid-template-columns: repeat(4, 70px); grid-gap: 2px 0px; width: 270px;" }, this._drawType_Standard, this._drawType_Line, this._drawType_Curve, this._drawType_Selection);
+	private readonly drawToolsContainer: HTMLDivElement = div({ class: "instrument-bar", style: "margin-left: -4px; display: grid; grid-template-columns: repeat(4, 70px); grid-gap: 2px 0px; width: 270px;" }, this._drawType_Standard, this._drawType_Line, this._drawType_Curve, this._drawType_Selection);
 
-	private readonly _removeSelectionButton: HTMLButtonElement = button({ style: "position: absolute; width:30%; align-self: center; bottom: 54px; font-size: 13px;" }, [
-		"Cancel Selection",
+	private readonly dragOnSelectionButton1: HTMLButtonElement = button({ style: "width: 90px; position: absolute; top: 84px; align-self: center;", title: "Extend Selection Ends"}, [
+		// Extending dotted-outline box icon:
+		SVG.svg({ class: "no-underline", style: "flex-shrink: 0; scale: 2; position: absolute; top: 7px; left: 31px; pointer-events: none;", width: "24", height: "24", viewBox: "0 0 30 24" }, [
+			SVG.path({ d: "M4 3 5 3 5 3.5 4 3.5 4 3M6 3 7 3 7 3.5 6 3.5 6 3M8 3 9 3 9 3.5 8 3.5 8 3M10 3 11 3 11 3.5 10 3.5 10 3M12 3 13 3 13 3.5 12 3.5 12 3M14 3 15 3 15 3.5 14 3.5 14 3M16 3 17 3 17 3.5 16 3.5 16 3M18 3 19 3 19 3.5 18 3.5 18 3M3 4 3.5 4 3.5 5 3 5 3 4M3 6 3.5 6 3.5 7 3 7 3 6M3 8 3.5 8 3.5 9 3 9 3 8M3 10 3.5 10 3.5 11 3 11 3 10M3 12 3.5 12 3.5 13 3 13 3 12M4 14 4 13.5 5 13.5 5 14 4 14M6 14 6 13.5 7 13.5 7 14 6 14M8 14 8 13.5 9 13.5 9 14 8 14M10 14 10 13.5 11 13.5 11 14 10 14M12 14 12 13.5 13 13.5 13 14 12 14M14 14 14 13.5 15 13.5 15 14 14 14M16 14 16 13.5 17 13.5 17 14 16 14M18 14 18 13.5 19 13.5 19 14 18 14M20 4 19.5 4 19.5 5 20 5 20 4M20 6 19.5 6 19.5 7 20 7 20 6M24 8 19.5 8 19.5 9 24 9 24 11 26 8.5 24 6 24 8M20 10 19.5 10 19.5 11 20 11 20 10M20 12 19.5 12 19.5 13 20 13 20 12M28 6 27 5 27.5 7 28 7 28 6M28 8 27.5 8 27.5 9 28 9 28 8M28 10 27.5 10 27 12 28 11 28 10ZM5 6 5 5 10 5 10 11 13 11 13 7 16 7 16 9 18 9 18 10 16 10 16 8 13 8 13 12 10 12 10 6 5 6Z", fill: "currentColor" }),
+		]),
 	]);
+	private readonly dragOnSelectionButton2: HTMLButtonElement = button({ style: "width: 90px; position: absolute; top: 84px; align-self: center;", title: "Stretch Items in Selection"}, [
+		// Stretching dotted-outline box icon:
+		SVG.svg({ class: "no-underline", style: "flex-shrink: 0; scale: 2; position: absolute; top: 7px; left: 31px; pointer-events: none;", width: "24", height: "24", viewBox: "0 0 30 24" }, [
+			SVG.path({ d: "M4 3 5 3 5 3.5 4 3.5 4 3M6 3 7 3 7 3.5 6 3.5 6 3M8 3 9 3 9 3.5 8 3.5 8 3M10 3 11 3 11 3.5 10 3.5 10 3M12 3 13 3 13 3.5 12 3.5 12 3M14 3 15 3 15 3.5 14 3.5 14 3M16 3 17 3 17 3.5 16 3.5 16 3M18 3 19 3 19 3.5 18 3.5 18 3M20 3 21 3 21 3.5 20 3.5 20 3M22 3 23 3 23 3.5 22 3.5 22 3M24 3 25 3 25 3.5 24 3.5 24 3M26 3 27 3 27 3.5 26 3.5 26 3M3 4 3.5 4 3.5 5 3 5 3 4M3 6 3.5 6 3.5 7 3 7 3 6M3 8 3.5 8 3.5 9 3 9 3 8M3 10 3.5 10 3.5 11 3 11 3 10M3 12 3.5 12 3.5 13 3 13 3 12M4 14 4 13.5 5 13.5 5 14 4 14M6 14 6 13.5 7 13.5 7 14 6 14M8 14 8 13.5 9 13.5 9 14 8 14M10 14 10 13.5 11 13.5 11 14 10 14M12 14 12 13.5 13 13.5 13 14 12 14M14 14 14 13.5 15 13.5 15 14 14 14M16 14 16 13.5 17 13.5 17 14 16 14M18 14 18 13.5 19 13.5 19 14 18 14M20 14 21 14 21 13.5 20 13.5 20 14M22 14 23 14 23 13.5 22 13.5 22 14M24 14 25 14 25 13.5 24 13.5 24 14M26 14 27 14 27 13.5 26 13.5 26 14M28 4 27.5 4 27.5 5 28 5 28 4M28 6 27.5 6 27.5 7 28 7 28 6M28 8 27.5 8 27.5 9 28 9 28 8M28 10 27.5 10 27.5 11 28 11 28 10M28 12 27.5 12 27.5 13 28 13 28 12ZM5 6 5 5 13 5 13 11 18 11 18 7 23 7 23 9 26 9 26 10 23 10 23 8 18 8 18 12 13 12 13 6 5 6Z", fill: "currentColor" }),
+		]),
+	]);
+
 	private readonly _flipHorizontalButton: HTMLButtonElement = button({ style: "position: absolute; width: 14%; align-self: center; left: 224px; bottom: 20px; font-size: 10.35px;" }, [
 		"Flip Left ↔ Right (H)",
 	]);
@@ -1808,17 +1854,19 @@ export class CustomChipPrompt implements Prompt {
 		h2("Edit Custom Chip Instrument"),
 		this._undoButton,
 		this._redoButton,
+		this.dragOnSelectionButton1,
+		this.dragOnSelectionButton2,
 		div({ style: "display: flex; width: 55%; align-self: center; flex-direction: row; align-items: center; justify-content: center;" },
 			this._playButton,
 		),
-		div({ style: "margin-top: 12px; margin-bottom: 3px; align-self: center; display: flex; flex-direction: row; align-items: center; justify-content: center;" },
+		div({ style: "margin-top: 36px; margin-bottom: 3px; align-self: center; display: flex; flex-direction: row; align-items: center; justify-content: center;" },
 			this.drawToolsContainer,
 		),
 		div({ style: "margin-top: 2px; display: flex; flex-direction: row; align-items: center; justify-content: center;" },
 			this.customChipCanvas.container,
 		),
 		this.curveModeStepText,
-		this._removeSelectionButton,
+		this.removeSelectionButton,
 		this._flipHorizontalButton,
 		this._flipVerticalButton,
 		this.loadWaveformPresetSelect,
@@ -1846,11 +1894,15 @@ export class CustomChipPrompt implements Prompt {
 		this._drawType_Line.addEventListener("click", this._selectLineDrawType);
 		this._drawType_Curve.addEventListener("click", this._selectCurveDrawType);
 		this._drawType_Selection.addEventListener("click", this._selectSelectionDrawType);
-		this._removeSelectionButton.addEventListener("click", this._removeSelection);
+		this.removeSelectionButton.addEventListener("click", this._removeSelection);
 		this._flipHorizontalButton.addEventListener("click", this.customChipCanvas.flipHorizontally);
 		this._flipVerticalButton.addEventListener("click", this.customChipCanvas.flipVertically);
+		this.dragOnSelectionButton1.addEventListener("click", this._extendSelectionPressed);
+		this.dragOnSelectionButton2.addEventListener("click", this._stretchSelectionPressed);
 		this.curveModeStepText.style.display = "none";
-		this._removeSelectionButton.style.display = "none";
+		this.removeSelectionButton.style.display = "none";
+		this.dragOnSelectionButton1.style.display = "none";
+		this.dragOnSelectionButton2.style.display = "none";
 
 		let colors = ColorConfig.getChannelColor(this._doc.song, this._doc.channel);
 		this.drawToolsContainer.style.setProperty("--text-color-lit", colors.primaryNote);
@@ -1895,7 +1947,8 @@ export class CustomChipPrompt implements Prompt {
 		this.customChipCanvas.drawMode = DrawMode.Standard;
 		this.customChipCanvas.clearSelection();
 		this.curveModeStepText.style.display = "none";
-		this._removeSelectionButton.style.display = "none";
+		this.dragOnSelectionButton1.style.display = "none";
+		this.dragOnSelectionButton2.style.display = "none";
 	}
 
 	private _selectLineDrawType = (): void => {
@@ -1906,7 +1959,8 @@ export class CustomChipPrompt implements Prompt {
 		this.customChipCanvas.drawMode = DrawMode.Line;
 		this.customChipCanvas.clearSelection();
 		this.curveModeStepText.style.display = "none";
-		this._removeSelectionButton.style.display = "none";
+		this.dragOnSelectionButton1.style.display = "none";
+		this.dragOnSelectionButton2.style.display = "none";
 	}
 
 	private _selectCurveDrawType = (): void => {
@@ -1918,8 +1972,9 @@ export class CustomChipPrompt implements Prompt {
 		this.customChipCanvas.drawMode = DrawMode.Curve;
 		this.customChipCanvas.clearSelection();
 		this.curveModeStepText.style.display = "";
-		this._removeSelectionButton.style.display = "none";
 		this.curveModeStepText.textContent = getCurveModeStepMessage(this.customChipCanvas.curveModeStep);
+		this.dragOnSelectionButton1.style.display = "none";
+		this.dragOnSelectionButton2.style.display = "none";
 	}
 
 	private _selectSelectionDrawType = (): void => {
@@ -1930,7 +1985,8 @@ export class CustomChipPrompt implements Prompt {
 		this.customChipCanvas.drawMode = DrawMode.Selection;
 		this.customChipCanvas.clearSelection();
 		this.curveModeStepText.style.display = "none";
-		this._removeSelectionButton.style.display = "";
+		this.dragOnSelectionButton1.style.display = "";
+		this.dragOnSelectionButton2.style.display = "none";
 	}
 
 	private _close = (): void => {
@@ -1952,7 +2008,7 @@ export class CustomChipPrompt implements Prompt {
 		this._drawType_Line.removeEventListener("click", this._selectLineDrawType);
 		this._drawType_Curve.removeEventListener("click", this._selectCurveDrawType);
 		this._drawType_Selection.removeEventListener("click", this._selectSelectionDrawType);
-		this._removeSelectionButton.removeEventListener("click", this._removeSelection);
+		this.removeSelectionButton.removeEventListener("click", this._removeSelection);
 		this._flipHorizontalButton.removeEventListener("click", this.customChipCanvas.flipHorizontally);
 		this._flipVerticalButton.removeEventListener("click", this.customChipCanvas.flipVertically);
 	}
@@ -1960,9 +2016,19 @@ export class CustomChipPrompt implements Prompt {
 	private _copySettings = (): void => {
 		this.customChipCanvas.copy();
 	}
-
 	private _pasteSettings = (): void => {
 		this.customChipCanvas.paste();
+	}
+	
+	private _extendSelectionPressed = (): void => {
+		this.dragOnSelectionButton1.style.display = "none";
+		this.dragOnSelectionButton2.style.display = "";
+		this.customChipCanvas.selectionDragEvent = SelectionDragEvent.Stretching;
+	}
+	private _stretchSelectionPressed = (): void => {
+		this.dragOnSelectionButton1.style.display = "";
+		this.dragOnSelectionButton2.style.display = "none";
+		this.customChipCanvas.selectionDragEvent = SelectionDragEvent.Extending;
 	}
 
 	// Taken from SongEditor.ts
@@ -2054,15 +2120,15 @@ export class CustomChipPrompt implements Prompt {
 		  	this.customChipCanvas.shiftSamplesDown();
 		  	event.stopPropagation();
 		}
-		else if (event.keyCode == 82 ) { // r
+		else if (event.keyCode == 82) { // r
 			this._decideRandomization();
 		  	event.stopPropagation();
 		}
-		else if (event.keyCode == 67 ) { // c
+		else if (event.keyCode == 67) { // c
 			this.customChipCanvas.copy();
 			event.stopPropagation();
 	  	}
-		else if (event.keyCode == 86 ) { // v
+		else if (event.keyCode == 86) { // v
 			this.customChipCanvas.paste();
 			event.stopPropagation();
 	  	}
@@ -2074,22 +2140,31 @@ export class CustomChipPrompt implements Prompt {
 			this.customChipCanvas.flipVertically();
 			event.stopPropagation();
 		}
-		else if (event.keyCode == 49 ) { // 1
+		else if (event.keyCode == 49) { // 1
 			this._selectStandardDrawType();
 			event.stopPropagation();
 	  	}
-		else if (event.keyCode == 50 ) { // 2
+		else if (event.keyCode == 50) { // 2
 			this._selectLineDrawType();
 			event.stopPropagation();
 	  	}
-		else if (event.keyCode == 51 ) { // 3
+		else if (event.keyCode == 51) { // 3
 			this._selectCurveDrawType();
 			event.stopPropagation();
 	  	}
-		else if (event.keyCode == 52 ) { // 4
+		else if (event.keyCode == 52) { // 4
 			this._selectSelectionDrawType();
 			event.stopPropagation();
 	  	}
+		else if (event.keyCode == 27) { // esc
+			// Pointed out to me. This is the standard keybind for getting rid of selections.
+			event.stopPropagation();
+			if (this.customChipCanvas.selectionModeStep != SelectionModeStep.NoSelection) {
+				this.customChipCanvas.clearSelection();
+			} else {
+				this._close();
+			}
+		}
 	}
 
 	private _saveChanges = (): void => {

@@ -63,7 +63,6 @@ export class ImportPrompt implements Prompt {
 			{
 				name: "ModBox-Based", modSelect: <DictionaryArray<ModList>>toNameMap([
 					{name: "ModBox", value: "modbox"},
-					{name: "WideBox", value: "widebox"},
 					{name: "Nepbox", value: "nepbox"},
 				])
 			},
