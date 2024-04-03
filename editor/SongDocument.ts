@@ -88,10 +88,12 @@ export class SongDocument {
 		public EQFilterCutOnRandomization: boolean = false;
 		public EQFilterPeakOnRandomization: boolean = false;
 		public EQFilterTypeOnRandomization: boolean = false;
+		public EQFilterMorphsOnRandomization: boolean = false;
 		public noteFilterOnRandomization: boolean = true;
 		public noteFilterCutOnRandomization: boolean = false;
 		public noteFilterPeakOnRandomization: boolean = false;
 		public noteFilterTypeOnRandomization: boolean = false;
+		public noteFilterMorphsOnRandomization: boolean = false;
 
     	public chipWaveformOnRandomization: boolean = true;
     	public PWMWidthOnRandomization: boolean = true;
@@ -128,7 +130,7 @@ export class SongDocument {
 		public strumSpeedOnRandomization: boolean = false;
 		public arpeggioSpeedOnRandomization: boolean = false;
 		public arpeggioFastTwoNoteOnRandomization: boolean = false;
-		public bounceArpeggioOnRandomization: boolean = false;
+		public arpeggioPatternOnRandomization: boolean = false;
 		public pitchShiftOnRandomization: boolean = true;
 		public detuneOnRandomization: boolean = false;
 		public vibratoOnRandomization: boolean = true;
@@ -146,6 +148,7 @@ export class SongDocument {
 		public reverbOnRandomization: boolean = true;
 		public keyAffectedOnRandomization: boolean = false;
 		public SDAffectedOnRandomization: boolean = false;
+		public SOAffectedOnRandomization: boolean = false;
 
 		public envelopesOnRandomization: boolean = true;
 		public envelopeSpeedOnRandomization: boolean = false;

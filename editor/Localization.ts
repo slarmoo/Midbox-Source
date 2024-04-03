@@ -657,7 +657,13 @@ export class Localization {
     public static midboxMiscPresets44Label: string = "supersaw click";
     public static midboxMiscPresets45Label: string = "corrupted vocals 2";
     public static midboxMiscPresets46Label: string = "space pad";
-    public static midboxMiscPresets47Label: string = "chipped triangle bass";
+    public static midboxMiscPresets47Label: string = "chipped triangle bass 1";
+    public static midboxMiscPresets48Label: string = "chipped triangle bass 2";
+    public static midboxMiscPresets49Label: string = "hypersaw synth";
+    public static midboxMiscPresets50Label: string = "lobby marimba";
+    public static midboxMiscPresets51Label: string = "terminal blip";
+    public static midboxMiscPresets52Label: string = "doom triangle SFX";
+    public static midboxMiscPresets53Label: string = "electronic pluck 3";
     public static midboxDubstepPresets1Label: string = "dubstep bwayyyy";
     public static midboxDubstepPresets2Label: string = "dubstep bass hum";
     public static midboxDubstepPresets3Label: string = "dubstep yaa";
@@ -668,7 +674,7 @@ export class Localization {
     public static midboxDubstepPresets8Label: string = "crispy growl";
     public static midboxDubstepPresets9Label: string = "distorted growl";
     public static midboxDubstepPresets10Label: string = "dance growl";
-    public static midboxDubstepPresets11Label: string = "dubstep saw";
+    public static midboxDubstepPresets11Label: string = "dubstep saw 1";
     public static midboxDubstepPresets12Label: string = "retro dubstep growl";
     public static midboxDubstepPresets13Label: string = "heavy growl";
     public static midboxDubstepPresets14Label: string = "bouncy wub";
@@ -678,6 +684,10 @@ export class Localization {
     public static midboxDubstepPresets18Label: string = "dubstep robot";
     public static midboxDubstepPresets19Label: string = "terror";
     public static midboxDubstepPresets20Label: string = "heavily distorted bwah";
+    public static midboxDubstepPresets21Label: string = "recharge synth";
+    public static midboxDubstepPresets22Label: string = "dynamic growler 1 (morph)";
+    public static midboxDubstepPresets23Label: string = "dynamic growler 2 (morph)";
+    public static midboxDubstepPresets24Label: string = "dubstep saw 2";
     public static midboxNoisePresets1Label: string = "hollow retro riser";
     public static midboxNoisePresets2Label: string = "hollow snare-clap";
     public static midboxDrumPresets1Label: string = "enhanced synth kick";
@@ -690,6 +700,12 @@ export class Localization {
     public static midboxDrumPresets8Label: string = "kick bass 1";
     public static midboxDrumPresets9Label: string = "kick bass 2";
     public static midboxDrumPresets10Label: string = "kick bass 3";
+    public static midboxDrumPresets11Label: string = "FM hi-hat";
+    public static midboxDrumPresets12Label: string = "FM deep clap";
+    public static midboxDrumPresets13Label: string = "high blip snare (setpiece)";
+    public static midboxDrumPresets14Label: string = "heavy boop kick (setpiece)";
+    public static midboxDrumPresets15Label: string = "corruption drumset";
+    public static midboxDrumPresets16Label: string = "strong synth kick";
     public static midboxPianoPresets1Label: string = "blessed piano";
     public static midboxPianoPresets2Label: string = "desolated piano";
     public static midboxPianoPresets3Label: string = "rough glistening piano";
@@ -721,8 +737,8 @@ export class Localization {
     public static midboxFMPresets3Label: string = "FM guitar";
     public static midboxFMPresets4Label: string = "FM pluck bass";
     public static midboxFMPresets5Label: string = "FM lead";
-    public static midboxFMPresets6Label: string = "";
-    public static midboxFMPresets7Label: string = "";
+    public static midboxFMPresets6Label: string = "FM distortion guitar";
+    public static midboxFMPresets7Label: string = "FM chipper bass";
     public static midboxWavetablePresets1Label: string = "multi-sawtooth pulse";
     public static midboxWavetablePresets2Label: string = "sawtooth pulse width";
     public static midboxWavetablePresets3Label: string = "square -> sawtooth";
@@ -747,6 +763,7 @@ export class Localization {
     public static retroPresets14Label: string = "Atari Square";
     public static retroPresets15Label: string = "Atari Bass";
     public static retroPresets16Label: string = "Sunsoft Bass";
+    public static retroPresets17Label: string = "FM sine";
     public static keyboardPresets1Label: string = "grand piano 1";
     public static keyboardPresets2Label: string = "bright piano";
     public static keyboardPresets3Label: string = "electric grand";

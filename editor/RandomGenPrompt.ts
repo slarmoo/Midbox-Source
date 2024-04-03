@@ -32,10 +32,12 @@ export class RandomGenPrompt implements Prompt {
     private readonly _EQFilterCutBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _EQFilterPeakBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _EQFilterTypeBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _EQFilterMorphsBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _noteFilterBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _noteFilterCutBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _noteFilterPeakBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _noteFilterTypeBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _noteFilterMorphsBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
 
     private readonly _chipwaveBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _pulseWidthBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
@@ -86,7 +88,7 @@ export class RandomGenPrompt implements Prompt {
     private readonly _strumSpeedBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _arpeggioSpeedBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _arpeggioFastTwoNoteBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
-    private readonly _bounceArpeggioBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _arpeggioPatternBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _pitchShiftBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _detuneBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _vibratoBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
@@ -104,6 +106,7 @@ export class RandomGenPrompt implements Prompt {
     private readonly _reverbBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _keyAffectedBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _SDAffectedBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
+    private readonly _SOAffectedBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
 
     private readonly _envelopeBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
     private readonly _envelopeSpeedBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
@@ -223,6 +226,10 @@ public readonly container: HTMLDivElement = div({class: "prompt noSelection", st
 			this._EQFilterTypeBox,
         ),
     label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"EQ Filter Morphs:",
+			this._EQFilterMorphsBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
 			"Note Filter:",
 			this._noteFilterBox,
         ),
@@ -237,6 +244,10 @@ public readonly container: HTMLDivElement = div({class: "prompt noSelection", st
     label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
 			"Note Filter Type:",
 			this._noteFilterTypeBox,
+        ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"EQ Filter Morphs:",
+			this._noteFilterMorphsBox,
         ),
     h4({style: "display: flex; flex-direction: row; text-align: center; align-items: center; height: 0.5em; justify-content: flex-end;"},
         "Instrument Type-Specific",
@@ -380,8 +391,8 @@ public readonly container: HTMLDivElement = div({class: "prompt noSelection", st
 			this._arpeggioFastTwoNoteBox,
         ),
     label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
-			"Bounce Arpeggio:",
-			this._bounceArpeggioBox,
+			"Arpeggio Pattern:",
+			this._arpeggioPatternBox,
         ),
     label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
 			"Pitch Shift:",
@@ -451,6 +462,10 @@ public readonly container: HTMLDivElement = div({class: "prompt noSelection", st
 			"SD-Affected:",
 			this._SDAffectedBox,
         ),
+    label({style: "display: flex; flex-direction: row; align-items: center; height: 1em; justify-content: flex-end;"},
+			"SO-Affected:",
+			this._SOAffectedBox,
+        ),
     h4({style: "display: flex; flex-direction: row; text-align: center; align-items: center; height: 0.5em; justify-content: flex-end;"},
         "Envelopes",
     ),  
@@ -490,9 +505,9 @@ constructor(private _doc: SongDocument) {
     this._drumNoiseBox.checked = this._doc.prefs.drumNoiseOnRandomization;
     this._drumsetBox.checked = this._doc.prefs.drumsetOnRandomization;
 
-    this._volumeBox.checked = this._doc.volumeOnRandomization;
-    this._panBox.checked = this._doc.panningOnRandomization;
-    this._panDelayBox.checked = this._doc.panDelayOnRandomization;
+    this._volumeBox.checked = this._doc.prefs.volumeOnRandomization;
+    this._panBox.checked = this._doc.prefs.panningOnRandomization;
+    this._panDelayBox.checked = this._doc.prefs.panDelayOnRandomization;
     this._fadeBox.checked = this._doc.prefs.fadeOnRandomization;
     this._unisonBox.checked = this._doc.prefs.unisonOnRandomization;
 
@@ -500,10 +515,12 @@ constructor(private _doc: SongDocument) {
     this._EQFilterCutBox.checked = this._doc.EQFilterCutOnRandomization;
     this._EQFilterPeakBox.checked = this._doc.EQFilterPeakOnRandomization;
     this._EQFilterTypeBox.checked = this._doc.EQFilterTypeOnRandomization;
+    this._EQFilterMorphsBox.checked = this._doc.EQFilterMorphsOnRandomization;
     this._noteFilterBox.checked = this._doc.prefs.noteFilterOnRandomization;
     this._noteFilterCutBox.checked = this._doc.noteFilterCutOnRandomization;
     this._noteFilterPeakBox.checked = this._doc.noteFilterPeakOnRandomization;
     this._noteFilterTypeBox.checked = this._doc.noteFilterTypeOnRandomization;
+    this._noteFilterMorphsBox.checked = this._doc.noteFilterMorphsOnRandomization;
 
     this._chipwaveBox.checked = this._doc.chipWaveformOnRandomization;
     this._pulseWidthBox.checked = this._doc.PWMWidthOnRandomization;
@@ -540,7 +557,7 @@ constructor(private _doc: SongDocument) {
     this._strumSpeedBox.checked = this._doc.strumSpeedOnRandomization;
     this._arpeggioSpeedBox.checked = this._doc.arpeggioSpeedOnRandomization;
     this._arpeggioFastTwoNoteBox.checked = this._doc.arpeggioFastTwoNoteOnRandomization;
-    this._bounceArpeggioBox.checked = this._doc.bounceArpeggioOnRandomization;
+    this._arpeggioPatternBox.checked = this._doc.arpeggioPatternOnRandomization;
     this._pitchShiftBox.checked = this._doc.pitchShiftOnRandomization;
     this._detuneBox.checked = this._doc.detuneOnRandomization;
     this._vibratoBox.checked = this._doc.vibratoOnRandomization;
@@ -558,6 +575,7 @@ constructor(private _doc: SongDocument) {
     this._reverbBox.checked = this._doc.reverbOnRandomization;
     this._keyAffectedBox.checked = this._doc.keyAffectedOnRandomization;
     this._SDAffectedBox.checked = this._doc.SDAffectedOnRandomization;
+    this._SOAffectedBox.checked = this._doc.SOAffectedOnRandomization;
     
     this._envelopeBox.checked = this._doc.envelopesOnRandomization;
     this._envelopeSpeedBox.checked = this._doc.envelopeSpeedOnRandomization;
@@ -589,6 +607,9 @@ private _confirm = (): void => {
     this._doc.prefs.drumNoiseOnRandomization = this._drumNoiseBox.checked;
     this._doc.prefs.drumsetOnRandomization = this._drumsetBox.checked;
 
+    this._doc.prefs.volumeOnRandomization = this._volumeBox.checked;
+    this._doc.prefs.panningOnRandomization = this._panBox.checked;
+    this._doc.prefs.panDelayOnRandomization = this._panDelayBox.checked;
     this._doc.prefs.fadeOnRandomization = this._fadeBox.checked;
     this._doc.prefs.unisonOnRandomization = this._unisonBox.checked;
 

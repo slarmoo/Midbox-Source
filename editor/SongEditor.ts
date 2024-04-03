@@ -1056,8 +1056,8 @@ export class SongEditor {
         _.wave29Label,
         _.wave30Label,
         _.wave31Label,
-        _.wave32Label
-
+        _.wave32Label,
+        _.wave33Label
     ]);
     private readonly _chipNoiseSelect: HTMLSelectElement = buildOptions(select(), [
         _.noise1Label,
@@ -4166,7 +4166,7 @@ export class SongEditor {
                 this.prompt.whenKeyPressed(event);
             }
             if (event.keyCode == 27) { // ESC key
-                // close prompt.
+                // Close prompt. This may be a strange way of doing it...
                 this._doc.undo();
             }
             return;

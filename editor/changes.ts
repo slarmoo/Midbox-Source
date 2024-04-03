@@ -817,14 +817,17 @@ export class ChangeRandomGeneratedInstrument extends Change {
         const midFreq: number = FilterControlPoint.getRoundedSettingValueFromHz(700.0);
         const maxFreq: number = Config.filterFreqRange - 1;
         if (doc.prefs.EQFilterOnRandomization) {
-        applyFilterPoints(instrument.eqFilter, [
-            new PotentialFilterPoint(0.8, FilterType.lowPass, midFreq, maxFreq, 4000.0, -1),
-            new PotentialFilterPoint(0.4, FilterType.highPass, 0, midFreq - 1, 250.0, -1),
-            new PotentialFilterPoint(0.5, FilterType.peak, 0, maxFreq, 2000.0, 0),
-            new PotentialFilterPoint(0.4, FilterType.peak, 0, maxFreq, 1400.0, 0),
-            new PotentialFilterPoint(0.3, FilterType.peak, 0, maxFreq, 1000.0, 0),
-            new PotentialFilterPoint(0.2, FilterType.peak, 0, maxFreq, 500.0, 0),
-        ])};
+            applyFilterPoints(instrument.eqFilter, [
+                new PotentialFilterPoint(0.8, FilterType.lowPass, midFreq, maxFreq, 4000.0, -1),
+                new PotentialFilterPoint(0.4, FilterType.highPass, 0, midFreq - 1, 250.0, -1),
+                new PotentialFilterPoint(0.5, FilterType.peak, 0, maxFreq, 2000.0, 0),
+                new PotentialFilterPoint(0.4, FilterType.peak, 0, maxFreq, 1400.0, 0),
+                new PotentialFilterPoint(0.3, FilterType.peak, 0, maxFreq, 1000.0, 0),
+                new PotentialFilterPoint(0.2, FilterType.peak, 0, maxFreq, 500.0, 0),
+            ]);
+        } else {
+            instrument.eqFilter = instrument.eqFilter;
+        }
 
         if (isNoise) {
             const possibleTypes: ({ item: InstrumentType, weight: number })[] = [];
@@ -838,10 +841,30 @@ export class ChangeRandomGeneratedInstrument extends Change {
             }
             instrument.preset = instrument.type = type;
 
-            if (doc.prefs.fadeOnRandomization && !(instrument.type == InstrumentType.drumset)) {
-                instrument.fadeIn = (Math.random() < 0.8) ? 0 : selectCurvedDistribution(0, Config.fadeInRange - 1, 0, 2);
+            if (doc.prefs.volumeOnRandomization) {
+                instrument.volume = Math.floor(Math.random() * 40) - 20;
+            } else {
+                instrument.volume = instrument.volume;
+            }
+            if (doc.prefs.panningOnRandomization) {
+                instrument.pan = Math.floor(Math.random() * 200) - 100;
+            } else {
+                instrument.pan = instrument.pan;
+            }
+            if (doc.prefs.panDelayOnRandomization) {
+                instrument.panDelay = Math.floor(Math.random() * 200) - 100;
+            } else {
+                instrument.panDelay = instrument.panDelay;
+            }
+
+            // Drumset doesn't have fade in/out so do not include it here.
+            if (doc.prefs.fadeOnRandomization && (instrument.type != InstrumentType.drumset)) {
+                instrument.fadeIn = (Math.random() < 0.5) ? 0 : selectCurvedDistribution(0, Config.fadeInRange - 1, 0, 2);
                 instrument.fadeOut = selectCurvedDistribution(0, Config.fadeOutTicks.length - 1, Config.fadeOutNeutral, 2);
-            } 
+            } else {
+                instrument.fadeIn = instrument.fadeIn;
+                instrument.fadeOut = instrument.fadeOut;
+            }
             if (Math.random() < 0.1) {
                 instrument.effects |= 1 << EffectType.transition;
                 instrument.transition = Config.transitions.dictionary[selectWeightedRandom([
@@ -977,7 +1000,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "shaky", weight: 2 },
                 ])].index;
             }
-            if (Math.random() < 0.8) {
+            if (Math.random() < 0.8 && doc.prefs.noteFilterOnRandomization) {
                 instrument.effects |= 1 << EffectType.noteFilter;
                 applyFilterPoints(instrument.noteFilter, [
                     new PotentialFilterPoint(1.0, FilterType.lowPass, midFreq, maxFreq, 8000.0, -1),
@@ -1084,6 +1107,8 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "looped stairs 3", weight: 2},
                         { item: "looped stairs 4", weight: 2},
                 ])].index);
+            } else {
+                instrument.noteFilter = instrument.noteFilter;
             }
             if (Math.random() < 0.1) {
                 instrument.effects |= 1 << EffectType.distortion;
@@ -1163,13 +1188,12 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     for (let i: number = 0; i < Config.drumCount; i++) {
                         instrument.drumsetEnvelopes[i] = Math.floor(Math.random() * Config.envelopes.length);
                         const spectrum: number[] = [];
-                        for (let i: number = 0; i < Config.spectrumControlPoints; i++) {
-                            const isHarmonic: boolean = i == 0 || i == 7 || i == 11 || i == 14 || i == 16 || i == 18 || i == 21;
-                            if (isHarmonic) {
-                                spectrum[i] = Math.pow(Math.random(), 0.25);
-                            } else {
-                                spectrum[i] = Math.pow(Math.random(), 3) * 0.5;
-                            }
+                        let randomFactor: number = Math.floor(Math.random() * 3)
+                        for (let j = 0; j < Config.spectrumControlPoints; j++) {
+                            if (randomFactor == 0 || randomFactor == 3) spectrum[j] = Math.pow(Math.random(), 3) * 0.25;
+                            else if (randomFactor == 1) spectrum[j] = Math.pow(Math.random(), ((i / 8) + 1));
+                            else if (randomFactor == 2) spectrum[j] = (Math.pow(Math.random(), 2)) * ((i / 3) + 1);
+                            else throw new Error("Error with random factor variable in drumset generation.");
                         }
                         normalize(spectrum);
                         for (let j: number = 0; j < Config.spectrumControlPoints; j++) {
@@ -1200,9 +1224,28 @@ export class ChangeRandomGeneratedInstrument extends Change {
             }
             instrument.preset = instrument.type = type;
 
+            if (doc.prefs.volumeOnRandomization) {
+                instrument.volume = Math.floor(Math.random() * 40) - 20;
+            } else {
+                instrument.volume = instrument.volume;
+            }
+            if (doc.prefs.panningOnRandomization) {
+                instrument.pan = Math.floor(Math.random() * 200) - 100;
+            } else {
+                instrument.pan = instrument.pan;
+            }
+            if (doc.prefs.panDelayOnRandomization) {
+                instrument.panDelay = Math.floor(Math.random() * 200) - 100;
+            } else {
+                instrument.panDelay = instrument.panDelay;
+            }
+
             if (doc.prefs.fadeOnRandomization) {
-            instrument.fadeIn = (Math.random() < 0.5) ? 0 : selectCurvedDistribution(0, Config.fadeInRange - 1, 0, 2);
-            instrument.fadeOut = selectCurvedDistribution(0, Config.fadeOutTicks.length - 1, Config.fadeOutNeutral, 2);
+                instrument.fadeIn = (Math.random() < 0.5) ? 0 : selectCurvedDistribution(0, Config.fadeInRange - 1, 0, 2);
+                instrument.fadeOut = selectCurvedDistribution(0, Config.fadeOutTicks.length - 1, Config.fadeOutNeutral, 2);
+            } else {
+                instrument.fadeIn = instrument.fadeIn;
+                instrument.fadeOut = instrument.fadeOut;
             }
 
             if (doc.prefs.unisonOnRandomization && (type == InstrumentType.chip || type == InstrumentType.harmonics || type == InstrumentType.pickedString || type == InstrumentType.customChipWave || type == InstrumentType.pwm || type == InstrumentType.spectrum || type == InstrumentType.wavetable || type == InstrumentType.noise)) {
@@ -1492,6 +1535,8 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "looped stairs 3", weight: 2},
                         { item: "looped stairs 4", weight: 2},
                 ])].index);
+            } else {
+                instrument.noteFilter = instrument.noteFilter;
             }
             if (Math.random() < 0.1) {
                 instrument.effects |= 1 << EffectType.bitcrusher;

@@ -52,6 +52,9 @@ export class Preferences {
 		public drumNoiseOnRandomization: boolean;
 		public drumsetOnRandomization: boolean;
 
+		public volumeOnRandomization: boolean;
+		public panningOnRandomization: boolean;
+		public panDelayOnRandomization: boolean;
 		public fadeOnRandomization: boolean;
 		public unisonOnRandomization: boolean;
 
@@ -119,6 +122,9 @@ export class Preferences {
 		this.drumNoiseOnRandomization = window.localStorage.getItem("drumNoiseOnRandomization") != "false";
 		this.drumsetOnRandomization = window.localStorage.getItem("drumsetOnRandomization") != "false";
 
+		this.volumeOnRandomization = window.localStorage.getItem("volumeOnRandomization") == "true";
+		this.panningOnRandomization = window.localStorage.getItem("panningOnRandomization") == "true";
+		this.panDelayOnRandomization = window.localStorage.getItem("panDelayOnRandomization") == "true";
 		this.fadeOnRandomization = window.localStorage.getItem("fadeOnRandomization") != "false";
 		this.unisonOnRandomization = window.localStorage.getItem("unisonOnRandomization") != "false";
 
@@ -203,6 +209,9 @@ export class Preferences {
 		window.localStorage.setItem("drumNoiseOnRandomization", this.drumNoiseOnRandomization ? "true" : "false");
 		window.localStorage.setItem("drumsetOnRandomization", this.drumsetOnRandomization ? "true" : "false");
 
+		window.localStorage.setItem("volumeOnRandomization", this.volumeOnRandomization ? "true" : "false");
+		window.localStorage.setItem("panningOnRandomization", this.panningOnRandomization ? "true" : "false");
+		window.localStorage.setItem("panDelayOnRandomization", this.panDelayOnRandomization ? "true" : "false");
 		window.localStorage.setItem("fadeOnRandomization", this.fadeOnRandomization ? "true" : "false");
 		window.localStorage.setItem("unisonOnRandomization", this.unisonOnRandomization ? "true" : "false");
 

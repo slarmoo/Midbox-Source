@@ -665,7 +665,6 @@ export class CustomChipPromptCanvas {
 	}
 
 	public clearSelection(): void {
-		if (this.drawMode != DrawMode.Selection) return;
 		if (this.selectionModeStep != SelectionModeStep.NoSelection) {
 			if (this._floatingSelection != null) {
 				for (let i = 0; i < 64; i++) this.chipData[i] = this.temporaryArray[i];

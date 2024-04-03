@@ -3595,10 +3595,10 @@ export class Song {
                 }
                 if (effectsIncludeTransition(instrument.effects)) {
                     buffer.push(base64IntToCharCode[instrument.transition]);
-                }
-                // Slide speed. Only if the instrument has the slide transition.
-                if (instrument.transition == Config.transitions.dictionary["slide"].index) {
-                    buffer.push(base64IntToCharCode[instrument.slideSpeed]);
+                    // Slide speed. Only if the instrument slides.
+                    if (Config.transitions[instrument.transition].slides) {
+                        buffer.push(base64IntToCharCode[instrument.slideSpeed]);
+                    }
                 }
                 if (effectsIncludeChord(instrument.effects)) {
                     buffer.push(base64IntToCharCode[instrument.chord]);
@@ -4982,7 +4982,7 @@ export class Song {
                     if (effectsIncludeTransition(instrument.effects)) {
                         instrument.transition = clamp(0, Config.transitions.length, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                         // Slide speed!
-                        if (instrument.transition == Config.transitions.dictionary["slide"].index) {
+                        if (Config.transitions[instrument.transition].slides && (fromMidbox)) {
                             instrument.slideSpeed = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
                         }
                     }   
@@ -6705,7 +6705,7 @@ class EnvelopeComputer {
                 const noteLengthTicks: number = noteEndTick - noteStartTick;
                 const maximumSlideTicks: number = noteLengthTicks * 0.5;
                 let slideTicks: number = Math.min(maximumSlideTicks, transition.slideTicks);
-                const useSlideSpeed: boolean = (instrument.transition == Config.transitions.dictionary["slide"].index) ? true : false;
+                const useSlideSpeed: boolean = (Config.transitions[instrument.transition].slides) ? true : false;
                 if (useSlideSpeed) { 
                     slideTicks += Config.slideSpeedScale[instrument.slideSpeed];
                 }
@@ -8278,8 +8278,7 @@ export class Synth {
 
     // Returns the total samples in the song
     public getTotalSamples(enableIntro: boolean, enableOutro: boolean, loop: number): number {
-        if (this.song == null)
-            return -1;
+        if (this.song == null) return -1;
 
         // Compute the window to be checked (start bar to end bar)
         let startBar: number = enableIntro ? 0 : this.song.loopStart;
@@ -8318,7 +8317,6 @@ export class Synth {
                     if (pattern != null) {
                         let instrumentIdx: number = pattern.instruments[0];
                         let instrument: Instrument = this.song.channels[channel].instruments[instrumentIdx];
-
                         let partsInBar: number = this.findPartsInBar(bar);
 
                         for (const note of pattern.notes) {
