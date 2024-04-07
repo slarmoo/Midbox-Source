@@ -3110,6 +3110,7 @@ export class ChangeUnisonVoices extends Change {
         if (oldValue != newValue || prevUnison != Config.unisons.length) {            
             instrument.unisonVoices = newValue;
             instrument.unison = Config.unisons.length; // Custom
+            instrument.preset = instrument.type;
             doc.notifier.changed();
             this._didSomething();
         }
@@ -3124,6 +3125,7 @@ export class ChangeUnisonSpread extends Change {
         if (oldValue != newValue || prevUnison != Config.unisons.length) {
             instrument.unisonSpread = newValue;
             instrument.unison = Config.unisons.length; // Custom
+            instrument.preset = instrument.type;
             doc.notifier.changed();
             this._didSomething();
         }
@@ -3138,6 +3140,7 @@ export class ChangeUnisonOffset extends Change {
         if (oldValue != newValue || prevUnison != Config.unisons.length) {
             instrument.unisonOffset = newValue;
             instrument.unison = Config.unisons.length; // Custom
+            instrument.preset = instrument.type;
             doc.notifier.changed();
             this._didSomething();
         }
@@ -3152,6 +3155,7 @@ export class ChangeUnisonExpression extends Change {
         if (oldValue != newValue || prevUnison != Config.unisons.length) {
             instrument.unisonExpression = newValue;
             instrument.unison = Config.unisons.length; // Custom
+            instrument.preset = instrument.type;
             doc.notifier.changed();
             this._didSomething();
         }
@@ -3166,6 +3170,7 @@ export class ChangeUnisonSign extends Change {
         if (oldValue != newValue || prevUnison != Config.unisons.length) {
             instrument.unisonSign = newValue;
             instrument.unison = Config.unisons.length; // Custom
+            instrument.preset = instrument.type;
             doc.notifier.changed();
             this._didSomething();
         }
@@ -3215,6 +3220,7 @@ export class ChangeVibratoDepth extends Change {
         if (oldValue != newValue || prevVibrato != Config.vibratos.length) {
             instrument.vibratoDepth = newValue / 25;
             instrument.vibrato = Config.vibratos.length; // Custom
+            instrument.preset = instrument.type;
             doc.notifier.changed();
             this._didSomething();
         }
@@ -3230,6 +3236,7 @@ export class ChangeEnvelopeSpeed extends Change {
         doc.notifier.changed();
         if (oldValue != newValue) {
             instrument.envelopeSpeed = newValue;
+            instrument.preset = instrument.type;
             doc.notifier.changed();
             this._didSomething();
         }
@@ -3247,6 +3254,7 @@ export class ChangeVibratoSpeed extends Change {
         if (oldValue != newValue || prevVibrato != Config.vibratos.length) {
             instrument.vibratoSpeed = newValue;
             instrument.vibrato = Config.vibratos.length; // Custom
+            instrument.preset = instrument.type;
             doc.notifier.changed();
             this._didSomething();
         }
@@ -3264,6 +3272,7 @@ export class ChangeVibratoDelay extends Change {
         if (oldValue != newValue || prevVibrato != Config.vibratos.length) {
             instrument.vibratoDelay = newValue;
             instrument.vibrato = Config.vibratos.length; // Custom
+            instrument.preset = instrument.type;
             doc.notifier.changed();
             this._didSomething();
         }
@@ -3281,6 +3290,7 @@ export class ChangeVibratoType extends Change {
         if (oldValue != newValue || prevVibrato != Config.vibratos.length) {
             instrument.vibratoType = newValue;
             instrument.vibrato = Config.vibratos.length; // Custom
+            instrument.preset = instrument.type;
             doc.notifier.changed();
             this._didSomething();
         }
@@ -3295,7 +3305,10 @@ export class ChangeArpeggioSpeed extends Change {
         doc.synth.unsetMod(Config.modulators.dictionary["arp speed"].index, doc.channel, doc.getCurrentInstrument());
 
         doc.notifier.changed();
-        if (oldValue != newValue) this._didSomething();
+        if (oldValue != newValue) {
+            instrument.preset = instrument.type;
+            this._didSomething();
+        }
     }
 }
 
@@ -3307,7 +3320,10 @@ export class ChangeStrumSpeed extends Change {
         doc.synth.unsetMod(Config.modulators.dictionary["strum speed"].index, doc.channel, doc.getCurrentInstrument());
 
         doc.notifier.changed();
-        if (oldValue != newValue) this._didSomething();
+        if (oldValue != newValue) {
+            instrument.preset = instrument.type;
+            this._didSomething();
+        }
     }
 }
 
@@ -3319,7 +3335,10 @@ export class ChangeSlideSpeed extends Change {
         doc.synth.unsetMod(Config.modulators.dictionary["slide speed"].index, doc.channel, doc.getCurrentInstrument());
 
         doc.notifier.changed();
-        if (oldValue != newValue) this._didSomething();
+        if (oldValue != newValue) {
+            instrument.preset = instrument.type;
+            this._didSomething();
+        }
     }
 }
 
@@ -3332,6 +3351,7 @@ export class ChangeFastTwoNoteArp extends Change {
         doc.notifier.changed();
         if (oldValue != newValue) {
             instrument.fastTwoNoteArp = newValue;
+            instrument.preset = instrument.type;
             this._didSomething();
         }
     }
@@ -3360,6 +3380,7 @@ export class ChangeClicklessTransition extends Change {
         doc.notifier.changed();
         if (oldValue != newValue) {
             instrument.clicklessTransition = newValue;
+            instrument.preset = instrument.type;
             this._didSomething();
         }
     }
@@ -3374,6 +3395,7 @@ export class ChangeContinueThruPattern extends Change {
         doc.notifier.changed();
         if (oldValue != newValue) {
             instrument.continueThruPattern = newValue;
+            instrument.preset = instrument.type;
             this._didSomething();
         }
     }
@@ -3388,6 +3410,7 @@ export class ChangeAliasing extends Change {
         doc.notifier.changed();
         if (oldValue != newValue) {
             instrument.aliases = newValue;
+            instrument.preset = instrument.type;
             this._didSomething();
         }
     }
@@ -3401,6 +3424,7 @@ export class ChangePercussion extends Change {
         doc.notifier.changed();
         if (oldValue != newValue) {
             instrument.percussion = newValue;
+            instrument.preset = instrument.type;
             this._didSomething();
         }
     }
@@ -3414,6 +3438,7 @@ export class ChangeSDAffected extends Change {
         doc.notifier.changed();
         if (oldValue != newValue) {
             instrument.songDetuneEffected = newValue;
+            instrument.preset = instrument.type;
             this._didSomething();
         }
     }
@@ -3427,6 +3452,7 @@ export class ChangeSOAffected extends Change {
         doc.notifier.changed();
         if (oldValue != newValue) {
             instrument.songOctaveEffected = newValue;
+            instrument.preset = instrument.type;
             this._didSomething();
         }
     }
@@ -3441,6 +3467,7 @@ export class ChangeDiscreteEnvelope extends Change {
         doc.notifier.changed();
         if (oldValue != newValue) {
             instrument.discreteEnvelope = newValue;
+            instrument.preset = instrument.type;
             this._didSomething();
         }
     }
@@ -3634,6 +3661,7 @@ export class ChangeWaveInterpolation extends Change {
         doc.notifier.changed();
         if (oldValue != newValue) {
             instrument.interpolateWaves = newValue;
+            instrument.preset = instrument.type;
             this._didSomething();
         }
     }
@@ -3651,6 +3679,7 @@ export class ChangeCyclePerNote extends Change {
             if (instrument.cyclePerNote == false) {
                 instrument.oneShotCycle = false;
             }
+            instrument.preset = instrument.type;
             this._didSomething();
         }
     }
@@ -3665,6 +3694,7 @@ export class ChangeOneShotCycle extends Change {
         doc.notifier.changed();
         if (oldValue != newValue) {
             instrument.oneShotCycle = newValue;
+            instrument.preset = instrument.type;
             this._didSomething();
         }
     }

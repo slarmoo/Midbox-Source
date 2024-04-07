@@ -187,6 +187,7 @@ export class SongDocument {
 		songString = this.song.toBase64String();
 		this.synth = new Synth(this.song);
 		this.synth.volume = this._calcVolume();
+		this.synth.oscilloscopeScale = this.prefs.oscilloscopeScale;
 		this.synth.anticipatePoorPerformance = isMobile;
 		
 		let state: HistoryState | null = this._getHistoryState();

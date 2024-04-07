@@ -6,7 +6,7 @@ export class oscilloscopeCanvas {
 
     constructor(public readonly canvas: HTMLCanvasElement, readonly scale: number = 1) {
         this._EventUpdateCanvas = function(oscilloscopeScale: number, directlinkL: Float32Array, directlinkR ?: Float32Array): void {
-            if(directlinkR) {
+            if (directlinkR) {
                 var ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 
                 ctx.fillStyle = ColorConfig.getComputed("--editor-background");

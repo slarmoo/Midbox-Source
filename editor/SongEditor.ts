@@ -202,16 +202,13 @@ class CustomChipCanvas {
         // Black BG
         ctx.fillStyle = ColorConfig.getComputed("--editor-background");
         ctx.fillRect(0, 0, 128, 52);
-
         // Mid-bar
         ctx.fillStyle = ColorConfig.getComputed("--ui-widget-background");
         ctx.fillRect(0, 25, 128, 2);
-
         // 25-75 bars
         ctx.fillStyle = ColorConfig.getComputed("--track-editor-bg-pitch-dim");
         ctx.fillRect(0, 13, 128, 1);
         ctx.fillRect(0, 39, 128, 1);
-
         // Waveform
         ctx.fillStyle = renderColor;
 
@@ -234,12 +231,10 @@ class CustomChipCanvas {
             var ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
 
             if (this.continuousEdit == true && Math.abs(this.lastX - x) < 40) {
-
                 var lowerBound = (x < this.lastX) ? x : this.lastX;
                 var upperBound = (x < this.lastX) ? this.lastX : x;
 
                 for (let i = lowerBound; i <= upperBound; i += 2) {
-
                     var progress = (Math.abs(x - this.lastX) > 2.0) ? ((x > this.lastX) ?
                         1.0 - ((i - lowerBound) / (upperBound - lowerBound))
                         : ((i - lowerBound) / (upperBound - lowerBound))) : 0.0;
@@ -258,9 +253,7 @@ class CustomChipCanvas {
                     // Actually update current instrument's custom waveform
                     this.newArray[Math.floor(i / 2)] = (j - 26);
                 }
-            }
-            else {
-
+            } else {
                 ctx.fillStyle = ColorConfig.getComputed("--editor-background");
                 ctx.fillRect(Math.floor(x / 2) * 2, 0, 2, 52);
                 ctx.fillStyle = ColorConfig.getComputed("--ui-widget-background");
@@ -274,7 +267,6 @@ class CustomChipCanvas {
                 // Actually update current instrument's custom waveform
                 this.newArray[Math.floor(x / 2)] = (y - 26);
             }
-
             this.continuousEdit = true;
             this.lastX = x;
             this.lastY = y;
@@ -314,7 +306,6 @@ class CustomChipCanvas {
         this._doc.record(this._change!);
         this._change = null;
     };
-
 }
 
 class WavetableCustomChipCanvas {
@@ -3191,9 +3182,9 @@ export class SongEditor {
             else if (this._arpeggioPatternSelect.selectedIndex == 9) this._arpeggioPatternSelectedText.textContent = _.arpeggioPattern10Label;
             else if (this._arpeggioPatternSelect.selectedIndex == 10) this._arpeggioPatternSelectedText.textContent = _.arpeggioPattern11Label;
             else throw new Error("There is no label for the arpeggio pattern type selected.");
-            this._strumSpeedSlider.input.title = prettyNumber(Config.strumSpeedScale[instrument.strumSpeed]);
+            this._strumSpeedSlider.input.title = prettyNumber((Config.strumSpeedScale[instrument.strumSpeed]) * -1 + 24);
             this._strumSpeedDisplay.textContent = prettyNumber((Config.strumSpeedScale[instrument.strumSpeed]) * 2) + " tk";
-            this._slideSpeedSlider.input.title = prettyNumber(Config.slideSpeedScale[instrument.slideSpeed]);
+            this._slideSpeedSlider.input.title = prettyNumber((Config.slideSpeedScale[instrument.slideSpeed]) * -1 + 24);
             this._slideSpeedDisplay.textContent = prettyNumber((Config.slideSpeedScale[instrument.slideSpeed]) * 2) + " tk";
             this._wavetableSpeedSlider.input.title = prettyNumber(Config.wavetableSpeedScale[instrument.wavetableSpeed]);
             this._wavetableSpeedDisplay.textContent = prettyNumber(Config.wavetableSpeedScale[instrument.wavetableSpeed]) + "wpb";
@@ -4226,6 +4217,7 @@ export class SongEditor {
         const needControlForShortcuts: boolean = (this._doc.prefs.deactivateCapsLock) && (this._doc.prefs.pressControlForShortcuts != event.getModifierState("CapsLock"));
         const canPlayNotes: boolean = (!event.ctrlKey && !event.metaKey && needControlForShortcuts);
         if (canPlayNotes) this._keyboardLayout.handleKeyEvent(event, true);
+        if (!canPlayNotes) this._doc.synth.preferLowerLatency = false;
 
         //this._trackEditor.onKeyPressed(event);
         switch (event.keyCode) {

@@ -7,10 +7,12 @@
 	"homepage": "https://www.beepbox.co",
 	"type": "module",
 	"scripts": {
-		"build": "npm run build-synth && npm run build-player && npm run build-editor",
+		"build": "npm run build-synth && npm run build-player && npm run build-editor && npm run build-recovery_player",
+		"debug": "npm run build-synth && npm run build-editor",
 		"build-synth": "bash ./compile_beepbox_synth.sh",
 		"build-player": "bash ./compile_beepbox_player.sh",
-		"build-editor": "bash ./compile_beepbox_editor.sh"
+		"build-editor": "bash ./compile_beepbox_editor.sh",
+		"build-recovery_player": "bash ./compile_beepbox_recovery_player.sh"
 	},
 	"repository": {
 		"type": "git",

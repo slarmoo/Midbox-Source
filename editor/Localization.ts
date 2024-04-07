@@ -664,6 +664,7 @@ export class Localization {
     public static midboxMiscPresets51Label: string = "terminal blip";
     public static midboxMiscPresets52Label: string = "doom triangle SFX";
     public static midboxMiscPresets53Label: string = "electronic pluck 3";
+    public static midboxMiscPresets54Label: string = "siren (setpiece)";
     public static midboxDubstepPresets1Label: string = "dubstep bwayyyy";
     public static midboxDubstepPresets2Label: string = "dubstep bass hum";
     public static midboxDubstepPresets3Label: string = "dubstep yaa";
@@ -706,6 +707,7 @@ export class Localization {
     public static midboxDrumPresets14Label: string = "heavy boop kick (setpiece)";
     public static midboxDrumPresets15Label: string = "corruption drumset";
     public static midboxDrumPresets16Label: string = "strong synth kick";
+    public static midboxDrumPresets17Label: string = "percussive bells (setpiece)";
     public static midboxPianoPresets1Label: string = "blessed piano";
     public static midboxPianoPresets2Label: string = "desolated piano";
     public static midboxPianoPresets3Label: string = "rough glistening piano";

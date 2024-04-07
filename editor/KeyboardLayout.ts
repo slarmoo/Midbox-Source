@@ -148,7 +148,6 @@ export class KeyboardLayout {
 	}
 	
 	public handleKey(x: number, y: number, pressed: boolean): void {
-		
 		const isDrum: boolean = this._doc.song.getChannelIsNoise(this._doc.channel);
 		if (isDrum) {
 			if (x >= 0 && x < Config.drumCount) {

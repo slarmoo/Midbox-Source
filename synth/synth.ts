@@ -2107,6 +2107,11 @@ export class Instrument {
 
         if (instrumentObject["preset"] != undefined) {
             this.preset = instrumentObject["preset"] >>> 0;
+            try {
+                if (EditorConfig.valueToPreset(this.preset) == null) this.preset = this.type;
+            } catch (error) {
+                this.preset = this.type;
+            }
         }
 
         if (instrumentObject["volume"] != undefined) {
@@ -8529,6 +8534,7 @@ export class Synth {
         this.computeLatestModValues();
         this.activateAudio();
         this.warmUpSynthesizer(this.song);
+        this.resetEffects();
         this.isPlayingSong = true;
     }
 
@@ -8536,6 +8542,7 @@ export class Synth {
         if (!this.isPlayingSong) return;
         this.isPlayingSong = false;
         this.isRecording = false;
+        this.preferLowerLatency = false;
         this.modValues = [];
         this.nextModValues = [];
         this.heldMods = [];
@@ -10699,7 +10706,7 @@ export class Synth {
                 const unisonSpread: number = instrument.unisonSpread;
                 const unisonOffset: number = instrument.unisonOffset;
                 const unisonExpression: number = instrument.unisonExpression;
-                const voiceCountExpression: number = (instrument.type == InstrumentType.pickedString || instrument.type == InstrumentType.pwm || instrument.type == InstrumentType.spectrum) ? 1 : unisonVoices / 2.0;
+                const voiceCountExpression: number = (instrument.type == InstrumentType.pickedString) ? 1 : unisonVoices / 2.0;
                 settingsExpressionMult *= unisonExpression * voiceCountExpression;
                 const unisonEnvelopeStart = envelopeStarts[EnvelopeComputeIndex.unison];
                 const unisonEnvelopeEnd = envelopeEnds[EnvelopeComputeIndex.unison];

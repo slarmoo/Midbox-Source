@@ -5,12 +5,12 @@ import { ColorConfig } from "../editor/ColorConfig";
 import { NotePin, Note, Pattern, Instrument, Channel, Synth } from "../synth/synth";
 import { HTML, SVG } from "imperative-html/dist/esm/elements-strict";
 import { Localization as _ } from "../editor/Localization";
-import { oscilloscopeCanvas } from "../global/Oscilloscope";
 
-	const {a, button, div, h1, h3, input, canvas} = HTML;
+// This file is a duplicate of the main.ts file from the ../player/ folder with
+// various tweaks to fit better in the song recovery prompt. 
+
+	const {a, button, div, input} = HTML;
 	const {svg, circle, rect, path} = SVG;
-
-	const isMobile: boolean = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|android|ipad|playbook|silk/i.test(navigator.userAgent);
 
 	document.head.appendChild(HTML.style({type: "text/css"}, `
 	body {
@@ -173,83 +173,43 @@ let pauseButtonDisplayed: boolean = false;
 let animationRequest: number | null;
 let zoomEnabled: boolean = false;
 let timelineWidth: number = 1;
-let outVolumeHistoricTimer: number = 0;
-let outVolumeHistoricCap: number = 0;
 
 const synth: Synth = new Synth();
-const oscilloscope: oscilloscopeCanvas = new oscilloscopeCanvas(canvas({ width: isMobile? 144:288, height: isMobile?32:64, style: `border:2px solid ${ColorConfig.uiWidgetBackground}; overflow: hidden;` , id: "oscilloscopeAll" }), isMobile?1:2);
-const showOscilloscope: boolean = getLocalStorage("showOscilloscope") != "false";
-if (!showOscilloscope) {
-	oscilloscope.canvas.style.display = "none";
-	synth.oscEnabled = false;
-}
-let titleText: HTMLHeadingElement = h1({ style: "flex-grow: 1; margin: 3px 1px; margin-left: 10px; overflow: hidden; vertical-align: 30%;" }, "");
-let subtitleText: HTMLHeadingElement = h3({ style: "flex-grow: 1; margin: 3px 1px; margin-left: 10px; overflow: hidden; vertical-align: -30%;" }, "");
-	let editLink: HTMLAnchorElement = a({target: "_top", style: "margin: 0 4px;"}, _.songPlayer1Label);
-	let copyLink: HTMLAnchorElement = a({href: "javascript:void(0)", style: "margin: 0 4px;"}, _.songPlayer2Label);
-	let shareLink: HTMLAnchorElement = a({href: "javascript:void(0)", style: "margin: 0 4px;"}, _.songPlayer3Label);
-	let fullscreenLink: HTMLAnchorElement = a({target: "_top", style: "margin: 0 4px;"}, _.songPlayer4Label);
+let editLink: HTMLAnchorElement = a({target: "_top", style: "margin: 0 4px;"}, _.songPlayer1Label);
+let fullscreenLink: HTMLAnchorElement = a({target: "_top", style: "margin: 0 4px;"}, _.songPlayer4Label);
 
 let draggingPlayhead: boolean = false;
 	const playButton: HTMLButtonElement = button({style: "width: 100%; height: 100%; max-height: 50px;"});
 	const playButtonContainer: HTMLDivElement = div({style: "flex-shrink: 0; display: flex; padding: 2px; width: 80px; height: 100%; box-sizing: border-box; align-items: center;"},
 	playButton,
 );
-	const loopIcon: SVGPathElement = path({d: "M 4 2 L 4 0 L 7 3 L 4 6 L 4 4 Q 2 4 2 6 Q 2 8 4 8 L 4 10 Q 0 10 0 6 Q 0 2 4 2 M 8 10 L 8 12 L 5 9 L 8 6 L 8 8 Q 10 8 10 6 Q 10 4 8 4 L 8 2 Q 12 2 12 6 Q 12 10 8 10 z"});
-	const loopButton: HTMLButtonElement = button({title: _.songPlayer5Label, style: "background: none; flex: 0 0 12px; margin: 0 3px; width: 12px; height: 12px; display: flex;"}, svg({width: 12, height: 12, viewBox: "0 0 12 12"},
-	loopIcon,
-));
 
-	const volumeIcon: SVGSVGElement = svg({style: "flex: 0 0 12px; margin: 0 1px; width: 12px; height: 12px;", viewBox: "0 0 12 12"},
-		path({fill: ColorConfig.uiWidgetBackground, d: "M 1 9 L 1 3 L 4 3 L 7 0 L 7 12 L 4 9 L 1 9 M 9 3 Q 12 6 9 9 L 8 8 Q 10.5 6 8 4 L 9 3 z"}),
+const volumeIcon: SVGSVGElement = svg({style: "flex: 0 0 12px; margin: 0 1px; width: 12px; height: 12px;", viewBox: "0 0 12 12"},
+	path({fill: ColorConfig.uiWidgetBackground, d: "M 1 9 L 1 3 L 4 3 L 7 0 L 7 12 L 4 9 L 1 9 M 9 3 Q 12 6 9 9 L 8 8 Q 10.5 6 8 4 L 9 3 z"}),
 );
 const volumeSlider: HTMLInputElement = input({ title: _.songPlayer6Label, type: "range", value: 75, min: 0, max: 75, step: 1, style: "width: 12vw; max-width: 100px; margin: 0 1px;" });
 
-	const zoomIcon: SVGSVGElement = svg({width: 12, height: 12, viewBox: "0 0 12 12"},
-		circle({cx: "5", cy: "5", r: "4.5", "stroke-width": "1", stroke: "currentColor", fill: "none"}),
-		path({stroke: "currentColor", "stroke-width": "2", d: "M 8 8 L 11 11 M 5 2 L 5 8 M 2 5 L 8 5", fill: "none"}),
+const zoomIcon: SVGSVGElement = svg({width: 12, height: 12, viewBox: "0 0 12 12"},
+	circle({cx: "5", cy: "5", r: "4.5", "stroke-width": "1", stroke: "currentColor", fill: "none"}),
+	path({stroke: "currentColor", "stroke-width": "2", d: "M 8 8 L 11 11 M 5 2 L 5 8 M 2 5 L 8 5", fill: "none"}),
 );
-	const zoomButton: HTMLButtonElement = button({title: _.songPlayer7Label, style: "background: none; flex: 0 0 12px; margin: 0 3px; width: 12px; height: 12px; display: flex;"},
+const zoomButton: HTMLButtonElement = button({title: _.songPlayer7Label, style: "background: none; flex: 0 0 12px; margin: 0 3px; width: 12px; height: 12px; display: flex;"},
 	zoomIcon,
 );
 
-	const timeline: SVGSVGElement = svg({style: "min-width: 0; min-height: 0; touch-action: pan-y pinch-zoom;"});
-	const playhead: HTMLDivElement = div({style: `position: absolute; left: 0; top: 0; width: 2px; height: 100%; background: ${ColorConfig.playhead}; pointer-events: none;`});
-	const timelineContainer: HTMLDivElement = div({style: "display: flex; flex-grow: 1; flex-shrink: 1; position: relative;"}, timeline, playhead);
-	const visualizationContainer: HTMLDivElement = div({style: "display: flex; flex-grow: 1; flex-shrink: 1; height: 0; position: relative; align-items: center; overflow: hidden;"}, timelineContainer);
-
-const outVolumeBarBg: SVGRectElement = SVG.rect({ "pointer-events": "none", width: "90%", height: "50%", x: "5%", y: "25%", fill: ColorConfig.uiWidgetBackground });
-const outVolumeBar: SVGRectElement = SVG.rect({ "pointer-events": "none", height: "50%", width: "0%", x: "5%", y: "25%", fill: "url('#volumeGrad2')" });
-const outVolumeCap: SVGRectElement = SVG.rect({ "pointer-events": "none", width: "2px", height: "50%", x: "5%", y: "25%", fill: ColorConfig.uiWidgetFocus });
-const stop1: SVGStopElement = SVG.stop({ "stop-color": "lime", offset: "60%" });
-const stop2: SVGStopElement = SVG.stop({ "stop-color": "orange", offset: "90%" });
-const stop3: SVGStopElement = SVG.stop({ "stop-color": "red", offset: "100%" });
-const gradient: SVGGradientElement = SVG.linearGradient({ id: "volumeGrad2", gradientUnits: "userSpaceOnUse" }, stop1, stop2, stop3);
-const defs: SVGDefsElement = SVG.defs({}, gradient);
-const volumeBarContainer: SVGSVGElement = SVG.svg({ style: `touch-action: none; overflow: hidden;`, width: "160px", height: "10px", preserveAspectRatio: "none" },
-	defs,
-	outVolumeBarBg,
-	outVolumeBar,
-	outVolumeCap,
-);
+const timeline: SVGSVGElement = svg({style: "min-width: 0; min-height: 0; touch-action: pan-y pinch-zoom;"});
+const playhead: HTMLDivElement = div({style: `position: absolute; left: 0; top: 0; width: 2px; height: 100%; background: ${ColorConfig.playhead}; pointer-events: none;`});
+const timelineContainer: HTMLDivElement = div({style: "display: flex; flex-grow: 1; flex-shrink: 1; position: relative;"}, timeline, playhead);
+const visualizationContainer: HTMLDivElement = div({style: "display: flex; flex-grow: 1; flex-shrink: 1; height: 0; position: relative; align-items: center; overflow: hidden;"}, timelineContainer);
 
 document.body.appendChild(visualizationContainer);
 document.body.appendChild(
 		div({style: `flex-shrink: 0; height: 20vh; min-height: 22px; max-height: 70px; display: flex; align-items: center;`},
 		playButtonContainer,
-		loopButton,
 		volumeIcon,
 		volumeSlider,
 		zoomButton,
-		volumeBarContainer,
-		oscilloscope.canvas,
-		div({style: `margin: 15px 0; margin-left: auto;`},
-			titleText,
-			subtitleText,
-		),
 		editLink,
-		copyLink,
-		shareLink,
 		fullscreenLink,
 	),
 );
@@ -309,17 +269,12 @@ function hashUpdatedExternally(): void {
 			switch (paramName) {
 				case "song":
 					loadSong(value, true);
-					if (synth.song) {
-						titleText.textContent = synth.song.title;
-						subtitleText.textContent = synth.song.subtitle;
-					}
 					break;
 				//case "title":
 				//	titleText.textContent = decodeURIComponent(value);
 				//	break;
 				case "loop":
 					synth.loopRepeatCount = (value != "1") ? 0 : -1;
-					renderLoopIcon();
 					break;
 			}
 		} else {
@@ -353,8 +308,6 @@ function animate(): void {
 	if (synth.playing) {
 		animationRequest = requestAnimationFrame(animate);
 		renderPlayhead();
-
-		volumeUpdate();
 	}
 		
 	if (pauseButtonDisplayed != synth.playing) {
@@ -363,41 +316,12 @@ function animate(): void {
 
 }
 
-function volumeUpdate(): void {
-	if (synth.song == null) {
-		outVolumeCap.setAttribute("x", "5%");
-		outVolumeBar.setAttribute("width", "0%");
-		return;
-}
-	outVolumeHistoricTimer--;
-	if (outVolumeHistoricTimer <= 0) {
-		outVolumeHistoricCap -= 0.03;
-	}
-	if (synth.song.outVolumeCap > outVolumeHistoricCap) {
-		outVolumeHistoricCap = synth.song.outVolumeCap;
-		outVolumeHistoricTimer = 50;
-	}
-
-	animateVolume(synth.song.outVolumeCap, outVolumeHistoricCap);
-
-	if (!synth.playing) {
-		outVolumeCap.setAttribute("x", "5%");
-		outVolumeBar.setAttribute("width", "0%");
-	}
-}
-
-function animateVolume(useOutVolumeCap: number, historicOutCap: number): void {
-	outVolumeBar.setAttribute("width", "" + Math.min(144, useOutVolumeCap * 144));
-	outVolumeCap.setAttribute("x", "" + (8 + Math.min(144, historicOutCap * 144)));
-}
-
 function onTogglePlay(): void {
 	if (synth.song != null) {
 		if (animationRequest != null) cancelAnimationFrame(animationRequest);
 		animationRequest = null;
 		if (synth.playing) {
 			synth.pause();
-			volumeUpdate();
 		} else {
 			synth.play();
 			setLocalStorage("playerId", id);
@@ -407,15 +331,6 @@ function onTogglePlay(): void {
 		}
 	}
 	renderPlayButton();
-}
-
-function onToggleLoop(): void {
-	if (synth.loopRepeatCount == -1) {
-		synth.loopRepeatCount = 0;
-	} else {
-		synth.loopRepeatCount = -1;
-	}
-	renderLoopIcon();
 }
 
 function onVolumeChange(): void {
@@ -587,10 +502,6 @@ function renderPlayButton(): void {
 	pauseButtonDisplayed = synth.playing;
 }
 
-function renderLoopIcon(): void {
-	loopIcon.setAttribute("fill", (synth.loopRepeatCount == -1) ? ColorConfig.linkAccent : ColorConfig.uiWidgetBackground);
-}
-
 function renderZoomIcon(): void {
 	zoomIcon.style.color = zoomEnabled ? ColorConfig.linkAccent : ColorConfig.uiWidgetBackground;
 }
@@ -620,46 +531,14 @@ function onKeyPressed(event: KeyboardEvent): void {
 			renderPlayhead();
 			event.preventDefault();
 			break;
-		case 80: // p
-			const songString: string = synth.song!.toBase64String();
-			location.href = "../#" + songString;
-			event.preventDefault();
-			break;
 	}
 }
 
-function onCopyClicked(): void {
-	// Set as any to allow compilation without clipboard types (since, uh, I didn't write this bit and don't know the proper types library) -jummbus
-	let nav: any;
-	nav = navigator;
-
-	if (nav.clipboard && nav.clipboard.writeText) {
-		nav.clipboard.writeText(location.href).catch(() => {
-			window.prompt("Copy to clipboard:", location.href);
-		});
-		return;
-	}
-	const textField: HTMLTextAreaElement = document.createElement("textarea");
-	textField.textContent = location.href;
-	document.body.appendChild(textField);
-	textField.select();
-	const succeeded: boolean = document.execCommand("copy");
-	textField.remove();
-	if (!succeeded) window.prompt("Copy this:", location.href);
-}
-
-function onShareClicked(): void {
-	(<any>navigator).share({ url: location.href });
-}
-
-	if ( top !== self ) {
-	// In an iframe.
-	copyLink.style.display = "none";
-	shareLink.style.display = "none";
+if ( top !== self ) {
+	// Nothing.
 } else {
 	// Fullscreen.
 	fullscreenLink.style.display = "none";
-	if (!("share" in navigator)) shareLink.style.display = "none";
 }
 
 if (getLocalStorage("volume") != null) {
@@ -679,15 +558,11 @@ timeline.addEventListener("touchend", onTimelineCursorUp);
 timeline.addEventListener("touchcancel", onTimelineCursorUp);
 
 playButton.addEventListener("click", onTogglePlay);
-loopButton.addEventListener("click", onToggleLoop);
 volumeSlider.addEventListener("input", onVolumeChange);
 zoomButton.addEventListener("click", onToggleZoom);
-copyLink.addEventListener("click", onCopyClicked);
-shareLink.addEventListener("click", onShareClicked);
 window.addEventListener("hashchange", hashUpdatedExternally);
 
 hashUpdatedExternally();
-renderLoopIcon();
 renderZoomIcon();
 renderPlayButton();
 

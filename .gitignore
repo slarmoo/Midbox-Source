@@ -7,9 +7,11 @@
 /website/beepbox_offline.html
 /website/jummbox_offline.html
 /editor/*.js
+/recovery_player/*.js
 /player/*.js
 /synth/*.js
 /editor/*.js.map
+/recovery_player/*.js.map
 /player/*.js.map
 /synth/*.js.map
 /**/*.ts.bak
