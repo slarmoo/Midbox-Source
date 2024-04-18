@@ -1135,6 +1135,129 @@ export class ChangeRandomGeneratedInstrument extends Change {
                 instrument.reverb = selectCurvedDistribution(1, Config.reverbRange - 1, 1, 1);
             }
 
+            if (type == InstrumentType.noise || type == InstrumentType.spectrum) {
+                instrument.unison = Config.unisons.dictionary[selectWeightedRandom([
+                    { item: "none", weight: 10 },
+                    { item: "shimmer", weight: 1 },
+                    { item: "hum", weight: 1 },
+                    { item: "honky tonk", weight: 1 },
+                    { item: "dissonant", weight: 1 },
+                    { item: "fifth", weight: 1 },
+                    { item: "octave", weight: 1 },
+                    { item: "bowed", weight: 1 },
+                    { item: "piano", weight: 1 },
+                    { item: "warbled", weight: 1 },
+                    { item: "hecking gosh", weight: 1 },
+                    { item: "hold", weight: 1 },
+                    { item: "broke", weight: 1 },
+                ])].index;
+
+                if (instrument.unison != Config.unisons.dictionary["none"].index && Math.random() > 0.4) {
+                    instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["unison"].index, 0, Config.envelopes.dictionary[selectWeightedRandom([
+                        { item: "none", weight: 30},
+                        { item: "note size", weight: 2},
+                        { item: "punch", weight: 2 },
+                        { item: "flare 0", weight: 2 },
+                        { item: "flare 1", weight: 2 },
+                        { item: "flare 2", weight: 2 },
+                        { item: "flare 3", weight: 2 },
+                        { item: "flare 4", weight: 2 },
+                        { item: "flare 5", weight: 2 },
+                        { item: "flare 6", weight: 2 },
+                        { item: "twang 0", weight: 2 },
+                        { item: "twang 1", weight: 2 },
+                        { item: "twang 2", weight: 2 },
+                        { item: "twang 3", weight: 2 },
+                        { item: "twang 4", weight: 2 },
+                        { item: "twang 5", weight: 2 },
+                        { item: "twang 6", weight: 2 },
+                        { item: "full tremolo 0", weight: 2 },
+                        { item: "full tremolo 1", weight: 2 },
+                        { item: "full tremolo 2", weight: 2 },
+                        { item: "full tremolo 3", weight: 2 },
+                        { item: "full tremolo 4", weight: 2 },
+                        { item: "full tremolo 5", weight: 2 },
+                        { item: "semi tremolo 0", weight: 2 },
+                        { item: "semi tremolo 1", weight: 2 },
+                        { item: "semi tremolo 2", weight: 2 },
+                        { item: "semi tremolo 3", weight: 2 },
+                        { item: "semi tremolo 4", weight: 2 },
+                        { item: "semi tremolo 5", weight: 2 },
+                        { item: "mini tremolo 0", weight: 2 },
+                        { item: "mini tremolo 1", weight: 2 },
+                        { item: "mini tremolo 2", weight: 2 },
+                        { item: "mini tremolo 3", weight: 2 },
+                        { item: "mini tremolo 4", weight: 2 },
+                        { item: "mini tremolo 5", weight: 2 },
+                        { item: "full tripolo 0", weight: 2 },
+                        { item: "full tripolo 1", weight: 2 },
+                        { item: "full tripolo 2", weight: 2 },
+                        { item: "full tripolo 3", weight: 2 },
+                        { item: "full tripolo 4", weight: 2 },
+                        { item: "full tripolo 5", weight: 2 },
+                        { item: "semi tripolo 0", weight: 2 },
+                        { item: "semi tripolo 1", weight: 2 },
+                        { item: "semi tripolo 2", weight: 2 },
+                        { item: "semi tripolo 3", weight: 2 },
+                        { item: "semi tripolo 4", weight: 2 },
+                        { item: "semi tripolo 5", weight: 2 },
+                        { item: "mini tripolo 0", weight: 2 },
+                        { item: "mini tripolo 1", weight: 2 },
+                        { item: "mini tripolo 2", weight: 2 },
+                        { item: "mini tripolo 3", weight: 2 },
+                        { item: "mini tripolo 4", weight: 2 },
+                        { item: "mini tripolo 5", weight: 2 },
+                        { item: "decay 0", weight: 2 },
+                        { item: "decay 1", weight: 2 },
+                        { item: "decay 2", weight: 2 },
+                        { item: "decay 3", weight: 2 },
+                        { item: "decay 4", weight: 2 },
+                        { item: "decay 5", weight: 2 },
+                        { item: "modbox blip", weight: 2 },
+                        { item: "modbox click", weight: 2 },
+                        { item: "modbox bow", weight: 2 },
+                        { item: "modbox trill", weight: 2 },
+                        { item: "wibble 0", weight: 2},
+                        { item: "wibble 1", weight: 2},
+                        { item: "wibble 2", weight: 2},
+                        { item: "wibble 3", weight: 2},
+                        { item: "wibble 4", weight: 2},
+                        { item: "linear 0", weight: 2},
+                        { item: "linear 1", weight: 2},
+                        { item: "linear 2", weight: 2},
+                        { item: "linear 3", weight: 2},
+                        { item: "linear 4", weight: 2},
+                        { item: "linear 5", weight: 2},
+                        { item: "rise 0", weight: 2},
+                        { item: "rise 1", weight: 2},
+                        { item: "rise 2", weight: 2},
+                        { item: "rise 3", weight: 2},
+                        { item: "rise 4", weight: 2},
+                        { item: "rise 5", weight: 2},
+                        { item: "jummbox blip 0", weight: 2},
+                        { item: "jummbox blip 1", weight: 2},
+                        { item: "jummbox blip 2", weight: 2},
+                        { item: "jummbox blip 3", weight: 2},
+                        { item: "jummbox blip 4", weight: 2},
+                        { item: "jummbox blip 5", weight: 2},
+                        { item: "decelerate 0", weight: 2},
+                        { item: "decelerate 1", weight: 2},
+                        { item: "decelerate 2", weight: 2},
+                        { item: "decelerate 3", weight: 2},
+                        { item: "stairs 0", weight: 2},
+                        { item: "stairs 1", weight: 2},
+                        { item: "stairs 2", weight: 2},
+                        { item: "stairs 3", weight: 2},
+                        { item: "stairs 4", weight: 2},
+                        { item: "looped stairs 0", weight: 2},
+                        { item: "looped stairs 1", weight: 2},
+                        { item: "looped stairs 2", weight: 2},
+                        { item: "looped stairs 3", weight: 2},
+                        { item: "looped stairs 4", weight: 2},
+                    ])].index);
+                }
+            }
+
             function normalize(harmonics: number[]): void {
                 let max: number = 0;
                 for (const value of harmonics) {
@@ -1193,7 +1316,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                             if (randomFactor == 0 || randomFactor == 3) spectrum[j] = Math.pow(Math.random(), 3) * 0.25;
                             else if (randomFactor == 1) spectrum[j] = Math.pow(Math.random(), ((i / 8) + 1));
                             else if (randomFactor == 2) spectrum[j] = (Math.pow(Math.random(), 2)) * ((i / 3) + 1);
-                            else throw new Error("Error with random factor variable in drumset generation.");
+                            else spectrum[j] = Math.pow(Math.random(), 3) * 0.25;
                         }
                         normalize(spectrum);
                         for (let j: number = 0; j < Config.spectrumControlPoints; j++) {
@@ -3073,8 +3196,7 @@ export class ChangeChannelBar extends Change {
         // Mod channels always jump to viewing the active instrument for the mod.
         if (doc.song.getChannelIsMod(doc.channel)) {
             const pattern: Pattern | null = doc.song!.getPattern(doc.channel, doc.bar);
-            if (pattern != null)
-                doc.viewedInstrument[doc.channel] = pattern.instruments[0];
+            if (pattern != null) doc.viewedInstrument[doc.channel] = pattern.instruments[0];
         }
         doc.notifier.changed();
         if (oldChannel != newChannel || oldBar != newBar) {
@@ -3730,6 +3852,7 @@ export class ChangeEQFilterType extends Change {
             instrument.tmpEqFilterEnd = null;
         }
         instrument.clearInvalidEnvelopeTargets();
+        instrument.preset = instrument.type;
         doc.notifier.changed();
         this._didSomething();
     }
@@ -3751,6 +3874,7 @@ export class ChangeNoteFilterType extends Change {
             instrument.tmpNoteFilterEnd = null;
         }
         instrument.clearInvalidEnvelopeTargets();
+        instrument.preset = instrument.type;
         doc.notifier.changed();
         this._didSomething();
     }

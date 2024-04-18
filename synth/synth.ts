@@ -3451,7 +3451,7 @@ export class Song {
         buffer.push(SongTagCode.channelCount, base64IntToCharCode[this.pitchChannelCount], base64IntToCharCode[this.noiseChannelCount], base64IntToCharCode[this.modChannelCount]);
         buffer.push(SongTagCode.scale, base64IntToCharCode[this.scale]);
         if (this.scale == Config.scales["dictionary"]["Custom Scale"].index) {
-            for (var i = 1; i < Config.pitchesPerOctave; i++) {
+            for (var i = 0; i < Config.pitchesPerOctave; i++) {
                 buffer.push(base64IntToCharCode[this.scaleCustom[i]?1:0])
             }
         }
@@ -4192,10 +4192,10 @@ export class Song {
             } break;
             case SongTagCode.scale: {
                 this.scale = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
-                // All the scales were jumbled around by Jummbox. Just convert to free.
+                // All the scales were jumbled around by JummBox. Just convert to free/expert.
                 if (this.scale == Config.scales["dictionary"]["Custom Scale"].index) {
-                    for (var i = 1; i < Config.pitchesPerOctave; i++) {
-                        this.scaleCustom[i] = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] == 1; // ineffiecent? yes, all we're going to do for now? hell yes
+                    for (var i = 0; i < Config.pitchesPerOctave; i++) {
+                        this.scaleCustom[i] = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] == 1;
                     }
                 }
                 if (fromBeepBox) this.scale = 0;
@@ -9135,7 +9135,7 @@ export class Synth {
                         let instrument: Instrument = this.song.channels[channel].instruments[instrumentIdx];
                         let instrumentState: InstrumentState = this.channels[channel].instruments[instrumentIdx];
 
-                        // Update arpeggio time, which is used to calculate arpeggio position. Same as the wavetable's current wave.
+                        // Update arpeggio time, which is used to calculate arpeggio position. Same for the wavetable's current wave.
                         if (instrument.type == InstrumentType.wavetable) {
                             const wavetableSize: number = instrument.currentCycle.length;
                             let wavetableSpeed: number = Config.wavetableSpeedScale[instrument.wavetableSpeed];
@@ -12728,14 +12728,19 @@ export class Synth {
         
         // Can also try this cross-fade curve, from the following article:
         // https://signalsmith-audio.co.uk/writing/2021/cheap-energy-crossfade/
-        // const x2: number = 1.0 - x;
-        // const A: number = x * x2;
-        // const B: number = A * (1.0 + 1.4186 * A);
-        // const C: number = B + x;
-        // const D: number = B + x2;
-        // const fadeIn: number = C * C;
-        // const fadeOut: number = D * D;
-        // return a * fadeOut + b * fadeIn;
+        /* 
+        const x2: number = 1.0 - x;
+        const A: number = x * x2;
+        const B: number = A * (1.0 + 1.4186 * A);
+        const C: number = B + x;
+        const D: number = B + x2;
+        const fadeIn: number = C * C;
+        const fadeOut: number = D * D;
+        return a * fadeOut + b * fadeIn; 
+        */
+
+        // Could also try and implement interpolation modes here to incorporate more types. E.g.
+        // Linear, Curved, Half-Step (Only one step in between waves), Quad-Step (Only three steps in between waves), and Shifter (Refer to shaky vibrato).
     }
     private static wavetableSynth(synth: Synth, bufferIndex: number, roundedSamplesPerTick: number, tone: Tone, instrumentState: InstrumentState): void {
         const aliases: boolean = (effectsIncludeDistortion(instrumentState.effects) && instrumentState.aliases);

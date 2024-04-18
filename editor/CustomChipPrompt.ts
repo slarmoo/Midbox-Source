@@ -8,7 +8,7 @@ import { ChangeCustomWave, randomRoundedWave, randomPulses, randomChip, biasedFu
 import { Config } from "./main";
 import { SongEditor } from "./SongEditor";
 import { Localization as _ } from "./Localization";
-import { convertChipWaveToCustomChip} from "../synth/synth";
+import { convertChipWaveToCustomChip } from "../synth/synth";
 
 const { button, div, h2, select, option } = HTML;
 

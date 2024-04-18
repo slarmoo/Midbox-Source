@@ -8,7 +8,6 @@
 	"type": "module",
 	"scripts": {
 		"build": "npm run build-synth && npm run build-player && npm run build-editor && npm run build-recovery_player",
-		"debug": "npm run build-synth && npm run build-editor",
 		"build-synth": "bash ./compile_beepbox_synth.sh",
 		"build-player": "bash ./compile_beepbox_player.sh",
 		"build-editor": "bash ./compile_beepbox_editor.sh",

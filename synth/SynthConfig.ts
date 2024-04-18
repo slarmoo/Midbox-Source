@@ -67,7 +67,7 @@ export const enum EnvelopeType {
     jummboxBlip,
     decelerate,
     stairs,
-    loopStairs
+    loopStairs,
 }
 
 

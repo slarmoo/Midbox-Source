@@ -23,10 +23,12 @@ export class CustomScalePrompt implements Prompt {
     constructor(private _doc: SongDocument) {
         this._flags = _doc.song.scaleCustom.slice();
         let scaleHolder: HTMLDivElement = div({});
-        for (var i = 1; i < Config.pitchesPerOctave; i++) {
+        let scaleNoteName: string[] = ["Root [0 & 12]", "Minor Second [1]", "Major Second [2]", "Minor Third [3]", "Major Third [4]", "Perfect Fourth [5]", "Tritone [6]", "Perfect Fifth [7]", "Minor Sixth [8]", "Major Sixth [9]", "Minor Seventh [10]", "Major Seventh [11]"];
+        for (var i = 0; i < Config.pitchesPerOctave; i++) {
             this._scaleFlags[i] = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;", "checked": this._flags[i], "value": i });
             this._scaleRows[i] = div({ style: "text-align: left; height: 2em;" },
-                _.customScaleNoteLabel + i + ":",
+                /*_.customScaleNoteLabel + (i+1) + ":",*/
+                scaleNoteName[i] + ":",
                 this._scaleFlags[i]
             );
             scaleHolder.appendChild(this._scaleRows[i])
@@ -67,7 +69,7 @@ export class CustomScalePrompt implements Prompt {
     
 
     private _saveChanges = (): void => {
-        for (var i = 1; i < this._scaleFlags.length; i++) {
+        for (var i = 0; i < this._scaleFlags.length; i++) {
             this._flags[i] = this._scaleFlags[i].checked;
         }
         this._doc.prompt = null;
