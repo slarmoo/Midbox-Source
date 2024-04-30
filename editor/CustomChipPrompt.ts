@@ -5,7 +5,7 @@ import { Prompt } from "./Prompt";
 import { SongDocument } from "./SongDocument";
 import { ColorConfig } from "./ColorConfig";
 import { ChangeCustomWave, randomRoundedWave, randomPulses, randomChip, biasedFullyRandom, randomizeWave } from "./changes";
-import { Config } from "./main";
+import { Config } from "../synth/SynthConfig";
 import { SongEditor } from "./SongEditor";
 import { Localization as _ } from "./Localization";
 import { convertChipWaveToCustomChip } from "../synth/synth";
@@ -1372,7 +1372,7 @@ export class CustomChipPromptCanvas {
 				let highest: number = Math.max(chipStartX, chipEndX);
 				if (highest != lowest) {
 					// @TODO: Should really be automatically determined, but that's even more code
-					const steps: number = 100;
+					const steps: number = 200;
 					for (var i = 0; i < steps; i++) {
 						// https://pomax.github.io/bezierinfo/#whatis
 						const lt: number = i / (steps - 1);
@@ -1936,6 +1936,7 @@ export class CustomChipPrompt implements Prompt {
 
 	private _removeSelection = (): void => {
 		this.customChipCanvas.clearSelection();
+		this._songEditor.refocusStage();
 	}
 
 	private _selectStandardDrawType = (): void => {
@@ -2023,11 +2024,13 @@ export class CustomChipPrompt implements Prompt {
 		this.dragOnSelectionButton1.style.display = "none";
 		this.dragOnSelectionButton2.style.display = "";
 		this.customChipCanvas.selectionDragEvent = SelectionDragEvent.Stretching;
+		this._songEditor.refocusStage();
 	}
 	private _stretchSelectionPressed = (): void => {
 		this.dragOnSelectionButton1.style.display = "";
 		this.dragOnSelectionButton2.style.display = "none";
 		this.customChipCanvas.selectionDragEvent = SelectionDragEvent.Extending;
+		this._songEditor.refocusStage();
 	}
 
 	// Taken from SongEditor.ts

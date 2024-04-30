@@ -117,18 +117,20 @@ export class Piano {
 		
 	private _updateCursorPitch(): void {
 		const scale: ReadonlyArray<boolean> = this._doc.song.scale == Config.scales.dictionary["Custom Scale"].index ? this._doc.song.scaleCustom : Config.scales[this._doc.song.scale].flags;
-			const mousePitch: number = Math.max(0, Math.min(this._pitchCount-1, this._pitchCount - (this._mouseY / this._pitchHeight)));
+		const mousePitch: number = Math.max(0, Math.min(this._pitchCount-1, this._pitchCount - (this._mouseY / this._pitchHeight)));
 		if (scale[Math.floor(mousePitch) % Config.pitchesPerOctave] || this._doc.song.getChannelIsNoise(this._doc.channel)) {
 			this._cursorPitch = Math.floor(mousePitch);
 		} else {
-			if (!this._doc.prefs.notesOutsideScale) {
+			if (!this._doc.prefs.notesOutsideScale || !(this._doc.song.scale == Config.scales.dictionary["Custom Scale"].index && this._doc.song.scaleCustom.every(x => x == false))) {
 				let topPitch: number = Math.floor(mousePitch) + 1;
 				let bottomPitch: number = Math.floor(mousePitch) - 1;
 				while (!scale[topPitch % Config.pitchesPerOctave]) {
 					topPitch++;
+					if (topPitch > this._pitchCount - 1) break;
 				}
 				while (!scale[(bottomPitch) % Config.pitchesPerOctave]) {
 					bottomPitch--;
+					if (bottomPitch < 0) break;
 				}
 				let topRange: number = topPitch;
 				let bottomRange: number = bottomPitch + 1;

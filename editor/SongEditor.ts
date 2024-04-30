@@ -4159,7 +4159,8 @@ export class SongEditor {
             if (this.prompt instanceof CustomChipPrompt || this.prompt instanceof LimiterPrompt || this.prompt instanceof CustomFilterPrompt || this.prompt instanceof WavetablePrompt) {
                 this.prompt.whenKeyPressed(event);
             }
-            if (event.keyCode == 27) { // ESC key
+            // Special case: CustomChip and Wavetable prompts actually have functions for esc themselves.
+            if (event.keyCode == 27 && !(this.prompt instanceof CustomChipPrompt)) { // ESC key
                 // Close prompt. This may be a strange way of doing it...
                 this._doc.undo();
             }

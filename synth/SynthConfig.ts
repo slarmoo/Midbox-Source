@@ -140,8 +140,11 @@ export const enum EnvelopeComputeIndex {
     supersawDynamism,
 	supersawSpread,
 	supersawShape,
-    // Issue#20 - Envelopes for effects.
     distortion,
+    bitCrusher,
+    freqCrusher,
+    chorus,
+    reverb,
     length,
 }
 
@@ -1034,19 +1037,18 @@ export class Config {
 		{ name: "supersawSpread",         computeIndex: EnvelopeComputeIndex.supersawSpread,         displayName: "spread",            interleave: false, isFilter: false, maxCount: 1,                       effect: null,                  compatibleInstruments: [InstrumentType.supersaw] },
 		{ name: "supersawShape",          computeIndex: EnvelopeComputeIndex.supersawShape,          displayName: "saw↔pulse",         interleave: false, isFilter: false, maxCount: 1,                       effect: null,                  compatibleInstruments: [InstrumentType.supersaw] },
         { name: "operatorPulseWidth",     computeIndex: EnvelopeComputeIndex.operatorPulseWidth0,    displayName: "fm # pwm",          interleave: false, isFilter: false, maxCount: Config.operatorCount+2,  effect: null,                  compatibleInstruments: [InstrumentType.fm, InstrumentType.advfm] },
-        // Issue#20 - Add envelope targets for effects.
         { name: "distortion",             computeIndex: EnvelopeComputeIndex.distortion,             displayName: "distortion",        interleave: false, isFilter: false, maxCount: 1,                       effect: EffectType.distortion, compatibleInstruments: null },
+        { name: "bitCrusher",             computeIndex: EnvelopeComputeIndex.bitCrusher,             displayName: "bit crush",         interleave: false, isFilter: false, maxCount: 1,                       effect: EffectType.bitcrusher, compatibleInstruments: null },
+        { name: "freqCrusher",            computeIndex: EnvelopeComputeIndex.freqCrusher,            displayName: "freq crush",        interleave: false, isFilter: false, maxCount: 1,                       effect: EffectType.bitcrusher, compatibleInstruments: null },
+        { name: "chorus",                 computeIndex: EnvelopeComputeIndex.chorus,                 displayName: "chorus",            interleave: false, isFilter: false, maxCount: 1,                       effect: EffectType.chorus,     compatibleInstruments: null },
+        { name: "reverb",                 computeIndex: EnvelopeComputeIndex.reverb,                 displayName: "reverb",            interleave: false, isFilter: false, maxCount: 1,                       effect: EffectType.reverb,     compatibleInstruments: null },
 /*      { name: "noteFilterGain",         computeIndex: EnvelopeComputeIndex.noteFilterGain0,        displayName: "n. filter # vol",   interleave: false, isFilter: true,  maxCount: Config.filterMaxPoints,  effect: EffectType.noteFilter, compatibleInstruments: null },
-        { name: "bitcrusherQuantization", computeIndex: EnvelopeComputeIndex.bitcrusherQuantization, displayName: "bit crush",         interleave: false, isFilter: false, maxCount: 1,                       effect: EffectType.bitcrusher, compatibleInstruments: null },
-        { name: "bitcrusherFrequency",    computeIndex: EnvelopeComputeIndex.bitcrusherFrequency,    displayName: "freq crush",        interleave: false, isFilter: false, maxCount: 1,                       effect: EffectType.bitcrusher, compatibleInstruments: null },
         { name: "eqFilterAllFreqs",       computeIndex: EnvelopeComputeIndex.eqFilterAllFreqs,       displayName: "eq filter freqs",   interleave: false, isFilter: true,  maxCount: 1,                       effect: null,                  compatibleInstruments: null },
         { name: "eqFilterFreq",           computeIndex: EnvelopeComputeIndex.eqFilterFreq0,          displayName: "eq filter # freq",  interleave: true,  isFilter: true,  maxCount: Config.filterMaxPoints,  effect: null,                  compatibleInstruments: null },
         { name: "eqFilterGain",           computeIndex: EnvelopeComputeIndex.eqFilterGain0,          displayName: "eq filter # vol",   interleave: false, isFilter: true,  maxCount: Config.filterMaxPoints,  effect: null,                  compatibleInstruments: null },
         { name: "panning",                computeIndex: EnvelopeComputeIndex.panning,                displayName: "panning",           interleave: false, isFilter: false, maxCount: 1,                       effect: EffectType.panning,    compatibleInstruments: null },
-        { name: "chorus",                 computeIndex: EnvelopeComputeIndex.chorus,                 displayName: "chorus",            interleave: false, isFilter: false, maxCount: 1,                       effect: EffectType.chorus,     compatibleInstruments: null },
         { name: "echoSustain",            computeIndex: EnvelopeComputeIndex.echoSustain,            displayName: "echo",              interleave: false, isFilter: false, maxCount: 1,                       effect: EffectType.echo,       compatibleInstruments: null },
         { name: "echoDelay",              computeIndex: EnvelopeComputeIndex.echoDelay,              displayName: "echo delay",        interleave: false, isFilter: false, maxCount: 1,                       effect: EffectType.echo,       compatibleInstruments: null }, 
-        { name: "reverb",                 computeIndex: EnvelopeComputeIndex.reverb,                 displayName: "reverb",            interleave: false, isFilter: false, maxCount: 1,                       effect: EffectType.reverb,     compatibleInstruments: null },
         { name: "mixVolume",              computeIndex: EnvelopeComputeIndex.mixVolume,              displayName: "mix volume",        interleave: false, isFilter: false, maxCount: 1,                       effect: null,                  compatibleInstruments: null },
         { name: "envelope#",              computeIndex: null,                                        displayName: "envelope",          interleave: false, isFilter: false, maxCount: Config.maxEnvelopeCount, effect: null,                  compatibleInstruments: null }, */
     ]);
@@ -1255,7 +1257,7 @@ export class Config {
             promptName: "Slide Speed",                  promptDesc: ["This setting controls the speed at which your instrument 'slides' between notes.", "Note that the lower numbers will slide faster, while the higher numbers will slide slower.", "[OVERWRITING] [$HI - $LO]"]},
 
         { name: "cycle wave",      pianoName: "Cycle Wave",             maxRawVol: 31,                                                     newNoteVol: 0,                                                            forSong: false,   convertRealFactor: 1,                                    associatedEffect: EffectType.length,
-            promptName: "Cycle Wave",                   promptDesc: ["This setting sets the current position in the cycle your wavetable instrument is in according to the value you put.", "Note that only the value at the beginning of the note will count.", "A little hidden function of this modulator also exists. If the wavetable speed is 0, whether that be set by its modulator or the slider itself, and certain waves are removed from the cycle, using this modulator will ignore what waves are not in the cycle and play it anyways. If this isn't the case, then it will loop around the cycle depending on the number (Example: If only 9 waves are in the cycle, 23 on this modulator would set the current wave to wave 5.)", "[$LO - $HI]"]},
+            promptName: "Cycle Wave",                   promptDesc: ["This setting sets the current position in the cycle your wavetable instrument is in according to the value you put.", "Note that only the value at the beginning of the note will count.", "If waves are missing from the cycle, this wave that will play from the modulator will loop around the cycle depending on the number and the amount of waves that are removed from the cycle. (Example: If only 9 waves are in the cycle, 23 on this modulator would set the current wave to wave 5.)", "[$LO - $HI]"]},
 
         { name: "wavetable speed", pianoName: "WavetableSpd",           maxRawVol: Config.wavetableSpeedMax,                               newNoteVol: 0,                                                            forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.length,
             promptName: "Wavetable Speed",              promptDesc: ["This setting controls the speed at which your wavetable instrument swaps between waves.", "[OVERWRITING] [$LO - $HI]"]},

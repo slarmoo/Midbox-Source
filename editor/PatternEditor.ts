@@ -526,18 +526,19 @@ export class PatternEditor {
     private _snapToPitch(guess: number, min: number, max: number): number {
         if (guess < min) guess = min;
         if (guess > max) guess = max;
-        const scale: ReadonlyArray<boolean> = this._doc.prefs.notesOutsideScale ? Config.scales.dictionary["Free"].flags : this._doc.song.scale == Config.scales.dictionary["Custom Scale"].index ? this._doc.song.scaleCustom : Config.scales[this._doc.song.scale].flags;
+        const scale: ReadonlyArray<boolean> = (this._doc.prefs.notesOutsideScale || (this._doc.song.scale == Config.scales.dictionary["Custom Scale"].index && this._doc.song.scaleCustom.every(x => x == false))) ? Config.scales.dictionary["Free"].flags : this._doc.song.scale == Config.scales.dictionary["Custom Scale"].index ? this._doc.song.scaleCustom : Config.scales[this._doc.song.scale].flags;
         if (scale[Math.floor(guess) % Config.pitchesPerOctave] || this._doc.song.getChannelIsNoise(this._doc.channel) || this._doc.song.getChannelIsMod(this._doc.channel)) {
-
             return Math.floor(guess);
         } else {
             let topPitch: number = Math.floor(guess) + 1;
             let bottomPitch: number = Math.floor(guess) - 1;
             while (!scale[topPitch % Config.pitchesPerOctave]) {
                 topPitch++;
+                if (topPitch > max) break;
             }
             while (!scale[(bottomPitch) % Config.pitchesPerOctave]) {
                 bottomPitch--;
+                if (bottomPitch < 0) break;
             }
             if (topPitch > max) {
                 if (bottomPitch < min) {
@@ -2367,7 +2368,6 @@ export class PatternEditor {
 
         for (let j: number = 0; j < Config.pitchesPerOctave; j++) {
             let scale = this._doc.song.scale == Config.scales.dictionary["Custom Scale"].index ? this._doc.song.scaleCustom : Config.scales[this._doc.song.scale].flags;
-
             this._backgroundPitchRows[j].style.visibility = scale[j] ? "visible" : "hidden";
         }
 
