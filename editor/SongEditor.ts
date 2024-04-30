@@ -4160,8 +4160,9 @@ export class SongEditor {
                 this.prompt.whenKeyPressed(event);
             }
             // Special case: CustomChip and Wavetable prompts actually have functions for esc themselves.
-            if (event.keyCode == 27 && !(this.prompt instanceof CustomChipPrompt)) { // ESC key
+            if (event.keyCode == 27 && !(this.prompt instanceof CustomChipPrompt || this.prompt instanceof WavetablePrompt)) { // ESC key
                 // Close prompt. This may be a strange way of doing it...
+                // The above is correct to some degree. Maybe find a better way to close the prompt???
                 this._doc.undo();
             }
             return;

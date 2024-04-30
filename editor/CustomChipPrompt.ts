@@ -394,9 +394,9 @@ export class CustomChipPromptCanvas {
 
 	public _storeChange = (): void => {
 		// Check if change is unique compared to the current history state
-		var sameCheck = true;
+		let sameCheck = true;
 		if (this._changeQueue.length > 0) {
-			for (var i = 0; i < 64; i++) {
+			for (let i = 0; i < 64; i++) {
 				if (this._changeQueue[this._undoHistoryState][i] != this.chipData[i]) {
 					sameCheck = false; i = 64;
 				}
@@ -404,47 +404,40 @@ export class CustomChipPromptCanvas {
 		}
 
 		if (sameCheck == false || this._changeQueue.length == 0) {
-
 			// Create new branch in history, removing all after this in time
 			this._changeQueue.splice(0, this._undoHistoryState);
-
 			this._undoHistoryState = 0;
-
 			this._changeQueue.unshift(this.chipData.slice());
 
 			// 32 undo max
 			if (this._changeQueue.length > 32) {
 				this._changeQueue.pop();
 			}
-
 		}
-
 	}
 
 	public undo = (): void => {
 		this.clearSelection();
 
-		// Go backward, if there is a change to go back to
+		// Go backward if there is a change to go back to.
 		if (this._undoHistoryState < this._changeQueue.length - 1) {
 			this._undoHistoryState++;
 			this.chipData = this._changeQueue[this._undoHistoryState].slice();
 			new ChangeCustomWave(this._doc, this.chipData);
 			this.render();
 		}
-
 	}
 
 	public redo = (): void => {
 		this.clearSelection();
 
-		// Go forward, if there is a change to go to
+		// Go forward if there is a change to go to.
 		if (this._undoHistoryState > 0) {
 			this._undoHistoryState--;
 			this.chipData = this._changeQueue[this._undoHistoryState].slice();
 			new ChangeCustomWave(this._doc, this.chipData);
 			this.render();
 		}
-
 	}
 
 	private _whenKeyPressed = (event: KeyboardEvent): void => {
@@ -1020,7 +1013,6 @@ export class CustomChipPromptCanvas {
 			}
 			this._renderSelection();
 		}
-
 		this._whenCursorMoved();
 	}
 
@@ -1059,7 +1051,6 @@ export class CustomChipPromptCanvas {
 		} else if (this.drawMode == DrawMode.Selection) {
 			this._renderSelection();
 		}
-
 		this._whenCursorMoved();
 	}
 
@@ -1410,7 +1401,6 @@ export class CustomChipPromptCanvas {
 
 			// Make a change to the data but don't record it, since this prompt uses its own undo/redo queue
 			new ChangeCustomWave(this._doc, this.chipData);
-
 			this._lastIndex = index;
 			this._lastAmp = amp;
 		}
@@ -1457,8 +1447,6 @@ export class CustomChipPromptCanvas {
 							this._tentativeSelectionBounds = null;
 						}
 					}
-
-
 					// There shouldn't be any changes to commit,
 					// other than the potential one in the pressed event.
 					this._mouseDown = false;
@@ -1486,8 +1474,6 @@ export class CustomChipPromptCanvas {
 							this._tentativeSelectionBounds = null;
 						}
 					}
-
-
 					// There shouldn't be any changes to commit,
 					// other than the potential one in the pressed event.
 					this._mouseDown = false;
@@ -1511,8 +1497,6 @@ export class CustomChipPromptCanvas {
 							this._tentativeSelectionBounds = null;
 						}
 					}
-
-
 					// There shouldn't be any changes to commit,
 					// other than the potential one in the pressed event.
 					this._mouseDown = false;
@@ -1560,7 +1544,6 @@ export class CustomChipPromptCanvas {
 							this.selectionModeStep = SelectionModeStep.HasSelection;
 							this._removeSelectionButton.style.display = "";
 						}
-
 						this._tentativeSelectionBounds = null;
 						this._tentativeDestinationStart = null;
 						this._tentativeDestinationEnd = null;
@@ -1569,7 +1552,6 @@ export class CustomChipPromptCanvas {
 						this._floatingSelectionDragStartY = null;
 						this._lockSelectionHorizontally = false;
 					}
-
 					// There shouldn't be any changes to commit.
 					this._mouseDown = false;
 					return;
@@ -1612,14 +1594,12 @@ export class CustomChipPromptCanvas {
 								new ChangeCustomWave(this._doc, this.chipData);
 							}
 						}
-
 						this._tentativeSelectionBounds = null;
 						this._tentativeDestinationStart = null;
 						this._tentativeDestinationEnd = null;
 						this._floatingSelectionDragStartX = null;
 						this._floatingSelectionDragStartY = null;
 					}
-
 					// There shouldn't be any changes to commit.
 					this._mouseDown = false;
 					return;
@@ -1662,14 +1642,12 @@ export class CustomChipPromptCanvas {
 								new ChangeCustomWave(this._doc, this.chipData);
 							}
 						}
-
 						this._tentativeSelectionBounds = null;
 						this._tentativeDestinationStart = null;
 						this._tentativeDestinationEnd = null;
 						this._floatingSelectionDragStartX = null;
 						this._floatingSelectionDragStartY = null;
 					}
-
 					// There shouldn't be any changes to commit.
 					this._mouseDown = false;
 					return;
