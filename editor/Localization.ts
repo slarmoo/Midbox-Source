@@ -66,6 +66,7 @@ export class Localization {
     public static slideSpeedLabel: string = "‣ Spd:";
     public static arpSpeedLabel: string = "‣ Spd:";
     public static envelopeSpeedLabel: string = "‣ Spd:";
+    public static perEnvelopeSpeedLabel: string = "‣ Env Spd:";
     public static discreteEnvelopeLabel: string = "‣ Discrete:";
     public static wavetableSpeedLabel: string = "Spd:";
     public static interpolateWavesLabel: string = "Interpolate:";

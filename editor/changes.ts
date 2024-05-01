@@ -4451,6 +4451,19 @@ export class ChangeEnvelopeSpeed extends Change {
     }
 }
 
+export class ChangePerEnvelopeSpeed extends Change {
+    constructor(doc: SongDocument, envelopeIndex: number, oldValue: number, newValue: number) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        if (oldValue != newValue) {
+            instrument.envelopes[envelopeIndex].envelopeSpeed = newValue;
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
 export class ChangeVibratoSpeed extends Change {
     constructor(doc: SongDocument, oldValue: number, newValue: number) {
         super();

@@ -1258,6 +1258,7 @@ export class EnvelopeSettings {
     public target: number = 0;
     public index: number = 0;
     public envelope: number = 0;
+    public envelopeSpeed: number = 1;
 
     constructor() {
         this.reset();
@@ -1267,12 +1268,14 @@ export class EnvelopeSettings {
         this.target = 0;
         this.index = 0;
         this.envelope = 0;
+        this.envelopeSpeed = 1;
     }
 
     public toJsonObject(): Object {
         const envelopeObject: any = {
             "target": Config.instrumentAutomationTargets[this.target].name,
             "envelope": Config.envelopes[this.envelope].name,
+            "envelopeSpeed": this.envelopeSpeed,
         };
         if (Config.instrumentAutomationTargets[this.target].maxCount > 1) {
             envelopeObject["index"] = this.index;
@@ -6827,21 +6830,23 @@ class EnvelopeComputer {
         this._modifiedEnvelopeCount = 0;
     }
 
-    public static computeEnvelope(envelope: Envelope, time: number, beats: number, beatNote: number, noteSize: number): number {
+    public static computeEnvelope(envelope: Envelope, time: number, beats: number, beatNote: number, noteSize: number, perEnvelopeSpeed?: number): number {
+        // Individual envelope speed does not exist on drumset so mark it optional. If undefined, default to 1.
+        if (perEnvelopeSpeed == undefined) perEnvelopeSpeed = 1;
         switch (envelope.type) {
             case EnvelopeType.noteSize: return Synth.noteSizeToVolumeMult(noteSize);
             case EnvelopeType.none: return 1.0;
-            case EnvelopeType.twang: return 1.0 / (1.0 + time * envelope.speed);
-            case EnvelopeType.swell: return 1.0 - 1.0 / (1.0 + time * envelope.speed);
-            case EnvelopeType.tremolo: return 0.5 - Math.cos(beats * 2.0 * Math.PI * envelope.speed) * 0.5;
-            case EnvelopeType.tremolo2: return 0.75 - Math.cos(beats * 2.0 * Math.PI * envelope.speed) * 0.25;
-            case EnvelopeType.tremolo3: return 0.875 - Math.cos(beats * 2.0 * Math.PI * envelope.speed) * 0.125;
-            case EnvelopeType.triptremolo: return 0.5 - Math.cos(beats * 3.0 * Math.PI * envelope.speed) * 0.5;
-            case EnvelopeType.triptremolo2: return 0.75 - Math.cos(beats * 3.0 * Math.PI * envelope.speed) * 0.25;
-            case EnvelopeType.triptremolo3: return 0.875 - Math.cos(beats * 3.0 * Math.PI * envelope.speed) * 0.125;
-            case EnvelopeType.punch: return Math.max(1.0, 2.0 - time * 10.0);
-            case EnvelopeType.flare: const attack: number = 0.25 / Math.sqrt(envelope.speed); return time < attack ? time / attack : 1.0 / (1.0 + (time - attack) * envelope.speed);
-            case EnvelopeType.decay: return Math.pow(2, -envelope.speed * time);
+            case EnvelopeType.twang: return 1.0 / (1.0 + time * envelope.speed * perEnvelopeSpeed);
+            case EnvelopeType.swell: return 1.0 - 1.0 / (1.0 + time * envelope.speed * perEnvelopeSpeed);
+            case EnvelopeType.tremolo: return 0.5 - Math.cos(beats * 2.0 * Math.PI * envelope.speed * perEnvelopeSpeed) * 0.5;
+            case EnvelopeType.tremolo2: return 0.75 - Math.cos(beats * 2.0 * Math.PI * envelope.speed * perEnvelopeSpeed) * 0.25;
+            case EnvelopeType.tremolo3: return 0.875 - Math.cos(beats * 2.0 * Math.PI * envelope.speed * perEnvelopeSpeed) * 0.125;
+            case EnvelopeType.triptremolo: return 0.5 - Math.cos(beats * 3.0 * Math.PI * envelope.speed * perEnvelopeSpeed) * 0.5;
+            case EnvelopeType.triptremolo2: return 0.75 - Math.cos(beats * 3.0 * Math.PI * envelope.speed * perEnvelopeSpeed) * 0.25;
+            case EnvelopeType.triptremolo3: return 0.875 - Math.cos(beats * 3.0 * Math.PI * envelope.speed * perEnvelopeSpeed) * 0.125;
+            case EnvelopeType.punch: return Math.max(1.0, 2.0 - time * 10.0 * perEnvelopeSpeed);
+            case EnvelopeType.flare: const attack: number = 0.25 / Math.sqrt(envelope.speed * perEnvelopeSpeed); return time < attack ? time / attack : 1.0 / (1.0 + (time - attack) * envelope.speed * perEnvelopeSpeed);
+            case EnvelopeType.decay: return Math.pow(2, -envelope.speed * time * perEnvelopeSpeed);
             // The next four are replicas of Modbox's unique transition types as envelopes. Awesome, right?
             case EnvelopeType.modboxTrill: const decay = 0.25 / Math.sqrt(envelope.speed); return time < decay ? (decay - time) / decay : 1.0;
             case EnvelopeType.modboxBlip: {const endTime1: number = 0.25 / Math.sqrt(envelope.speed); const endTime2: number = 0.7 / Math.sqrt(envelope.speed); const zeroIntercept: number = 2; const startValue2: number = 0.9; return time < endTime1 ? ((startValue2 - zeroIntercept) / endTime1) * time + zeroIntercept : time < endTime2 ? ((1 - startValue2) / (endTime2 - endTime1)) * (time - endTime1) + startValue2 : 1.0;}

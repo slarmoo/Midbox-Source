@@ -3127,11 +3127,8 @@ export class SongEditor {
                 this._unisonDropdownGroup.style.display = "none";
             }
 
-            if (this._openEnvelopeDropdown)
-                this._envelopeDropdownGroup.style.display = "";
-            else
-                this._envelopeDropdownGroup.style.display = "none";
-
+            if (this._openEnvelopeDropdown) this._envelopeDropdownGroup.style.display = "";
+            else this._envelopeDropdownGroup.style.display = "none";
             this._envelopeEditor.render();
 
             for (let chordIndex: number = 0; chordIndex < Config.chords.length; chordIndex++) {

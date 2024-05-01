@@ -93,15 +93,15 @@ export const enum InstrumentType {
 }
 
 export const enum DropdownID {
-    Vibrato    = 0,
-    Pan        = 1,
-    Chord      = 2,
-    Transition = 3,
-    FM         = 4,
-    Strum      = 5,
-    Envelope   = 6,
-    Unison     = 7,
-
+    Vibrato     = 0,
+    Pan         = 1,
+    Chord       = 2,
+    Transition  = 3,
+    FM          = 4,
+    Strum       = 5,
+    Envelope    = 6,
+    Unison      = 7,
+    PerEnvelope = 8,
 }
 
 export const enum EffectType {
@@ -480,10 +480,10 @@ export class Config {
         { name: "shaky",  periodsSeconds: [0.11, 1.618 * 0.11, 3 * 0.11], period: 266.97 },
     ]);
 //  MID TODO: Make the make the envelope speed not use arpSpeedScale.    0       1      2    3     4      5    6    7      8     9   10   11 12   13   14   15   16   17   18   19   20   21 22   23   24   25   26   27   28   29   30   31 32   33   34   35   36   37   38    39  40   41 42    43   44   45   46 47   48 49 50
-    public static readonly arpSpeedScale:       ReadonlyArray<number> = [0, 0.0625, 0.125, 0.2, 0.25, 1 / 3, 0.4, 0.5, 2 / 3, 0.75, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 4, 4.15, 4.3, 4.5, 4.8, 5, 5.5, 6, 8];
-    public static readonly strumSpeedScale:     ReadonlyArray<number> = [24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
-    public static readonly slideSpeedScale:     ReadonlyArray<number> = [24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
-    public static readonly wavetableSpeedScale: ReadonlyArray<number> = [0, 0.25, 0.5, 1, 1.5, 2, 2.5, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 24];
+    public static readonly arpSpeedScale:         ReadonlyArray<number> = [0, 0.0625, 0.125, 0.2, 0.25, 1 / 3, 0.4, 0.5, 2 / 3, 0.75, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 4, 4.15, 4.3, 4.5, 4.8, 5, 5.5, 6, 8];
+    public static readonly strumSpeedScale:       ReadonlyArray<number> = [24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+    public static readonly slideSpeedScale:       ReadonlyArray<number> = [24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+    public static readonly wavetableSpeedScale:   ReadonlyArray<number> = [0, 0.25, 0.5, 1, 1.5, 2, 2.5, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 24];
 
     public static readonly unisons: DictionaryArray<Unison> = toNameMap([
         { name: "none",            voices: 1, spread: 0.0,      offset:  0.0,    expression: 1.4,  sign:  1.0 },
@@ -646,123 +646,6 @@ export class Config {
         { name: "64×",    mult: 64.0,  hzOffset:  0.0, amplitudeSign:  1.0 },
         { name: "128×",   mult: 128.0, hzOffset:  0.0, amplitudeSign:  1.0 },
     ]);
-//  Issue#22 - Find a way to put envelopes into categories. Try to find a way to do this only 
-//  visually, and if that can't be done, go through the process of updating the code to make the
-//  organized system below work.
-/*  public static readonly envelopeCategories: DictionaryArray<EnvelopeCategory> = toNameMap([
-        {
-            name: "None", envelopes: <DictionaryArray<Envelope>>toNameMap([
-                { name: "none", type: EnvelopeType.none, speed: 0.0 },
-            ])
-        },
-        {
-            name: "Misc", envelopes: <DictionaryArray<Envelope>>toNameMap([
-                { name: "note size", type: EnvelopeType.noteSize, speed: 0.0 },
-                { name: "punch",     type: EnvelopeType.punch,    speed: 0.0 },
-            ])
-        },
-        {
-            name: "Flare", envelopes: <DictionaryArray<Envelope>>toNameMap([
-                { name: "flare 0", type: EnvelopeType.flare, speed: 64.0 },
-                { name: "flare 1", type: EnvelopeType.flare, speed: 32.0 },
-                { name: "flare 2", type: EnvelopeType.flare, speed: 16.0 },
-                { name: "flare 3", type: EnvelopeType.flare, speed: 8.0  },
-                { name: "flare 4", type: EnvelopeType.flare, speed: 4.0  },
-                { name: "flare 5", type: EnvelopeType.flare, speed: 2.0  },
-                { name: "flare 6", type: EnvelopeType.flare, speed: 1.0  },
-            ])
-        },
-        {
-            name: "Twang", envelopes: <DictionaryArray<Envelope>>toNameMap([
-                { name: "twang 0", type: EnvelopeType.twang, speed: 64.0 },
-                { name: "twang 1", type: EnvelopeType.twang, speed: 32.0 },
-                { name: "twang 2", type: EnvelopeType.twang, speed: 16.0 },
-                { name: "twang 3", type: EnvelopeType.twang, speed: 8.0  },
-                { name: "twang 4", type: EnvelopeType.twang, speed: 4.0  },
-                { name: "twang 5", type: EnvelopeType.twang, speed: 2.0  },
-                { name: "twang 6", type: EnvelopeType.twang, speed: 1.0  },
-            ])
-        },
-        {
-            name: "Swell", envelopes: <DictionaryArray<Envelope>>toNameMap([
-                { name: "swell 0", type: EnvelopeType.swell, speed: 64.0 },
-                { name: "swell 1", type: EnvelopeType.swell, speed: 32.0 },
-                { name: "swell 2", type: EnvelopeType.swell, speed: 16.0 },
-                { name: "swell 3", type: EnvelopeType.swell, speed: 8.0  },
-                { name: "swell 4", type: EnvelopeType.swell, speed: 4.0  },
-                { name: "swell 5", type: EnvelopeType.swell, speed: 2.0  },
-                { name: "swell 6", type: EnvelopeType.swell, speed: 1.0  },
-                { name: "swell 7", type: EnvelopeType.swell, speed: 0.5  },
-            ])
-        },
-        {
-            name: "Full Tremolo", envelopes: <DictionaryArray<Envelope>>toNameMap([
-                { name: "full tremolo 0", type: EnvelopeType.tremolo, speed: 8.0  },
-                { name: "full tremolo 1", type: EnvelopeType.tremolo, speed: 4.0  },
-                { name: "full tremolo 2", type: EnvelopeType.tremolo, speed: 2.0  },
-                { name: "full tremolo 3", type: EnvelopeType.tremolo, speed: 1.0  },
-                { name: "full tremolo 4", type: EnvelopeType.tremolo, speed: 0.5  },
-                { name: "full tremolo 5", type: EnvelopeType.tremolo, speed: 0.25 },
-            ])
-        },
-        {
-            name: "Semi Tremolo", envelopes: <DictionaryArray<Envelope>>toNameMap([
-                { name: "semi tremolo 0", type: EnvelopeType.tremolo2, speed: 8.0  },
-                { name: "semi tremolo 1", type: EnvelopeType.tremolo2, speed: 4.0  },
-                { name: "semi tremolo 2", type: EnvelopeType.tremolo2, speed: 2.0  },
-                { name: "semi tremolo 3", type: EnvelopeType.tremolo2, speed: 1.0  },
-                { name: "semi tremolo 4", type: EnvelopeType.tremolo2, speed: 0.5  },
-                { name: "semi tremolo 5", type: EnvelopeType.tremolo2, speed: 0.25 },
-            ])
-        },
-        {
-            name: "Decay", envelopes: <DictionaryArray<Envelope>>toNameMap([
-                { name: "decay 0", type: EnvelopeType.decay, speed: 18.0 },
-                { name: "decay 1", type: EnvelopeType.decay, speed: 10.0 },
-                { name: "decay 2", type: EnvelopeType.decay, speed: 7.0  },
-                { name: "decay 3", type: EnvelopeType.decay, speed: 4.0  },
-                { name: "decay 4", type: EnvelopeType.decay, speed: 1.5  },
-                { name: "decay 5", type: EnvelopeType.decay, speed: 0.75 },
-            ])
-        },
-        {
-            name: "Modbox", envelopes: <DictionaryArray<Envelope>>toNameMap([
-                { name: "modbox trill", type: EnvelopeType.modboxTrill, speed: 40 },
-                { name: "modbox blip",  type: EnvelopeType.modboxBlip,  speed: 4  },
-                { name: "modbox click", type: EnvelopeType.modboxClick, speed: 5  },
-                { name: "modbox bow",   type: EnvelopeType.modboxBow,   speed: 90 },
-            ])
-        },
-        {
-            name: "Wibble", envelopes: <DictionaryArray<Envelope>>toNameMap([
-                { name: "wibble 0", type: EnvelopeType.wibble, speed: 96.0 },
-                { name: "wibble 1", type: EnvelopeType.wibble, speed: 24.0 },
-                { name: "wibble 2", type: EnvelopeType.wibble, speed: 12.0 },
-                { name: "wibble 3", type: EnvelopeType.wibble, speed: 4.0  },
-                { name: "wibble 4", type: EnvelopeType.wibble, speed: 1.0  },
-            ])
-        },
-        {
-            name: "Linear", envelopes: <DictionaryArray<Envelope>>toNameMap([
-                { name: "linear 0", type: EnvelopeType.linear, speed: 256.0 },
-                { name: "linear 1", type: EnvelopeType.linear, speed: 128.0 },
-                { name: "linear 2", type: EnvelopeType.linear, speed: 32.0  },
-                { name: "linear 3", type: EnvelopeType.linear, speed: 8.0   },
-                { name: "linear 4", type: EnvelopeType.linear, speed: 2.0   },
-                { name: "linear 5", type: EnvelopeType.linear, speed: 0.5   },
-            ])
-        },
-        {
-            name: "Rise", envelopes: <DictionaryArray<Envelope>>toNameMap([
-                { name: "rise 0", type: EnvelopeType.rise, speed: 256.0 },
-                { name: "rise 1", type: EnvelopeType.rise, speed: 128.0 },
-                { name: "rise 2", type: EnvelopeType.rise, speed: 32.0  },
-                { name: "rise 3", type: EnvelopeType.rise, speed: 8.0   },
-                { name: "rise 4", type: EnvelopeType.rise, speed: 2.0   },
-                { name: "rise 5", type: EnvelopeType.rise, speed: 0.5   },
-            ])
-        },
-        */
 
     public static readonly envelopes: DictionaryArray<Envelope> = toNameMap([
         { name: "none",           type: EnvelopeType.none,         speed: 0.0   },
