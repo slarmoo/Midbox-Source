@@ -1364,7 +1364,7 @@ export class SongEditor {
     private readonly _harmonicsRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "font-size: smaller;", onclick: () => this._openPrompt("harmonics") }, span(_.harmonicsLabel)), /*this._harmonicsZoom,*/ this._harmonicsEditor.container);
     //private readonly _harmonicsCopyPasteRow: HTMLDivElement = div({class: "selectRow", style: "width: 90px; align-content: space-between; align-self: right;" }, this._harmonicsCopyButton, this._harmonicsPasteButton);
     
-    private readonly _envelopeEditor: EnvelopeEditor = new EnvelopeEditor(this._doc);
+    private readonly _envelopeEditor: EnvelopeEditor = new EnvelopeEditor(this._doc, (name) => this._openPrompt(name));
     private readonly _discreteEnvelopeBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
     private readonly _discreteEnvelopeRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:4px;", onclick: () => this._openPrompt("discreteEnvelope") }, _.discreteEnvelopeLabel), this._discreteEnvelopeBox);
     private readonly _envelopeSpeedDisplay: HTMLSpanElement = span({ style: `color: ${ColorConfig.secondaryText}; font-size: smaller; text-overflow: clip;`, class: "tip", onclick: () => this._openPrompt("x") }, "x1");

@@ -986,7 +986,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "looped stairs 2", weight: 2},
                         { item: "looped stairs 3", weight: 2},
                         { item: "looped stairs 4", weight: 2},
-                    ])].index);
+                    ])].index, 1);
                 }
             }
             if (Math.random() < 0.1) {
@@ -1104,7 +1104,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "looped stairs 2", weight: 2},
                         { item: "looped stairs 3", weight: 2},
                         { item: "looped stairs 4", weight: 2},
-                ])].index);
+                ])].index, 1);
             } else {
                 instrument.noteFilter = instrument.noteFilter;
             }
@@ -1211,7 +1211,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "looped stairs 2", weight: 2},
                         { item: "looped stairs 3", weight: 2},
                         { item: "looped stairs 4", weight: 2},
-                ])].index);
+                ])].index, 1);
             }
             if (Math.random() < 0.15) {
                 instrument.effects |= 1 << EffectType.bitcrusher;
@@ -1317,7 +1317,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "looped stairs 2", weight: 2},
                     { item: "looped stairs 3", weight: 2},
                     { item: "looped stairs 4", weight: 2},
-                ])].index);
+                ])].index, 1);
                 if (Math.random() < 0.25) instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["freqCrusher"].index, 0, Config.envelopes.dictionary[selectWeightedRandom([
                     { item: "note size", weight: 2},
                     { item: "punch", weight: 2 },
@@ -1418,7 +1418,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "looped stairs 2", weight: 2},
                     { item: "looped stairs 3", weight: 2},
                     { item: "looped stairs 4", weight: 2},
-                ])].index);
+                ])].index, 1);
             }
             if (Math.random() < 0.15) {
                 instrument.effects |= 1 << EffectType.chorus;
@@ -1523,7 +1523,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "looped stairs 2", weight: 2},
                     { item: "looped stairs 3", weight: 2},
                     { item: "looped stairs 4", weight: 2},
-                ])].index);
+                ])].index, 1);
             }
             if (Math.random() < 0.1) {
                 instrument.echoSustain = selectCurvedDistribution(0, Config.echoSustainRange - 1, Config.echoSustainRange >> 1, 2);
@@ -1635,7 +1635,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "looped stairs 2", weight: 2},
                     { item: "looped stairs 3", weight: 2},
                     { item: "looped stairs 4", weight: 2},
-                ])].index);
+                ])].index, 1);
             }
 
             if (type == InstrumentType.noise || type == InstrumentType.spectrum) {
@@ -1756,7 +1756,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "looped stairs 2", weight: 2},
                         { item: "looped stairs 3", weight: 2},
                         { item: "looped stairs 4", weight: 2},
-                    ])].index);
+                    ])].index, 1);
                 }
             }
 
@@ -2029,7 +2029,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "looped stairs 2", weight: 2},
                         { item: "looped stairs 3", weight: 2},
                         { item: "looped stairs 4", weight: 2},
-                    ])].index);
+                    ])].index, 1);
                 }
             }
             if (Math.random() < 0.25) {
@@ -2145,7 +2145,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "looped stairs 2", weight: 2},
                     { item: "looped stairs 3", weight: 2},
                     { item: "looped stairs 4", weight: 2},
-                ])].index);
+                ])].index, 1);
             }
             if (Math.random() < 0.12) {
                 instrument.effects |= 1 << EffectType.bitcrusher;
@@ -2251,7 +2251,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "looped stairs 2", weight: 2},
                     { item: "looped stairs 3", weight: 2},
                     { item: "looped stairs 4", weight: 2},
-                ])].index);
+                ])].index, 1);
                 if (Math.random() < 0.18) instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["freqCrusher"].index, 0, Config.envelopes.dictionary[selectWeightedRandom([
                     { item: "note size", weight: 2},
                     { item: "punch", weight: 2 },
@@ -2352,7 +2352,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "looped stairs 2", weight: 2},
                     { item: "looped stairs 3", weight: 2},
                     { item: "looped stairs 4", weight: 2},
-                ])].index);
+                ])].index, 1);
             }
             if (effectsIncludeDistortion(instrument.effects) && Math.random() < 0.8 && (doc.prefs.noteFilterOnRandomization)) {
                 instrument.effects |= 1 << EffectType.noteFilter;
@@ -2440,7 +2440,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "looped stairs 2", weight: 2},
                     { item: "looped stairs 3", weight: 2},
                     { item: "looped stairs 4", weight: 2},
-                ])].index);
+                ])].index, 1);
             } else if (Math.random() < 0.5 && (doc.prefs.noteFilterOnRandomization)) {
                 instrument.effects |= 1 << EffectType.noteFilter;
                 applyFilterPoints(instrument.noteFilter, [
@@ -2546,7 +2546,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "looped stairs 2", weight: 2},
                         { item: "looped stairs 3", weight: 2},
                         { item: "looped stairs 4", weight: 2},
-                ])].index);
+                ])].index, 1);
             } else {
                 instrument.noteFilter = instrument.noteFilter;
             }
@@ -2653,7 +2653,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "looped stairs 2", weight: 2},
                     { item: "looped stairs 3", weight: 2},
                     { item: "looped stairs 4", weight: 2},
-                ])].index);
+                ])].index, 1);
             }
             if (Math.random() < 0.12) {
                 instrument.echoSustain = selectCurvedDistribution(0, Config.echoSustainRange - 1, Config.echoSustainRange >> 1, 2);
@@ -2765,7 +2765,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "looped stairs 2", weight: 2},
                     { item: "looped stairs 3", weight: 2},
                     { item: "looped stairs 4", weight: 2},
-                ])].index);
+                ])].index, 1);
             }
 
             function normalize(harmonics: number[]): void {
@@ -2884,7 +2884,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "looped stairs 2", weight: 2},
                         { item: "looped stairs 3", weight: 2},
                         { item: "looped stairs 4", weight: 2},
-                        ])].index);
+                        ])].index, 1);
                     }
                 } break;
                 case InstrumentType.supersaw: {
@@ -2993,7 +2993,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "looped stairs 2", weight: 2},
                                 { item: "looped stairs 3", weight: 2},
                                 { item: "looped stairs 4", weight: 2},
-                        ])].index);
+                        ])].index, 1);
                     }
                     if (instrument.envelopeCount < Config.maxEnvelopeCount && Math.random() < 0.3) {
                         instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["supersawDynamism"].index, 0, Config.envelopes.dictionary[selectWeightedRandom([
@@ -3094,7 +3094,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "looped stairs 2", weight: 2},
                                 { item: "looped stairs 3", weight: 2},
                                 { item: "looped stairs 4", weight: 2},
-                        ])].index);
+                        ])].index, 1);
                     }
                     if (instrument.envelopeCount < Config.maxEnvelopeCount && Math.random() < 0.3) {
                         instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["supersawShape"].index, 0, Config.envelopes.dictionary[selectWeightedRandom([
@@ -3196,7 +3196,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "looped stairs 2", weight: 2},
                                 { item: "looped stairs 3", weight: 2},
                                 { item: "looped stairs 4", weight: 2},
-                        ])].index);
+                        ])].index, 1);
                     }
                     if (instrument.envelopeCount < Config.maxEnvelopeCount && Math.random() < 0.3) {
                         instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["supersawSpread"].index, 0, Config.envelopes.dictionary[selectWeightedRandom([
@@ -3297,7 +3297,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "looped stairs 2", weight: 2},
                                 { item: "looped stairs 3", weight: 2},
                                 { item: "looped stairs 4", weight: 2},
-                        ])].index);
+                        ])].index, 1);
                     }
                 } break;
                 case InstrumentType.pickedString:
@@ -3526,7 +3526,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "looped stairs 2", weight: 2},
                                 { item: "looped stairs 3", weight: 2},
                                 { item: "looped stairs 4", weight: 2},
-                            ])].index);
+                            ])].index, 1);
                             instrument.operators[i].waveform = Config.operatorWaves.dictionary[selectWeightedRandom([
                                 { item: "sine", weight: 3 },
                                 { item: "triangle", weight: 3 },
@@ -3676,7 +3676,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "looped stairs 2", weight: 2},
                                 { item: "looped stairs 3", weight: 2},
                                 { item: "looped stairs 4", weight: 2},
-                            ])].index);
+                            ])].index, 1);
                         }
                     }
                     instrument.feedbackAmplitude = (Math.pow(Math.random(), 3) * Config.operatorAmplitudeMax) | 0;
@@ -3780,7 +3780,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "looped stairs 2", weight: 2},
                                 { item: "looped stairs 3", weight: 2},
                                 { item: "looped stairs 4", weight: 2},
-                        ])].index);
+                        ])].index, 1);
                     }
                 } break;
                 case InstrumentType.customChipWave: {
@@ -7315,7 +7315,7 @@ export class ChangeAddEnvelope extends Change {
     constructor(doc: SongDocument) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        instrument.addEnvelope(0, 0, 0);
+        instrument.addEnvelope(0, 0, 0, 1);
         instrument.preset = instrument.type;
         doc.notifier.changed();
         this._didSomething();

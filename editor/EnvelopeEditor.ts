@@ -2,12 +2,12 @@
 
 import {InstrumentType, Config, DropdownID} from "../synth/SynthConfig";
 import {Instrument} from "../synth/synth";
-import {Slider} from "./HTMLWrapper";
 import {ColorConfig} from "./ColorConfig";
 import {SongDocument} from "./SongDocument";
 import {ChangeSetEnvelopeTarget, ChangeSetEnvelopeType, ChangeRemoveEnvelope, ChangePerEnvelopeSpeed} from "./changes";
 import {HTML} from "imperative-html/dist/esm/elements-strict";
 import {Localization as _} from "./Localization";
+import {clamp} from "./UsefulCodingStuff";
 
 export class EnvelopeEditor {
 	public readonly container: HTMLElement = HTML.div({class: "envelopeEditor"});
@@ -15,7 +15,7 @@ export class EnvelopeEditor {
 	// Everything must be declared as arrays for each envelope
 	// Properly given styles and what not in render()
 	private readonly _rows: HTMLDivElement[] = [];
-	private readonly _perEnvelopeSpeedSliders: Slider[] = [];
+	private readonly _perEnvelopeSpeedSliders: HTMLInputElement[] = [];
 	private readonly _perEnvelopeSpeedInputBoxes: HTMLInputElement[] = [];
 	private readonly _perEnvelopeSpeedRows: HTMLElement[] = [];
 	private readonly _envelopeDropdownGroups: HTMLElement[] = [];
@@ -30,10 +30,11 @@ export class EnvelopeEditor {
 	private _renderedEffects: number = 0;
 	private _openPerEnvelopeDropdowns: boolean[] = [];
 	
-	constructor(private _doc: SongDocument) {
+	constructor(private _doc: SongDocument, private _openPrompt: (name: string) => void) {
 		this.container.addEventListener("change", this._onChange);
+		this.container.addEventListener("input", this._onInput);
 		this.container.addEventListener("click", this._onClick);
-		this.container.addEventListener("keypress", this._typingInInput);
+		this.container.addEventListener("keydown", this._typingInInput);
 
 		const instrument: Instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
 		for (let envelopeIndex: number = this._rows.length; envelopeIndex < instrument.envelopeCount; envelopeIndex++) {
@@ -54,6 +55,18 @@ export class EnvelopeEditor {
 		}
 	}
 	
+	private _onInput = (event: Event) => {
+		const instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
+		const perEnvelopeSpeedInputBoxIndex = this._perEnvelopeSpeedInputBoxes.indexOf(<any> event.target);
+		const perEnvelopeSpeedSliderIndex = this._perEnvelopeSpeedSliders.indexOf(<any> event.target);
+		if (perEnvelopeSpeedInputBoxIndex != -1) {
+			this._doc.record(new ChangePerEnvelopeSpeed(this._doc, perEnvelopeSpeedInputBoxIndex, instrument.envelopes[perEnvelopeSpeedInputBoxIndex].envelopeSpeed, +(this._perEnvelopeSpeedInputBoxes[perEnvelopeSpeedInputBoxIndex].value)));
+		}
+		if (perEnvelopeSpeedSliderIndex != -1) {
+			this._doc.record(new ChangePerEnvelopeSpeed(this._doc, perEnvelopeSpeedSliderIndex, instrument.envelopes[perEnvelopeSpeedSliderIndex].envelopeSpeed, +(this._perEnvelopeSpeedSliders[perEnvelopeSpeedSliderIndex].value)));
+		}
+	};
+
 	private _onClick = (event: MouseEvent): void => {
 		const index: number = this._deleteButtons.indexOf(<any> event.target);
 		if (index != -1) {
@@ -64,29 +77,8 @@ export class EnvelopeEditor {
 	private _typingInInput = (event: KeyboardEvent): void => {
 		const perEnvelopeSpeedInputBoxIndex: number = this._perEnvelopeSpeedInputBoxes.indexOf(<any> event.target);
 		if (perEnvelopeSpeedInputBoxIndex != -1) {
-			switch (event.keyCode) {
-				case 8: // backspace/delete
-				case 13: // enter/return
-				case 38: // up
-				case 40: // down
-				case 37: // left
-				case 39: // right
-				case 48: // 0
-				case 49: // 1
-				case 50: // 2
-				case 51: // 3
-				case 52: // 4
-				case 53: // 5
-				case 54: // 6
-				case 55: // 7
-				case 56: // 8
-				case 57: // 9
-					event.stopPropagation();
-					break;
-			}
+			event.stopPropagation();
 		}
-		const instrument: Instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
-		this._doc.record(new ChangePerEnvelopeSpeed(this._doc, perEnvelopeSpeedInputBoxIndex, instrument.envelopes[perEnvelopeSpeedInputBoxIndex].envelopeSpeed, parseInt(this._perEnvelopeSpeedInputBoxes[perEnvelopeSpeedInputBoxIndex].value)));
 	}
 	
 	private _makeOption(target: number, index: number): HTMLOptionElement {
@@ -115,12 +107,12 @@ export class EnvelopeEditor {
 		const instrument: Instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
 		
 		for (let envelopeIndex: number = this._rows.length; envelopeIndex < instrument.envelopeCount; envelopeIndex++) {
-			const perEnvelopeSpeedSlider: Slider = new Slider(HTML.input({style: "margin: 0;", type: "range", min: "0", max: "32", value: "1", step: "0.25"}), this._doc, (oldValue: number, newValue: number) => new ChangePerEnvelopeSpeed(this._doc, envelopeIndex, oldValue, newValue), false);
-			const perEnvelopeSpeedInputBox: HTMLInputElement = HTML.input({style: "width: 4em; font-size: 80%; ", id: "perEnvelopeSpeedInputBox", type: "number", step: "0.001", min: "0", max: "32", value: "1"});
+			const perEnvelopeSpeedSlider: HTMLInputElement = HTML.input({style: "margin: 0;", type: "range", min: Config.perEnvelopeSpeedMin, max: Config.perEnvelopeSpeedMax, value: "1", step: "0.25"});
+			const perEnvelopeSpeedInputBox: HTMLInputElement = HTML.input({style: "width: 4em; font-size: 80%; ", id: "perEnvelopeSpeedInputBox", type: "number", step: "0.001", min: Config.perEnvelopeSpeedMin, max: Config.perEnvelopeSpeedMax, value: "1"});
 			const perEnvelopeSpeedRow: HTMLElement = HTML.div({class: "selectRow dropFader"}, HTML.div({},
-				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", /*onclick: () => this._openPrompt("perEnvelopeSpeed")*/}, HTML.span(_.perEnvelopeSpeedLabel)),
+				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("perEnvelopeSpeed")}, HTML.span(_.perEnvelopeSpeedLabel)),
 				HTML.div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, perEnvelopeSpeedInputBox),
-			), perEnvelopeSpeedSlider.container);
+			), perEnvelopeSpeedSlider);
 			const envelopeDropdownGroup: HTMLElement = HTML.div({class: "editor-controls", style: "display: none;"}, perEnvelopeSpeedRow);
 			const envelopeDropdown: HTMLButtonElement = HTML.button({style: "margin-left: 0.7em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.PerEnvelope, envelopeIndex)}, "▼");
 
@@ -188,6 +180,8 @@ export class EnvelopeEditor {
 		}
 		
 		for (let envelopeIndex: number = 0; envelopeIndex < instrument.envelopeCount; envelopeIndex++) {
+			this._perEnvelopeSpeedSliders[envelopeIndex].value = String(clamp(Config.perEnvelopeSpeedMin, Config.perEnvelopeSpeedMax+1, instrument.envelopes[envelopeIndex].envelopeSpeed));
+			this._perEnvelopeSpeedInputBoxes[envelopeIndex].value = String(clamp(Config.perEnvelopeSpeedMin, Config.perEnvelopeSpeedMax+1, instrument.envelopes[envelopeIndex].envelopeSpeed));
 			this._targetSelects[envelopeIndex].value = String(instrument.envelopes[envelopeIndex].target + instrument.envelopes[envelopeIndex].index * Config.instrumentAutomationTargets.length);
 			this._envelopeSelects[envelopeIndex].selectedIndex = instrument.envelopes[envelopeIndex].envelope;
 		}

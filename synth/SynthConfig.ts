@@ -757,6 +757,8 @@ export class Config {
         { name: "looped stairs 3",type: EnvelopeType.loopStairs,   speed: -0.25 },
         { name: "looped stairs 4",type: EnvelopeType.loopStairs,   speed: -0.125},
     ]);
+    public static readonly perEnvelopeSpeedMin: number = 0;
+    public static readonly perEnvelopeSpeedMax: number = 16;
 
     public static readonly feedbacks: DictionaryArray<Feedback> = toNameMap([
         { name: "1⟲",         indices: [[1], [],  [],  [] ]},
