@@ -6692,7 +6692,7 @@ class EnvelopeComputer {
         const prevNoteTicksStart: number = this.prevNoteTicksEnd;
         const prevNoteTicksEnd: number = prevNoteTicksStart + 1.0;
 
-        for (let envelopeIndex: number = 0; envelopeIndex <= instrument.envelopeCount; envelopeIndex++) {
+        for (let envelopeIndex: number = 0; envelopeIndex < instrument.envelopeCount; envelopeIndex++) {
             let envSpeed: number = instrument.envelopes[envelopeIndex].envelopeSpeed;
             this.tickTimeEnd[envelopeIndex] = tickTimeStart[envelopeIndex] + timeScale * envSpeed;
             this.noteSecondsStart[envelopeIndex] = this.noteSecondsEnd[envelopeIndex];
@@ -7094,7 +7094,7 @@ class InstrumentState {
     public arpTime: number = 0;
     public vibratoTime: number = 0;
     public nextVibratoTime: number = 0;
-    public envelopeTime: number = 0;
+    public envelopeTime: number[] = [];
     public currentWave: number = 0;
 
     public eqFilterVolume: number = 1.0;
@@ -7298,7 +7298,7 @@ class InstrumentState {
         this.vibratoTime = 0;
         this.nextVibratoTime = 0;
         this.arpTime = 0;
-        this.envelopeTime = 0;
+        this.envelopeTime = [];
         this.envelopeComputer.reset();
         this.currentWave = 0.0;
 
@@ -7938,7 +7938,7 @@ export class Synth {
                     Synth.getInstrumentSynthFunction(instrument);
                     instrumentState.vibratoTime = 0;
                     instrumentState.nextVibratoTime = 0;
-                    instrumentState.envelopeTime = 0;
+                    instrumentState.envelopeTime = [];
                     instrumentState.arpTime = 0;
                     instrumentState.currentWave = 0;
                     instrumentState.updateWaves(instrument, this.samplesPerSecond);
@@ -9223,18 +9223,20 @@ export class Synth {
                         }
 
                         // Update envelope time, which is used to calculate (all envelopes') position.
-                        let useEnvelopeSpeed: number = instrument.envelopeSpeed;
-                        if (this.isModActive(Config.modulators.dictionary["envelope speed"].index, channel, instrumentIdx)) {
-                            useEnvelopeSpeed = Math.max(0, Math.min(Config.arpSpeedScale.length-1, this.getModValue(Config.modulators.dictionary["envelope speed"].index, channel, instrumentIdx, false)));
-                            if (Number.isInteger(useEnvelopeSpeed)) {
-                                instrumentState.envelopeTime += Config.arpSpeedScale[useEnvelopeSpeed];
+                        for (let envelopeIndex: number = 0; envelopeIndex < instrument.envelopeCount; envelopeIndex++) {
+                            let useEnvelopeSpeed: number = instrument.envelopeSpeed;
+                            let individualEnvSpeed: number = instrument.envelopes[envelopeIndex].envelopeSpeed;
+                            if (this.isModActive(Config.modulators.dictionary["envelope speed"].index, channel, instrumentIdx)) {
+                                useEnvelopeSpeed = Math.max(0, Math.min(Config.arpSpeedScale.length-1, this.getModValue(Config.modulators.dictionary["envelope speed"].index, channel, instrumentIdx, false)));
+                                if (Number.isInteger(useEnvelopeSpeed)) {
+                                    instrumentState.envelopeTime[envelopeIndex] += (Config.arpSpeedScale[useEnvelopeSpeed] * individualEnvSpeed);
+                                } else {
+                                    // Linear interpolate envelope values
+                                    instrumentState.envelopeTime[envelopeIndex] += (((1 - (useEnvelopeSpeed % 1)) * Config.arpSpeedScale[Math.floor(useEnvelopeSpeed)] + (useEnvelopeSpeed % 1) * Config.arpSpeedScale[Math.ceil(useEnvelopeSpeed)]) * individualEnvSpeed);
+                                }
                             } else {
-                                // Linear interpolate envelope values
-                                instrumentState.envelopeTime += (1 - (useEnvelopeSpeed % 1)) * Config.arpSpeedScale[Math.floor(useEnvelopeSpeed)] + (useEnvelopeSpeed % 1) * Config.arpSpeedScale[Math.ceil(useEnvelopeSpeed)];
+                                instrumentState.envelopeTime[envelopeIndex] += (Config.arpSpeedScale[useEnvelopeSpeed] * individualEnvSpeed);
                             }
-                        }
-                        else {
-                            instrumentState.envelopeTime += Config.arpSpeedScale[useEnvelopeSpeed];
                         }
                     }
                 }
@@ -9322,7 +9324,9 @@ export class Synth {
                     const instrument: Instrument = this.song.channels[channelIndex].instruments[instrumentIndex];
                     instrumentState.nextVibratoTime = (instrumentState.nextVibratoTime % (Config.vibratoTypes[instrument.vibratoType].period / (Config.ticksPerPart * samplesPerTick / this.samplesPerSecond)));
                     instrumentState.arpTime = (instrumentState.arpTime % (2520 * Config.ticksPerArpeggio)); // 2520 = LCM of 4, 5, 6, 7, 8, 9 (arp sizes)
-                    instrumentState.envelopeTime = (instrumentState.envelopeTime % (Config.partsPerBeat * Config.ticksPerPart * this.song.beatsPerBar));
+                    for (let envelopeIndex: number = 0; envelopeIndex < instrument.envelopeCount; envelopeIndex++) {
+                        instrumentState.envelopeTime[envelopeIndex] = (instrumentState.envelopeTime[envelopeIndex] % (Config.partsPerBeat * Config.ticksPerPart * this.song.beatsPerBar));
+                    }
                 }
             }
 
@@ -10393,8 +10397,10 @@ export class Synth {
             // Fade in the beginning of the note.
             const fadeInSeconds: number = instrument.getFadeInSeconds();
             if (fadeInSeconds > 0.0) {
-                fadeExpressionStart *= Math.min(1.0, envelopeComputer.noteSecondsStart / fadeInSeconds);
-                fadeExpressionEnd *= Math.min(1.0, envelopeComputer.noteSecondsEnd / fadeInSeconds);
+                for (let envelopeIndex: number = 0; envelopeIndex < instrument.envelopeCount; envelopeIndex++) {
+                    fadeExpressionStart *= Math.min(1.0, envelopeComputer.noteSecondsStart[envelopeIndex] / fadeInSeconds);
+                    fadeExpressionEnd *= Math.min(1.0, envelopeComputer.noteSecondsEnd[envelopeIndex] / fadeInSeconds);
+                }
             }
         }
 
@@ -10465,11 +10471,11 @@ export class Synth {
             noteFilterExpression *= EnvelopeComputer.getLowpassCutoffDecayVolumeCompensation(drumsetFilterEnvelope)
 
             // Drumset filters use the same envelope timing as the rest of the envelopes, but do not include support for slide transitions.
-            let drumsetFilterEnvelopeStart: number = EnvelopeComputer.computeEnvelope(drumsetFilterEnvelope, envelopeComputer.noteSecondsStart, beatsPerPart * partTimeStart, beatNoteTimeStart, envelopeComputer.noteSizeStart);
+            let drumsetFilterEnvelopeStart: number = EnvelopeComputer.computeEnvelope(drumsetFilterEnvelope, envelopeComputer.noteSecondsStart[0], beatsPerPart * partTimeStart, beatNoteTimeStart, envelopeComputer.noteSizeStart);
 
             // Apply slide interpolation to drumset envelope.
             if (envelopeComputer.prevSlideStart) {
-                const other: number = EnvelopeComputer.computeEnvelope(drumsetFilterEnvelope, envelopeComputer.prevNoteSecondsStart, beatsPerPart * partTimeStart, beatNoteTimeStart, envelopeComputer.prevNoteSize);
+                const other: number = EnvelopeComputer.computeEnvelope(drumsetFilterEnvelope, envelopeComputer.prevNoteSecondsStart[0], beatsPerPart * partTimeStart, beatNoteTimeStart, envelopeComputer.prevNoteSize);
                 drumsetFilterEnvelopeStart += (other - drumsetFilterEnvelopeStart) * envelopeComputer.prevSlideRatioStart;
             }
             if (envelopeComputer.nextSlideStart) {
@@ -10479,10 +10485,10 @@ export class Synth {
             let drumsetFilterEnvelopeEnd: number = drumsetFilterEnvelopeStart;
 
             if ( instrument.discreteEnvelope == false ) {
-                drumsetFilterEnvelopeEnd = EnvelopeComputer.computeEnvelope(drumsetFilterEnvelope, envelopeComputer.noteSecondsEnd, beatsPerPart * partTimeEnd, beatNoteTimeEnd, envelopeComputer.noteSizeEnd);
+                drumsetFilterEnvelopeEnd = EnvelopeComputer.computeEnvelope(drumsetFilterEnvelope, envelopeComputer.noteSecondsEnd[0], beatsPerPart * partTimeEnd, beatNoteTimeEnd, envelopeComputer.noteSizeEnd);
 
                 if (envelopeComputer.prevSlideEnd) {
-                    const other: number = EnvelopeComputer.computeEnvelope(drumsetFilterEnvelope, envelopeComputer.prevNoteSecondsEnd, beatsPerPart * partTimeEnd, beatNoteTimeEnd, envelopeComputer.prevNoteSize);
+                    const other: number = EnvelopeComputer.computeEnvelope(drumsetFilterEnvelope, envelopeComputer.prevNoteSecondsEnd[0], beatsPerPart * partTimeEnd, beatNoteTimeEnd, envelopeComputer.prevNoteSize);
                     drumsetFilterEnvelopeEnd += (other - drumsetFilterEnvelopeEnd) * envelopeComputer.prevSlideRatioEnd;
                 }
                 if (envelopeComputer.nextSlideEnd) {
