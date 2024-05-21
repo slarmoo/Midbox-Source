@@ -4,7 +4,7 @@ import {InstrumentType, Config, DropdownID} from "../synth/SynthConfig";
 import {Instrument} from "../synth/synth";
 import {ColorConfig} from "./ColorConfig";
 import {SongDocument} from "./SongDocument";
-import {ChangeSetEnvelopeTarget, ChangeSetEnvelopeType, ChangeRemoveEnvelope, ChangePerEnvelopeSpeed} from "./changes";
+import {ChangeSetEnvelopeTarget, ChangeSetEnvelopeType, ChangeRemoveEnvelope, ChangePerEnvelopeSpeed, ChangeEnvelopeAmplitude} from "./changes";
 import {HTML} from "imperative-html/dist/esm/elements-strict";
 import {Localization as _} from "./Localization";
 import {clamp} from "./UsefulCodingStuff";
@@ -18,6 +18,9 @@ export class EnvelopeEditor {
 	private readonly _perEnvelopeSpeedSliders: HTMLInputElement[] = [];
 	private readonly _perEnvelopeSpeedInputBoxes: HTMLInputElement[] = [];
 	private readonly _perEnvelopeSpeedRows: HTMLElement[] = [];
+	private readonly _envelopeAmplitudeSliders: HTMLInputElement[] = [];
+	private readonly _envelopeAmplitudeInputBoxes: HTMLInputElement[] = [];
+	private readonly _envelopeAmplitudeRows: HTMLElement[] = [];
 	private readonly _envelopeDropdownGroups: HTMLElement[] = [];
 	private readonly _envelopeDropdowns: HTMLButtonElement[] = [];
 	private readonly _targetSelects: HTMLSelectElement[] = [];
@@ -65,6 +68,14 @@ export class EnvelopeEditor {
 		if (perEnvelopeSpeedSliderIndex != -1) {
 			this._doc.record(new ChangePerEnvelopeSpeed(this._doc, perEnvelopeSpeedSliderIndex, instrument.envelopes[perEnvelopeSpeedSliderIndex].envelopeSpeed, +(this._perEnvelopeSpeedSliders[perEnvelopeSpeedSliderIndex].value)));
 		}
+		const envelopeAmplitudeInputBoxIndex = this._envelopeAmplitudeInputBoxes.indexOf(<any> event.target);
+		const envelopeAmplitudeSliderIndex = this._envelopeAmplitudeSliders.indexOf(<any> event.target);
+		if (envelopeAmplitudeInputBoxIndex != -1) {
+			this._doc.record(new ChangeEnvelopeAmplitude(this._doc, envelopeAmplitudeInputBoxIndex, instrument.envelopes[envelopeAmplitudeInputBoxIndex].amplitude, +(this._envelopeAmplitudeInputBoxes[envelopeAmplitudeInputBoxIndex].value)));
+		}
+		if (envelopeAmplitudeSliderIndex != -1) {
+			this._doc.record(new ChangeEnvelopeAmplitude(this._doc, envelopeAmplitudeSliderIndex, instrument.envelopes[envelopeAmplitudeSliderIndex].amplitude, +(this._envelopeAmplitudeSliders[envelopeAmplitudeSliderIndex].value)));
+		}
 	};
 
 	private _onClick = (event: MouseEvent): void => {
@@ -77,6 +88,10 @@ export class EnvelopeEditor {
 	private _typingInInput = (event: KeyboardEvent): void => {
 		const perEnvelopeSpeedInputBoxIndex: number = this._perEnvelopeSpeedInputBoxes.indexOf(<any> event.target);
 		if (perEnvelopeSpeedInputBoxIndex != -1) {
+			event.stopPropagation();
+		}
+		const perEnvelopeAmplitudeInputBoxIndex: number = this._envelopeAmplitudeInputBoxes.indexOf(<any> event.target);
+		if (perEnvelopeAmplitudeInputBoxIndex != -1) {
 			event.stopPropagation();
 		}
 	}
@@ -113,7 +128,13 @@ export class EnvelopeEditor {
 				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("perEnvelopeSpeed")}, HTML.span(_.perEnvelopeSpeedLabel)),
 				HTML.div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, perEnvelopeSpeedInputBox),
 			), perEnvelopeSpeedSlider);
-			const envelopeDropdownGroup: HTMLElement = HTML.div({class: "editor-controls", style: "display: none;"}, perEnvelopeSpeedRow);
+			const envelopeAmplitudeSlider: HTMLInputElement = HTML.input({style: "margin: 0;", type: "range", min: Config.envelopeAmplitudeMin, max: Config.envelopeAmplitudeMax, value: "1", step: "0.20"});
+			const envelopeAmplitudeInputBox: HTMLInputElement = HTML.input({style: "width: 4em; font-size: 80%; ", id: "envelopeAmplitudeInputBox", type: "number", step: "0.001", min: Config.envelopeAmplitudeMin, max: Config.envelopeAmplitudeMax, value: "1"});
+			const envelopeAmplitudeRow: HTMLElement = HTML.div({class: "selectRow dropFader"}, HTML.div({},
+				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeAmplitude")}, HTML.span(_.envelopeAmplitudeLabel)),
+				HTML.div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, envelopeAmplitudeInputBox),
+			), envelopeAmplitudeSlider);
+			const envelopeDropdownGroup: HTMLElement = HTML.div({class: "editor-controls", style: "display: none;"}, perEnvelopeSpeedRow, envelopeAmplitudeRow);
 			const envelopeDropdown: HTMLButtonElement = HTML.button({style: "margin-left: 0.7em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.PerEnvelope, envelopeIndex)}, "▼");
 
 			const targetSelect: HTMLSelectElement = HTML.select();
@@ -136,7 +157,7 @@ export class EnvelopeEditor {
 			const deleteButton: HTMLButtonElement = HTML.button({type: "button", class: "delete-envelope"});
 			
 			const row: HTMLDivElement = HTML.div(HTML.div({class: "envelope-row"},
-				HTML.div({style: "width: 0; flex: 0.2;"}, envelopeDropdown),
+				HTML.div({style: "width: 0; flex: 0.2; margin-top: 3px;"}, envelopeDropdown),
 				HTML.div({class: "selectContainer", style: "width: 0; flex: 0.8;"}, targetSelect),
 				HTML.div({class: "selectContainer", style: "width: 0; flex: 0.7;"}, envelopeSelect),
 				deleteButton,
@@ -147,6 +168,9 @@ export class EnvelopeEditor {
 			this._perEnvelopeSpeedSliders[envelopeIndex] = perEnvelopeSpeedSlider;
 			this._perEnvelopeSpeedInputBoxes[envelopeIndex] = perEnvelopeSpeedInputBox;
 			this._perEnvelopeSpeedRows[envelopeIndex] = perEnvelopeSpeedRow;
+			this._envelopeAmplitudeSliders[envelopeIndex] = envelopeAmplitudeSlider;
+			this._envelopeAmplitudeInputBoxes[envelopeIndex] = envelopeAmplitudeInputBox;
+			this._envelopeAmplitudeRows[envelopeIndex] = envelopeAmplitudeRow;
 			this._envelopeDropdownGroups[envelopeIndex] = envelopeDropdownGroup;
 			this._envelopeDropdowns[envelopeIndex] = envelopeDropdown;
 			this._targetSelects[envelopeIndex] = targetSelect;
@@ -182,6 +206,8 @@ export class EnvelopeEditor {
 		for (let envelopeIndex: number = 0; envelopeIndex < instrument.envelopeCount; envelopeIndex++) {
 			this._perEnvelopeSpeedSliders[envelopeIndex].value = String(clamp(Config.perEnvelopeSpeedMin, Config.perEnvelopeSpeedMax+1, instrument.envelopes[envelopeIndex].envelopeSpeed));
 			this._perEnvelopeSpeedInputBoxes[envelopeIndex].value = String(clamp(Config.perEnvelopeSpeedMin, Config.perEnvelopeSpeedMax+1, instrument.envelopes[envelopeIndex].envelopeSpeed));
+			this._envelopeAmplitudeSliders[envelopeIndex].value = String(clamp(Config.envelopeAmplitudeMin, Config.envelopeAmplitudeMax+1, instrument.envelopes[envelopeIndex].amplitude));
+			this._envelopeAmplitudeInputBoxes[envelopeIndex].value = String(clamp(Config.envelopeAmplitudeMin, Config.envelopeAmplitudeMax+1, instrument.envelopes[envelopeIndex].amplitude));
 			this._targetSelects[envelopeIndex].value = String(instrument.envelopes[envelopeIndex].target + instrument.envelopes[envelopeIndex].index * Config.instrumentAutomationTargets.length);
 			this._envelopeSelects[envelopeIndex].selectedIndex = instrument.envelopes[envelopeIndex].envelope;
 		}

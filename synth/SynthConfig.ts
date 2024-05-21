@@ -281,7 +281,7 @@ export class Config {
     public static jsonFormat: string = "midbox";
 
     public static readonly scales: DictionaryArray<Scale> = toNameMap([
-//        The keys in a scale:                                         C     Db     D      Eb     E      F      F#     G      Ab     A      Bb     B      
+//        The keys in a scale:                                         C     C#|Db  D      D#|Eb  E      F      F#|Gb  G      Ab|G#  A      Bb|A#  B      
         { name: "Free",              realName: _.scale1Label,  flags: [true, true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true ]}, 
         { name: "Major",             realName: _.scale2Label,  flags: [true, false, true,  false, true,  true,  false, true,  false, true,  false, true ]},
         { name: "Minor",             realName: _.scale3Label,  flags: [true, false, true,  true,  false, true,  false, true,  true,  false, true,  false]},
@@ -349,7 +349,7 @@ export class Config {
 
 //  Normal variants.
     public static readonly normalArpeggioPatterns:             ReadonlyArray<ReadonlyArray<number>> = [[0], [0, 1], [0, 1, 2],    [0, 1, 2, 3],       [0, 1, 2, 3, 4],          [0, 1, 2, 3, 4, 5],             [0, 1, 2, 3, 4, 5, 6],                [0, 1, 2, 3, 4, 5, 6, 7],                   [0, 1, 2, 3, 4, 5, 6, 7, 8]                     ];
-//  This one is mostly the same as Normal, but the third case bounces back. Kept to not break songs.
+  //This one is mostly the same as Normal, but the third case bounces back. Kept to not break songs reliant on this.
     public static readonly legacyArpeggioPatterns:             ReadonlyArray<ReadonlyArray<number>> = [[0], [0, 1], [0, 1, 2, 1], [0, 1, 2, 3],       [0, 1, 2, 3, 4],          [0, 1, 2, 3, 4, 5],             [0, 1, 2, 3, 4, 5, 6],                [0, 1, 2, 3, 4, 5, 6, 7],                   [0, 1, 2, 3, 4, 5, 6, 7, 8]                     ];
     public static readonly scrambleArpeggioPatterns:           ReadonlyArray<ReadonlyArray<number>> = [[0], [0, 1], [0, 1, 0, 2], [0, 1, 0, 2, 3],    [0, 1, 0, 2, 3, 2, 4, 2], [0, 1, 0, 2, 3, 4, 3, 5],       [0, 1, 0, 2, 3, 4, 6, 5],             [0, 1, 0, 2, 3, 2, 4, 2, 6, 5, 7, 5],       [0, 1, 0, 2, 3, 4, 3, 5, 6, 7, 6, 8]            ];
     public static readonly oscillateArpeggioPatterns:          ReadonlyArray<ReadonlyArray<number>> = [[0], [0, 1], [0, 1, 0, 2], [0, 1, 0, 2, 0, 3], [0, 1, 0, 2, 0, 3, 0, 4], [0, 1, 0, 2, 0, 3, 0, 4, 0, 5], [0, 1, 0, 2, 0, 3, 0, 4, 0, 5, 0, 6], [0, 1, 0, 2, 0, 3, 0, 4, 0, 5, 0, 6, 0, 7], [0, 1, 0, 2, 0, 3, 0, 4, 0, 5, 0, 6, 0, 7, 0, 8]];
@@ -759,6 +759,8 @@ export class Config {
     ]);
     public static readonly perEnvelopeSpeedMin: number = 0;
     public static readonly perEnvelopeSpeedMax: number = 16;
+    public static readonly envelopeAmplitudeMin: number = 0;
+    public static readonly envelopeAmplitudeMax: number = 8;
 
     public static readonly feedbacks: DictionaryArray<Feedback> = toNameMap([
         { name: "1⟲",         indices: [[1], [],  [],  [] ]},

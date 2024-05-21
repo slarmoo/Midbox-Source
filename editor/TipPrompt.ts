@@ -509,7 +509,16 @@ export class TipPrompt implements Prompt {
 				message = div(
 					h2("Individual Envelope Speed"),
 					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously."),
-					p("This setting controls the speed of this envelope as a multiplier. You can use the slider to quickly adjust speeds and the input box for finer speed amounts.")
+					p("This setting controls the speed of this envelope as a multiplier. You can use the slider to quickly adjust speeds and the input box for finer speed amounts."),
+					p("The speed of an envelope changes how fast its runs. In BeepBox, this is equivalent to the numbers beside each envelope type's name.")
+				);
+			} break;
+			case "envelopeAmplitude": {
+				message = div(
+					h2("Envelope Amplitude"),
+					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously."),
+					p("This setting controls the amplitude of this envelope as a multiplier. You can use the slider to quickly adjust amplitude and the input box for finer amplitude amounts."),
+					p("The amplitude of an envelope changes how heavy its effect is. Example, using other BeepBox, |Tremolo 1-3| to |Tremolo 4-6| is the same as |Tremolo x1amp| to |Tremolo x0.5amp|.")
 				);
 			} break;
 			case "usedInstrument": {

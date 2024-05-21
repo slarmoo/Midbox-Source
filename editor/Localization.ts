@@ -67,6 +67,7 @@ export class Localization {
     public static arpSpeedLabel: string = "‣ Spd:";
     public static envelopeSpeedLabel: string = "‣ Spd:";
     public static perEnvelopeSpeedLabel: string = "‣ Env Spd:";
+    public static envelopeAmplitudeLabel: string = "‣ Env Amp:";
     public static discreteEnvelopeLabel: string = "‣ Discrete:";
     public static wavetableSpeedLabel: string = "Spd:";
     public static interpolateWavesLabel: string = "Interpolate:";
@@ -1020,6 +1021,8 @@ if (language == "spanish") {
     Localization.slideSpeedLabel = "‣ Vel:";
     Localization.arpSpeedLabel = "‣ Vel:";
     Localization.envelopeSpeedLabel = "‣ Vel:";
+    Localization.perEnvelopeSpeedLabel = "‣ Env Vel:";
+    Localization.envelopeAmplitudeLabel = "‣ Env Amp:";
     Localization.wavetableSpeedLabel = "Vel:";
     Localization.interpolateWavesLabel = "Interpolar:";
     Localization.resetCyclePerNoteLabel = "Ciclo por Nota:";
