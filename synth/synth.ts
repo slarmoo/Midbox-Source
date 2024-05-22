@@ -3058,7 +3058,141 @@ export class Instrument {
                     const rawEnvelopeName: string = envelopeObject["envelope"];
                     tempEnvelope.fromJsonObject(envelopeObject);
                     if (jsonFormat == "midbox") {
-                        // Nothing yet!!!
+                        // Default Envelope Table
+                        // Used as the center point for grabbing all other speed values from other speed numbers.
+                        /*
+                        None/Note Size/Punch | stay the same
+                        Flare 3
+                        Twang 3
+                        Swell 3
+                        Full Tremolo 2
+                        Decay 3.5
+                        ModBox Envelopes | stay the same
+                        Wibble 2
+                        Linear 2
+                        Rise 2
+                        JummBox Blip 3
+                        Decelerate 1
+                        Stairs 1
+                        Looped Stairs 1
+                        */
+                        const envelopeProperty: any = instrumentObject["envelope"];
+                        const oldNameToNewData = (<any>{
+                            "none":            {envelope: "none",          envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4},
+                            "note size":       {envelope: "note size",     envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4},
+                            "punch":           {envelope: "punch",         envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4},
+                            "flare 0":         {envelope: "flare",         envelopeSpeed: 8,     lowerBound: 0,    stepAmount: 4},
+                            "flare 1":         {envelope: "flare",         envelopeSpeed: 4,     lowerBound: 0,    stepAmount: 4},
+                            "flare 2":         {envelope: "flare",         envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4},
+                            "flare 3":         {envelope: "flare",         envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4},
+                            "flare 4":         {envelope: "flare",         envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 4},
+                            "flare 5":         {envelope: "flare",         envelopeSpeed: 0.333, lowerBound: 0,    stepAmount: 4},
+                            "flare 6":         {envelope: "flare",         envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4},
+                            "twang 0":         {envelope: "twang",         envelopeSpeed: 8,     lowerBound: 0,    stepAmount: 4},
+                            "twang 1":         {envelope: "twang",         envelopeSpeed: 4,     lowerBound: 0,    stepAmount: 4},
+                            "twang 2":         {envelope: "twang",         envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4},
+                            "twang 3":         {envelope: "twang",         envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4},
+                            "twang 4":         {envelope: "twang",         envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 4},
+                            "twang 5":         {envelope: "twang",         envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4},
+                            "twang 6":         {envelope: "twang",         envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4},
+                            "swell 0":         {envelope: "swell",         envelopeSpeed: 8,     lowerBound: 0,    stepAmount: 4},
+                            "swell 1":         {envelope: "swell",         envelopeSpeed: 4,     lowerBound: 0,    stepAmount: 4},
+                            "swell 2":         {envelope: "swell",         envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4},
+                            "swell 3":         {envelope: "swell",         envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4},
+                            "swell 4":         {envelope: "swell",         envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 4},
+                            "swell 5":         {envelope: "swell",         envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4},
+                            "swell 6":         {envelope: "swell",         envelopeSpeed: 0.125, lowerBound: 0,    stepAmount: 4},
+                            "swell 7":         {envelope: "swell",         envelopeSpeed: 0.063, lowerBound: 0,    stepAmount: 4},
+                            "full tremolo 0":  {envelope: "tremolo",       envelopeSpeed: 4,     lowerBound: 0,    stepAmount: 4},
+                            "full tremolo 1":  {envelope: "tremolo",       envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4},
+                            "full tremolo 2":  {envelope: "tremolo",       envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4},
+                            "full tremolo 3":  {envelope: "tremolo",       envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 4},
+                            "full tremolo 4":  {envelope: "tremolo",       envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4},
+                            "full tremolo 5":  {envelope: "tremolo",       envelopeSpeed: 0.125, lowerBound: 0,    stepAmount: 4},
+                            "semi tremolo 0":  {envelope: "tremolo",       envelopeSpeed: 4,     lowerBound: 0.5,  stepAmount: 4},
+                            "semi tremolo 1":  {envelope: "tremolo",       envelopeSpeed: 2,     lowerBound: 0.5,  stepAmount: 4},
+                            "semi tremolo 2":  {envelope: "tremolo",       envelopeSpeed: 1,     lowerBound: 0.5,  stepAmount: 4},
+                            "semi tremolo 3":  {envelope: "tremolo",       envelopeSpeed: 0.5,   lowerBound: 0.5,  stepAmount: 4},
+                            "semi tremolo 4":  {envelope: "tremolo",       envelopeSpeed: 0.25,  lowerBound: 0.5,  stepAmount: 4},
+                            "semi tremolo 5":  {envelope: "tremolo",       envelopeSpeed: 0.125, lowerBound: 0.5,  stepAmount: 4},
+                            "mini tremolo 0":  {envelope: "tremolo",       envelopeSpeed: 4,     lowerBound: 0.75, stepAmount: 4},
+                            "mini tremolo 1":  {envelope: "tremolo",       envelopeSpeed: 2,     lowerBound: 0.75, stepAmount: 4},
+                            "mini tremolo 2":  {envelope: "tremolo",       envelopeSpeed: 1,     lowerBound: 0.75, stepAmount: 4},
+                            "mini tremolo 3":  {envelope: "tremolo",       envelopeSpeed: 0.5,   lowerBound: 0.75, stepAmount: 4},
+                            "mini tremolo 4":  {envelope: "tremolo",       envelopeSpeed: 0.25,  lowerBound: 0.75, stepAmount: 4},
+                            "mini tremolo 5":  {envelope: "tremolo",       envelopeSpeed: 0.125, lowerBound: 0.75, stepAmount: 4},
+                            "full tripolo 0":  {envelope: "tremolo",       envelopeSpeed: 6,     lowerBound: 0,    stepAmount: 4},
+                            "full tripolo 1":  {envelope: "tremolo",       envelopeSpeed: 3,     lowerBound: 0,    stepAmount: 4},
+                            "full tripolo 2":  {envelope: "tremolo",       envelopeSpeed: 1.5,   lowerBound: 0,    stepAmount: 4},
+                            "full tripolo 3":  {envelope: "tremolo",       envelopeSpeed: 0.75,  lowerBound: 0,    stepAmount: 4},
+                            "full tripolo 4":  {envelope: "tremolo",       envelopeSpeed: 0.375, lowerBound: 0,    stepAmount: 4},
+                            "full tripolo 5":  {envelope: "tremolo",       envelopeSpeed: 0.188, lowerBound: 0,    stepAmount: 4},
+                            "semi tripolo 0":  {envelope: "tremolo",       envelopeSpeed: 6,     lowerBound: 0.5,  stepAmount: 4},
+                            "semi tripolo 1":  {envelope: "tremolo",       envelopeSpeed: 3,     lowerBound: 0.5,  stepAmount: 4},
+                            "semi tripolo 2":  {envelope: "tremolo",       envelopeSpeed: 1.5,   lowerBound: 0.5,  stepAmount: 4},
+                            "semi tripolo 3":  {envelope: "tremolo",       envelopeSpeed: 0.75,  lowerBound: 0.5,  stepAmount: 4},
+                            "semi tripolo 4":  {envelope: "tremolo",       envelopeSpeed: 0.375, lowerBound: 0.5,  stepAmount: 4},
+                            "semi tripolo 5":  {envelope: "tremolo",       envelopeSpeed: 0.188, lowerBound: 0.5,  stepAmount: 4},
+                            "mini tripolo 0":  {envelope: "tremolo",       envelopeSpeed: 6,     lowerBound: 0.75, stepAmount: 4},
+                            "mini tripolo 1":  {envelope: "tremolo",       envelopeSpeed: 3,     lowerBound: 0.75, stepAmount: 4},
+                            "mini tripolo 2":  {envelope: "tremolo",       envelopeSpeed: 1.5,   lowerBound: 0.75, stepAmount: 4},
+                            "mini tripolo 3":  {envelope: "tremolo",       envelopeSpeed: 0.75,  lowerBound: 0.75, stepAmount: 4},
+                            "mini tripolo 4":  {envelope: "tremolo",       envelopeSpeed: 0.375, lowerBound: 0.75, stepAmount: 4},
+                            "mini tripolo 5":  {envelope: "tremolo",       envelopeSpeed: 0.188, lowerBound: 0.75, stepAmount: 4},
+                            "decay 0":         {envelope: "decay",         envelopeSpeed: 9,     lowerBound: 0,    stepAmount: 4},
+                            "decay 1":         {envelope: "decay",         envelopeSpeed: 5,     lowerBound: 0,    stepAmount: 4},
+                            "decay 2":         {envelope: "decay",         envelopeSpeed: 3.5,   lowerBound: 0,    stepAmount: 4},
+                            "decay 3":         {envelope: "decay",         envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4},
+                            "decay 4":         {envelope: "decay",         envelopeSpeed: 0.75,  lowerBound: 0,    stepAmount: 4},
+                            "decay 5":         {envelope: "decay",         envelopeSpeed: 0.375, lowerBound: 0,    stepAmount: 4},
+                            "modbox trill":    {envelope: "modbox trill",  envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4},
+                            "modbox blip":     {envelope: "modbox blip",   envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4},
+                            "modbox click":    {envelope: "modbox click",  envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4},
+                            "modbox bow":      {envelope: "modbox bow",    envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4},
+                            "wibble 0":        {envelope: "wibble",        envelopeSpeed: 8,     lowerBound: 0,    stepAmount: 4},
+                            "wibble 1":        {envelope: "wibble",        envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4},
+                            "wibble 2":        {envelope: "wibble",        envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4},
+                            "wibble 3":        {envelope: "wibble",        envelopeSpeed: 0.333, lowerBound: 0,    stepAmount: 4},
+                            "wibble 4":        {envelope: "wibble",        envelopeSpeed: 0.083, lowerBound: 0,    stepAmount: 4},
+                            "linear 0":        {envelope: "linear",        envelopeSpeed: 8,     lowerBound: 0,    stepAmount: 4},
+                            "linear 1":        {envelope: "linear",        envelopeSpeed: 4,     lowerBound: 0,    stepAmount: 4},
+                            "linear 2":        {envelope: "linear",        envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4},
+                            "linear 3":        {envelope: "linear",        envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4},
+                            "linear 4":        {envelope: "linear",        envelopeSpeed: 0.063, lowerBound: 0,    stepAmount: 4},
+                            "linear 5":        {envelope: "linear",        envelopeSpeed: 0.016, lowerBound: 0,    stepAmount: 4},
+                            "rise 0":          {envelope: "rise",          envelopeSpeed: 8,     lowerBound: 0,    stepAmount: 4},
+                            "rise 1":          {envelope: "rise",          envelopeSpeed: 4,     lowerBound: 0,    stepAmount: 4},
+                            "rise 2":          {envelope: "rise",          envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4},
+                            "rise 3":          {envelope: "rise",          envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4},
+                            "rise 4":          {envelope: "rise",          envelopeSpeed: 0.063, lowerBound: 0,    stepAmount: 4},
+                            "rise 5":          {envelope: "rise",          envelopeSpeed: 0.016, lowerBound: 0,    stepAmount: 4},
+                            "jummbox blip 0":  {envelope: "jummBox blip",  envelopeSpeed: 8,     lowerBound: 0,    stepAmount: 4},
+                            "jummbox blip 1":  {envelope: "jummBox blip",  envelopeSpeed: 4,     lowerBound: 0,    stepAmount: 4},
+                            "jummbox blip 2":  {envelope: "jummBox blip",  envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4},
+                            "jummbox blip 3":  {envelope: "jummBox blip",  envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4},
+                            "jummbox blip 4":  {envelope: "jummBox blip",  envelopeSpeed: 0.75,  lowerBound: 0,    stepAmount: 4},
+                            "jummbox blip 5":  {envelope: "jummBox blip",  envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 4},
+                            "decelerate 0":    {envelope: "decelerate",    envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4},
+                            "decelerate 1":    {envelope: "decelerate",    envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4},
+                            "decelerate 2":    {envelope: "decelerate",    envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4},
+                            "decelerate 3":    {envelope: "decelerate",    envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4},
+                            "stairs 0":        {envelope: "stairs",        envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 2},
+                            "stairs 1":        {envelope: "stairs",        envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4},
+                            "stairs 2":        {envelope: "stairs",        envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 8},
+                            "stairs 3":        {envelope: "stairs",        envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 16},
+                            "stairs 4":        {envelope: "stairs",        envelopeSpeed: 0.125, lowerBound: 0,    stepAmount: 32},
+                            "looped stairs 0": {envelope: "looped stairs", envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 2},
+                            "looped stairs 1": {envelope: "looped stairs", envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4},
+                            "looped stairs 2": {envelope: "looped stairs", envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 8},
+                            "looped stairs 3": {envelope: "looped stairs", envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 16},
+                            "looped stairs 4": {envelope: "looped stairs", envelopeSpeed: 0.125, lowerBound: 0,    stepAmount: 32},
+                        })[envelopeProperty];
+                        if (oldNameToNewData != undefined) {
+                            if (oldNameToNewData.envelope != null) tempEnvelope.envelope = Config.envelopes.dictionary[oldNameToNewData.envelope].index;
+                            if (oldNameToNewData.envelopeSpeed != null) tempEnvelope.envelopeSpeed = oldNameToNewData.envelopeSpeed;
+                            if (oldNameToNewData.lowerBound != null) tempEnvelope.lowerBound = oldNameToNewData.lowerBound;
+                            if (oldNameToNewData.stepAmount != null) tempEnvelope.stepAmount = oldNameToNewData.stepAmount;
+                        }
                     }
                     if (jsonFormat != "midbox") {
                         // Midbox changes the names and values of various envelopes. Change them here.
