@@ -4,7 +4,7 @@ import {InstrumentType, Config, DropdownID} from "../synth/SynthConfig";
 import {Instrument} from "../synth/synth";
 import {ColorConfig} from "./ColorConfig";
 import {SongDocument} from "./SongDocument";
-import {ChangeSetEnvelopeTarget, ChangeSetEnvelopeType, ChangeRemoveEnvelope, ChangePerEnvelopeSpeed, ChangeEnvelopeAmplitude, ChangeDiscreteEnvelope} from "./changes";
+import {ChangeSetEnvelopeTarget, ChangeSetEnvelopeType, ChangeRemoveEnvelope, ChangePerEnvelopeSpeed, ChangeEnvelopeAmplitude, ChangeDiscreteEnvelope, ChangeLowerBound, ChangeUpperBound, ChangeStairsStepAmount} from "./changes";
 import {HTML} from "imperative-html/dist/esm/elements-strict";
 import {Localization as _} from "./Localization";
 import {clamp} from "./UsefulCodingStuff";
@@ -23,6 +23,15 @@ export class EnvelopeEditor {
 	private readonly _envelopeAmplitudeRows: HTMLElement[] = [];
 	private readonly _discreteEnvelopeToggles: HTMLInputElement[] = [];
 	private readonly _discreteEnvelopeRows: HTMLElement[] = [];
+	private readonly _lowerBoundSliders: HTMLInputElement[] = [];
+	private readonly _upperBoundSliders: HTMLInputElement[] = [];
+	private readonly _lowerBoundInputBoxes: HTMLInputElement[] = [];
+	private readonly _upperBoundInputBoxes: HTMLInputElement[] = [];
+	private readonly _lowerBoundRows: HTMLElement[] = [];
+	private readonly _upperBoundRows: HTMLElement[] = [];
+	private readonly _stairsStepAmountSliders: HTMLInputElement[] = [];
+	private readonly _stairsStepAmountInputBoxes: HTMLInputElement[] = [];
+	private readonly _stairsStepAmountRows: HTMLElement[] = [];
 	private readonly _envelopeDropdownGroups: HTMLElement[] = [];
 	private readonly _envelopeDropdowns: HTMLButtonElement[] = [];
 	private readonly _targetSelects: HTMLSelectElement[] = [];
@@ -82,6 +91,30 @@ export class EnvelopeEditor {
 		if (discreteEnvelopeToggleIndex != -1) {
 			this._doc.record(new ChangeDiscreteEnvelope(this._doc, discreteEnvelopeToggleIndex, this._discreteEnvelopeToggles[discreteEnvelopeToggleIndex].checked));
 		}
+		const lowerBoundInputBoxIndex = this._lowerBoundInputBoxes.indexOf(<any> event.target);
+		const lowerBoundSliderIndex = this._lowerBoundSliders.indexOf(<any> event.target);
+		const upperBoundInputBoxIndex = this._upperBoundInputBoxes.indexOf(<any> event.target);
+		const upperBoundSliderIndex = this._upperBoundSliders.indexOf(<any> event.target);
+		if (lowerBoundInputBoxIndex != -1) {
+			this._doc.record(new ChangeLowerBound(this._doc, lowerBoundInputBoxIndex, instrument.envelopes[lowerBoundInputBoxIndex].lowerBound, +(this._lowerBoundInputBoxes[lowerBoundInputBoxIndex].value)));
+		}
+		if (lowerBoundSliderIndex != -1) {
+			this._doc.record(new ChangeLowerBound(this._doc, lowerBoundSliderIndex, instrument.envelopes[lowerBoundSliderIndex].lowerBound, +(this._lowerBoundSliders[lowerBoundSliderIndex].value)));
+		}
+		if (upperBoundInputBoxIndex != -1) {
+			this._doc.record(new ChangeUpperBound(this._doc, upperBoundInputBoxIndex, instrument.envelopes[upperBoundInputBoxIndex].upperBound, +(this._upperBoundInputBoxes[upperBoundInputBoxIndex].value)));
+		}
+		if (upperBoundSliderIndex != -1) {
+			this._doc.record(new ChangeUpperBound(this._doc, upperBoundSliderIndex, instrument.envelopes[upperBoundSliderIndex].upperBound, +(this._upperBoundSliders[upperBoundSliderIndex].value)));
+		}
+		const stairsStepAmountInputBoxIndex = this._stairsStepAmountInputBoxes.indexOf(<any> event.target);
+		const stairsStepAmountSliderIndex = this._stairsStepAmountSliders.indexOf(<any> event.target);
+		if (stairsStepAmountInputBoxIndex != -1) {
+			this._doc.record(new ChangeStairsStepAmount(this._doc, stairsStepAmountInputBoxIndex, instrument.envelopes[stairsStepAmountInputBoxIndex].stepAmount, +(this._stairsStepAmountInputBoxes[stairsStepAmountInputBoxIndex].value)));
+		}
+		if (stairsStepAmountSliderIndex != -1) {
+			this._doc.record(new ChangeStairsStepAmount(this._doc, stairsStepAmountSliderIndex, instrument.envelopes[stairsStepAmountSliderIndex].stepAmount, +(this._stairsStepAmountSliders[stairsStepAmountSliderIndex].value)));
+		}
 	};
 
 	private _onClick = (event: MouseEvent): void => {
@@ -98,6 +131,18 @@ export class EnvelopeEditor {
 		}
 		const perEnvelopeAmplitudeInputBoxIndex: number = this._envelopeAmplitudeInputBoxes.indexOf(<any> event.target);
 		if (perEnvelopeAmplitudeInputBoxIndex != -1) {
+			event.stopPropagation();
+		}
+		const lowerBoundInputBoxIndex: number = this._lowerBoundInputBoxes.indexOf(<any> event.target);
+		if (lowerBoundInputBoxIndex != -1) {
+			event.stopPropagation();
+		}
+		const upperBoundInputBoxIndex: number = this._upperBoundInputBoxes.indexOf(<any> event.target);
+		if (upperBoundInputBoxIndex != -1) {
+			event.stopPropagation();
+		}
+		const stairsStepAmountInputBoxIndex: number = this._stairsStepAmountInputBoxes.indexOf(<any> event.target);
+		if (stairsStepAmountInputBoxIndex != -1) {
 			event.stopPropagation();
 		}
 	}
@@ -142,9 +187,27 @@ export class EnvelopeEditor {
 			), envelopeAmplitudeSlider);
 			const discreteEnvelopeToggle: HTMLInputElement = HTML.input({style: "width: 3em; padding: 0; margin-right: 3em;", type: "checkbox"});
 			const discreteEnvelopeRow: HTMLElement = HTML.div({class: "selectRow dropFader"}, HTML.div({},
-				HTML.span({class: "tip", style: "height: 1em; font-size: 14px;", onclick: () => this._openPrompt("discreteEnvelope")}, HTML.span(_.discreteEnvelopeLabel)),
+				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("discreteEnvelope")}, HTML.span(_.discreteEnvelopeLabel)),
 			), discreteEnvelopeToggle);
-			const envelopeDropdownGroup: HTMLElement = HTML.div({class: "editor-controls", style: "display: none;"}, perEnvelopeSpeedRow, envelopeAmplitudeRow, discreteEnvelopeRow);
+			const lowerBoundSlider: HTMLInputElement = HTML.input({style: "margin: 0;", type: "range", min: Config.lowerBoundMin, max: Config.lowerBoundMax, value: "0", step: "0.20"});
+			const upperBoundSlider: HTMLInputElement = HTML.input({style: "margin: 0;", type: "range", min: Config.upperBoundMin, max: Config.upperBoundMax, value: "1", step: "0.20"});
+			const lowerBoundInputBox: HTMLInputElement = HTML.input({style: "width: 4em; font-size: 80%; ", id: "lowerBoundInputBox", type: "number", step: "0.001", min: Config.lowerBoundMin, max: Config.lowerBoundMax, value: "0"});
+			const upperBoundInputBox: HTMLInputElement = HTML.input({style: "width: 4em; font-size: 80%; ", id: "upperBoundInputBox", type: "number", step: "0.001", min: Config.upperBoundMin, max: Config.upperBoundMax, value: "1"});
+			const lowerBoundRow: HTMLElement = HTML.div({class: "selectRow dropFader"}, HTML.div({},
+				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeBounds")}, HTML.span(_.lowerBoundLabel)),
+				HTML.div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, lowerBoundInputBox),
+			), lowerBoundSlider);
+			const upperBoundRow: HTMLElement = HTML.div({class: "selectRow dropFader"}, HTML.div({},
+				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeBounds")}, HTML.span(_.upperBoundLabel)),
+				HTML.div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, upperBoundInputBox),
+			), upperBoundSlider);
+			const stairsStepAmountSlider: HTMLInputElement = HTML.input({style: "margin: 0;", type: "range", min: 1, max: Config.stairsStepAmountMax, value: "4", step: "1"});
+			const stairsStepAmountInputBox: HTMLInputElement = HTML.input({style: "width: 4em; font-size: 80%; ", id: "stairsStepAmountInputBox", type: "number", step: "1", min: 1, max: Config.stairsStepAmountMax, value: "4"});
+			const stairsStepAmountRow: HTMLElement = HTML.div({class: "selectRow dropFader"}, HTML.div({},
+				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("stepAmount")}, HTML.span(_.stairsStepAmountLabel)),
+				HTML.div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, stairsStepAmountInputBox),
+			), stairsStepAmountSlider);
+			const envelopeDropdownGroup: HTMLElement = HTML.div({class: "editor-controls", style: "display: none;"}, perEnvelopeSpeedRow, envelopeAmplitudeRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, stairsStepAmountRow);
 			const envelopeDropdown: HTMLButtonElement = HTML.button({style: "margin-left: 0.7em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.PerEnvelope, envelopeIndex)}, "▼");
 
 			const targetSelect: HTMLSelectElement = HTML.select();
@@ -183,6 +246,15 @@ export class EnvelopeEditor {
 			this._envelopeAmplitudeRows[envelopeIndex] = envelopeAmplitudeRow;
 			this._discreteEnvelopeToggles[envelopeIndex] = discreteEnvelopeToggle;
 			this._discreteEnvelopeRows[envelopeIndex] = discreteEnvelopeRow;
+			this._lowerBoundSliders[envelopeIndex] = lowerBoundSlider;
+			this._upperBoundSliders[envelopeIndex] = upperBoundSlider;
+			this._lowerBoundInputBoxes[envelopeIndex] = lowerBoundInputBox;
+			this._upperBoundInputBoxes[envelopeIndex] = upperBoundInputBox;
+			this._lowerBoundRows[envelopeIndex] = lowerBoundRow;
+			this._upperBoundRows[envelopeIndex] = upperBoundRow;
+			this._stairsStepAmountSliders[envelopeIndex] = stairsStepAmountSlider;
+			this._stairsStepAmountInputBoxes[envelopeIndex] = stairsStepAmountInputBox;
+			this._stairsStepAmountRows[envelopeIndex] = stairsStepAmountRow;
 			this._envelopeDropdownGroups[envelopeIndex] = envelopeDropdownGroup;
 			this._envelopeDropdowns[envelopeIndex] = envelopeDropdown;
 			this._targetSelects[envelopeIndex] = targetSelect;
@@ -221,6 +293,12 @@ export class EnvelopeEditor {
 			this._envelopeAmplitudeSliders[envelopeIndex].value = String(clamp(Config.envelopeAmplitudeMin, Config.envelopeAmplitudeMax+1, instrument.envelopes[envelopeIndex].amplitude));
 			this._envelopeAmplitudeInputBoxes[envelopeIndex].value = String(clamp(Config.envelopeAmplitudeMin, Config.envelopeAmplitudeMax+1, instrument.envelopes[envelopeIndex].amplitude));
 			this._discreteEnvelopeToggles[envelopeIndex].checked = instrument.envelopes[envelopeIndex].discrete ? true : false;
+			this._lowerBoundSliders[envelopeIndex].value = String(clamp(Config.lowerBoundMin, Config.lowerBoundMax+1, instrument.envelopes[envelopeIndex].lowerBound));
+			this._upperBoundSliders[envelopeIndex].value = String(clamp(Config.upperBoundMin, Config.upperBoundMax+1, instrument.envelopes[envelopeIndex].upperBound));
+			this._lowerBoundInputBoxes[envelopeIndex].value = String(clamp(Config.lowerBoundMin, Config.lowerBoundMax+1, instrument.envelopes[envelopeIndex].lowerBound));
+			this._upperBoundInputBoxes[envelopeIndex].value = String(clamp(Config.upperBoundMin, Config.upperBoundMax+1, instrument.envelopes[envelopeIndex].upperBound));
+			this._stairsStepAmountSliders[envelopeIndex].value = String(clamp(1, Config.stairsStepAmountMax+1, instrument.envelopes[envelopeIndex].stepAmount));
+			this._stairsStepAmountInputBoxes[envelopeIndex].value = String(clamp(1, Config.stairsStepAmountMax+1, instrument.envelopes[envelopeIndex].stepAmount));
 			this._targetSelects[envelopeIndex].value = String(instrument.envelopes[envelopeIndex].target + instrument.envelopes[envelopeIndex].index * Config.instrumentAutomationTargets.length);
 			this._envelopeSelects[envelopeIndex].selectedIndex = instrument.envelopes[envelopeIndex].envelope;
 			
@@ -285,6 +363,34 @@ export class EnvelopeEditor {
 			// Special case on discrete toggles.
 			if (instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["none"].index) this._discreteEnvelopeRows[envelopeIndex].style.display = "none";
 			else this._discreteEnvelopeRows[envelopeIndex].style.display = "";
+
+			if ( // Special case on lower/upper boundaries.
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["none"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["note size"].index 
+			) {
+				this._lowerBoundRows[envelopeIndex].style.display = "none";
+				this._upperBoundRows[envelopeIndex].style.display = "none";
+			} else {
+				this._lowerBoundRows[envelopeIndex].style.display = "";
+				this._upperBoundRows[envelopeIndex].style.display = "";
+			}
+
+			if ( // Special case on step amount.
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["stairs 0"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["stairs 1"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["stairs 2"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["stairs 3"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["stairs 4"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["looped stairs 0"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["looped stairs 1"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["looped stairs 2"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["looped stairs 3"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["looped stairs 4"].index 
+			) {
+				this._stairsStepAmountRows[envelopeIndex].style.display = "";
+			} else {
+				this._stairsStepAmountRows[envelopeIndex].style.display = "none";
+			}
 		}
 		
 		this._renderedEnvelopeCount = instrument.envelopeCount;

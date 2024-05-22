@@ -489,7 +489,6 @@ export class TipPrompt implements Prompt {
 					p("Envelopes are a way to dynamically adjust various other settings over time, usually based on how long the note lasts. Press the + button to add an envelope, then use the menus below to select which setting to control and the curve of the envelope. Try different combinations to see how they sound!"),
 					p("Most envelope curves restart from the beginning every time a new note plays. The \"note size\" option is based on the note width as drawn in the pattern editor."),
 					p("Envelope curves move in the range from 0 to 1 (or vice versa), where 0 means as quiet as possible and 1 is the same as the corresponding position selected in the instrument settings above. If multiple envelopes are targetting the same setting, they are multiplied before applying to the setting."),
-					p("BE AWARE: Stacking too many envelopes on the same setting may have undesired effects, such as errors in sound and the program in general. Try to keep it one or two envelopes per setting to avoid such issues."),
 				);
 			} break;
 			case "discreteEnvelope": {
@@ -519,7 +518,25 @@ export class TipPrompt implements Prompt {
 					h2("Envelope Amplitude"),
 					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously."),
 					p("This setting controls the amplitude of this envelope as a multiplier. You can use the slider to quickly adjust amplitude and the input box for finer amplitude amounts."),
-					p("The amplitude of an envelope changes how heavy its effect is. Example, using other BeepBox, |Tremolo 1-3| to |Tremolo 4-6| is the same as |Tremolo x1amp| to |Tremolo x0.5amp|.")
+					p("The amplitude of an envelope changes how heavy its effect is. Example, using BeepBox, |Tremolo 1-3| to |Tremolo 4-6| is the same as |Tremolo|[EnvAmp: x1] to |Tremolo|[EnvAmp: x0.5]."),
+					p("UNSUPPORTED: Tremolo, Decelerate.")
+				);
+			} break;
+			case "envelopeBounds": {
+				message = div(
+					h2("Envelope Boundaries"),
+					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects."),
+					p("These two settings stretch the envelope vertically, which can serve many purposes."),
+					p("You can now put a center point for your envelope to play at, adjust its amplitude, and if you have the upper bound lower than the lower bound, invert the envelope, allowing you to swap the 0s and 1s of a tremolo or turn a swell into a twang. The only limit is your imaginiation; get creative!"),
+					p("Just remember: Both bounds being the same number means all envelope values will be the same, and the bounds being very high can result to loud/strange sound artifacts.")
+				);
+			} break;
+			case "stepAmount": {
+				message = div(
+					h2("Amount of Steps"),
+					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously. Thise settings in specific is unique to stair-based envelopes."),
+					p("Stair-based envelopes change values in 'steps', and using this option allows you to configure how many steps the envelope has."),
+					p("SUPPORTS: Stairs, Looped Stairs.")
 				);
 			} break;
 			case "usedInstrument": {

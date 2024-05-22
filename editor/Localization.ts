@@ -69,6 +69,9 @@ export class Localization {
     public static perEnvelopeSpeedLabel: string = "‣ Env Spd:";
     public static envelopeAmplitudeLabel: string = "‣ Env Amp:";
     public static discreteEnvelopeLabel: string = "‣ Discrete:";
+    public static lowerBoundLabel: string = "‣ Lwr Bnd:";
+    public static upperBoundLabel: string = "‣ Upr Bnd:";
+    public static stairsStepAmountLabel: string = "‣ Steps:";
     public static wavetableSpeedLabel: string = "Spd:";
     public static interpolateWavesLabel: string = "Interpolate:";
     public static resetCyclePerNoteLabel: string = "Cycle per Note:";
@@ -1023,11 +1026,14 @@ if (language == "spanish") {
     Localization.envelopeSpeedLabel = "‣ Vel:";
     Localization.perEnvelopeSpeedLabel = "‣ Env Vel:";
     Localization.envelopeAmplitudeLabel = "‣ Env Amp:";
+    Localization.discreteEnvelopeLabel = "‣ Discreto:";
+    Localization.lowerBoundLabel = "‣ Lmt Baje:";
+    Localization.upperBoundLabel = "‣ Lmt Alto:";
+    Localization.stairsStepAmountLabel = "‣ Pasos:";
     Localization.wavetableSpeedLabel = "Vel:";
     Localization.interpolateWavesLabel = "Interpolar:";
     Localization.resetCyclePerNoteLabel = "Ciclo por Nota:";
     Localization.oneShotCycleLabel = "Solo-Ciclo:";
-    Localization.discreteEnvelopeLabel = "‣ Discreto:";
     Localization.twoFastArpLabel = "‣ Rapido Dos-Notas:";
     Localization.arpeggioPatternLabel = "‣ Patrón del Arpegio: "; 
     Localization.arpeggioPattern1Label = "Patrón: Normal"; 
