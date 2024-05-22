@@ -4,7 +4,7 @@ import {InstrumentType, Config, DropdownID} from "../synth/SynthConfig";
 import {Instrument} from "../synth/synth";
 import {ColorConfig} from "./ColorConfig";
 import {SongDocument} from "./SongDocument";
-import {ChangeSetEnvelopeTarget, ChangeSetEnvelopeType, ChangeRemoveEnvelope, ChangePerEnvelopeSpeed, ChangeEnvelopeAmplitude} from "./changes";
+import {ChangeSetEnvelopeTarget, ChangeSetEnvelopeType, ChangeRemoveEnvelope, ChangePerEnvelopeSpeed, ChangeEnvelopeAmplitude, ChangeDiscreteEnvelope} from "./changes";
 import {HTML} from "imperative-html/dist/esm/elements-strict";
 import {Localization as _} from "./Localization";
 import {clamp} from "./UsefulCodingStuff";
@@ -21,6 +21,8 @@ export class EnvelopeEditor {
 	private readonly _envelopeAmplitudeSliders: HTMLInputElement[] = [];
 	private readonly _envelopeAmplitudeInputBoxes: HTMLInputElement[] = [];
 	private readonly _envelopeAmplitudeRows: HTMLElement[] = [];
+	private readonly _discreteEnvelopeToggles: HTMLInputElement[] = [];
+	private readonly _discreteEnvelopeRows: HTMLElement[] = [];
 	private readonly _envelopeDropdownGroups: HTMLElement[] = [];
 	private readonly _envelopeDropdowns: HTMLButtonElement[] = [];
 	private readonly _targetSelects: HTMLSelectElement[] = [];
@@ -75,6 +77,10 @@ export class EnvelopeEditor {
 		}
 		if (envelopeAmplitudeSliderIndex != -1) {
 			this._doc.record(new ChangeEnvelopeAmplitude(this._doc, envelopeAmplitudeSliderIndex, instrument.envelopes[envelopeAmplitudeSliderIndex].amplitude, +(this._envelopeAmplitudeSliders[envelopeAmplitudeSliderIndex].value)));
+		}
+		const discreteEnvelopeToggleIndex = this._discreteEnvelopeToggles.indexOf(<any> event.target);
+		if (discreteEnvelopeToggleIndex != -1) {
+			this._doc.record(new ChangeDiscreteEnvelope(this._doc, discreteEnvelopeToggleIndex, this._discreteEnvelopeToggles[discreteEnvelopeToggleIndex].checked));
 		}
 	};
 
@@ -134,7 +140,11 @@ export class EnvelopeEditor {
 				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeAmplitude")}, HTML.span(_.envelopeAmplitudeLabel)),
 				HTML.div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, envelopeAmplitudeInputBox),
 			), envelopeAmplitudeSlider);
-			const envelopeDropdownGroup: HTMLElement = HTML.div({class: "editor-controls", style: "display: none;"}, perEnvelopeSpeedRow, envelopeAmplitudeRow);
+			const discreteEnvelopeToggle: HTMLInputElement = HTML.input({style: "width: 3em; padding: 0; margin-right: 3em;", type: "checkbox"});
+			const discreteEnvelopeRow: HTMLElement = HTML.div({class: "selectRow dropFader"}, HTML.div({},
+				HTML.span({class: "tip", style: "height: 1em; font-size: 14px;", onclick: () => this._openPrompt("discreteEnvelope")}, HTML.span(_.discreteEnvelopeLabel)),
+			), discreteEnvelopeToggle);
+			const envelopeDropdownGroup: HTMLElement = HTML.div({class: "editor-controls", style: "display: none;"}, perEnvelopeSpeedRow, envelopeAmplitudeRow, discreteEnvelopeRow);
 			const envelopeDropdown: HTMLButtonElement = HTML.button({style: "margin-left: 0.7em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.PerEnvelope, envelopeIndex)}, "▼");
 
 			const targetSelect: HTMLSelectElement = HTML.select();
@@ -171,6 +181,8 @@ export class EnvelopeEditor {
 			this._envelopeAmplitudeSliders[envelopeIndex] = envelopeAmplitudeSlider;
 			this._envelopeAmplitudeInputBoxes[envelopeIndex] = envelopeAmplitudeInputBox;
 			this._envelopeAmplitudeRows[envelopeIndex] = envelopeAmplitudeRow;
+			this._discreteEnvelopeToggles[envelopeIndex] = discreteEnvelopeToggle;
+			this._discreteEnvelopeRows[envelopeIndex] = discreteEnvelopeRow;
 			this._envelopeDropdownGroups[envelopeIndex] = envelopeDropdownGroup;
 			this._envelopeDropdowns[envelopeIndex] = envelopeDropdown;
 			this._targetSelects[envelopeIndex] = targetSelect;
@@ -208,8 +220,71 @@ export class EnvelopeEditor {
 			this._perEnvelopeSpeedInputBoxes[envelopeIndex].value = String(clamp(Config.perEnvelopeSpeedMin, Config.perEnvelopeSpeedMax+1, instrument.envelopes[envelopeIndex].envelopeSpeed));
 			this._envelopeAmplitudeSliders[envelopeIndex].value = String(clamp(Config.envelopeAmplitudeMin, Config.envelopeAmplitudeMax+1, instrument.envelopes[envelopeIndex].amplitude));
 			this._envelopeAmplitudeInputBoxes[envelopeIndex].value = String(clamp(Config.envelopeAmplitudeMin, Config.envelopeAmplitudeMax+1, instrument.envelopes[envelopeIndex].amplitude));
+			this._discreteEnvelopeToggles[envelopeIndex].checked = instrument.envelopes[envelopeIndex].discrete ? true : false;
 			this._targetSelects[envelopeIndex].value = String(instrument.envelopes[envelopeIndex].target + instrument.envelopes[envelopeIndex].index * Config.instrumentAutomationTargets.length);
 			this._envelopeSelects[envelopeIndex].selectedIndex = instrument.envelopes[envelopeIndex].envelope;
+			
+			if ( // Special case on IES
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["none"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["note size"].index 
+			) {
+				this._perEnvelopeSpeedRows[envelopeIndex].style.display = "none";
+			} else {
+				this._perEnvelopeSpeedRows[envelopeIndex].style.display = "";
+			}
+
+			if ( // Special case on amplitude.
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["none"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["note size"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["full tremolo 0"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["full tremolo 1"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["full tremolo 2"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["full tremolo 3"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["full tremolo 4"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["full tremolo 5"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["semi tremolo 0"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["semi tremolo 1"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["semi tremolo 2"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["semi tremolo 3"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["semi tremolo 4"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["semi tremolo 5"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["mini tremolo 0"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["mini tremolo 1"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["mini tremolo 2"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["mini tremolo 3"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["mini tremolo 4"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["mini tremolo 5"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["full tripolo 0"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["full tripolo 1"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["full tripolo 2"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["full tripolo 3"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["full tripolo 4"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["full tripolo 5"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["semi tripolo 0"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["semi tripolo 1"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["semi tripolo 2"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["semi tripolo 3"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["semi tripolo 4"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["semi tripolo 5"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["mini tripolo 0"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["mini tripolo 1"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["mini tripolo 2"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["mini tripolo 3"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["mini tripolo 4"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["mini tripolo 5"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["decelerate 0"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["decelerate 1"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["decelerate 2"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["decelerate 3"].index
+			) {
+				this._envelopeAmplitudeRows[envelopeIndex].style.display = "none";
+			} else {
+				this._envelopeAmplitudeRows[envelopeIndex].style.display = "";
+			}
+
+			// Special case on discrete toggles.
+			if (instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["none"].index) this._discreteEnvelopeRows[envelopeIndex].style.display = "none";
+			else this._discreteEnvelopeRows[envelopeIndex].style.display = "";
 		}
 		
 		this._renderedEnvelopeCount = instrument.envelopeCount;

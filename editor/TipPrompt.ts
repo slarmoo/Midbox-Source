@@ -494,15 +494,16 @@ export class TipPrompt implements Prompt {
 			} break;
 			case "discreteEnvelope": {
 				message = div(
-					h2("Use Discrete Envelopes?"),
-					p("Envelopes are usually interpolated, meaning they change continuously and smoothly. This setting, when ticked, makes envelopes not interpolate. It's a small difference, but can be helpful for some chip-like sounds."),
-					p("For understandability, imagine this: Each envelope is a function, and every tick (or 48ths of a second) the envelope is updated to have the current value of the function. Picture this as many /48th notes that fade in volume. When this checkbox is enabled, those notes will be flat rather than faded. Very small change, but can have a larger difference on faster envelopes.")
+					h2("Discrete Envelopes"),
+					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously. In the case of discrete envelopes, if you used other BeepBox mods, you may be familiar with it being a setting that was global across all other envelopes on the instrument, but Midbox has changed it to be a toggle per instrument. Quality of life!"),
+					p("Envelopes are usually interpolated, meaning they change continuously and smoothly. This setting, when ticked, makes envelopes not interpolate. It's a small difference, but can be helpful for some chip-like sounds or sharper cut-offs."),
+					p("Example, stairs has a slight curved blip before each step. This is caused by the interpolation. Toggling this makes each stair 'step' cut instantly without the blip. Stuff like this is most noticible with fast envelopes like decelerate.")
 				);
 			} break;
 			case "envelopeSpeed": {
 				message = div(
 					h2("Envelope Speed"),
-					p("This setting controls the speed of ALL envelopes for the instrument. Each envelope 'plays' at a certain speed, and this slider can scale it to play faster or slower. You can use this to fine-tune your tremolo or how fast something decays to get just the right effect."),
+					p("This setting controls the speed of all envelopes for the instrument. Each envelope plays at a certain speed, and this slider can scale it to play faster or slower. You can use this to fine-tune your tremolo or how fast something decays to get just the right effect."),
 				);
 			} break;
 			case "perEnvelopeSpeed": {
