@@ -48,7 +48,7 @@ import { ThemePrompt } from "./ThemePrompt";
 import { TipPrompt } from "./TipPrompt";
 import { LanguagePrompt } from "./LanguagePrompt";
 import { Localization as _ } from "./Localization";
-import { ChangeTempo, ChangeKeyOctave, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangeSupersawDynamism, ChangeSupersawSpread, ChangeSupersawShape, ChangeWavetableSpeed, ChangeWaveInterpolation, ChangeCyclePerNote, ChangeOneShotCycle, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeCustomAlgorithmOrFeedback, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, pickRandomPresetValue, ChangeRandomGeneratedInstrument, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, Change6OpFeedbackType, Change6OpAlgorithm, ChangeChipWave, ChangeNoiseWave, /*ChangeNoiseSeedRandomization, ChangeNoiseSeed,*/ ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeUnisonVoices, ChangeUnisonSpread, ChangeUnisonOffset, ChangeUnisonExpression, ChangeUnisonSign, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeLowerWavefold, ChangeUpperWavefold, ChangeAddEnvelope, ChangeEnvelopeSpeed, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeWavetableCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeArpeggioPattern, ChangeClicklessTransition, ChangeContinueThruPattern, ChangeAliasing, ChangePercussion, ChangeSDAffected, ChangeSOAffected, ChangeStrumSpeed, ChangeSlideSpeed, ChangeSongSubtitle, ChangeSetPatternInstruments, ChangeHoldingModRecording } from "./changes";
+import { ChangeTempo, ChangeKeyOctave, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangeSupersawDynamism, ChangeSupersawSpread, ChangeSupersawShape, ChangeWavetableSpeed, ChangeWaveInterpolation, ChangeCyclePerNote, ChangeOneShotCycle, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeCustomAlgorithmOrFeedback, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, pickRandomPresetValue, ChangeRandomGeneratedInstrument, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, Change6OpFeedbackType, Change6OpAlgorithm, ChangeChipWave, ChangeNoiseWave, /*ChangeNoiseSeedRandomization, ChangeNoiseSeed,*/ ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeUnisonVoices, ChangeUnisonSpread, ChangeUnisonOffset, ChangeUnisonExpression, ChangeUnisonSign, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeLowerWavefold, ChangeUpperWavefold, ChangeAddEnvelope, ChangeEnvelopeSpeed, ChangeDrumEnvelopeSpeed, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeWavetableCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeArpeggioPattern, ChangeClicklessTransition, ChangeContinueThruPattern, ChangeAliasing, ChangePercussion, ChangeSDAffected, ChangeSOAffected, ChangeStrumSpeed, ChangeSlideSpeed, ChangeSongSubtitle, ChangeSetPatternInstruments, ChangeHoldingModRecording } from "./changes";
 import { oscilloscopeCanvas } from "../global/Oscilloscope";
 import { TrackEditor } from "./TrackEditor";
 
@@ -1221,7 +1221,7 @@ export class SongEditor {
     private readonly _stringSustainSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.stringSustainRange - 1, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeStringSustain(this._doc, oldValue, newValue), false);
     private readonly _stringSustainLabel: HTMLSpanElement = span({class: "tip", onclick: ()=>this._openPrompt("stringSustain")}, span(_.sustainLabel));
     private readonly _stringSustainRow: HTMLDivElement = div({class: "selectRow"}, this._stringSustainLabel, this._stringSustainSlider.container);
-    private readonly _unisonDropdown:  HTMLButtonElement = button({ style: "margin-left:0em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.Unison) }, "▼");
+    private readonly _unisonDropdown: HTMLButtonElement = button({ style: "margin-left:0em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.Unison) }, "▼");
     private readonly _unisonSelect: HTMLSelectElement = buildOptions(select(), [
         _.unison1Label,
         _.unison2Label,
@@ -1742,6 +1742,11 @@ export class SongEditor {
     private readonly _operatorDropdownGroups: HTMLDivElement[] = [];
     private readonly _drumsetSpectrumEditors: SpectrumEditor[] = [];
     private readonly _drumsetEnvelopeSelects: HTMLSelectElement[] = [];
+    private readonly _drumsetEnvelopeSpeedSliders: Slider[] = [];
+    private readonly _drumsetEnvelopeSpeedInputBoxes: HTMLInputElement[] = [];
+    private readonly _drumsetEnvelopeSpeedRows: HTMLDivElement[] = [];
+    private readonly _drumsetEnvelopeDropdownGroups: HTMLDivElement[] = [];
+    private readonly _drumsetEnvelopeDropdowns: HTMLButtonElement[] = [];
     private _showModSliders: boolean[] = [];
     private _newShowModSliders: boolean[] = [];
     private _modSliderValues: number[] = [];
@@ -1755,6 +1760,7 @@ export class SongEditor {
     private _openTransitionDropdown: boolean = false;
     private _openOperatorDropdowns: boolean[] = [];
     private _openUnisonDropdown: boolean = false;
+    private _openDrumsetEnvDropdowns: boolean[] = [];
 
     private outVolumeHistoricTimer: number = 0;
     private outVolumeHistoricCap: number = 0;
@@ -1879,82 +1885,35 @@ export class SongEditor {
             const drumIndex: number = i;
             const spectrumEditor: SpectrumEditor = new SpectrumEditor(this._doc, drumIndex);
             spectrumEditor.container.addEventListener("mousedown", this.refocusStage);
-            this._drumsetSpectrumEditors[i] = spectrumEditor;
 
             const envelopeSelect: HTMLSelectElement = buildOptions(select({ style: "width: 100%;", title: _.hoverText13Label }), Config.envelopes.map(envelope => envelope.name));
-                /*_.envelope1Label,
-                _.envelope2Label,
-                _.envelope3Label,
-                _.envelope4Label,
-                _.envelope5Label,
-                _.envelope6Label,
-                _.envelope7Label,
-                _.envelope8Label,
-                _.envelope9Label,
-                _.envelope10Label,
-                _.envelope11Label,
-                _.envelope12Label,
-                _.envelope13Label,
-                _.envelope14Label,
-                _.envelope15Label,
-                _.envelope16Label,
-                _.envelope17Label,
-                _.envelope18Label,
-                _.envelope19Label,
-                _.envelope20Label,
-                _.envelope21Label,
-                _.envelope22Label,
-                _.envelope23Label,
-                _.envelope24Label,
-                _.envelope25Label,
-                _.envelope26Label,
-                _.envelope27Label,
-                _.envelope28Label,
-                _.envelope29Label,
-                _.envelope30Label,
-                _.envelope31Label,
-                _.envelope32Label,
-                _.envelope33Label,
-                _.envelope34Label,
-                _.envelope35Label,
-                _.envelope36Label,
-                _.envelope37Label,
-                _.envelope38Label,
-                _.envelope39Label,
-                _.envelope40Label,
-                _.envelope41Label,
-                _.envelope42Label,
-                _.envelope43Label,
-                _.envelope44Label,
-                _.envelope45Label,
-                _.envelope46Label,
-                _.envelope47Label,
-                _.envelope48Label,
-                _.envelope49Label,
-                _.envelope50Label,
-                _.envelope51Label,
-                _.envelope52Label,
-                _.envelope53Label,
-                _.envelope54Label,
-                _.envelope55Label,
-                _.envelope56Label,
-                _.envelope57Label,
-                _.envelope58Label,
-                _.envelope59Label,
-                _.envelope60Label,
-                _.envelope61Label,
-                _.envelope62Label,
-                _.envelope63Label,
-                _.envelope64Label*/
-            this._drumsetEnvelopeSelects[i] = envelopeSelect;
+
+            const envelopeSpeedSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: Config.perEnvelopeSpeedMin, max: Config.perEnvelopeSpeedMax, value: "1", step: "0.25" }), this._doc, (oldValue: number, newValue: number) => new ChangeDrumEnvelopeSpeed(this._doc, drumIndex, oldValue, newValue), false);
+            const envelopeSpeedInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "perEnvelopeSpeedInputBox", type: "number", step: "0.001", min: Config.perEnvelopeSpeedMin, max: Config.perEnvelopeSpeedMax, value: "1"});
+			const envelopeSpeedRow: HTMLDivElement = div({class: "selectRow dropFader"}, div({},
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("perEnvelopeSpeed")}, span(_.perEnvelopeSpeedLabel)),
+				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, envelopeSpeedInputBox),
+			), envelopeSpeedSlider.container);
+            const drumsetEnvelopeDropdownGroup: HTMLDivElement = div({class: "editor-controls", style: "display: none;"}, envelopeSpeedRow);
+            const drumsetEnvelopeDropdown: HTMLButtonElement = button({ style: "margin-left: 0.6em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.DrumsetEnv) }, "▼");
+
             envelopeSelect.addEventListener("change", () => {
                 this._doc.record(new ChangeDrumsetEnvelope(this._doc, drumIndex, envelopeSelect.selectedIndex));
             });
 
-            const row: HTMLDivElement = div({ class: "selectRow" },
-                div({ class: "selectContainer", style: "width: 5em; margin-right: .3em;" }, envelopeSelect),
+            this._drumsetSpectrumEditors[i] = spectrumEditor;
+            this._drumsetEnvelopeSelects[i] = envelopeSelect;
+            this._drumsetEnvelopeSpeedSliders[i] = envelopeSpeedSlider;
+            this._drumsetEnvelopeSpeedInputBoxes[i] = envelopeSpeedInputBox;
+            this._drumsetEnvelopeSpeedRows[i] = envelopeSpeedRow;
+            this._drumsetEnvelopeDropdownGroups[i] = drumsetEnvelopeDropdownGroup;
+            this._drumsetEnvelopeDropdowns[i] = drumsetEnvelopeDropdown;
+            this._openDrumsetEnvDropdowns[i] = false;
+            const row: HTMLDivElement = div(div({ class: "selectRow" },
+                div({style: "width: 0; margin-top: 3px;"}, this._drumsetEnvelopeDropdowns[i]),
+                div({ class: "selectContainer", style: "width: 5em; margin-left: 0.5em; margin-right: 0.3em;" }, envelopeSelect),
                 this._drumsetSpectrumEditors[i].container,
-            );
+            ), this._drumsetEnvelopeDropdowns[i]);
             this._drumsetGroup.appendChild(row);
         }
 
@@ -2221,6 +2180,11 @@ export class SongEditor {
                 target = this._unisonDropdown;
                 this._openUnisonDropdown = this._openUnisonDropdown ? false : true;
                 group = this._unisonDropdownGroup;
+                break;
+            case DropdownID.DrumsetEnv:
+                target = this._drumsetEnvelopeDropdowns[submenu];
+                this._openDrumsetEnvDropdowns[submenu] = this._openDrumsetEnvDropdowns[submenu] ? false : true;
+                group = this._drumsetEnvelopeDropdownGroups[submenu];
                 break;
         }
 
@@ -2803,6 +2767,7 @@ export class SongEditor {
                 for (let i: number = 0; i < Config.drumCount; i++) {
                     setSelectedValue(this._drumsetEnvelopeSelects[i], instrument.drumsetEnvelopes[i]);
                     this._drumsetSpectrumEditors[i].render();
+                    this._drumsetEnvelopeSpeedSliders[i].updateValue(instrument.drumsetEnvelopeSpeeds[i]);
                 }
             } else {
                 this._drumsetGroup.style.display = "none";

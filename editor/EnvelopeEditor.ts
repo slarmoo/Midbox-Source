@@ -208,7 +208,7 @@ export class EnvelopeEditor {
 				HTML.div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, stairsStepAmountInputBox),
 			), stairsStepAmountSlider);
 			const envelopeDropdownGroup: HTMLElement = HTML.div({class: "editor-controls", style: "display: none;"}, perEnvelopeSpeedRow, envelopeAmplitudeRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, stairsStepAmountRow);
-			const envelopeDropdown: HTMLButtonElement = HTML.button({style: "margin-left: 0.7em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.PerEnvelope, envelopeIndex)}, "▼");
+			const envelopeDropdown: HTMLButtonElement = HTML.button({style: "margin-left: 0.6em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.PerEnvelope, envelopeIndex)}, "▼");
 
 			const targetSelect: HTMLSelectElement = HTML.select();
 			for (let target: number = 0; target < Config.instrumentAutomationTargets.length; target++) {

@@ -102,6 +102,7 @@ export const enum DropdownID {
     Envelope    = 6,
     Unison      = 7,
     PerEnvelope = 8,
+    DrumsetEnv  = 9,
 }
 
 export const enum EffectType {

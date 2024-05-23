@@ -410,7 +410,7 @@ export class TipPrompt implements Prompt {
 				message = div(
 					h2("Drumset Spectrum"),
 					p("This setting allows you to draw your own noise spectrum! This is good for making drumsets. Each row in the pattern editor gets its own spectrum."),
-					p("The left side of the spectrum editor controls the noise energy at lower frequencies, and the right side controls higher frequencies."),
+					p("The left side of the spectrum editor controls the noise energy at lower frequencies, and the right side controls higher frequencies.")
 				);
 			} break;
 			case "chorus": {
@@ -502,7 +502,7 @@ export class TipPrompt implements Prompt {
 			case "envelopeSpeed": {
 				message = div(
 					h2("Envelope Speed"),
-					p("This setting controls the speed of all envelopes for the instrument. Each envelope plays at a certain speed, and this slider can scale it to play faster or slower. You can use this to fine-tune your tremolo or how fast something decays to get just the right effect."),
+					p("This setting controls the speed of all envelopes for the instrument. Each envelope plays at a certain speed, and this slider can scale it to play faster or slower. You can use this to fine-tune a tremolo or how fast something decays to get just the right effect."),
 				);
 			} break;
 			case "perEnvelopeSpeed": {

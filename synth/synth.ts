@@ -1490,6 +1490,7 @@ export class Instrument {
     public readonly harmonicsWave: HarmonicsWave = new HarmonicsWave();
     public readonly drumsetEnvelopes: number[] = [];
     public readonly drumsetSpectrumWaves: SpectrumWave[] = [];
+    public readonly drumsetEnvelopeSpeeds: number[] = [];
     public modChannels: number[] = [];
     public modInstruments: number[] = [];
     public modulators: number[] = [];
@@ -1530,6 +1531,7 @@ export class Instrument {
         for (let i: number = 0; i < Config.drumCount; i++) {
             this.drumsetEnvelopes[i] = Config.envelopes.dictionary["twang 2"].index;
             this.drumsetSpectrumWaves[i] = new SpectrumWave(true);
+            this.drumsetEnvelopeSpeeds[i] = 1;
         }
 
         Synth.wavetableWaveDefaults(this);
@@ -7127,7 +7129,7 @@ class EnvelopeComputer {
                 const offset: number = 1;
                 const smoothness: number = 0.000001;
                 const steps: number = stepAmount;
-                const x: number = beatNote % (((envelope.speed * -1) * 0.5) / (envelope.speed * (envelope.speed / 2)));
+                const x: number = beatNote % envelope.speed * -1; /*(((envelope.speed * -1) * 0.5) / (envelope.speed * (envelope.speed / 2)))*/;
                 const a: number = 0.5 - smoothness;
                 const b: number = 0.5 + smoothness;
                 const x1: number = x * steps - 0.5 + smoothness;
