@@ -1,7 +1,7 @@
 {
-	"name": "BeepBox",
-	"short_name": "BeepBox",
-	"description": "BeepBox is a tool for sketching and sharing instrumental melodies.",
+	"name": "Midbox",
+	"short_name": "Midbox",
+	"description": "Midbox is a tool for sketching and sharing instrumental melodies.",
 	"scope": "/",
 	"start_url": ".",
 	"display": "browser",

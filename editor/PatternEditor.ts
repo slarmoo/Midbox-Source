@@ -1309,21 +1309,20 @@ export class PatternEditor {
                     }
 
                     // Found a suitable instrument to use, now add the setting
-                    if ( useInstrument != -1 ) {
+                    if (useInstrument != -1) {
                         let instrument: Instrument = channel.instruments[useInstrument];
                         for (let mod: number = 0; mod < Config.modCount; mod++) {
-                            if ( instrument.modulators[mod] == Config.modulators.dictionary["none"].index ) {
+                            if (instrument.modulators[mod] == Config.modulators.dictionary["none"].index) {
                                 instrument.modulators[mod] = applyToMods[applyIndex];
-                                if ( Config.modulators[applyToMods[applyIndex]].forSong ) {
-                                    instrument.modChannels[mod] = -1; // Song
-                                }
+                                if (Config.modulators[applyToMods[applyIndex]].forSong) instrument.modChannels[mod] = -1; // Song
                                 else {
                                     instrument.modChannels[mod] = this._doc.channel;
-                                    // Set these new ones to "active" modulation for the most flexibility, if there's more one instrument in the channel.
-                                    if (this._doc.song.channels[this._doc.channel].instruments.length > 1)
-                                        instrument.modInstruments[mod] = this._doc.song.channels[this._doc.channel].instruments.length + 1;
-                                    else
-                                        instrument.modInstruments[mod] = 0;
+                                    if (this._doc.song.channels[this._doc.channel].instruments.length > 1) {
+                                        // Ctrl key or Shift key: set the new mod target to "active" modulation for the most flexibility, if there's more than one instrument in the channel.
+                                        if (!this.controlMode || !this.shiftMode) instrument.modInstruments[mod] = this._doc.song.channels[this._doc.channel].instruments.length + 1;
+                                        // Control+Shift key: Set the new mod target to the currently viewed instrument only.
+                                        else instrument.modInstruments[mod] = this._doc.getCurrentInstrument();
+                                    } else instrument.modInstruments[mod] = 0;
 
                                     // Filter dot. Add appropriate filter target settings (dot# X and dot# Y mod).
                                     if (applyToFilterTargets.length > applyIndex) {
@@ -1335,7 +1334,6 @@ export class PatternEditor {
                                 usedInstrumentIndices.push(useInstrument);
                                 usedInstruments.push(instrument);
                                 usedModIndices.push(mod);
-
                                 mod = Config.modCount; channelIndex = this._doc.song.getChannelCount(); // Skip after finding one
                             }
                         }

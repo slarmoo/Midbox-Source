@@ -149,9 +149,9 @@ export class TipPrompt implements Prompt {
 			case "instrumentType": {
 				message = div(
 					h2("Instrument Presets/Type"),
-					p("Beepbox and Jummbox add many instrument presets, with so many more from Midbox. Check them out! You can also create your own custom instruments."),
+					p("BeepBox and JummBox add many instrument presets, with so many more from Midbox. Check them out! You can also create your own custom instruments."),
 					p("There are many instrument/drum types to pick from, each with their own properties that separate them from one another. Try them out!"),
-					p("There are also options for copying and pasting instrument settings at the bottom of the instrument settings, as well as for generating random instruments at the top of the instrument type menu. However, you should at least get a decent understanding of what every setting does before you start attempting to master instrument design."),
+					p("There are also buttons for copying and pasting instruments at the bottom of the instrument settings tab, and for generating random instruments in the \"Randomize\" category in the instrument type menu. However, you should at least get a decent understanding of what every setting does before you start attempting to master instrument design."),
 				);
 			} break;
 			case "eqFilter": {

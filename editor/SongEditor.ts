@@ -1895,11 +1895,12 @@ export class SongEditor {
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, envelopeSpeedInputBox),
 			), envelopeSpeedSlider.container);
             const drumsetEnvelopeDropdownGroup: HTMLDivElement = div({class: "editor-controls", style: "display: none;"}, envelopeSpeedRow);
-            const drumsetEnvelopeDropdown: HTMLButtonElement = button({ style: "margin-left: 0.6em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.DrumsetEnv) }, "▼");
+            const drumsetEnvelopeDropdown: HTMLButtonElement = button({ style: "margin-left: 0.6em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.DrumsetEnv, i) }, "▼");
 
             envelopeSelect.addEventListener("change", () => {
                 this._doc.record(new ChangeDrumsetEnvelope(this._doc, drumIndex, envelopeSelect.selectedIndex));
             });
+            envelopeSpeedInputBox.addEventListener("input", () => { this._doc.record(new ChangeDrumEnvelopeSpeed(this._doc, drumIndex, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].drumsetEnvelopeSpeeds[drumIndex], Math.min(Config.perEnvelopeSpeedMax, Math.max(Config.perEnvelopeSpeedMin, +envelopeSpeedInputBox.value)))) });
 
             this._drumsetSpectrumEditors[i] = spectrumEditor;
             this._drumsetEnvelopeSelects[i] = envelopeSelect;
@@ -1909,11 +1910,12 @@ export class SongEditor {
             this._drumsetEnvelopeDropdownGroups[i] = drumsetEnvelopeDropdownGroup;
             this._drumsetEnvelopeDropdowns[i] = drumsetEnvelopeDropdown;
             this._openDrumsetEnvDropdowns[i] = false;
+
             const row: HTMLDivElement = div(div({ class: "selectRow" },
-                div({style: "width: 0; margin-top: 3px;"}, this._drumsetEnvelopeDropdowns[i]),
-                div({ class: "selectContainer", style: "width: 5em; margin-left: 0.5em; margin-right: 0.3em;" }, envelopeSelect),
-                this._drumsetSpectrumEditors[i].container,
-            ), this._drumsetEnvelopeDropdowns[i]);
+                div({style: "width: 0; margin-top: 3px;"}, drumsetEnvelopeDropdown),
+                div({style: "width: 5em; margin-left: 1.5em; margin-right: 0.3em;"}, envelopeSelect), 
+                spectrumEditor.container,
+            ), drumsetEnvelopeDropdownGroup);
             this._drumsetGroup.appendChild(row);
         }
 
@@ -4995,6 +4997,7 @@ export class SongEditor {
         const instrument: Instrument = channel.instruments[this._doc.getCurrentInstrument()];
         const instrumentCopy: any = instrument.toJsonObject();
         instrumentCopy["isDrum"] = this._doc.song.getChannelIsNoise(this._doc.channel);
+        instrumentCopy["isMod"] = this._doc.song.getChannelIsMod(this._doc.channel);
         window.localStorage.setItem("instrumentCopy", JSON.stringify(instrumentCopy));
         this.refocusStage();
     }
@@ -5003,7 +5006,7 @@ export class SongEditor {
         const channel: Channel = this._doc.song.channels[this._doc.channel];
         const instrument: Instrument = channel.instruments[this._doc.getCurrentInstrument()];
         const instrumentCopy: any = JSON.parse(String(window.localStorage.getItem("instrumentCopy")));
-        if (instrumentCopy != null && instrumentCopy["isDrum"] == this._doc.song.getChannelIsNoise(this._doc.channel)) {
+        if (instrumentCopy != null && instrumentCopy["isDrum"] == this._doc.song.getChannelIsNoise(this._doc.channel) && instrumentCopy["isMod"] == this._doc.song.getChannelIsMod(this._doc.channel)) {
             this._doc.record(new ChangePasteInstrument(this._doc, instrument, instrumentCopy));
         }
         this.refocusStage();

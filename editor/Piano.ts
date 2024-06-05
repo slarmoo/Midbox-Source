@@ -382,37 +382,30 @@ export class Piano {
 						break;
 					case 1:
 						if (this._doc.song.channels[channelVal - 1].name == "") {
-
 							if (instrumentsLength > 1) {
 								if (channelVal >= 10 || instrumentVal >= 10) {
 									firstRow = "P" + channelVal;
 									if (instrumentVal - 1 == instrumentsLength) {
 										firstRow += " All";
-									}
-									else if (instrumentVal - 1 > instrumentsLength) {
+									} else if (instrumentVal - 1 > instrumentsLength) {
 										firstRow += " Act";
 									} else {
 										firstRow += " I" + instrumentVal;
 									}
-								}
-								else {
+								} else {
 									firstRow = "Pitch" + channelVal;
 									if (instrumentVal-1 == instrumentsLength) {
 										firstRow += " All";
-									}
-									else if (instrumentVal - 1 > instrumentsLength) {
+									} else if (instrumentVal - 1 > instrumentsLength) {
 										firstRow += " Act";
 									} else {
 										firstRow += " Ins" + instrumentVal;
 									}
 								}
-							}
-							else {
+							} else {
 								firstRow = "Pitch " + channelVal;
 							}
-
 						} else {
-
 							// Channel name display
 							let insText: string;
 							if (instrumentVal - 1 == instrumentsLength) {
@@ -424,51 +417,42 @@ export class Piano {
                             }
 							if (instrumentsLength > 1) {
 								firstRow = "P" + channelVal + " " + this._doc.song.channels[channelVal - 1].name + insText;
-							}
-							else {
+							} else {
 								firstRow = "P" + channelVal + " " + this._doc.song.channels[channelVal - 1].name;
 							}
-
 						}
 						break;
 					case 2:
-						channelVal = instrument.modChannels[Config.modCount - j - 1] + 1 - this._doc.song.pitchChannelCount;
-						instrumentsLength = this._doc.song.channels[channelVal - 1].instruments.length;
+						const absoluteChannelVal: number = instrument.modChannels[Config.modCount - j - 1];
+						const relativeChannelVal: number = absoluteChannelVal - this._doc.song.pitchChannelCount;
 
-						if (this._doc.song.channels[channelVal - 1].name == "") {
+						if (this._doc.song.channels[absoluteChannelVal].name == "") {
 
 							if (instrumentsLength > 1) {
 
-								if (channelVal >= 10 || instrumentVal >= 10) {
-									firstRow = "N" + channelVal;
+								if ((relativeChannelVal + 1) >= 10 || instrumentVal >= 10) {
+									firstRow = "N" + (relativeChannelVal + 1);
 									if (instrumentVal - 1 == instrumentsLength) {
 										firstRow += " All";
-									}
-									else if (instrumentVal - 1 > instrumentsLength) {
+									} else if (instrumentVal - 1 > instrumentsLength) {
 										firstRow += " Act";
-									}
-									else {
+									} else {
 										firstRow += " I" + instrumentVal;
 									}
-								}
-								else {
-									firstRow = "Noise" + channelVal;
+								} else {
+									firstRow = "Noise" + (relativeChannelVal + 1);
 									if (instrumentVal - 1 == instrumentsLength) {
 										firstRow += " All";
-									}
-									else if (instrumentVal - 1 > instrumentsLength) {
+									} else if (instrumentVal - 1 > instrumentsLength) {
 										firstRow += " Act";
-									}
-									else {
+									} else {
 										firstRow += " Ins" + instrumentVal;
 									}
 								}
-							}
-							else {
-								firstRow = "Noise " + channelVal;
+							} else {
+								firstRow = "Noise " + (relativeChannelVal + 1);
 							}
 						} else {
-
 							// Channel name display
 							if (instrumentsLength > 1) {
 								let insText: string;
@@ -479,12 +463,10 @@ export class Piano {
 								} else {
 									insText = " I" + instrumentVal;
 								}
-								firstRow = "N" + channelVal + " " + this._doc.song.channels[channelVal - 1].name + insText;
+								firstRow = "N" + (relativeChannelVal + 1) + " " + this._doc.song.channels[absoluteChannelVal].name + insText;
+							} else {
+								firstRow = "N" + (relativeChannelVal + 1) + " " + this._doc.song.channels[absoluteChannelVal].name;
 							}
-							else {
-								firstRow = "N" + channelVal + " " + this._doc.song.channels[channelVal - 1].name;
-							}
-
 						}
 						break;
 					case 3:
@@ -498,17 +480,14 @@ export class Piano {
 					if (modulator == Config.modulators.dictionary["none"].index) {
 						useSecondColor = ColorConfig.modLabelSecondaryText;
 						usingMod = false;
-					}
-					else if (modulator == Config.modulators.dictionary["eq filter"].index || modulator == Config.modulators.dictionary["note filter"].index) {
+					} else if (modulator == Config.modulators.dictionary["eq filter"].index || modulator == Config.modulators.dictionary["note filter"].index) {
 						var text = " Morph";
 						var filterVal = instrument.modFilterTypes[Config.modCount - j - 1];
 						if (filterVal > 0 && (filterVal % 2)) {
 							text = " Dot" + Math.ceil(filterVal / 2) + "X";
-						}
-						else if (filterVal > 0) {
+						} else if (filterVal > 0) {
 							text = " Dot" + Math.ceil(filterVal / 2) + "Y";
                         }
-						
 						secondRow += text;
                     }
 				}
