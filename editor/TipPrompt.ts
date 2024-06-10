@@ -513,15 +513,6 @@ export class TipPrompt implements Prompt {
 					p("The speed of an envelope changes how fast its runs. In BeepBox, this is equivalent to the numbers beside each envelope type's name.")
 				);
 			} break;
-			case "envelopeAmplitude": {
-				message = div(
-					h2("Envelope Amplitude"),
-					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously."),
-					p("This setting controls the amplitude of this envelope as a multiplier. You can use the slider to quickly adjust amplitude and the input box for finer amplitude amounts."),
-					p("The amplitude of an envelope changes how heavy its effect is. Example, using BeepBox, |Tremolo 1-3| to |Tremolo 4-6| is the same as |Tremolo|[EnvAmp: x1] to |Tremolo|[EnvAmp: x0.5]."),
-					p("UNSUPPORTED: Tremolo, Decelerate.")
-				);
-			} break;
 			case "envelopeBounds": {
 				message = div(
 					h2("Envelope Boundaries"),

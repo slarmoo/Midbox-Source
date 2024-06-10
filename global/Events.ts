@@ -10,7 +10,7 @@ class EventManager {
     }
 
 
-    public raise(eventType: string, eventModifier: number, eventData: any, extraEventData?: any): void {
+    public raise(eventType: string, eventData: any, eventModifier?: number, extraEventData?: any): void {
         if (this.listeners[eventType] == undefined) {
             return;
         }

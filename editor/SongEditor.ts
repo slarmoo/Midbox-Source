@@ -1412,7 +1412,7 @@ export class SongEditor {
     // Issue#26 - Add other oscilloscope types. The main one planned is equalizers, so use a "?" statement here to pick between oscilloscope and equalizers.
     public readonly _globalOscilloscope: oscilloscopeCanvas = new oscilloscopeCanvas(canvas({ width: 144, height: 32, style: `border: 2px solid ${ColorConfig.uiWidgetBackground}; position: static;`, id: "oscilloscopeAll" }), 1);
     private readonly _globalOscilloscopeContainer: HTMLDivElement = div({ style: "height: 38px; margin-left: auto; margin-right: auto;" },
-    this._globalOscilloscope.canvas
+        this._globalOscilloscope.canvas
     );
     private readonly _oscilloscopeScaleSlider: Slider = new Slider(input({ style: "width: 120px; flex-grow: 1; margin: 0;", type: "range", min: "0.25", max: "5", value: "1", step: "0.25" }), this._doc, null, false);
     private readonly _oscilloscopeScaleRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("oscilloscopeScaling") }, span(_.oscilloscopeScaleLabel)), this._oscilloscopeScaleSlider.container);

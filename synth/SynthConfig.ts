@@ -784,8 +784,6 @@ export class Config {
     */
     public static readonly perEnvelopeSpeedMin: number = 0;
     public static readonly perEnvelopeSpeedMax: number = 16;
-    public static readonly envelopeAmplitudeMin: number = 0;
-    public static readonly envelopeAmplitudeMax: number = 8;
     public static readonly lowerBoundMin: number = 0;
     public static readonly lowerBoundMax: number = 8;
     public static readonly upperBoundMin: number = 0;
