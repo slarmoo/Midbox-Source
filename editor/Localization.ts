@@ -72,6 +72,7 @@ export class Localization {
     public static lowerBoundLabel: string = "‣ Lwr Bnd:";
     public static upperBoundLabel: string = "‣ Upr Bnd:";
     public static stairsStepAmountLabel: string = "‣ Steps:";
+    public static envelopeDelayLabel: string = "‣ Delay:";
     public static wavetableSpeedLabel: string = "Spd:";
     public static interpolateWavesLabel: string = "Interpolate:";
     public static resetCyclePerNoteLabel: string = "Cycle per Note:";
@@ -1031,6 +1032,7 @@ if (language == "spanish") {
     Localization.lowerBoundLabel = "‣ Lmt Baje:";
     Localization.upperBoundLabel = "‣ Lmt Alto:";
     Localization.stairsStepAmountLabel = "‣ Pasos:";
+    Localization.envelopeDelayLabel = "‣ Retraso:";
     Localization.wavetableSpeedLabel = "Vel:";
     Localization.interpolateWavesLabel = "Interpolar:";
     Localization.resetCyclePerNoteLabel = "Ciclo por Nota:";

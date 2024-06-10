@@ -51,6 +51,7 @@ import { Localization as _ } from "./Localization";
 import { ChangeTempo, ChangeKeyOctave, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangeSupersawDynamism, ChangeSupersawSpread, ChangeSupersawShape, ChangeWavetableSpeed, ChangeWaveInterpolation, ChangeCyclePerNote, ChangeOneShotCycle, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeCustomAlgorithmOrFeedback, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, pickRandomPresetValue, ChangeRandomGeneratedInstrument, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, Change6OpFeedbackType, Change6OpAlgorithm, ChangeChipWave, ChangeNoiseWave, /*ChangeNoiseSeedRandomization, ChangeNoiseSeed,*/ ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeUnisonVoices, ChangeUnisonSpread, ChangeUnisonOffset, ChangeUnisonExpression, ChangeUnisonSign, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeLowerWavefold, ChangeUpperWavefold, ChangeAddEnvelope, ChangeEnvelopeSpeed, ChangeDrumEnvelopeSpeed, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeWavetableCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeArpeggioPattern, ChangeClicklessTransition, ChangeContinueThruPattern, ChangeAliasing, ChangePercussion, ChangeSDAffected, ChangeSOAffected, ChangeStrumSpeed, ChangeSlideSpeed, ChangeSongSubtitle, ChangeSetPatternInstruments, ChangeHoldingModRecording } from "./changes";
 import { oscilloscopeCanvas } from "../global/Oscilloscope";
 import { TrackEditor } from "./TrackEditor";
+import { clamp } from "./UsefulCodingStuff";
 
 const { button, div, input, select, span, optgroup, option, canvas } = HTML;
 
@@ -1882,6 +1883,7 @@ export class SongEditor {
             ),
         );
         for (let i: number = Config.drumCount - 1; i >= 0; i--) {
+            const instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
             const drumIndex: number = i;
             const spectrumEditor: SpectrumEditor = new SpectrumEditor(this._doc, drumIndex);
             spectrumEditor.container.addEventListener("mousedown", this.refocusStage);
@@ -1900,7 +1902,7 @@ export class SongEditor {
             envelopeSelect.addEventListener("change", () => {
                 this._doc.record(new ChangeDrumsetEnvelope(this._doc, drumIndex, envelopeSelect.selectedIndex));
             });
-            envelopeSpeedInputBox.addEventListener("input", () => { this._doc.record(new ChangeDrumEnvelopeSpeed(this._doc, drumIndex, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].drumsetEnvelopeSpeeds[drumIndex], Math.min(Config.perEnvelopeSpeedMax, Math.max(Config.perEnvelopeSpeedMin, +envelopeSpeedInputBox.value)))) });
+            envelopeSpeedInputBox.addEventListener("input", () => { this._doc.record(new ChangeDrumEnvelopeSpeed(this._doc, drumIndex, instrument.drumsetEnvelopeSpeeds[drumIndex], Math.min(Config.perEnvelopeSpeedMax, Math.max(Config.perEnvelopeSpeedMin, +envelopeSpeedInputBox.value)))) });
 
             this._drumsetSpectrumEditors[i] = spectrumEditor;
             this._drumsetEnvelopeSelects[i] = envelopeSelect;
@@ -1917,6 +1919,9 @@ export class SongEditor {
                 spectrumEditor.container,
             ), drumsetEnvelopeDropdownGroup);
             this._drumsetGroup.appendChild(row);
+
+            this._drumsetEnvelopeSpeedSliders[i].updateValue(instrument.drumsetEnvelopeSpeeds[i]);
+            this._drumsetEnvelopeSpeedInputBoxes[i].value = String(clamp(Config.perEnvelopeSpeedMin, Config.perEnvelopeSpeedMax+1, instrument.drumsetEnvelopeSpeeds[i]));
         }
 
         this._modNameRows = [];

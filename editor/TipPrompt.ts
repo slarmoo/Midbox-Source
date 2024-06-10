@@ -534,9 +534,16 @@ export class TipPrompt implements Prompt {
 			case "stepAmount": {
 				message = div(
 					h2("Amount of Steps"),
-					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously. Thise settings in specific is unique to stair-based envelopes."),
+					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously. This setting in specific is unique to stair-based envelopes."),
 					p("Stair-based envelopes change values in 'steps', and using this option allows you to configure how many steps the envelope has."),
 					p("SUPPORTS: Stairs, Looped Stairs.")
+				);
+			} break;
+			case "envelopeDelay": {
+				message = div(
+					h2("Envelope Delay"),
+					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously."),
+					p("Envelopes typically will start their behaviors instantly the moment a note plays. With this setting, you can delay when the envelope starts changing values instead for better control over them. (This delay is in beats.)"),
 				);
 			} break;
 			case "usedInstrument": {

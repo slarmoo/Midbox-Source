@@ -4,7 +4,7 @@ import {InstrumentType, Config, DropdownID} from "../synth/SynthConfig";
 import {Instrument} from "../synth/synth";
 import {ColorConfig} from "./ColorConfig";
 import {SongDocument} from "./SongDocument";
-import {ChangeSetEnvelopeTarget, ChangeSetEnvelopeType, ChangeRemoveEnvelope, ChangePerEnvelopeSpeed, ChangeEnvelopeAmplitude, ChangeDiscreteEnvelope, ChangeLowerBound, ChangeUpperBound, ChangeStairsStepAmount} from "./changes";
+import {ChangeSetEnvelopeTarget, ChangeSetEnvelopeType, ChangeRemoveEnvelope, ChangePerEnvelopeSpeed, ChangeEnvelopeAmplitude, ChangeDiscreteEnvelope, ChangeLowerBound, ChangeUpperBound, ChangeStairsStepAmount, ChangeEnvelopeDelay} from "./changes";
 import {HTML} from "imperative-html/dist/esm/elements-strict";
 import {Localization as _} from "./Localization";
 import {clamp} from "./UsefulCodingStuff";
@@ -32,6 +32,9 @@ export class EnvelopeEditor {
 	private readonly _stairsStepAmountSliders: HTMLInputElement[] = [];
 	private readonly _stairsStepAmountInputBoxes: HTMLInputElement[] = [];
 	private readonly _stairsStepAmountRows: HTMLElement[] = [];
+	private readonly _envelopeDelaySliders: HTMLInputElement[] = [];
+	private readonly _envelopeDelayInputBoxes: HTMLInputElement[] = [];
+	private readonly _envelopeDelayRows: HTMLElement[] = [];
 	private readonly _envelopeDropdownGroups: HTMLElement[] = [];
 	private readonly _envelopeDropdowns: HTMLButtonElement[] = [];
 	private readonly _targetSelects: HTMLSelectElement[] = [];
@@ -115,6 +118,14 @@ export class EnvelopeEditor {
 		if (stairsStepAmountSliderIndex != -1) {
 			this._doc.record(new ChangeStairsStepAmount(this._doc, stairsStepAmountSliderIndex, instrument.envelopes[stairsStepAmountSliderIndex].stepAmount, +(this._stairsStepAmountSliders[stairsStepAmountSliderIndex].value)));
 		}
+		const envelopeDelayInputBoxIndex = this._envelopeDelayInputBoxes.indexOf(<any> event.target);
+		const envelopeDelaySliderIndex = this._envelopeDelaySliders.indexOf(<any> event.target);
+		if (envelopeDelayInputBoxIndex != -1) {
+			this._doc.record(new ChangeEnvelopeDelay(this._doc, envelopeDelayInputBoxIndex, instrument.envelopes[envelopeDelayInputBoxIndex].stepAmount, +(this._envelopeDelayInputBoxes[envelopeDelayInputBoxIndex].value)));
+		}
+		if (envelopeDelaySliderIndex != -1) {
+			this._doc.record(new ChangeEnvelopeDelay(this._doc, envelopeDelaySliderIndex, instrument.envelopes[envelopeDelaySliderIndex].stepAmount, +(this._envelopeDelaySliders[envelopeDelaySliderIndex].value)));
+		}
 	};
 
 	private _onClick = (event: MouseEvent): void => {
@@ -143,6 +154,10 @@ export class EnvelopeEditor {
 		}
 		const stairsStepAmountInputBoxIndex: number = this._stairsStepAmountInputBoxes.indexOf(<any> event.target);
 		if (stairsStepAmountInputBoxIndex != -1) {
+			event.stopPropagation();
+		}
+		const envelopeDelayInputBoxIndex: number = this._envelopeDelayInputBoxes.indexOf(<any> event.target);
+		if (envelopeDelayInputBoxIndex != -1) {
 			event.stopPropagation();
 		}
 	}
@@ -207,7 +222,13 @@ export class EnvelopeEditor {
 				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("stepAmount")}, HTML.span(_.stairsStepAmountLabel)),
 				HTML.div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, stairsStepAmountInputBox),
 			), stairsStepAmountSlider);
-			const envelopeDropdownGroup: HTMLElement = HTML.div({class: "editor-controls", style: "display: none;"}, perEnvelopeSpeedRow, envelopeAmplitudeRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, stairsStepAmountRow);
+			const envelopeDelaySlider: HTMLInputElement = HTML.input({style: "margin: 0;", type: "range", min: 0, max: Config.envelopeDelayMax, value: "0", step: "0.5"});
+			const envelopeDelayInputBox: HTMLInputElement = HTML.input({style: "width: 4em; font-size: 80%; ", id: "envelopeDelayInputBox", type: "number", step: "0.01", min: 0, max: Config.envelopeDelayMax, value: "0"});
+			const envelopeDelayRow: HTMLElement = HTML.div({class: "selectRow dropFader"}, HTML.div({},
+				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeDelay")}, HTML.span(_.envelopeDelayLabel)),
+				HTML.div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, envelopeDelayInputBox),
+			), envelopeDelaySlider);
+			const envelopeDropdownGroup: HTMLElement = HTML.div({class: "editor-controls", style: "display: none;"}, perEnvelopeSpeedRow, envelopeAmplitudeRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, stairsStepAmountRow, envelopeDelayRow);
 			const envelopeDropdown: HTMLButtonElement = HTML.button({style: "margin-left: 0.6em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.PerEnvelope, envelopeIndex)}, "▼");
 
 			const targetSelect: HTMLSelectElement = HTML.select();
@@ -255,6 +276,9 @@ export class EnvelopeEditor {
 			this._stairsStepAmountSliders[envelopeIndex] = stairsStepAmountSlider;
 			this._stairsStepAmountInputBoxes[envelopeIndex] = stairsStepAmountInputBox;
 			this._stairsStepAmountRows[envelopeIndex] = stairsStepAmountRow;
+			this._envelopeDelaySliders[envelopeIndex] = envelopeDelaySlider;
+			this._envelopeDelayInputBoxes[envelopeIndex] = envelopeDelayInputBox;
+			this._envelopeDelayRows[envelopeIndex] = envelopeDelayRow;
 			this._envelopeDropdownGroups[envelopeIndex] = envelopeDropdownGroup;
 			this._envelopeDropdowns[envelopeIndex] = envelopeDropdown;
 			this._targetSelects[envelopeIndex] = targetSelect;
@@ -299,6 +323,8 @@ export class EnvelopeEditor {
 			this._upperBoundInputBoxes[envelopeIndex].value = String(clamp(Config.upperBoundMin, Config.upperBoundMax+1, instrument.envelopes[envelopeIndex].upperBound));
 			this._stairsStepAmountSliders[envelopeIndex].value = String(clamp(1, Config.stairsStepAmountMax+1, instrument.envelopes[envelopeIndex].stepAmount));
 			this._stairsStepAmountInputBoxes[envelopeIndex].value = String(clamp(1, Config.stairsStepAmountMax+1, instrument.envelopes[envelopeIndex].stepAmount));
+			this._envelopeDelaySliders[envelopeIndex].value = String(clamp(0, Config.envelopeDelayMax+1, instrument.envelopes[envelopeIndex].delay));
+			this._envelopeDelayInputBoxes[envelopeIndex].value = String(clamp(0, Config.envelopeDelayMax+1, instrument.envelopes[envelopeIndex].delay));
 			this._targetSelects[envelopeIndex].value = String(instrument.envelopes[envelopeIndex].target + instrument.envelopes[envelopeIndex].index * Config.instrumentAutomationTargets.length);
 			this._envelopeSelects[envelopeIndex].selectedIndex = instrument.envelopes[envelopeIndex].envelope;
 			
@@ -390,6 +416,15 @@ export class EnvelopeEditor {
 				this._stairsStepAmountRows[envelopeIndex].style.display = "";
 			} else {
 				this._stairsStepAmountRows[envelopeIndex].style.display = "none";
+			}
+
+			if ( // Special case on delay.
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["none"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["note size"].index 
+			) {
+				this._envelopeDelayRows[envelopeIndex].style.display = "none";
+			} else {
+				this._envelopeDelayRows[envelopeIndex].style.display = "";
 			}
 		}
 		

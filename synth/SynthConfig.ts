@@ -324,7 +324,7 @@ export class Config {
 
     public static readonly blackKeyNameParents:       ReadonlyArray<number> = [-1, 1, -1, 1, -1, 1, -1, -1, 1, -1, 1, -1];
     public static readonly tempoMin:                  number = 1;
-    public static readonly tempoMax:                  number = 750;
+    public static readonly tempoMax:                  number = 750; // MID TODO: Raise to 1k or 2k.
     public static readonly octaveMin:                 number = -2;
 	public static readonly octaveMax:                 number = 2;
     public static readonly echoDelayRange:            number = 48;
@@ -342,7 +342,7 @@ export class Config {
     public static readonly barCountMin:               number = 1;
     public static readonly barCountMax:               number = 512;
     public static readonly instrumentCountMin:        number = 1;
-    public static readonly layeredInstrumentCountMax: number = 4;
+    public static readonly layeredInstrumentCountMax: number = 10;
     public static readonly patternInstrumentCountMax: number = 10;
     public static readonly partsPerBeat:              number = 24;
     public static readonly ticksPerPart:              number = 2;
@@ -791,6 +791,7 @@ export class Config {
     public static readonly upperBoundMin: number = 0;
     public static readonly upperBoundMax: number = 8;
     public static readonly stairsStepAmountMax: number = 64;
+    public static readonly envelopeDelayMax: number = 32;
 
     public static readonly feedbacks: DictionaryArray<Feedback> = toNameMap([
         { name: "1⟲",         indices: [[1], [],  [],  [] ]},
