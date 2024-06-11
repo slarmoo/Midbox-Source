@@ -9,7 +9,7 @@ import {HTML} from "imperative-html/dist/esm/elements-strict";
 import {Localization as _} from "./Localization";
 import {clamp} from "./UsefulCodingStuff";
 
-class EnvelopeLineGraph {
+export class EnvelopeLineGraph {
     constructor(public readonly canvas: HTMLCanvasElement, private readonly _doc: SongDocument, public index: number) {
 		this.render();
     }
@@ -60,8 +60,7 @@ class EnvelopeLineGraph {
 	}
 
 	public render() {
-		const gap: number = 40;
-		this._drawCanvas(gap, gap, this.canvas.width - gap * 2, this.canvas.height - gap * 2);
+		this._drawCanvas(0, 0, this.canvas.width * 2, this.canvas.height * 2);
 	}
 
 	private lerp(t: number, a: number, b: number) {
@@ -241,8 +240,8 @@ export class EnvelopeEditor {
 		const instrument: Instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
 		
 		for (let envelopeIndex: number = this._rows.length; envelopeIndex < instrument.envelopeCount; envelopeIndex++) {
-			const envelopePlotter: EnvelopeLineGraph = new EnvelopeLineGraph(HTML.canvas({ width: 180, height: 80, style: `border: 2px solid ${ColorConfig.uiWidgetBackground}; width: 20px;`, id: "EnvelopeLineGraph" }), this._doc, envelopeIndex);
-			const envelopePlotterRow: HTMLElement = HTML.div({class: "selectRow dropFader", style: "margin-bottom: 3px;"}, envelopePlotter.canvas);
+			const envelopePlotter: EnvelopeLineGraph = new EnvelopeLineGraph(HTML.canvas({ width: 180, height: 80, style: `border: 2px solid ${ColorConfig.uiWidgetBackground}; width: 140px; height: 60px; margin-left: 24px;`, id: "EnvelopeLineGraph" }), this._doc, envelopeIndex);
+			const envelopePlotterRow: HTMLElement = HTML.div({class: "selectRow dropFader", style: "margin-top: 25px; margin-bottom: 25px;"}, envelopePlotter.canvas);
 			const perEnvelopeSpeedSlider: HTMLInputElement = HTML.input({style: "margin: 0;", type: "range", min: Config.perEnvelopeSpeedMin, max: Config.perEnvelopeSpeedMax, value: "1", step: "0.25"});
 			const perEnvelopeSpeedInputBox: HTMLInputElement = HTML.input({style: "width: 4em; font-size: 80%; ", id: "perEnvelopeSpeedInputBox", type: "number", step: "0.001", min: Config.perEnvelopeSpeedMin, max: Config.perEnvelopeSpeedMax, value: "1"});
 			const perEnvelopeSpeedRow: HTMLElement = HTML.div({class: "selectRow dropFader"}, HTML.div({},
