@@ -10,6 +10,8 @@ import {Localization as _} from "./Localization";
 import {clamp} from "./UsefulCodingStuff";
 
 export class EnvelopeLineGraph {
+	public range: number = 4;
+
     constructor(public readonly canvas: HTMLCanvasElement, private readonly _doc: SongDocument, public index: number) {
 		this.render();
     }
@@ -18,25 +20,28 @@ export class EnvelopeLineGraph {
 		const envelopeGraph: number[] = []
 		let instEnv = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].envelopes[this.index];
 		let envelope = Config.envelopes[instEnv.envelope];
+		let speed: number = instEnv.envelopeSpeed;
 		let lowerBound: number = instEnv.lowerBound;
 		let upperBound: number = instEnv.upperBound;
 		let stepAmount: number = instEnv.stepAmount;
 		let delay: number = instEnv.delay;
 		let qualitySteps: number = 300;
-		let range: number = 5;
 		let minValue = -0.1;
       	let maxValue = -Infinity;
 		for (let i: number = 0; i < qualitySteps; i++) {
 			const time: number = i / (qualitySteps - 1);
-			const seconds: number = time * range;
+			const seconds: number = (time * this.range) * speed;
+			const beats: number = (time * this.range) * speed;
+			const beatNote: number = (time * this.range) * speed;
 			const noteSize: number = (1 - time) * Config.noteSizeMax;
-			let value = EnvelopeComputer.computeEnvelope(envelope, seconds, 1, 1, noteSize, lowerBound, upperBound, stepAmount, delay);
+			let value = EnvelopeComputer.computeEnvelope(envelope, seconds, beats, beatNote, noteSize, lowerBound, upperBound, stepAmount, delay);
 			envelopeGraph.push(value);
 			maxValue = Math.max(value, maxValue);
         	minValue = Math.min(value, minValue);
 		}
 
 		var ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
+		ctx.clearRect(0, 0, graphWidth, graphHeight);
 
 		// Draw background.
 		ctx.fillStyle = ColorConfig.getComputed("--editor-background");
@@ -46,21 +51,20 @@ export class EnvelopeLineGraph {
 		ctx.fillStyle = ColorConfig.getComputed("--loop-accent");
 		ctx.strokeStyle = ColorConfig.getComputed("--loop-accent");
 		ctx.beginPath();
-      	ctx.moveTo(graphX, graphY + graphHeight);
 		for (let i: number = 0; i < qualitySteps; i++) {
 			const value: number = envelopeGraph[i];
 			const x = graphX + this.remap(i, 0, qualitySteps - 1, 0, graphWidth);
-			const y = graphY + this.remap(value, minValue, maxValue, graphHeight, 0);
-			ctx.lineTo(x, y);
+			const y = (graphY + this.remap(value, minValue, maxValue, graphHeight, 0)) * 1.1;
+			if (i == 0) ctx.moveTo(x, y);
+			else ctx.lineTo(x, y);
 		}
-		ctx.lineTo(graphX + graphWidth, graphY + graphHeight);
-		ctx.lineWidth = 3;
+		ctx.lineWidth = 2.5;
 		ctx.stroke();
 		//ctx.fill();
 	}
 
 	public render() {
-		this._drawCanvas(0, 0, this.canvas.width * 2, this.canvas.height * 2);
+		this._drawCanvas(0, 0, this.canvas.width, this.canvas.height);
 	}
 
 	private lerp(t: number, a: number, b: number) {
@@ -82,6 +86,8 @@ export class EnvelopeEditor {
 	private readonly _rows: HTMLDivElement[] = [];
 	private readonly _envelopePlotters: EnvelopeLineGraph[] = [];
 	private readonly _envelopePlotterRows: HTMLElement[] = [];
+	private readonly _plotterTimeRangeInputBoxes: HTMLInputElement[] = [];
+	private readonly _plotterTimeRangeRows: HTMLElement[] = [];
 	private readonly _perEnvelopeSpeedSliders: HTMLInputElement[] = [];
 	private readonly _perEnvelopeSpeedInputBoxes: HTMLInputElement[] = [];
 	private readonly _perEnvelopeSpeedRows: HTMLElement[] = [];
@@ -138,6 +144,12 @@ export class EnvelopeEditor {
 	
 	private _onInput = (event: Event) => {
 		const instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
+
+		const plotterTimeRangeInputBoxIndex = this._plotterTimeRangeInputBoxes.indexOf(<any> event.target);
+		if (plotterTimeRangeInputBoxIndex != -1) {
+			this._changeTimeRange(this._doc, plotterTimeRangeInputBoxIndex, this._envelopePlotters[plotterTimeRangeInputBoxIndex].range, +(this._plotterTimeRangeInputBoxes[plotterTimeRangeInputBoxIndex].value));
+		}
+
 		const perEnvelopeSpeedInputBoxIndex = this._perEnvelopeSpeedInputBoxes.indexOf(<any> event.target);
 		const perEnvelopeSpeedSliderIndex = this._perEnvelopeSpeedSliders.indexOf(<any> event.target);
 		if (perEnvelopeSpeedInputBoxIndex != -1) {
@@ -184,6 +196,13 @@ export class EnvelopeEditor {
 		}
 	};
 
+	private _changeTimeRange(doc: SongDocument, envelopeIndex: number, oldValue: number, newValue: number): void {
+        if (oldValue != newValue) {
+            this._envelopePlotters[envelopeIndex].range = newValue;
+            doc.notifier.changed();
+        }
+	}
+
 	private _onClick = (event: MouseEvent): void => {
 		const index: number = this._deleteButtons.indexOf(<any> event.target);
 		if (index != -1) {
@@ -192,6 +211,10 @@ export class EnvelopeEditor {
 	}
 
 	private _typingInInput = (event: KeyboardEvent): void => {
+		const plotterTimeRangeInputBoxIndex: number = this._plotterTimeRangeInputBoxes.indexOf(<any> event.target);
+		if (plotterTimeRangeInputBoxIndex != -1) {
+			event.stopPropagation();
+		}
 		const perEnvelopeSpeedInputBoxIndex: number = this._perEnvelopeSpeedInputBoxes.indexOf(<any> event.target);
 		if (perEnvelopeSpeedInputBoxIndex != -1) {
 			event.stopPropagation();
@@ -241,7 +264,12 @@ export class EnvelopeEditor {
 		
 		for (let envelopeIndex: number = this._rows.length; envelopeIndex < instrument.envelopeCount; envelopeIndex++) {
 			const envelopePlotter: EnvelopeLineGraph = new EnvelopeLineGraph(HTML.canvas({ width: 180, height: 80, style: `border: 2px solid ${ColorConfig.uiWidgetBackground}; width: 140px; height: 60px; margin-left: 24px;`, id: "EnvelopeLineGraph" }), this._doc, envelopeIndex);
-			const envelopePlotterRow: HTMLElement = HTML.div({class: "selectRow dropFader", style: "margin-top: 25px; margin-bottom: 25px;"}, envelopePlotter.canvas);
+			const envelopePlotterRow: HTMLElement = HTML.div({class: "selectRow dropFader", style: "margin-top: 5px; margin-bottom: 25px;"}, envelopePlotter.canvas);
+			const plotterTimeRangeInputBox: HTMLInputElement = HTML.input({style: "width: 13.1em; font-size: 80%; margin-left: -28px; vertical-align: middle;", id: "timeRangeInputBox", type: "number", step: "0.1", min: "0.1", max: "200", value: "4"});
+			const plotterTimeRangeRow: HTMLElement = HTML.div({ class: "selectRow dropFader", style: "margin-left: 53px; margin-bottom: 20px;" }, HTML.div({},
+				HTML.span({ class: "tip", style: "height:1em; font-size: small;", onclick: () => this._openPrompt("plotterTimeRange") }, _.timeRangeLabel),
+				HTML.div({ style: "color: " + ColorConfig.secondaryText + "; margin-top: -3px;" }, plotterTimeRangeInputBox),
+			));
 			const perEnvelopeSpeedSlider: HTMLInputElement = HTML.input({style: "margin: 0;", type: "range", min: Config.perEnvelopeSpeedMin, max: Config.perEnvelopeSpeedMax, value: "1", step: "0.25"});
 			const perEnvelopeSpeedInputBox: HTMLInputElement = HTML.input({style: "width: 4em; font-size: 80%; ", id: "perEnvelopeSpeedInputBox", type: "number", step: "0.001", min: Config.perEnvelopeSpeedMin, max: Config.perEnvelopeSpeedMax, value: "1"});
 			const perEnvelopeSpeedRow: HTMLElement = HTML.div({class: "selectRow dropFader"}, HTML.div({},
@@ -276,7 +304,7 @@ export class EnvelopeEditor {
 				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeDelay")}, HTML.span(_.envelopeDelayLabel)),
 				HTML.div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, envelopeDelayInputBox),
 			), envelopeDelaySlider);
-			const envelopeDropdownGroup: HTMLElement = HTML.div({class: "editor-controls", style: "display: none;"}, envelopePlotterRow, perEnvelopeSpeedRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, stairsStepAmountRow, envelopeDelayRow);
+			const envelopeDropdownGroup: HTMLElement = HTML.div({class: "editor-controls", style: "display: none;"}, plotterTimeRangeRow, envelopePlotterRow, perEnvelopeSpeedRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, stairsStepAmountRow, envelopeDelayRow);
 			const envelopeDropdown: HTMLButtonElement = HTML.button({style: "margin-left: 0.6em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.PerEnvelope, envelopeIndex)}, "▼");
 
 			const targetSelect: HTMLSelectElement = HTML.select();
@@ -309,6 +337,8 @@ export class EnvelopeEditor {
 			this._rows[envelopeIndex] = row;
 			this._envelopePlotters[envelopeIndex] = envelopePlotter;
 			this._envelopePlotterRows[envelopeIndex] = envelopePlotterRow;
+			this._plotterTimeRangeInputBoxes[envelopeIndex] = plotterTimeRangeInputBox;
+			this._plotterTimeRangeRows[envelopeIndex] = plotterTimeRangeRow;
 			this._perEnvelopeSpeedSliders[envelopeIndex] = perEnvelopeSpeedSlider;
 			this._perEnvelopeSpeedInputBoxes[envelopeIndex] = perEnvelopeSpeedInputBox;
 			this._perEnvelopeSpeedRows[envelopeIndex] = perEnvelopeSpeedRow;
@@ -358,6 +388,8 @@ export class EnvelopeEditor {
 		}
 		
 		for (let envelopeIndex: number = 0; envelopeIndex < instrument.envelopeCount; envelopeIndex++) {
+			this._envelopePlotters[envelopeIndex].render();
+			this._plotterTimeRangeInputBoxes[envelopeIndex].value = String(clamp(0.1, 201, this._envelopePlotters[envelopeIndex].range));
 			this._perEnvelopeSpeedSliders[envelopeIndex].value = String(clamp(Config.perEnvelopeSpeedMin, Config.perEnvelopeSpeedMax+1, instrument.envelopes[envelopeIndex].envelopeSpeed));
 			this._perEnvelopeSpeedInputBoxes[envelopeIndex].value = String(clamp(Config.perEnvelopeSpeedMin, Config.perEnvelopeSpeedMax+1, instrument.envelopes[envelopeIndex].envelopeSpeed));
 			this._discreteEnvelopeToggles[envelopeIndex].checked = instrument.envelopes[envelopeIndex].discrete ? true : false;
@@ -372,6 +404,16 @@ export class EnvelopeEditor {
 			this._targetSelects[envelopeIndex].value = String(instrument.envelopes[envelopeIndex].target + instrument.envelopes[envelopeIndex].index * Config.instrumentAutomationTargets.length);
 			this._envelopeSelects[envelopeIndex].selectedIndex = instrument.envelopes[envelopeIndex].envelope;
 			
+			if ( // Special case on envelope plotters
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["none"].index
+			) {
+				this._envelopePlotterRows[envelopeIndex].style.display = "none";
+				this._plotterTimeRangeRows[envelopeIndex].style.display = "none";
+			} else {
+				this._envelopePlotterRows[envelopeIndex].style.display = "";
+				this._plotterTimeRangeRows[envelopeIndex].style.display = "";
+			}
+
 			if ( // Special case on IES
 				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["none"].index ||
 				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["note size"].index 

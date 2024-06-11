@@ -66,6 +66,7 @@ export class Localization {
     public static slideSpeedLabel: string = "‣ Spd:";
     public static arpSpeedLabel: string = "‣ Spd:";
     public static envelopeSpeedLabel: string = "‣ Spd:";
+    public static timeRangeLabel: string = "‣ Time Range: ";
     public static perEnvelopeSpeedLabel: string = "‣ Env Spd:";
     public static discreteEnvelopeLabel: string = "‣ Discrete:";
     public static lowerBoundLabel: string = "‣ Lwr Bnd:";
@@ -1025,6 +1026,7 @@ if (language == "spanish") {
     Localization.slideSpeedLabel = "‣ Vel:";
     Localization.arpSpeedLabel = "‣ Vel:";
     Localization.envelopeSpeedLabel = "‣ Vel:";
+    Localization.timeRangeLabel = "‣ Alcance de Tiempo:";
     Localization.perEnvelopeSpeedLabel = "‣ Env Vel:";
     Localization.discreteEnvelopeLabel = "‣ Discreto:";
     Localization.lowerBoundLabel = "‣ Lmt Baje:";

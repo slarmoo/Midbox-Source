@@ -23,7 +23,7 @@ import { InputBox, Slider } from "./HTMLWrapper";
 import { ImportPrompt } from "./ImportPrompt";
 import { ChannelRow } from "./ChannelRow";
 import { LayoutPrompt } from "./LayoutPrompt";
-import { EnvelopeEditor, EnvelopeLineGraph } from "./EnvelopeEditor";
+import { EnvelopeEditor } from "./EnvelopeEditor";
 import { FadeInOutEditor } from "./FadeInOutEditor";
 import { FilterEditor } from "./FilterEditor";
 import { LimiterPrompt } from "./LimiterPrompt";
@@ -1372,7 +1372,6 @@ export class SongEditor {
     private readonly _envelopeSpeedRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:4px;", onclick: () => this._openPrompt("envelopeSpeed") }, _.envelopeSpeedLabel), this._envelopeSpeedDisplay, this._envelopeSpeedSlider.container);
     private readonly _envelopeDropdownGroup: HTMLElement = div({ class: "editor-controls", style: "display: none;" }, this._envelopeSpeedRow);
     private readonly _envelopeDropdown: HTMLButtonElement = button({ style: "margin-left:0em; margin-right: 1em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.Envelope) }, "▼");
-    private readonly _envelopeLineGraph: EnvelopeLineGraph = new EnvelopeLineGraph(HTML.canvas({ width: 180, height: 80, style: `border: 2px solid ${ColorConfig.uiWidgetBackground}; width: 140px; height: 60px; margin-left: 24px;`, id: "EnvelopeLineGraph" }), this._doc, 0);
     
     private readonly _drumsetGroup: HTMLElement = div({ class: "editor-controls" });
     private readonly _modulatorGroup: HTMLElement = div({ class: "editor-controls" });
@@ -3099,7 +3098,6 @@ export class SongEditor {
             if (this._openEnvelopeDropdown) this._envelopeDropdownGroup.style.display = "";
             else this._envelopeDropdownGroup.style.display = "none";
             this._envelopeEditor.render();
-            this._envelopeLineGraph.render();
 
             for (let chordIndex: number = 0; chordIndex < Config.chords.length; chordIndex++) {
                 let hidden: boolean = (!Config.instrumentTypeHasSpecialInterval[instrument.type] && Config.chords[chordIndex].customInterval);
