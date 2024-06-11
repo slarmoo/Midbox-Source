@@ -1,16 +1,79 @@
 // Copyright (c) 2012-2022 John Nesky and contributing authors, distributed under the MIT license, see accompanying the LICENSE.md file.
 
-import {InstrumentType, Config, DropdownID, Envelope} from "../synth/SynthConfig";
-import {Instrument, EnvelopeSettings} from "../synth/synth";
+import {InstrumentType, Config, DropdownID} from "../synth/SynthConfig";
+import {Instrument, EnvelopeComputer} from "../synth/synth";
 import {ColorConfig} from "./ColorConfig";
 import {SongDocument} from "./SongDocument";
 import {ChangeSetEnvelopeTarget, ChangeSetEnvelopeType, ChangeRemoveEnvelope, ChangePerEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeLowerBound, ChangeUpperBound, ChangeStairsStepAmount, ChangeEnvelopeDelay} from "./changes";
 import {HTML} from "imperative-html/dist/esm/elements-strict";
 import {Localization as _} from "./Localization";
 import {clamp} from "./UsefulCodingStuff";
-import {envelopeLineGraph} from "../global/EnvelopePlotter";
-import {events} from "../global/Events";
-import {EnvelopeComputer} from "../synth/synth";
+
+class EnvelopeLineGraph {
+    constructor(public readonly canvas: HTMLCanvasElement, private readonly _doc: SongDocument, public index: number) {
+		this.render();
+    }
+
+	private _drawCanvas(graphX: number, graphY: number, graphWidth: number, graphHeight: number): void {
+		const envelopeGraph: number[] = []
+		let instEnv = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].envelopes[this.index];
+		let envelope = Config.envelopes[instEnv.envelope];
+		let lowerBound: number = instEnv.lowerBound;
+		let upperBound: number = instEnv.upperBound;
+		let stepAmount: number = instEnv.stepAmount;
+		let delay: number = instEnv.delay;
+		let qualitySteps: number = 300;
+		let range: number = 5;
+		let minValue = -0.1;
+      	let maxValue = -Infinity;
+		for (let i: number = 0; i < qualitySteps; i++) {
+			const time: number = i / (qualitySteps - 1);
+			const seconds: number = time * range;
+			const noteSize: number = (1 - time) * Config.noteSizeMax;
+			let value = EnvelopeComputer.computeEnvelope(envelope, seconds, 1, 1, noteSize, lowerBound, upperBound, stepAmount, delay);
+			envelopeGraph.push(value);
+			maxValue = Math.max(value, maxValue);
+        	minValue = Math.min(value, minValue);
+		}
+
+		var ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
+
+		// Draw background.
+		ctx.fillStyle = ColorConfig.getComputed("--editor-background");
+        ctx.fillRect(0, 0, graphX, graphY);
+
+		// Proceed to draw envelope graph.
+		ctx.fillStyle = ColorConfig.getComputed("--loop-accent");
+		ctx.strokeStyle = ColorConfig.getComputed("--loop-accent");
+		ctx.beginPath();
+      	ctx.moveTo(graphX, graphY + graphHeight);
+		for (let i: number = 0; i < qualitySteps; i++) {
+			const value: number = envelopeGraph[i];
+			const x = graphX + this.remap(i, 0, qualitySteps - 1, 0, graphWidth);
+			const y = graphY + this.remap(value, minValue, maxValue, graphHeight, 0);
+			ctx.lineTo(x, y);
+		}
+		ctx.lineTo(graphX + graphWidth, graphY + graphHeight);
+		ctx.lineWidth = 3;
+		ctx.stroke();
+		//ctx.fill();
+	}
+
+	public render() {
+		const gap: number = 40;
+		this._drawCanvas(gap, gap, this.canvas.width - gap * 2, this.canvas.height - gap * 2);
+	}
+
+	private lerp(t: number, a: number, b: number) {
+		return a + (b - a) * t;
+	}
+	private norm(x: number, a: number, b: number) {
+		return (x - a) / (b - a);
+	}
+	private remap(x: number, a: number, b: number, c: number, d: number) {
+		return this.lerp(this.norm(x, a, b), c, d);
+	}
+}
 
 export class EnvelopeEditor {
 	public readonly container: HTMLElement = HTML.div({class: "envelopeEditor"});
@@ -18,7 +81,7 @@ export class EnvelopeEditor {
 	// Everything must be declared as arrays for each envelope
 	// Properly given styles and what not in render()
 	private readonly _rows: HTMLDivElement[] = [];
-	private readonly _envelopePlotters: envelopeLineGraph[] = [];
+	private readonly _envelopePlotters: EnvelopeLineGraph[] = [];
 	private readonly _envelopePlotterRows: HTMLElement[] = [];
 	private readonly _perEnvelopeSpeedSliders: HTMLInputElement[] = [];
 	private readonly _perEnvelopeSpeedInputBoxes: HTMLInputElement[] = [];
@@ -48,8 +111,6 @@ export class EnvelopeEditor {
 	private _renderedInstrumentType: InstrumentType;
 	private _renderedEffects: number = 0;
 	private _openPerEnvelopeDropdowns: boolean[] = [];
-	private _values: number[] = [];
-	private _computeEnvelope: Function = EnvelopeComputer.computeEnvelope;
 	
 	constructor(private _doc: SongDocument, private _openPrompt: (name: string) => void) {
 		this.container.addEventListener("change", this._onChange);
@@ -73,7 +134,6 @@ export class EnvelopeEditor {
 			this._doc.record(new ChangeSetEnvelopeTarget(this._doc, targetSelectIndex, target, index));
 		} else if (envelopeSelectIndex != -1) {
 			this._doc.record(new ChangeSetEnvelopeType(this._doc, envelopeSelectIndex, this._envelopeSelects[envelopeSelectIndex].selectedIndex));
-			this._updateValues(this._envelopeSelects[envelopeSelectIndex].selectedIndex);
 		}
 	}
 	
@@ -176,24 +236,13 @@ export class EnvelopeEditor {
 			option.hidden = !instrument.supportsEnvelopeTarget(target, index);
 		}
 	}
-	
-	private _updateValues(index: number): void {
-		let steps: number = 300;
-		let envelope: Envelope = Config.envelopes[/*How do i get the selected envelope's type*/];
-		for (let i: number = 0; i < steps; i++) {
-			// _computeEnvelope: Function = EnvelopeComputer.computeEnvelope; for function below
-			const value = this._computeEnvelope(envelope);
-			this._values.push(value);
-			events.raise("updatePlot", this._values);
-		}
-	}
 
 	public render(): void {
 		const instrument: Instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
 		
 		for (let envelopeIndex: number = this._rows.length; envelopeIndex < instrument.envelopeCount; envelopeIndex++) {
-			const envelopePlotter: envelopeLineGraph = new envelopeLineGraph(HTML.canvas({ width: 144, height: 72, style: `border: 2px solid ${ColorConfig.uiWidgetBackground}; position: static;`, id: "envelopeLineGraph" }), 1);
-			const envelopePlotterRow: HTMLElement = HTML.div({class: "selectRow dropFader"}, envelopePlotter.canvas);
+			const envelopePlotter: EnvelopeLineGraph = new EnvelopeLineGraph(HTML.canvas({ width: 180, height: 80, style: `border: 2px solid ${ColorConfig.uiWidgetBackground}; width: 20px;`, id: "EnvelopeLineGraph" }), this._doc, envelopeIndex);
+			const envelopePlotterRow: HTMLElement = HTML.div({class: "selectRow dropFader", style: "margin-bottom: 3px;"}, envelopePlotter.canvas);
 			const perEnvelopeSpeedSlider: HTMLInputElement = HTML.input({style: "margin: 0;", type: "range", min: Config.perEnvelopeSpeedMin, max: Config.perEnvelopeSpeedMax, value: "1", step: "0.25"});
 			const perEnvelopeSpeedInputBox: HTMLInputElement = HTML.input({style: "width: 4em; font-size: 80%; ", id: "perEnvelopeSpeedInputBox", type: "number", step: "0.001", min: Config.perEnvelopeSpeedMin, max: Config.perEnvelopeSpeedMax, value: "1"});
 			const perEnvelopeSpeedRow: HTMLElement = HTML.div({class: "selectRow dropFader"}, HTML.div({},
@@ -228,7 +277,7 @@ export class EnvelopeEditor {
 				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeDelay")}, HTML.span(_.envelopeDelayLabel)),
 				HTML.div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, envelopeDelayInputBox),
 			), envelopeDelaySlider);
-			const envelopeDropdownGroup: HTMLElement = HTML.div({class: "editor-controls", style: "display: none;"}, perEnvelopeSpeedRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, stairsStepAmountRow, envelopeDelayRow);
+			const envelopeDropdownGroup: HTMLElement = HTML.div({class: "editor-controls", style: "display: none;"}, envelopePlotterRow, perEnvelopeSpeedRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, stairsStepAmountRow, envelopeDelayRow);
 			const envelopeDropdown: HTMLButtonElement = HTML.button({style: "margin-left: 0.6em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.PerEnvelope, envelopeIndex)}, "▼");
 
 			const targetSelect: HTMLSelectElement = HTML.select();
