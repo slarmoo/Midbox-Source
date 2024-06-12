@@ -1,10 +1,10 @@
 // Copyright (c) 2012-2022 John Nesky and contributing authors, distributed under the MIT license, see accompanying the LICENSE.md file.
 
 import {InstrumentType, Config, DropdownID} from "../synth/SynthConfig";
-import {Instrument, EnvelopeComputer} from "../synth/synth";
+import {Instrument, EnvelopeComputer, Tone} from "../synth/synth";
 import {ColorConfig} from "./ColorConfig";
 import {SongDocument} from "./SongDocument";
-import {ChangeSetEnvelopeTarget, ChangeSetEnvelopeType, ChangeRemoveEnvelope, ChangePerEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeLowerBound, ChangeUpperBound, ChangeStairsStepAmount, ChangeEnvelopeDelay} from "./changes";
+import {ChangeSetEnvelopeTarget, ChangeSetEnvelopeType, ChangeRemoveEnvelope, ChangePerEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeLowerBound, ChangeUpperBound, ChangeStairsStepAmount, ChangeEnvelopeDelay, ChangePitchEnvelopeStart, ChangePitchEnvelopeEnd} from "./changes";
 import {HTML} from "imperative-html/dist/esm/elements-strict";
 import {Localization as _} from "./Localization";
 import {clamp} from "./UsefulCodingStuff";
@@ -18,7 +18,8 @@ export class EnvelopeLineGraph {
 
 	private _drawCanvas(graphX: number, graphY: number, graphWidth: number, graphHeight: number): void {
 		const envelopeGraph: number[] = []
-		let instEnv = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].envelopes[this.index];
+		let instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
+		let instEnv = instrument.envelopes[this.index];
 		let envelope = Config.envelopes[instEnv.envelope];
 		let speed: number = instEnv.envelopeSpeed;
 		let lowerBound: number = instEnv.lowerBound;
@@ -34,7 +35,7 @@ export class EnvelopeLineGraph {
 			const beats: number = (time * this.range) * speed;
 			const beatNote: number = (time * this.range) * speed;
 			const noteSize: number = (1 - time) * Config.noteSizeMax;
-			let value = EnvelopeComputer.computeEnvelope(envelope, seconds, beats, beatNote, noteSize, lowerBound, upperBound, stepAmount, delay);
+			let value = EnvelopeComputer.computeEnvelope(envelope, seconds, beats, beatNote, noteSize, lowerBound, upperBound, stepAmount, delay, new Tone, instrument);
 			envelopeGraph.push(value);
 			maxValue = Math.max(value, maxValue);
         	minValue = Math.min(value, minValue);
@@ -105,6 +106,12 @@ export class EnvelopeEditor {
 	private readonly _envelopeDelaySliders: HTMLInputElement[] = [];
 	private readonly _envelopeDelayInputBoxes: HTMLInputElement[] = [];
 	private readonly _envelopeDelayRows: HTMLElement[] = [];
+	private readonly _pitchStartSliders: HTMLInputElement[] = [];
+	private readonly _pitchStartInputBoxes: HTMLInputElement[] = [];
+	private readonly _pitchEndSliders: HTMLInputElement[] = [];
+	private readonly _pitchEndInputBoxes: HTMLInputElement[] = [];
+	private readonly _pitchStartGroups: HTMLElement[] = [];
+	private readonly _pitchEndGroups: HTMLElement[] = [];
 	private readonly _envelopeDropdownGroups: HTMLElement[] = [];
 	private readonly _envelopeDropdowns: HTMLButtonElement[] = [];
 	private readonly _targetSelects: HTMLSelectElement[] = [];
@@ -144,6 +151,7 @@ export class EnvelopeEditor {
 	
 	private _onInput = (event: Event) => {
 		const instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
+		let drumPitchEnvBoolean: boolean = instrument.isNoiseInstrument;
 
 		const plotterTimeRangeInputBoxIndex = this._plotterTimeRangeInputBoxes.indexOf(<any> event.target);
 		if (plotterTimeRangeInputBoxIndex != -1) {
@@ -194,6 +202,19 @@ export class EnvelopeEditor {
 		if (envelopeDelaySliderIndex != -1) {
 			this._doc.record(new ChangeEnvelopeDelay(this._doc, envelopeDelaySliderIndex, instrument.envelopes[envelopeDelaySliderIndex].stepAmount, +(this._envelopeDelaySliders[envelopeDelaySliderIndex].value)));
 		}
+		const startInputBoxIndex = this._pitchStartInputBoxes.indexOf(<any>event.target);
+		const endInputBoxIndex = this._pitchEndInputBoxes.indexOf(<any>event.target);
+		const startSliderIndex = this._pitchStartSliders.indexOf(<any>event.target);
+		const endSliderIndex = this._pitchEndSliders.indexOf(<any>event.target);
+		if (startInputBoxIndex != -1) {
+			this._doc.record(new ChangePitchEnvelopeStart(this._doc, startInputBoxIndex, instrument.envelopes[startInputBoxIndex].pitchStart + (drumPitchEnvBoolean ? 1 : 0), +(this._pitchStartInputBoxes[startInputBoxIndex].value)));
+		} else if (endInputBoxIndex != -1) {
+			this._doc.record(new ChangePitchEnvelopeEnd(this._doc, endInputBoxIndex, instrument.envelopes[endInputBoxIndex].pitchEnd + (drumPitchEnvBoolean ? 1 : 0), +(this._pitchEndInputBoxes[endInputBoxIndex].value)));
+		} else if (startSliderIndex != -1) {
+			this._doc.record(new ChangePitchEnvelopeStart(this._doc, startSliderIndex, instrument.envelopes[startSliderIndex].pitchStart + (drumPitchEnvBoolean ? 1 : 0), +(this._pitchStartSliders[startSliderIndex].value)));
+		} else if (endSliderIndex != -1) {
+			this._doc.record(new ChangePitchEnvelopeEnd(this._doc, endSliderIndex, instrument.envelopes[endSliderIndex].pitchEnd + (drumPitchEnvBoolean ? 1 : 0), +(this._pitchEndSliders[endSliderIndex].value)));
+		}
 	};
 
 	private _changeTimeRange(doc: SongDocument, envelopeIndex: number, oldValue: number, newValue: number): void {
@@ -235,6 +256,14 @@ export class EnvelopeEditor {
 		if (envelopeDelayInputBoxIndex != -1) {
 			event.stopPropagation();
 		}
+		const startInputBoxIndex: number = this._pitchStartInputBoxes.indexOf(<any>event.target);
+		if (startInputBoxIndex != -1) {
+			event.stopPropagation();
+		}
+		const endInputBoxIndex: number = this._pitchEndInputBoxes.indexOf(<any>event.target);
+		if (endInputBoxIndex != -1) {
+			event.stopPropagation();
+		}
 	}
 	
 	private _makeOption(target: number, index: number): HTMLOptionElement {
@@ -261,6 +290,7 @@ export class EnvelopeEditor {
 
 	public render(): void {
 		const instrument: Instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
+		let drumPitchEnvBoolean: boolean = instrument.isNoiseInstrument;
 		
 		for (let envelopeIndex: number = this._rows.length; envelopeIndex < instrument.envelopeCount; envelopeIndex++) {
 			const envelopePlotter: EnvelopeLineGraph = new EnvelopeLineGraph(HTML.canvas({ width: 180, height: 80, style: `border: 2px solid ${ColorConfig.uiWidgetBackground}; width: 140px; height: 60px; margin-left: 24px;`, id: "EnvelopeLineGraph" }), this._doc, envelopeIndex);
@@ -304,7 +334,19 @@ export class EnvelopeEditor {
 				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeDelay")}, HTML.span(_.envelopeDelayLabel)),
 				HTML.div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, envelopeDelayInputBox),
 			), envelopeDelaySlider);
-			const envelopeDropdownGroup: HTMLElement = HTML.div({class: "editor-controls", style: "display: none;"}, plotterTimeRangeRow, envelopePlotterRow, perEnvelopeSpeedRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, stairsStepAmountRow, envelopeDelayRow);
+			const pitchStartSlider: HTMLInputElement = HTML.input({style: "margin: 0;", type: "range", min: drumPitchEnvBoolean ? 1 : 0, max: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, value: "0", step: "1"});
+			const pitchStartInputBox: HTMLInputElement = HTML.input({style: "width: 4em; font-size: 80%; ", id: "pitchStartInputBox", type: "number", step: "1", min: drumPitchEnvBoolean ? 1 : 0, max: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, value: "0"});
+			const pitchEndSlider: HTMLInputElement = HTML.input({style: "margin: 0;", type: "range", min: drumPitchEnvBoolean ? 1 : 0, max: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, value: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, step: "1"});
+			const pitchEndInputBox: HTMLInputElement = HTML.input({style: "width: 4em; font-size: 80%; ", id: "pitchEndInputBox", type: "number", step: "1", min: drumPitchEnvBoolean ? 1 : 0, max: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, value: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch});
+			const pitchStartGroup: HTMLElement = HTML.div({class: "selectRow dropFader"}, HTML.div({},
+				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("pitchEnvelope")}, HTML.span(_.pitchStartLabel)),
+				HTML.div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, pitchStartInputBox),
+			), pitchStartSlider);
+			const pitchEndGroup: HTMLElement = HTML.div({class: "selectRow dropFader"}, HTML.div({},
+				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("pitchEnvelope")}, HTML.span(_.pitchEndLabel)),
+				HTML.div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, pitchEndInputBox),
+			), pitchEndSlider);
+			const envelopeDropdownGroup: HTMLElement = HTML.div({class: "editor-controls", style: "display: none;"}, plotterTimeRangeRow, envelopePlotterRow, pitchStartGroup, pitchEndGroup, perEnvelopeSpeedRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, stairsStepAmountRow, envelopeDelayRow);
 			const envelopeDropdown: HTMLButtonElement = HTML.button({style: "margin-left: 0.6em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.PerEnvelope, envelopeIndex)}, "▼");
 
 			const targetSelect: HTMLSelectElement = HTML.select();
@@ -356,6 +398,12 @@ export class EnvelopeEditor {
 			this._envelopeDelaySliders[envelopeIndex] = envelopeDelaySlider;
 			this._envelopeDelayInputBoxes[envelopeIndex] = envelopeDelayInputBox;
 			this._envelopeDelayRows[envelopeIndex] = envelopeDelayRow;
+			this._pitchStartSliders[envelopeIndex] = pitchStartSlider;
+			this._pitchStartInputBoxes[envelopeIndex] = pitchStartInputBox;
+			this._pitchEndSliders[envelopeIndex] = pitchEndSlider;
+			this._pitchEndInputBoxes[envelopeIndex] = pitchEndInputBox;
+			this._pitchStartGroups[envelopeIndex] = pitchStartGroup;
+			this._pitchEndGroups[envelopeIndex] = pitchEndGroup;
 			this._envelopeDropdownGroups[envelopeIndex] = envelopeDropdownGroup;
 			this._envelopeDropdowns[envelopeIndex] = envelopeDropdown;
 			this._targetSelects[envelopeIndex] = targetSelect;
@@ -401,8 +449,22 @@ export class EnvelopeEditor {
 			this._stairsStepAmountInputBoxes[envelopeIndex].value = String(clamp(1, Config.stairsStepAmountMax+1, instrument.envelopes[envelopeIndex].stepAmount));
 			this._envelopeDelaySliders[envelopeIndex].value = String(clamp(0, Config.envelopeDelayMax+1, instrument.envelopes[envelopeIndex].delay));
 			this._envelopeDelayInputBoxes[envelopeIndex].value = String(clamp(0, Config.envelopeDelayMax+1, instrument.envelopes[envelopeIndex].delay));
+			this._pitchStartSliders[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instrument.envelopes[envelopeIndex].pitchStart));
+			this._pitchStartInputBoxes[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instrument.envelopes[envelopeIndex].pitchStart));
+			this._pitchEndSliders[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instrument.envelopes[envelopeIndex].pitchEnd));
+			this._pitchEndInputBoxes[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instrument.envelopes[envelopeIndex].pitchEnd));
 			this._targetSelects[envelopeIndex].value = String(instrument.envelopes[envelopeIndex].target + instrument.envelopes[envelopeIndex].index * Config.instrumentAutomationTargets.length);
 			this._envelopeSelects[envelopeIndex].selectedIndex = instrument.envelopes[envelopeIndex].envelope;
+
+			// Reset min/max for pitch envelope UI elements.
+			this._pitchStartSliders[envelopeIndex].min = (drumPitchEnvBoolean ? 1 : 0).toString();
+			this._pitchStartSliders[envelopeIndex].max = (drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch).toString();
+			this._pitchStartInputBoxes[envelopeIndex].min = (drumPitchEnvBoolean ? 1 : 0).toString();
+			this._pitchStartInputBoxes[envelopeIndex].max = (drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch).toString();
+			this._pitchEndSliders[envelopeIndex].min = (drumPitchEnvBoolean ? 1 : 0).toString();
+			this._pitchEndSliders[envelopeIndex].max = (drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch).toString();
+			this._pitchEndInputBoxes[envelopeIndex].min = (drumPitchEnvBoolean ? 1 : 0).toString();
+			this._pitchEndInputBoxes[envelopeIndex].max = (drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch).toString();
 			
 			if ( // Special case on envelope plotters
 				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["none"].index
@@ -416,7 +478,8 @@ export class EnvelopeEditor {
 
 			if ( // Special case on IES
 				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["none"].index ||
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["note size"].index 
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["note size"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["pitch"].index
 			) {
 				this._perEnvelopeSpeedRows[envelopeIndex].style.display = "none";
 			} else {
@@ -424,12 +487,19 @@ export class EnvelopeEditor {
 			}
 
 			// Special case on discrete toggles.
-			if (instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["none"].index) this._discreteEnvelopeRows[envelopeIndex].style.display = "none";
-			else this._discreteEnvelopeRows[envelopeIndex].style.display = "";
+			if (
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["none"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["pitch"].index
+			) {
+				this._discreteEnvelopeRows[envelopeIndex].style.display = "none";
+			} else { 
+				this._discreteEnvelopeRows[envelopeIndex].style.display = "";
+			}
 
 			if ( // Special case on lower/upper boundaries.
 				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["none"].index ||
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["note size"].index 
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["note size"].index
+				// Pitch would go here but these are used as the start/end bounds instead. Innovative!
 			) {
 				this._lowerBoundRows[envelopeIndex].style.display = "none";
 				this._upperBoundRows[envelopeIndex].style.display = "none";
@@ -457,11 +527,22 @@ export class EnvelopeEditor {
 
 			if ( // Special case on delay.
 				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["none"].index ||
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["note size"].index 
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["note size"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["pitch"].index
 			) {
 				this._envelopeDelayRows[envelopeIndex].style.display = "none";
 			} else {
 				this._envelopeDelayRows[envelopeIndex].style.display = "";
+			}
+
+			if ( // Pitch settings are special-cased to the pitch envelope
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["pitch"].index
+			) {
+				this._pitchStartGroups[envelopeIndex].style.display = "";
+				this._pitchEndGroups[envelopeIndex].style.display = "";
+			} else {
+				this._pitchStartGroups[envelopeIndex].style.display = "none";
+				this._pitchEndGroups[envelopeIndex].style.display = "none";
 			}
 		}
 		

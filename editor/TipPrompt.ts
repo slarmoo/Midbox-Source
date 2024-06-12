@@ -544,6 +544,16 @@ export class TipPrompt implements Prompt {
 					p("Envelopes typically will start their behaviors instantly the moment a note plays. With this setting, you can delay when the envelope starts changing values instead for better control over them. (This delay is in beats.)"),
 				);
 			} break;
+			case "pitchEnvelope": {
+				message = div(
+					h2("Pitch Envelope Type"),
+					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously. These settings apply specifically to the more-unique envelope type, Pitch."),
+					p("The pitch envelope type is based off of the pitch, or vertical placement of a note. You are able to set the top and bottom boundaries of the pitch envelope using the pitch start and pitch end sliders/input boxes."),
+					p("When a note is placed, the pitch envelope checks where the note is placed and assigns a value between the start and end boundaries according to the note's position in said bounds. There are many things that you can do with key-tracking envelopes, such as making the instrument quieter as notes are placed lower, or dynamic instruments that act more like vocals."),
+					p("And also, if you place the bottom boundary above the top one, you can invert the direction of value incrementation, flipping the top to bottom potential on its head! Go ahead and check out the other pitch-envelope-related settings for some more details on what you can do!"),
+					p("This feature was ported from Slarmoo's Box!")
+				);
+			} break;
 			case "usedInstrument": {
 				message = div(
 					h3("'Is this instrument used somewhere else?'"),

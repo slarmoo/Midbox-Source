@@ -68,6 +68,7 @@ export const enum EnvelopeType {
     decelerate,
     stairs,
     loopStairs,
+    pitch,
 }
 
 
@@ -652,6 +653,7 @@ export class Config {
     public static readonly envelopes: DictionaryArray<Envelope> = toNameMap([
         { name: "none",           type: EnvelopeType.none,         speed: 0.0   },
         { name: "note size",      type: EnvelopeType.noteSize,     speed: 0.0   },
+        { name: "pitch",          type: EnvelopeType.pitch,        speed: 0.0   },
         { name: "punch",          type: EnvelopeType.punch,        speed: 0.0   },
         { name: "flare 0",        type: EnvelopeType.flare,        speed: 64.0  },
         { name: "flare 1",        type: EnvelopeType.flare,        speed: 32.0  },
@@ -763,6 +765,7 @@ export class Config {
     public static readonly envelopes: DictionaryArray<Envelope> = toNameMap([
         { name: "none",           type: EnvelopeType.none,         speed: 0.0   },
         { name: "note size",      type: EnvelopeType.noteSize,     speed: 0.0   },
+        { name: "pitch",          type: EnvelopeType.pitch,        speed: 0.0   },
         { name: "punch",          type: EnvelopeType.punch,        speed: 0.0   },
         { name: "flare",          type: EnvelopeType.flare,        speed: 8.0   },
         { name: "twang",          type: EnvelopeType.twang,        speed: 8.0   },
