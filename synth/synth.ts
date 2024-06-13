@@ -50,7 +50,7 @@ function encodeUnisonSettings(buffer: number[], v: number, s: number, o: number,
     buffer.push(base64IntToCharCode[cleanI % 63], base64IntToCharCode[Math.floor(cleanI / 63)]);
 }
 
-function encodeEnvelopeSettings(buffer: number[], s: number, d: boolean, lb: number, ub: number, sa: number, dl: number): void {
+function encodeEnvelopeSettings(buffer: number[], s: number, d: boolean, lb: number, ub: number, sa: number, dl: number, ps: number, pe: number): void {
     let cleanS = Math.round(Math.abs(s) * 1000);
     let cleanSDivided = Math.floor(cleanS / 63);
     buffer.push(base64IntToCharCode[cleanS % 63], base64IntToCharCode[cleanSDivided % 63], base64IntToCharCode[Math.floor(cleanSDivided / 63)]);
@@ -72,6 +72,14 @@ function encodeEnvelopeSettings(buffer: number[], s: number, d: boolean, lb: num
     let cleanDL = Math.round(Math.abs(dl) * 100);
     let cleanDLDivided = Math.floor(cleanDL / 63);
     buffer.push(base64IntToCharCode[cleanDL % 63], base64IntToCharCode[cleanDLDivided % 63], base64IntToCharCode[Math.floor(cleanDLDivided / 63)]);
+
+    let cleanPS = Math.round(Math.abs(ps) * 1000);
+    let cleanPSDivided = Math.floor(cleanPS / 63);
+    buffer.push(base64IntToCharCode[cleanPS % 63], base64IntToCharCode[cleanPSDivided % 63], base64IntToCharCode[Math.floor(cleanPSDivided / 63)]);
+
+    let cleanPE = Math.round(Math.abs(pe) * 1000);
+    let cleanPEDivided = Math.floor(cleanPE / 63);
+    buffer.push(base64IntToCharCode[cleanPE % 63], base64IntToCharCode[cleanPEDivided % 63], base64IntToCharCode[Math.floor(cleanPEDivided / 63)]);
 }
 
 function encodeDrumEnvelopeSettings(buffer: number[], s: number): void {
@@ -1297,11 +1305,13 @@ export class EnvelopeSettings {
     public pitchStart: number = 0;
     public pitchEnd: number = Config.maxPitch;
 
-    constructor() {
-        this.reset();
+    constructor(instrument: Instrument) {
+        this.reset(instrument);
     }
 
-    reset(): void {
+    reset(instrument: Instrument): void {
+        let drumPitchEnvBoolean: boolean = instrument.isNoiseInstrument;
+
         this.target = 0;
         this.index = 0;
         this.envelope = 0;
@@ -1311,8 +1321,8 @@ export class EnvelopeSettings {
         this.upperBound = 1;
         this.stepAmount = 4;
         this.delay = 0;
-        this.pitchStart = 0;
-        this.pitchEnd = Config.maxPitch;
+        this.pitchStart = drumPitchEnvBoolean ? 1 : 0;
+        this.pitchEnd = drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch;
     }
 
     public toJsonObject(): Object {
@@ -1334,8 +1344,10 @@ export class EnvelopeSettings {
         return envelopeObject;
     }
 
-    public fromJsonObject(envelopeObject: any): void {
-        this.reset();
+    public fromJsonObject(envelopeObject: any, instrument: Instrument): void {
+        this.reset(instrument);
+
+        let drumPitchEnvBoolean: boolean = instrument.isNoiseInstrument;
 
         let target: AutomationTarget = Config.instrumentAutomationTargets.dictionary[envelopeObject["target"]];
         if (target == null) target = Config.instrumentAutomationTargets.dictionary["noteVolume"];
@@ -1390,13 +1402,13 @@ export class EnvelopeSettings {
         if (envelopeObject["pitchStart"] != undefined) {
             this.pitchStart = clamp(0, Config.maxPitch+1, envelopeObject["pitchStart"]);
         } else {
-            this.pitchStart = 0;
+            this.pitchStart = drumPitchEnvBoolean ? 1 : 0;
         }
 
         if (envelopeObject["pitchEnd"] != undefined) {
             this.pitchEnd = clamp(0, Config.maxPitch+1, envelopeObject["pitchEnd"]);
         } else {
-            this.pitchEnd = Config.maxPitch;
+            this.pitchEnd = drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch;
         }
     }
 }
@@ -1821,9 +1833,9 @@ export class Instrument {
 
         if (this.type == InstrumentType.fm || this.type == InstrumentType.advfm) {
             if (allCarriersControlledByNoteSize && noteSizeControlsSomethingElse) {
-                this.addEnvelope(Config.instrumentAutomationTargets.dictionary["noteVolume"].index, 0, Config.envelopes.dictionary["note size"].index, 1, false, 0, 1, 4, 0);
+                this.addEnvelope(Config.instrumentAutomationTargets.dictionary["noteVolume"].index, 0, Config.envelopes.dictionary["note size"].index, 1, false, 0, 1, 4, 0, 0, 96);
             } else if (noCarriersControlledByNoteSize && !noteSizeControlsSomethingElse) {
-                this.addEnvelope(Config.instrumentAutomationTargets.dictionary["none"].index, 0, Config.envelopes.dictionary["note size"].index, 1, false, 0, 1, 4, 0);
+                this.addEnvelope(Config.instrumentAutomationTargets.dictionary["none"].index, 0, Config.envelopes.dictionary["note size"].index, 1, false, 0, 1, 4, 0, 0, 96);
             }
         }
 
@@ -1844,7 +1856,7 @@ export class Instrument {
             this.noteFilterType = false;
             this.noteFilter.convertLegacySettings(legacyCutoffSetting, legacyResonanceSetting, legacyFilterEnv);
             this.effects |= 1 << EffectType.noteFilter;
-            this.addEnvelope(Config.instrumentAutomationTargets.dictionary["noteFilterAllFreqs"].index, 0, legacyFilterEnv.index, 1, false, 0, 1, 4, 0);
+            this.addEnvelope(Config.instrumentAutomationTargets.dictionary["noteFilterAllFreqs"].index, 0, legacyFilterEnv.index, 1, false, 0, 1, 4, 0, 0, 96);
             if (forceSimpleFilter || this.noteFilterType) {
                 this.noteFilterType = true;
                 this.noteFilterSimpleCut = legacyCutoffSetting;
@@ -1853,18 +1865,18 @@ export class Instrument {
         }
 
         if (legacyPulseEnv.type != EnvelopeType.none) {
-            this.addEnvelope(Config.instrumentAutomationTargets.dictionary["pulseWidth"].index, 0, legacyPulseEnv.index, 1, false, 0, 1, 4, 0);
+            this.addEnvelope(Config.instrumentAutomationTargets.dictionary["pulseWidth"].index, 0, legacyPulseEnv.index, 1, false, 0, 1, 4, 0, 0, 96);
         }
 
         for (let i: number = 0; i < legacyOperatorEnvelopes.length; i++) {
             if (i < carrierCount && allCarriersControlledByNoteSize) continue;
             if (legacyOperatorEnvelopes[i].type != EnvelopeType.none) {
-                this.addEnvelope(Config.instrumentAutomationTargets.dictionary["operatorAmplitude"].index, i, legacyOperatorEnvelopes[i].index, 1, false, 0, 1, 4, 0);
+                this.addEnvelope(Config.instrumentAutomationTargets.dictionary["operatorAmplitude"].index, i, legacyOperatorEnvelopes[i].index, 1, false, 0, 1, 4, 0, 0, 96);
             }
         }
 
         if (legacyFeedbackEnv.type != EnvelopeType.none) {
-            this.addEnvelope(Config.instrumentAutomationTargets.dictionary["feedbackAmplitude"].index, 0, legacyFeedbackEnv.index, 1, false, 0, 1, 4, 0);
+            this.addEnvelope(Config.instrumentAutomationTargets.dictionary["feedbackAmplitude"].index, 0, legacyFeedbackEnv.index, 1, false, 0, 1, 4, 0, 0, 96);
         }
     }
 
@@ -2292,8 +2304,8 @@ export class Instrument {
                     });
                     const possibleEnvelope = oldTransitionToEnvelope[transitionProperty];
                     if (possibleEnvelope != null) {
-                        const env: EnvelopeSettings = new EnvelopeSettings();
-                        env.fromJsonObject(possibleEnvelope);
+                        const env: EnvelopeSettings = new EnvelopeSettings(this);
+                        env.fromJsonObject(possibleEnvelope, this);
                         if (transitionProperty == "click" || transitionProperty == "bow") {
                             this.effects |= 1 << 7;
                             this.effects |= 1 << 8;
@@ -2307,7 +2319,7 @@ export class Instrument {
                                 instrumentObject["detuneCents"] = Config.detuneCenter - 1200;
                             }
                         }
-                        this.addEnvelope(env.target, env.index, env.envelope, env.envelopeSpeed, env.discrete, env.lowerBound, env.upperBound, env.stepAmount, env.delay);
+                        this.addEnvelope(env.target, env.index, env.envelope, env.envelopeSpeed, env.discrete, env.lowerBound, env.upperBound, env.stepAmount, env.delay, env.pitchStart, env.pitchEnd);
                     }
                 }
             }
@@ -3090,10 +3102,10 @@ export class Instrument {
                 const envelopeArray: any[] = instrumentObject["envelopes"];
                 for (let i = 0; i < envelopeArray.length; i++) {
                     if (this.envelopeCount >= Config.maxEnvelopeCount) break;
-                    const tempEnvelope: EnvelopeSettings = new EnvelopeSettings();
+                    const tempEnvelope: EnvelopeSettings = new EnvelopeSettings(this);
                     const envelopeObject: any = envelopeArray[i];
                     const rawEnvelopeName: string = envelopeObject["envelope"];
-                    tempEnvelope.fromJsonObject(envelopeObject);
+                    tempEnvelope.fromJsonObject(envelopeObject, this);
                     if (jsonFormat == "midbox") {
                         // Default Envelope Table
                         // Used as the center point for grabbing all other speed values from other speed numbers.
@@ -3299,7 +3311,7 @@ export class Instrument {
                         const newIndex: number | null = oldNameToNewIndex[rawEnvelopeName];
                         if (newIndex != null) tempEnvelope.envelope = newIndex;
                     }
-                    this.addEnvelope(tempEnvelope.target, tempEnvelope.index, tempEnvelope.envelope, tempEnvelope.envelopeSpeed, tempEnvelope.discrete, tempEnvelope.lowerBound, tempEnvelope.upperBound, tempEnvelope.stepAmount, tempEnvelope.delay);
+                    this.addEnvelope(tempEnvelope.target, tempEnvelope.index, tempEnvelope.envelope, tempEnvelope.envelopeSpeed, tempEnvelope.discrete, tempEnvelope.lowerBound, tempEnvelope.upperBound, tempEnvelope.stepAmount, tempEnvelope.delay, tempEnvelope.pitchStart, tempEnvelope.pitchEnd);
                 }
             }
 
@@ -3339,11 +3351,11 @@ export class Instrument {
         return 440.0 * Math.pow(2.0, (pitch - 69.0) / 12.0);
     }
 
-    public addEnvelope(target: number, index: number, envelope: number, envelopeSpeed: number, discrete: boolean, lowerBound: number, upperBound: number, stepAmount: number, delay: number): void {
+    public addEnvelope(target: number, index: number, envelope: number, envelopeSpeed: number, discrete: boolean, lowerBound: number, upperBound: number, stepAmount: number, delay: number, pitchStart: number, pitchEnd: number): void {
         let makeEmpty: boolean = false;
         if (!this.supportsEnvelopeTarget(target, index)) makeEmpty = true;
         if (this.envelopeCount >= Config.maxEnvelopeCount) throw new Error();
-        while (this.envelopes.length <= this.envelopeCount) this.envelopes[this.envelopes.length] = new EnvelopeSettings();
+        while (this.envelopes.length <= this.envelopeCount) this.envelopes[this.envelopes.length] = new EnvelopeSettings(this);
         const envelopeSettings: EnvelopeSettings = this.envelopes[this.envelopeCount];
         envelopeSettings.target = makeEmpty ? Config.instrumentAutomationTargets.dictionary["none"].index : target;
         envelopeSettings.index = makeEmpty ? 0 : index;
@@ -3354,6 +3366,8 @@ export class Instrument {
         envelopeSettings.upperBound = upperBound;
         envelopeSettings.stepAmount = stepAmount;
         envelopeSettings.delay = delay;
+        envelopeSettings.pitchStart = pitchStart;
+        envelopeSettings.pitchEnd = pitchEnd;
         this.envelopeCount++;
     }
 
@@ -4050,7 +4064,7 @@ export class Song {
                     buffer.push(base64IntToCharCode[idx.envelope >> 6], base64IntToCharCode[idx.envelope & 0x3F]);
                     // Other per-envelope settings have already been done in a function way above, so call that here.
                     // Discrete was also moved. It goes here.
-                    encodeEnvelopeSettings(buffer, idx.envelopeSpeed, idx.discrete, idx.lowerBound, idx.upperBound, idx.stepAmount, idx.delay);
+                    encodeEnvelopeSettings(buffer, idx.envelopeSpeed, idx.discrete, idx.lowerBound, idx.upperBound, idx.stepAmount, idx.delay, idx.pitchStart, idx.pitchEnd);
                 }
             }
         }
@@ -5546,7 +5560,9 @@ export class Song {
                         const upperBound: number = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] + ((base64CharCodeToInt[compressed.charCodeAt(charIndex++)] + (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] * 63)) * 63);
                         const stepAmount: number = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] + ((base64CharCodeToInt[compressed.charCodeAt(charIndex++)] + (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] * 63)) * 63);
                         const delay: number = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] + ((base64CharCodeToInt[compressed.charCodeAt(charIndex++)] + (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] * 63)) * 63);
-                        instrument.addEnvelope(target, index, envelope, envSpeed/1000, discrete, lowerBound/1000, upperBound/1000, stepAmount/1000, delay/100);
+                        const pitchStart: number = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] + ((base64CharCodeToInt[compressed.charCodeAt(charIndex++)] + (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] * 63)) * 63);
+                        const pitchEnd: number = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] + ((base64CharCodeToInt[compressed.charCodeAt(charIndex++)] + (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] * 63)) * 63);
+                        instrument.addEnvelope(target, index, envelope, envSpeed/1000, discrete, lowerBound/1000, upperBound/1000, stepAmount/1000, delay/100, pitchStart/1000, pitchEnd/1000);
                     }
                 }
             } break;

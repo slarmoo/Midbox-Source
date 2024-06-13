@@ -151,7 +151,6 @@ export class EnvelopeEditor {
 	
 	private _onInput = (event: Event) => {
 		const instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
-		let drumPitchEnvBoolean: boolean = instrument.isNoiseInstrument;
 
 		const plotterTimeRangeInputBoxIndex = this._plotterTimeRangeInputBoxes.indexOf(<any> event.target);
 		if (plotterTimeRangeInputBoxIndex != -1) {
@@ -207,13 +206,13 @@ export class EnvelopeEditor {
 		const startSliderIndex = this._pitchStartSliders.indexOf(<any>event.target);
 		const endSliderIndex = this._pitchEndSliders.indexOf(<any>event.target);
 		if (startInputBoxIndex != -1) {
-			this._doc.record(new ChangePitchEnvelopeStart(this._doc, startInputBoxIndex, instrument.envelopes[startInputBoxIndex].pitchStart + (drumPitchEnvBoolean ? 1 : 0), +(this._pitchStartInputBoxes[startInputBoxIndex].value)));
+			this._doc.record(new ChangePitchEnvelopeStart(this._doc, startInputBoxIndex, instrument.envelopes[startInputBoxIndex].pitchStart, +(this._pitchStartInputBoxes[startInputBoxIndex].value)));
 		} else if (endInputBoxIndex != -1) {
-			this._doc.record(new ChangePitchEnvelopeEnd(this._doc, endInputBoxIndex, instrument.envelopes[endInputBoxIndex].pitchEnd + (drumPitchEnvBoolean ? 1 : 0), +(this._pitchEndInputBoxes[endInputBoxIndex].value)));
+			this._doc.record(new ChangePitchEnvelopeEnd(this._doc, endInputBoxIndex, instrument.envelopes[endInputBoxIndex].pitchEnd, +(this._pitchEndInputBoxes[endInputBoxIndex].value)));
 		} else if (startSliderIndex != -1) {
-			this._doc.record(new ChangePitchEnvelopeStart(this._doc, startSliderIndex, instrument.envelopes[startSliderIndex].pitchStart + (drumPitchEnvBoolean ? 1 : 0), +(this._pitchStartSliders[startSliderIndex].value)));
+			this._doc.record(new ChangePitchEnvelopeStart(this._doc, startSliderIndex, instrument.envelopes[startSliderIndex].pitchStart, +(this._pitchStartSliders[startSliderIndex].value)));
 		} else if (endSliderIndex != -1) {
-			this._doc.record(new ChangePitchEnvelopeEnd(this._doc, endSliderIndex, instrument.envelopes[endSliderIndex].pitchEnd + (drumPitchEnvBoolean ? 1 : 0), +(this._pitchEndSliders[endSliderIndex].value)));
+			this._doc.record(new ChangePitchEnvelopeEnd(this._doc, endSliderIndex, instrument.envelopes[endSliderIndex].pitchEnd, +(this._pitchEndSliders[endSliderIndex].value)));
 		}
 	};
 
@@ -295,9 +294,9 @@ export class EnvelopeEditor {
 		for (let envelopeIndex: number = this._rows.length; envelopeIndex < instrument.envelopeCount; envelopeIndex++) {
 			const envelopePlotter: EnvelopeLineGraph = new EnvelopeLineGraph(HTML.canvas({ width: 180, height: 80, style: `border: 2px solid ${ColorConfig.uiWidgetBackground}; width: 140px; height: 60px; margin-left: 24px;`, id: "EnvelopeLineGraph" }), this._doc, envelopeIndex);
 			const envelopePlotterRow: HTMLElement = HTML.div({class: "selectRow dropFader", style: "margin-top: 5px; margin-bottom: 25px;"}, envelopePlotter.canvas);
-			const plotterTimeRangeInputBox: HTMLInputElement = HTML.input({style: "width: 13.1em; font-size: 80%; margin-left: -28px; vertical-align: middle;", id: "timeRangeInputBox", type: "number", step: "0.1", min: "0.1", max: "200", value: "4"});
-			const plotterTimeRangeRow: HTMLElement = HTML.div({ class: "selectRow dropFader", style: "margin-left: 53px; margin-bottom: 20px;" }, HTML.div({},
-				HTML.span({ class: "tip", style: "height:1em; font-size: small;", onclick: () => this._openPrompt("plotterTimeRange") }, _.timeRangeLabel),
+			const plotterTimeRangeInputBox: HTMLInputElement = HTML.input({style: "width: 13.1em; font-size: 80%; margin-left: 0px; vertical-align: middle;", id: "timeRangeInputBox", type: "number", step: "0.1", min: "0.1", max: "200", value: "4"});
+			const plotterTimeRangeRow: HTMLElement = HTML.div({ class: "selectRow dropFader", style: "margin-left: 25px; margin-bottom: 20px;" }, HTML.div({},
+				HTML.span({ class: "tip", style: "height:1em; font-size: small; white-space: nowrap;", onclick: () => this._openPrompt("plotterTimeRange") }, _.timeRangeLabel),
 				HTML.div({ style: "color: " + ColorConfig.secondaryText + "; margin-top: -3px;" }, plotterTimeRangeInputBox),
 			));
 			const perEnvelopeSpeedSlider: HTMLInputElement = HTML.input({style: "margin: 0;", type: "range", min: Config.perEnvelopeSpeedMin, max: Config.perEnvelopeSpeedMax, value: "1", step: "0.25"});
@@ -465,6 +464,9 @@ export class EnvelopeEditor {
 			this._pitchEndSliders[envelopeIndex].max = (drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch).toString();
 			this._pitchEndInputBoxes[envelopeIndex].min = (drumPitchEnvBoolean ? 1 : 0).toString();
 			this._pitchEndInputBoxes[envelopeIndex].max = (drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch).toString();
+			// These bad boys don't reset correctly when changing from a drum channel and swapping back to a pitch channel. How to fix?
+			this._pitchEndSliders[envelopeIndex].value;
+			this._pitchEndInputBoxes[envelopeIndex].value;
 			
 			if ( // Special case on envelope plotters
 				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["none"].index

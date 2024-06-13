@@ -810,6 +810,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
 
         const isNoise: boolean = doc.song.getChannelIsNoise(doc.channel);
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        let drumPitchEnvBoolean: boolean = instrument.isNoiseInstrument;
         instrument.effects = 1 << EffectType.panning; // disable all existing effects except panning, which should always be on.
         instrument.aliases = false;
         instrument.envelopeCount = 0;
@@ -986,7 +987,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "looped stairs 2", weight: 2},
                         { item: "looped stairs 3", weight: 2},
                         { item: "looped stairs 4", weight: 2},
-                    ])].index, 1, false, 0, 1, 4, 0);
+                    ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch);
                 }
             }
             if (Math.random() < 0.1) {
@@ -1104,7 +1105,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "looped stairs 2", weight: 2},
                         { item: "looped stairs 3", weight: 2},
                         { item: "looped stairs 4", weight: 2},
-                ])].index, 1, false, 0, 1, 4, 0);
+                ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch);
             } else {
                 instrument.noteFilter = instrument.noteFilter;
             }
@@ -1211,7 +1212,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "looped stairs 2", weight: 2},
                         { item: "looped stairs 3", weight: 2},
                         { item: "looped stairs 4", weight: 2},
-                ])].index, 1, false, 0, 1, 4, 0);
+                ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch);
             }
             if (Math.random() < 0.15) {
                 instrument.effects |= 1 << EffectType.bitcrusher;
@@ -1317,7 +1318,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "looped stairs 2", weight: 2},
                     { item: "looped stairs 3", weight: 2},
                     { item: "looped stairs 4", weight: 2},
-                ])].index, 1, false, 0, 1, 4, 0);
+                ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch);
                 if (Math.random() < 0.25) instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["freqCrusher"].index, 0, Config.envelopes.dictionary[selectWeightedRandom([
                     { item: "note size", weight: 2},
                     { item: "punch", weight: 2 },
@@ -1418,7 +1419,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "looped stairs 2", weight: 2},
                     { item: "looped stairs 3", weight: 2},
                     { item: "looped stairs 4", weight: 2},
-                ])].index, 1, false, 0, 1, 4, 0);
+                ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch);
             }
             if (Math.random() < 0.15) {
                 instrument.effects |= 1 << EffectType.chorus;
@@ -1523,7 +1524,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "looped stairs 2", weight: 2},
                     { item: "looped stairs 3", weight: 2},
                     { item: "looped stairs 4", weight: 2},
-                ])].index, 1, false, 0, 1, 4, 0);
+                ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch);
             }
             if (Math.random() < 0.1) {
                 instrument.echoSustain = selectCurvedDistribution(0, Config.echoSustainRange - 1, Config.echoSustainRange >> 1, 2);
@@ -1635,7 +1636,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "looped stairs 2", weight: 2},
                     { item: "looped stairs 3", weight: 2},
                     { item: "looped stairs 4", weight: 2},
-                ])].index, 1, false, 0, 1, 4, 0);
+                ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch);
             }
 
             if (type == InstrumentType.noise || type == InstrumentType.spectrum) {
@@ -1756,7 +1757,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "looped stairs 2", weight: 2},
                         { item: "looped stairs 3", weight: 2},
                         { item: "looped stairs 4", weight: 2},
-                    ])].index, 1, false, 0, 1, 4, 0);
+                    ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch);
                 }
             }
 
@@ -2029,7 +2030,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "looped stairs 2", weight: 2},
                         { item: "looped stairs 3", weight: 2},
                         { item: "looped stairs 4", weight: 2},
-                    ])].index, 1, false, 0, 1, 4, 0);
+                    ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch);
                 }
             }
             if (Math.random() < 0.25) {
@@ -2145,7 +2146,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "looped stairs 2", weight: 2},
                     { item: "looped stairs 3", weight: 2},
                     { item: "looped stairs 4", weight: 2},
-                ])].index, 1, false, 0, 1, 4, 0);
+                ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch);
             }
             if (Math.random() < 0.12) {
                 instrument.effects |= 1 << EffectType.bitcrusher;
@@ -2251,7 +2252,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "looped stairs 2", weight: 2},
                     { item: "looped stairs 3", weight: 2},
                     { item: "looped stairs 4", weight: 2},
-                ])].index, 1, false, 0, 1, 4, 0);
+                ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch);
                 if (Math.random() < 0.18) instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["freqCrusher"].index, 0, Config.envelopes.dictionary[selectWeightedRandom([
                     { item: "note size", weight: 2},
                     { item: "punch", weight: 2 },
@@ -2352,7 +2353,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "looped stairs 2", weight: 2},
                     { item: "looped stairs 3", weight: 2},
                     { item: "looped stairs 4", weight: 2},
-                ])].index, 1, false, 0, 1, 4, 0);
+                ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch);
             }
             if (effectsIncludeDistortion(instrument.effects) && Math.random() < 0.8 && (doc.prefs.noteFilterOnRandomization)) {
                 instrument.effects |= 1 << EffectType.noteFilter;
@@ -2440,7 +2441,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "looped stairs 2", weight: 2},
                     { item: "looped stairs 3", weight: 2},
                     { item: "looped stairs 4", weight: 2},
-                ])].index, 1, false, 0, 1, 4, 0);
+                ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch);
             } else if (Math.random() < 0.5 && (doc.prefs.noteFilterOnRandomization)) {
                 instrument.effects |= 1 << EffectType.noteFilter;
                 applyFilterPoints(instrument.noteFilter, [
@@ -2546,7 +2547,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "looped stairs 2", weight: 2},
                         { item: "looped stairs 3", weight: 2},
                         { item: "looped stairs 4", weight: 2},
-                ])].index, 1, false, 0, 1, 4, 0);
+                ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch);
             } else {
                 instrument.noteFilter = instrument.noteFilter;
             }
@@ -2653,7 +2654,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "looped stairs 2", weight: 2},
                     { item: "looped stairs 3", weight: 2},
                     { item: "looped stairs 4", weight: 2},
-                ])].index, 1, false, 0, 1, 4, 0);
+                ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch);
             }
             if (Math.random() < 0.12) {
                 instrument.echoSustain = selectCurvedDistribution(0, Config.echoSustainRange - 1, Config.echoSustainRange >> 1, 2);
@@ -2765,7 +2766,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "looped stairs 2", weight: 2},
                     { item: "looped stairs 3", weight: 2},
                     { item: "looped stairs 4", weight: 2},
-                ])].index, 1, false, 0, 1, 4, 0);
+                ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch);
             }
 
             function normalize(harmonics: number[]): void {
@@ -2884,7 +2885,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "looped stairs 2", weight: 2},
                         { item: "looped stairs 3", weight: 2},
                         { item: "looped stairs 4", weight: 2},
-                        ])].index, 1, false, 0, 1, 4, 0);
+                        ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch);
                     }
                 } break;
                 case InstrumentType.supersaw: {
@@ -2993,7 +2994,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "looped stairs 2", weight: 2},
                                 { item: "looped stairs 3", weight: 2},
                                 { item: "looped stairs 4", weight: 2},
-                        ])].index, 1, false, 0, 1, 4, 0);
+                        ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch);
                     }
                     if (instrument.envelopeCount < Config.maxEnvelopeCount && Math.random() < 0.3) {
                         instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["supersawDynamism"].index, 0, Config.envelopes.dictionary[selectWeightedRandom([
@@ -3094,7 +3095,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "looped stairs 2", weight: 2},
                                 { item: "looped stairs 3", weight: 2},
                                 { item: "looped stairs 4", weight: 2},
-                        ])].index, 1, false, 0, 1, 4, 0);
+                        ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch);
                     }
                     if (instrument.envelopeCount < Config.maxEnvelopeCount && Math.random() < 0.3) {
                         instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["supersawShape"].index, 0, Config.envelopes.dictionary[selectWeightedRandom([
@@ -3196,7 +3197,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "looped stairs 2", weight: 2},
                                 { item: "looped stairs 3", weight: 2},
                                 { item: "looped stairs 4", weight: 2},
-                        ])].index, 1, false, 0, 1, 4, 0);
+                        ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch);
                     }
                     if (instrument.envelopeCount < Config.maxEnvelopeCount && Math.random() < 0.3) {
                         instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["supersawSpread"].index, 0, Config.envelopes.dictionary[selectWeightedRandom([
@@ -3297,7 +3298,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "looped stairs 2", weight: 2},
                                 { item: "looped stairs 3", weight: 2},
                                 { item: "looped stairs 4", weight: 2},
-                        ])].index, 1, false, 0, 1, 4, 0);
+                        ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch);
                     }
                 } break;
                 case InstrumentType.pickedString:
@@ -3526,7 +3527,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "looped stairs 2", weight: 2},
                                 { item: "looped stairs 3", weight: 2},
                                 { item: "looped stairs 4", weight: 2},
-                            ])].index, 1, false, 0, 1, 4, 0);
+                            ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch);
                             instrument.operators[i].waveform = Config.operatorWaves.dictionary[selectWeightedRandom([
                                 { item: "sine", weight: 3 },
                                 { item: "triangle", weight: 3 },
@@ -3676,7 +3677,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "looped stairs 2", weight: 2},
                                 { item: "looped stairs 3", weight: 2},
                                 { item: "looped stairs 4", weight: 2},
-                            ])].index, 1, false, 0, 1, 4, 0);
+                            ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch);
                         }
                     }
                     instrument.feedbackAmplitude = (Math.pow(Math.random(), 3) * Config.operatorAmplitudeMax) | 0;
@@ -3780,7 +3781,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "looped stairs 2", weight: 2},
                                 { item: "looped stairs 3", weight: 2},
                                 { item: "looped stairs 4", weight: 2},
-                        ])].index, 1, false, 0, 1, 4, 0);
+                        ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch);
                     }
                 } break;
                 case InstrumentType.customChipWave: {
@@ -7408,7 +7409,8 @@ export class ChangeAddEnvelope extends Change {
     constructor(doc: SongDocument) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        instrument.addEnvelope(0, 0, 0, 1, false, 0, 1, 4, 0);
+        let drumPitchEnvBoolean: boolean = instrument.isNoiseInstrument;
+        instrument.addEnvelope(0, 0, 0, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch);
         instrument.preset = instrument.type;
         doc.notifier.changed();
         this._didSomething();
@@ -7430,6 +7432,8 @@ export class ChangeRemoveEnvelope extends Change {
             instrument.envelopes[i].upperBound = instrument.envelopes[i + 1].upperBound;
             instrument.envelopes[i].stepAmount = instrument.envelopes[i + 1].stepAmount;
             instrument.envelopes[i].delay = instrument.envelopes[i + 1].delay;
+            instrument.envelopes[i].pitchStart = instrument.envelopes[i + 1].pitchStart;
+            instrument.envelopes[i].pitchEnd = instrument.envelopes[i + 1].pitchEnd;
         }
         // TODO: Shift any envelopes that were targeting other envelope indices after the removed one.
         instrument.preset = instrument.type;

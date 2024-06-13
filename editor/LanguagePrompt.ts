@@ -31,6 +31,8 @@ export class LanguagePrompt implements Prompt {
 		this._cancelButton.addEventListener("click", this._close);
 		this.container.addEventListener("keydown", this._whenKeyPressed);
 		this._languageSelect.addEventListener("change", this._previewLanguage);
+
+		this._previewLanguage2();
 	}
 
 	private _close = (): void => {
@@ -60,10 +62,23 @@ export class LanguagePrompt implements Prompt {
 		setTimeout(() => { location.reload() }, 50);
 	}
 
+	// When changing from the select dropdown box.
 	private _previewLanguage = (): void => {
 		if (this._languageSelect.value == "english") {
 			this._previewLanguageText.textContent = "This is the preview text used for showing what the selected language looks like.";
 		} else if (this._languageSelect.value == "spanish") {
+			this._previewLanguageText.textContent = "Este es el texto de vista previa que se utiliza para mostrar el aspecto del idioma seleccionado.";
+		} else {
+			/*Nothing, although perhaps there may be a case where none are selected. I doubt it though.*/
+		};
+	}
+
+	// When loading into the prompt.
+	private _previewLanguage2 = (): void => {
+		const language: string = window.localStorage.getItem("language") ?? "english";
+		if (language == "english") {
+			this._previewLanguageText.textContent = "This is the preview text used for showing what the selected language looks like.";
+		} else if (language == "spanish") {
 			this._previewLanguageText.textContent = "Este es el texto de vista previa que se utiliza para mostrar el aspecto del idioma seleccionado.";
 		} else {
 			/*Nothing, although perhaps there may be a case where none are selected. I doubt it though.*/
