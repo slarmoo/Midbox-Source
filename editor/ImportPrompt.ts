@@ -53,10 +53,8 @@ export class ImportPrompt implements Prompt {
 				name: "BeepBox-Based", modSelect: <DictionaryArray<ModList>>toNameMap([
 					{name: "BeepBox", value: "beepbox"},
 					{name: "FoxBox", value: "foxbox"},
-					{name: "Wackybox", value: "wackybox"},
-					{name: "TodBox", value: "todbox"},
 					{name: "CardboardBox", value: "cardboardbox"},
-					{name: "PaandorasBox", value: "paandorasbox"},
+					{name: "Thurmbox", value: "thurmbox"},
 					{name: "Sandbox", value: "sandbox"},
 				])
 			},
@@ -71,10 +69,10 @@ export class ImportPrompt implements Prompt {
 					{name: "JummBox", value: "jummbox"},
 					{name: "Midbox", value: "midbox"},
 					{name: "SynthBox", value: "synthbox"},
-					{name: "Thurmbox", value: "thurmbox"},
-					{name: "WeebBox", value: "weebbox"},
+					{name: "PaandorasBox", value: "paandorasbox"},
 					{name: "DogeBox2", value: "dogebox2"},
 					{name: "GoldBox", value: "goldbox"},
+					{name: "AwesomeBox", value: "awesomebox"},
 				])
 			},
 			{
@@ -82,7 +80,8 @@ export class ImportPrompt implements Prompt {
 					{name: "UltraBox", value: "ultrabox"},
 					{name: "AbyssBox", value: "abyssbox"},
 					{name: "Unbox", value: "unbox"},
-					{name: "Baribox", value: "baribox"},
+					{name: "Slarmoo's Box", value: "slarmoobox"},
+					{name: "VoxBox", value: "voxbox"},
 				])
 			},
 		]);

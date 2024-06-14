@@ -5,7 +5,7 @@ import { Note, Pattern } from "../synth/synth";
 import { SongDocument } from "./SongDocument";
 import { ChangeGroup } from "./Change";
 import { ColorConfig } from "./ColorConfig";
-import { ChangeTrackSelection, ChangeChannelBar, ChangeAddChannel, ChangeRemoveChannel, ChangeChannelOrder, ChangeDuplicateSelectedReusedPatterns, ChangeNoteAdded, ChangeNoteTruncate, ChangePatternNumbers, ChangePatternSelection, ChangeInsertBars, ChangeDeleteBars, ChangeEnsurePatternExists, ChangeNoteLength, ChangePaste, ChangeSetPatternInstruments, ChangeViewInstrument, ChangeModChannel, ChangeModInstrument, ChangeModSetting, ChangeModFilter, ChangePatternsPerChannel, ChangePatternRhythm, ChangePatternScale, ChangeTranspose, ChangeRhythm, comparePatternNotes, unionOfUsedNotes, generateScaleMap, discardInvalidPatternInstruments, patternsContainSameInstruments } from "./changes";
+import { ChangeTrackSelection, ChangeChannelBar, ChangeAddChannel, ChangeRemoveChannel, ChangeChannelOrder, ChangeDuplicateSelectedReusedPatterns, ChangeNoteAdded, ChangeNoteTruncate, ChangePatternNumbers, ChangePatternSelection, ChangeInsertBars, ChangeDeleteBars, ChangeEnsurePatternExists, ChangeNoteLength, ChangePaste, ChangeSetPatternInstruments, ChangeViewInstrument, ChangeModChannel, ChangeModInstrument, ChangeModSetting, ChangeModFilter, ChangePatternsPerChannel, ChangePatternRhythm, ChangePatternScale, ChangeTranspose, ChangeRhythm, comparePatternNotes, unionOfUsedNotes, generateScaleMap, discardInvalidPatternInstruments, patternsContainSameInstruments, ChangePreset, pickRandomPresetValue, ChangeRandomGeneratedInstrument, } from "./changes";
 
 interface PatternCopy {
     instruments: number[];
@@ -283,6 +283,53 @@ export class Selection {
         return true;
     }
 
+    public randomPreset(): void {
+        const group: ChangeGroup = new ChangeGroup();
+        const channelIndex: number = this.boxSelectionChannel;
+        const selectionHeight: number = this.boxSelectionHeight;
+        const selectionWidth: number = this.boxSelectionWidth;
+        const isNoise: boolean = this._doc.song.getChannelIsNoise(this._doc.channel);
+
+        if (selectionHeight == 1 && selectionWidth == 1) { 
+            // Only do currently selected instrument if there is no selection.
+            let channel = this._doc.channel;
+            let instrument = this._doc.getCurrentInstrument();
+            group.append(new ChangePreset(this._doc, pickRandomPresetValue(isNoise), channel, instrument));
+        } else {
+            for (let channel = channelIndex; channel < channelIndex + selectionHeight; channel++) {
+                const instrumentsInChannel: number = this._doc.song.channels[channel].instruments.length;
+                for (let instrumentIdx = 0; instrumentIdx < instrumentsInChannel; instrumentIdx++) {
+                    group.append(new ChangePreset(this._doc, pickRandomPresetValue(isNoise), channel, instrumentIdx));
+                }
+            }
+        }
+
+        this._doc.record(group);
+    }
+
+    public randomGenerated(): void {
+        const group: ChangeGroup = new ChangeGroup();
+        const channelIndex: number = this.boxSelectionChannel;
+        const selectionHeight: number = this.boxSelectionHeight;
+        const selectionWidth: number = this.boxSelectionWidth;
+
+        if (selectionHeight == 1 && selectionWidth == 1) { 
+            // Only do currently selected instrument if there is no selection.
+            let channel = this._doc.channel;
+            let instrument = this._doc.getCurrentInstrument();
+            group.append(new ChangeRandomGeneratedInstrument(this._doc, channel, instrument));
+        } else {
+            for (let channel = channelIndex; channel < channelIndex + selectionHeight; channel++) {
+                const instrumentsInChannel: number = this._doc.song.channels[channel].instruments.length;
+                for (let instrumentIdx = 0; instrumentIdx < instrumentsInChannel; instrumentIdx++) {
+                    group.append(new ChangeRandomGeneratedInstrument(this._doc, channel, instrumentIdx));
+                }
+            }
+        }
+
+        this._doc.record(group);
+    }
+
     public copy(): void {
         const channels: ChannelCopy[] = [];
 
@@ -348,8 +395,8 @@ export class Selection {
             for (let bar = barIndex; bar < barIndex + cutWidth; bar++) {
                 const patternNumber: number = this._doc.song.channels[channel].bars[bar];
                 if (patternNumber != 0) {
-                const pattern: Pattern = this._doc.song.channels[channel].patterns[patternNumber - 1];
-                group.append(new ChangeNoteTruncate(this._doc, pattern, 0, Config.partsPerBeat * this._doc.song.beatsPerBar));
+                    const pattern: Pattern = this._doc.song.channels[channel].patterns[patternNumber - 1];
+                    group.append(new ChangeNoteTruncate(this._doc, pattern, 0, Config.partsPerBeat * this._doc.song.beatsPerBar));
                 }
             }
         }

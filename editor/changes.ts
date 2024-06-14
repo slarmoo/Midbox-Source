@@ -718,9 +718,9 @@ export class ChangeCustomAlgorithmOrFeedback extends Change {
 }
 
 export class ChangePreset extends Change {
-    constructor(doc: SongDocument, newValue: number) {
+    constructor(doc: SongDocument, newValue: number, channelIdx: number, instrumentIdx: number) {
         super();
-        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        const instrument: Instrument = doc.song.channels[channelIdx].instruments[instrumentIdx];
         const oldValue: number = instrument.preset;
         if (oldValue != newValue) {
             const preset: Preset | null = EditorConfig.valueToPreset(newValue);
@@ -736,7 +736,7 @@ export class ChangePreset extends Change {
                     const tempPan: number = instrument.pan;
                     const tempPanDelay = instrument.panDelay;
                     //const usesPanning: boolean = effectsIncludePanning(instrument.effects);
-                    instrument.fromJsonObject(preset.settings, doc.song.getChannelIsNoise(doc.channel), doc.song.getChannelIsMod(doc.channel), doc.song.rhythm == 0 || doc.song.rhythm == 2, doc.song.rhythm >= 2);
+                    instrument.fromJsonObject(preset.settings, doc.song.getChannelIsNoise(channelIdx), doc.song.getChannelIsMod(channelIdx), doc.song.rhythm == 0 || doc.song.rhythm == 2, doc.song.rhythm >= 2);
                     instrument.volume = tempVolume;
                     instrument.pan = tempPan;
                     instrument.panDelay = tempPanDelay;
@@ -754,7 +754,7 @@ export class ChangePreset extends Change {
 }
 
 export class ChangeRandomGeneratedInstrument extends Change {
-    constructor(doc: SongDocument) {
+    constructor(doc: SongDocument, channelIdx: number, instrumentIdx: number) {
         super();
 
         interface ItemWeight<T> {
@@ -808,8 +808,8 @@ export class ChangeRandomGeneratedInstrument extends Change {
             }
         }
 
-        const isNoise: boolean = doc.song.getChannelIsNoise(doc.channel);
-        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        const isNoise: boolean = doc.song.getChannelIsNoise(channelIdx);
+        const instrument: Instrument = doc.song.channels[channelIdx].instruments[instrumentIdx];
         let drumPitchEnvBoolean: boolean = instrument.isNoiseInstrument;
         instrument.effects = 1 << EffectType.panning; // disable all existing effects except panning, which should always be on.
         instrument.aliases = false;

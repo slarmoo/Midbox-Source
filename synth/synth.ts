@@ -2233,7 +2233,7 @@ export class Instrument {
         }
 
         if (instrumentObject["volume"] != undefined) {
-            if (jsonFormat == "beepbox" || jsonFormat == "modbox" || jsonFormat == "foxbox" || jsonFormat == "nepbox" || jsonFormat == "sandbox" || jsonFormat == "todbox" || jsonFormat == "cardboardbox" || jsonFormat == "paandorasbox" || jsonFormat == "wackybox") {
+            if (jsonFormat == "beepbox" || jsonFormat == "modbox" || jsonFormat == "foxbox" || jsonFormat == "nepbox" || jsonFormat == "sandbox" || jsonFormat == "cardboardbox" || jsonFormat == "thurmbox") {
                 // BeepBox-like mods had a lot less options for volume and couldn't go above 0 in JummBox-like volumes.
                 this.volume = Math.round(-clamp(0, 8, Math.round(5 - (instrumentObject["volume"] | 0) / 20)) * 25.0 / 7.0);
             } else {
