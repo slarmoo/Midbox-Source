@@ -73,6 +73,8 @@ export class Localization {
     public static envelopeDelayLabel: string = "‣ Delay:";
     public static pitchStartLabel = "‣ Pitch St:";
     public static pitchEndLabel = "‣ Pitch End:";
+    public static pitchAmplifyLabel = "‣ Amplify";
+    public static pitchBounceLabel = "‣ Bounce";
     public static wavetableSpeedLabel: string = "Spd:";
     public static interpolateWavesLabel: string = "Interpolate:";
     public static resetCyclePerNoteLabel: string = "Cycle per Note:";

@@ -7089,25 +7089,25 @@ export class EnvelopeComputer {
             }
             if (automationTarget.computeIndex != null) {
                 const computeIndex: number = automationTarget.computeIndex + targetIndex;
-                let envelopeStart: number = EnvelopeComputer.computeEnvelope(envelope, this.noteSecondsStart[envelopeIndex], beatTimeStart[envelopeIndex], beatNoteTimeStart[envelopeIndex], noteSizeStart, lowerBound, upperBound, stepAmount, delay, tone, instrument, instrumentState);
+                let envelopeStart: number = EnvelopeComputer.computeEnvelope(envelope, this.noteSecondsStart[envelopeIndex], beatTimeStart[envelopeIndex], beatNoteTimeStart[envelopeIndex], noteSizeStart, lowerBound, upperBound, stepAmount, delay, instrument);
 
                 if (prevSlideStart) {
-                    const other: number = EnvelopeComputer.computeEnvelope(envelope, this.prevNoteSecondsStart[envelopeIndex], beatTimeStart[envelopeIndex], beatNoteTimeStart[envelopeIndex], prevNoteSize, lowerBound, upperBound, stepAmount, delay, tone, instrument, instrumentState);
+                    const other: number = EnvelopeComputer.computeEnvelope(envelope, this.prevNoteSecondsStart[envelopeIndex], beatTimeStart[envelopeIndex], beatNoteTimeStart[envelopeIndex], prevNoteSize, lowerBound, upperBound, stepAmount, delay, instrument);
                     envelopeStart += (other - envelopeStart) * prevSlideRatioStart;
                 }
                 if (nextSlideStart) {
-                    const other: number = EnvelopeComputer.computeEnvelope(envelope, 0.0, beatTimeStart[envelopeIndex], 0.0, nextNoteSize, lowerBound, upperBound, stepAmount, delay, tone, instrument, instrumentState);
+                    const other: number = EnvelopeComputer.computeEnvelope(envelope, 0.0, beatTimeStart[envelopeIndex], 0.0, nextNoteSize, lowerBound, upperBound, stepAmount, delay, instrument);
                     envelopeStart += (other - envelopeStart) * nextSlideRatioStart;
                 }
                 let envelopeEnd: number = envelopeStart;
                 if (discrete == false) {
-                    envelopeEnd = EnvelopeComputer.computeEnvelope(envelope, this.noteSecondsEnd[envelopeIndex], beatTimeEnd[envelopeIndex], beatNoteTimeEnd[envelopeIndex], noteSizeEnd, lowerBound, upperBound, stepAmount, delay, tone, instrument, instrumentState);
+                    envelopeEnd = EnvelopeComputer.computeEnvelope(envelope, this.noteSecondsEnd[envelopeIndex], beatTimeEnd[envelopeIndex], beatNoteTimeEnd[envelopeIndex], noteSizeEnd, lowerBound, upperBound, stepAmount, delay, instrument);
                     if (prevSlideEnd) {
-                        const other: number = EnvelopeComputer.computeEnvelope(envelope, this.prevNoteSecondsEnd[envelopeIndex], beatNoteTimeEnd[envelopeIndex], beatTimeEnd[envelopeIndex], prevNoteSize, lowerBound, upperBound, stepAmount, delay, tone, instrument, instrumentState);
+                        const other: number = EnvelopeComputer.computeEnvelope(envelope, this.prevNoteSecondsEnd[envelopeIndex], beatNoteTimeEnd[envelopeIndex], beatTimeEnd[envelopeIndex], prevNoteSize, lowerBound, upperBound, stepAmount, delay, instrument);
                         envelopeEnd += (other - envelopeEnd) * prevSlideRatioEnd;
                     }
                     if (nextSlideEnd) {
-                        const other: number = EnvelopeComputer.computeEnvelope(envelope, 0.0, beatTimeEnd[envelopeIndex], 0.0, nextNoteSize, lowerBound, upperBound, stepAmount, delay, tone, instrument, instrumentState);
+                        const other: number = EnvelopeComputer.computeEnvelope(envelope, 0.0, beatTimeEnd[envelopeIndex], 0.0, nextNoteSize, lowerBound, upperBound, stepAmount, delay, instrument);
                         envelopeEnd += (other - envelopeEnd) * nextSlideRatioEnd;
                     }
                 }
@@ -7156,7 +7156,7 @@ export class EnvelopeComputer {
         this._modifiedEnvelopeCount = 0;
     }
 
-    public static computeEnvelope(envelope: Envelope, time: number, beats: number, beatNote: number, noteSize: number, lowerBound: number, upperBound: number, stepAmount: number, delay: number, tone: Tone | null, instrument: Instrument, instrumentState: InstrumentState): number {
+    public static computeEnvelope(envelope: Envelope, time: number, beats: number, beatNote: number, noteSize: number, lowerBound: number, upperBound: number, stepAmount: number, delay: number, instrument: Instrument): number {
         // This is where each envelope's equations are computed as well as the settings that change their properties.
         // Here is a note of some important parts of equations for future reference: 
         /*
@@ -7302,31 +7302,10 @@ export class EnvelopeComputer {
                 const x3: number = x2 * x2 * (3.0 - 2.0 * x2) + x1i;
                 return (Math.max(0, Math.min(1, ((x3 / steps) * scale + offset)))) * (upperBound - lowerBound) + lowerBound;
             } 
-            // SlarmooBox's pitch envelope.
+            // SlarmooBox's pitch envelope. 
             case EnvelopeType.pitch: {
-                let startNote: number = 0;
-                let endNote: number = 96;
-                let pitch: number = 0;
-
-                if (instrument.isNoiseInstrument) {
-                    endNote = Config.drumCount;
-                }
-                for (let index = 0; index < instrument.envelopeCount; index++) {
-                    if (index < instrument.envelopeCount && index !== -2) {
-                        startNote = instrument.envelopes[index].pitchStart;
-                        endNote = instrument.envelopes[index].pitchEnd;
-                    }
-                }
-                if (tone) {
-                    const chord = instrument.getChord()
-                    const arpeggiates = chord.arpeggiates;
-                    const arpeggio: number = Math.floor(instrumentState.arpTime / Config.ticksPerArpeggio); //calculate arpeggiation
-                    const tonePitch = tone.pitches[arpeggiates ? getArpeggioPitchIndex(tone.pitchCount, instrument.fastTwoNoteArp, instrument.arpeggioPattern, arpeggio) : 0]
-                    pitch = tone.lastInterval != tonePitch ? tonePitch + tone.lastInterval : tonePitch; //account for pitch bends
-                }
-                const range = endNote - startNote + 1;
-                // Fix this
-                return Math.max(0, (pitch - startNote) / range);
+                // This is done similar to note size with a function from Synth.
+                return Synth.notePitchToEnvelopeValue(instrument);
             }
             // MID TODO: Wanna try the Sandbox envelopes? Do them next!
             default: throw new Error("Unrecognized operator envelope type.");
@@ -10886,15 +10865,15 @@ export class Synth {
             noteFilterExpression *= EnvelopeComputer.getLowpassCutoffDecayVolumeCompensation(drumsetFilterEnvelope)
 
             // Drumset filters use the same envelope timing as the rest of the envelopes, but do not include support for slide transitions.
-            let drumsetFilterEnvelopeStart: number = EnvelopeComputer.computeEnvelope(drumsetFilterEnvelope, envelopeComputer.noteSecondsStart[0], beatsPerPart * partTimeStart, beatNoteTimeStart, envelopeComputer.noteSizeStart, 0, 1, 4, 0, tone, instrument, instrumentState);
+            let drumsetFilterEnvelopeStart: number = EnvelopeComputer.computeEnvelope(drumsetFilterEnvelope, envelopeComputer.noteSecondsStart[0], beatsPerPart * partTimeStart, beatNoteTimeStart, envelopeComputer.noteSizeStart, 0, 1, 4, 0, instrument);
 
             // Apply slide interpolation to drumset envelope.
             if (envelopeComputer.prevSlideStart) {
-                const other: number = EnvelopeComputer.computeEnvelope(drumsetFilterEnvelope, envelopeComputer.prevNoteSecondsStart[0], beatsPerPart * partTimeStart, beatNoteTimeStart, envelopeComputer.prevNoteSize, 0, 1, 4, 0, tone, instrument, instrumentState);
+                const other: number = EnvelopeComputer.computeEnvelope(drumsetFilterEnvelope, envelopeComputer.prevNoteSecondsStart[0], beatsPerPart * partTimeStart, beatNoteTimeStart, envelopeComputer.prevNoteSize, 0, 1, 4, 0, instrument);
                 drumsetFilterEnvelopeStart += (other - drumsetFilterEnvelopeStart) * envelopeComputer.prevSlideRatioStart;
             }
             if (envelopeComputer.nextSlideStart) {
-                const other: number = EnvelopeComputer.computeEnvelope(drumsetFilterEnvelope, 0.0, beatsPerPart * partTimeStart, 0.0, envelopeComputer.nextNoteSize, 0, 1, 4, 0, tone, instrument, instrumentState);
+                const other: number = EnvelopeComputer.computeEnvelope(drumsetFilterEnvelope, 0.0, beatsPerPart * partTimeStart, 0.0, envelopeComputer.nextNoteSize, 0, 1, 4, 0, instrument);
                 drumsetFilterEnvelopeStart += (other - drumsetFilterEnvelopeStart) * envelopeComputer.nextSlideRatioStart;
             }
             let drumsetFilterEnvelopeEnd: number = drumsetFilterEnvelopeStart;
@@ -13443,6 +13422,33 @@ export class Synth {
     }
     public static volumeMultToNoteSize(volumeMult: number): number {
         return Math.pow(Math.max(0.0, volumeMult), 1 / 1.5) * Config.noteSizeMax;
+    }
+
+    public static notePitchToEnvelopeValue(instrument: Instrument, tone?: Tone, instrumentState?: InstrumentState): number {
+        let startNote: number = 0;
+        let endNote: number = Config.maxPitch;
+        let pitch: number = 0;
+
+        if (instrument.isNoiseInstrument) {
+            endNote = Config.drumCount;
+        }
+        for (let index = 0; index < instrument.envelopeCount; index++) {
+            if (index < instrument.envelopeCount && index !== -2) {
+                startNote = instrument.envelopes[index].pitchStart;
+                endNote = instrument.envelopes[index].pitchEnd;
+            }
+        }
+        if (tone && instrumentState) {
+            const chord = instrument.getChord()
+            const arpeggiates = chord.arpeggiates;
+            const arpeggio: number = Math.floor(instrumentState.arpTime / Config.ticksPerArpeggio); //calculate arpeggiation
+            const tonePitch = tone.pitches[arpeggiates ? getArpeggioPitchIndex(tone.pitchCount, instrument.fastTwoNoteArp, instrument.arpeggioPattern, arpeggio) : 0]
+            pitch = tone.lastInterval != tonePitch ? tonePitch + tone.lastInterval : tonePitch; //account for pitch bends
+        }
+        const range = endNote - startNote + 1;
+        // This seems inaccurate...
+        // MID TODO: Also, try corporating pitchEnv Amplify & Bounce settings here when you can!
+        return Math.max(0, (pitch - startNote) / range);
     }
 
     public static fadeInSettingToSeconds(setting: number): number {

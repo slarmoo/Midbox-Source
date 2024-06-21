@@ -1,17 +1,16 @@
 // Copyright (c) 2012-2022 John Nesky and contributing authors, distributed under the MIT license, see accompanying the LICENSE.md file.
 
 import {InstrumentType, Config, DropdownID} from "../synth/SynthConfig";
-import {Instrument, EnvelopeComputer, Tone, InstrumentState} from "../synth/synth";
+import {Instrument, EnvelopeComputer} from "../synth/synth";
 import {ColorConfig} from "./ColorConfig";
 import {SongDocument} from "./SongDocument";
-import {ChangeSetEnvelopeTarget, ChangeSetEnvelopeType, ChangeRemoveEnvelope, ChangePerEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeLowerBound, ChangeUpperBound, ChangeStairsStepAmount, ChangeEnvelopeDelay, ChangePitchEnvelopeStart, ChangePitchEnvelopeEnd} from "./changes";
+import {ChangeSetEnvelopeTarget, ChangeSetEnvelopeType, ChangeRemoveEnvelope, ChangePerEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeLowerBound, ChangeUpperBound, ChangeStairsStepAmount, ChangeEnvelopeDelay, ChangePitchEnvelopeStart, ChangePitchEnvelopeEnd, ChangePitchAmplify, ChangePitchBounce} from "./changes";
 import {HTML} from "imperative-html/dist/esm/elements-strict";
 import {Localization as _} from "./Localization";
 import {clamp, lerp, norm} from "./UsefulCodingStuff";
 
 export class EnvelopeLineGraph {
 	public range: number = 4;
-	public instrumentState: InstrumentState;
 
     constructor(public readonly canvas: HTMLCanvasElement, private readonly _doc: SongDocument, public index: number) {
 		this.render();
@@ -36,7 +35,7 @@ export class EnvelopeLineGraph {
 			const beats: number = (time * this.range) * speed;
 			const beatNote: number = (time * this.range) * speed;
 			const noteSize: number = (1 - time) * Config.noteSizeMax;
-			let value = EnvelopeComputer.computeEnvelope(envelope, seconds, beats, beatNote, noteSize, lowerBound, upperBound, stepAmount, delay, new Tone, instrument, this.instrumentState);
+			let value = EnvelopeComputer.computeEnvelope(envelope, seconds, beats, beatNote, noteSize, lowerBound, upperBound, stepAmount, delay, instrument);
 			envelopeGraph.push(value);
 			maxValue = Math.max(value, maxValue);
         	minValue = Math.min(value, minValue);
@@ -107,6 +106,9 @@ export class EnvelopeEditor {
 	private readonly _pitchEndInputBoxes: HTMLInputElement[] = [];
 	private readonly _pitchStartGroups: HTMLElement[] = [];
 	private readonly _pitchEndGroups: HTMLElement[] = [];
+	private readonly _pitchAmplifyToggles: HTMLInputElement[] = [];
+	private readonly _pitchBounceToggles: HTMLInputElement[] = [];
+	private readonly _extraPitchSettingRows: HTMLElement[] = [];
 	private readonly _envelopeDropdownGroups: HTMLElement[] = [];
 	private readonly _envelopeDropdowns: HTMLButtonElement[] = [];
 	private readonly _targetSelects: HTMLSelectElement[] = [];
@@ -209,6 +211,14 @@ export class EnvelopeEditor {
 		} else if (endSliderIndex != -1) {
 			this._doc.record(new ChangePitchEnvelopeEnd(this._doc, endSliderIndex, instrument.envelopes[endSliderIndex].pitchEnd, +(this._pitchEndSliders[endSliderIndex].value)));
 		}
+		const pitchAmplifyToggleIndex = this._pitchAmplifyToggles.indexOf(<any> event.target);
+		const pitchBounceToggleIndex = this._pitchBounceToggles.indexOf(<any> event.target);
+		if (pitchAmplifyToggleIndex != -1) {
+			this._doc.record(new ChangePitchAmplify(this._doc, pitchAmplifyToggleIndex, this._pitchAmplifyToggles[pitchAmplifyToggleIndex].checked));
+		}
+		if (pitchBounceToggleIndex != -1) {
+			this._doc.record(new ChangePitchBounce(this._doc, pitchBounceToggleIndex, this._pitchBounceToggles[pitchBounceToggleIndex].checked));
+		}
 	};
 
 	private _changeTimeRange(doc: SongDocument, envelopeIndex: number, oldValue: number, newValue: number): void {
@@ -302,7 +312,7 @@ export class EnvelopeEditor {
 			), perEnvelopeSpeedSlider);
 			const discreteEnvelopeToggle: HTMLInputElement = HTML.input({style: "width: 3em; padding: 0; margin-right: 3em;", type: "checkbox"});
 			const discreteEnvelopeRow: HTMLElement = HTML.div({class: "selectRow dropFader"}, HTML.div({},
-				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("discreteEnvelope")}, HTML.span(_.discreteEnvelopeLabel)),
+				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("discreteEnvelope")}, HTML.span(_.discreteEnvelopeLabel))
 			), discreteEnvelopeToggle);
 			const lowerBoundSlider: HTMLInputElement = HTML.input({style: "margin: 0;", type: "range", min: Config.lowerBoundMin, max: Config.lowerBoundMax, value: "0", step: "0.20"});
 			const upperBoundSlider: HTMLInputElement = HTML.input({style: "margin: 0;", type: "range", min: Config.upperBoundMin, max: Config.upperBoundMax, value: "1", step: "0.20"});
@@ -340,6 +350,12 @@ export class EnvelopeEditor {
 				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("pitchEnvelope")}, HTML.span(_.pitchEndLabel)),
 				HTML.div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, pitchEndInputBox),
 			), pitchEndSlider);
+			const pitchAmplifyToggle: HTMLInputElement = HTML.input({style: "width: 3em; padding: 0; margin-right: 3em;", type: "checkbox"});
+			const pitchBounceToggle: HTMLInputElement = HTML.input({style: "width: 3em; padding: 0; margin-right: 3em;", type: "checkbox"});
+			const extraPitchSettingRow: HTMLElement = HTML.div({class: "selectRow dropFader"}, HTML.div({},
+				HTML.span({class: "tip", style: "height: 1em; font-size: 10px;", onclick: () => this._openPrompt("extraPitchEnvSettings")}, HTML.span(_.pitchAmplifyLabel)), 
+				HTML.span({class: "tip", style: "height: 1em; font-size: 10px;", onclick: () => this._openPrompt("extraPitchEnvSettings")}, HTML.span(_.pitchBounceLabel))
+			), pitchAmplifyToggle, pitchBounceToggle);
 			const envelopeDropdownGroup: HTMLElement = HTML.div({class: "editor-controls", style: "display: none;"}, plotterTimeRangeRow, envelopePlotterRow, pitchStartGroup, pitchEndGroup, perEnvelopeSpeedRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, stairsStepAmountRow, envelopeDelayRow);
 			const envelopeDropdown: HTMLButtonElement = HTML.button({style: "margin-left: 0.6em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.PerEnvelope, envelopeIndex)}, "▼");
 
@@ -398,6 +414,9 @@ export class EnvelopeEditor {
 			this._pitchEndInputBoxes[envelopeIndex] = pitchEndInputBox;
 			this._pitchStartGroups[envelopeIndex] = pitchStartGroup;
 			this._pitchEndGroups[envelopeIndex] = pitchEndGroup;
+			this._pitchAmplifyToggles[envelopeIndex] = pitchAmplifyToggle;
+			this._pitchBounceToggles[envelopeIndex] = pitchBounceToggle;
+			this._extraPitchSettingRows[envelopeIndex] = extraPitchSettingRow;
 			this._envelopeDropdownGroups[envelopeIndex] = envelopeDropdownGroup;
 			this._envelopeDropdowns[envelopeIndex] = envelopeDropdown;
 			this._targetSelects[envelopeIndex] = targetSelect;
@@ -456,6 +475,8 @@ export class EnvelopeEditor {
 			this._pitchStartInputBoxes[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instrument.envelopes[envelopeIndex].pitchStart));
 			this._pitchEndSliders[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instrument.envelopes[envelopeIndex].pitchEnd));
 			this._pitchEndInputBoxes[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instrument.envelopes[envelopeIndex].pitchEnd));
+			this._pitchAmplifyToggles[envelopeIndex].checked = instrument.envelopes[envelopeIndex].pitchAmplify ? true : false;
+			this._pitchBounceToggles[envelopeIndex].checked = instrument.envelopes[envelopeIndex].pitchBounce ? true : false;
 			this._targetSelects[envelopeIndex].value = String(instrument.envelopes[envelopeIndex].target + instrument.envelopes[envelopeIndex].index * Config.instrumentAutomationTargets.length);
 			this._envelopeSelects[envelopeIndex].selectedIndex = instrument.envelopes[envelopeIndex].envelope;
 			
@@ -535,9 +556,11 @@ export class EnvelopeEditor {
 			) {
 				this._pitchStartGroups[envelopeIndex].style.display = "";
 				this._pitchEndGroups[envelopeIndex].style.display = "";
+				this._extraPitchSettingRows[envelopeIndex].style.display = "";
 			} else {
 				this._pitchStartGroups[envelopeIndex].style.display = "none";
 				this._pitchEndGroups[envelopeIndex].style.display = "none";
+				this._extraPitchSettingRows[envelopeIndex].style.display = "none";
 			}
 		}
 		

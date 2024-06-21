@@ -4571,6 +4571,40 @@ export class ChangePitchEnvelopeEnd extends Change {
     }
 }
 
+export class ChangePitchAmplify extends Change {
+    constructor(doc: SongDocument, envelopeIndex: number, newValue: boolean) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        const oldValue = instrument.envelopes[envelopeIndex].pitchAmplify;
+        if (oldValue != newValue) {
+            instrument.envelopes[envelopeIndex].pitchAmplify = newValue;
+            // Extra step: Toggle pitchBounce to be off if pitchAmplify is on.
+            if (instrument.envelopes[envelopeIndex].pitchAmplify && instrument.envelopes[envelopeIndex].pitchBounce)
+                instrument.envelopes[envelopeIndex].pitchBounce = false;
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
+export class ChangePitchBounce extends Change {
+    constructor(doc: SongDocument, envelopeIndex: number, newValue: boolean) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        const oldValue = instrument.envelopes[envelopeIndex].pitchBounce;
+        if (oldValue != newValue) {
+            instrument.envelopes[envelopeIndex].pitchBounce = newValue;
+            // Extra step: Toggle pitchAmplify to be off if pitchBounce is on.
+            if (instrument.envelopes[envelopeIndex].pitchBounce && instrument.envelopes[envelopeIndex].pitchAmplify)
+                instrument.envelopes[envelopeIndex].pitchAmplify = false;
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
 export class ChangeVibratoSpeed extends Change {
     constructor(doc: SongDocument, oldValue: number, newValue: number) {
         super();

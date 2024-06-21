@@ -554,6 +554,16 @@ export class TipPrompt implements Prompt {
 					p("This feature was ported from Slarmoo's Box!")
 				);
 			} break;
+			case "extraPitchEnvSettings": {
+				message = div(
+					h2("Pitch Envelope Amplify/Bounce"),
+					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously. These settings apply specifically to the more-unique envelope type, Pitch."),
+					p("The pitch envelope type is based off of the pitch, or vertical placement of a note. You are able to set the top and bottom boundaries of the pitch envelope using the pitch start and pitch end sliders/input boxes."),
+					p("For these two settings in specific, they toggle certain interactions when a note's pitch value is more/less than the start/end points, and by default, both of these settings are off meaning pitch values above/below the start/end points will remain capped at their respective upper and lower starting bounds."),
+					p("Amplify will instead proceed to increment the envelope target's value as normal instead of being capped, which can be dangerous when not used cautiously. Bounce will make the pitch value reflect backwards upon being above/below the set points. Try them out for yourself!"),
+					p("The pitch envelope type was ported from Slarmoo's Box!")
+				);
+			} break;
 			case "usedInstrument": {
 				message = div(
 					h3("'Is this instrument used somewhere else?'"),
