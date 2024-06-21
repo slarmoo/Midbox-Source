@@ -42,8 +42,6 @@ export class Localization {
     public static EQTypeLabel: string = "EQ Filt. Type:";
     public static noteFiltLabel: string = "Note Filt:";
     public static noteFiltTypeLabel: string = "Note Filt. Type:";
-    public static songEQLabel: string = "Song EQ:";
-    public static songEQTypeLabel: string = "Song EQ Type:";
     public static pwmLabel: string = "Pulse Width:";
     public static pitchShiftLabel: string = "Pitch Shift:";
     public static detuneLabel: string = "Detune:";
@@ -74,7 +72,7 @@ export class Localization {
     public static stairsStepAmountLabel: string = "‣ Steps:";
     public static envelopeDelayLabel: string = "‣ Delay:";
     public static pitchStartLabel = "‣ Pitch St:";
-    public static pitchEndLabel = "‣ Pitch En:";
+    public static pitchEndLabel = "‣ Pitch End:";
     public static wavetableSpeedLabel: string = "Spd:";
     public static interpolateWavesLabel: string = "Interpolate:";
     public static resetCyclePerNoteLabel: string = "Cycle per Note:";

@@ -1,16 +1,17 @@
 // Copyright (c) 2012-2022 John Nesky and contributing authors, distributed under the MIT license, see accompanying the LICENSE.md file.
 
 import {InstrumentType, Config, DropdownID} from "../synth/SynthConfig";
-import {Instrument, EnvelopeComputer, Tone} from "../synth/synth";
+import {Instrument, EnvelopeComputer, Tone, InstrumentState} from "../synth/synth";
 import {ColorConfig} from "./ColorConfig";
 import {SongDocument} from "./SongDocument";
 import {ChangeSetEnvelopeTarget, ChangeSetEnvelopeType, ChangeRemoveEnvelope, ChangePerEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeLowerBound, ChangeUpperBound, ChangeStairsStepAmount, ChangeEnvelopeDelay, ChangePitchEnvelopeStart, ChangePitchEnvelopeEnd} from "./changes";
 import {HTML} from "imperative-html/dist/esm/elements-strict";
 import {Localization as _} from "./Localization";
-import {clamp} from "./UsefulCodingStuff";
+import {clamp, lerp, norm} from "./UsefulCodingStuff";
 
 export class EnvelopeLineGraph {
 	public range: number = 4;
+	public instrumentState: InstrumentState;
 
     constructor(public readonly canvas: HTMLCanvasElement, private readonly _doc: SongDocument, public index: number) {
 		this.render();
@@ -18,7 +19,7 @@ export class EnvelopeLineGraph {
 
 	private _drawCanvas(graphX: number, graphY: number, graphWidth: number, graphHeight: number): void {
 		const envelopeGraph: number[] = []
-		let instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
+		let instrument: Instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
 		let instEnv = instrument.envelopes[this.index];
 		let envelope = Config.envelopes[instEnv.envelope];
 		let speed: number = instEnv.envelopeSpeed;
@@ -35,7 +36,7 @@ export class EnvelopeLineGraph {
 			const beats: number = (time * this.range) * speed;
 			const beatNote: number = (time * this.range) * speed;
 			const noteSize: number = (1 - time) * Config.noteSizeMax;
-			let value = EnvelopeComputer.computeEnvelope(envelope, seconds, beats, beatNote, noteSize, lowerBound, upperBound, stepAmount, delay, new Tone, instrument);
+			let value = EnvelopeComputer.computeEnvelope(envelope, seconds, beats, beatNote, noteSize, lowerBound, upperBound, stepAmount, delay, new Tone, instrument, this.instrumentState);
 			envelopeGraph.push(value);
 			maxValue = Math.max(value, maxValue);
         	minValue = Math.min(value, minValue);
@@ -68,14 +69,8 @@ export class EnvelopeLineGraph {
 		this._drawCanvas(0, 0, this.canvas.width, this.canvas.height);
 	}
 
-	private lerp(t: number, a: number, b: number) {
-		return a + (b - a) * t;
-	}
-	private norm(x: number, a: number, b: number) {
-		return (x - a) / (b - a);
-	}
 	private remap(x: number, a: number, b: number, c: number, d: number) {
-		return this.lerp(this.norm(x, a, b), c, d);
+		return lerp(norm(x, a, b), c, d);
 	}
 }
 
@@ -448,14 +443,7 @@ export class EnvelopeEditor {
 			this._stairsStepAmountInputBoxes[envelopeIndex].value = String(clamp(1, Config.stairsStepAmountMax+1, instrument.envelopes[envelopeIndex].stepAmount));
 			this._envelopeDelaySliders[envelopeIndex].value = String(clamp(0, Config.envelopeDelayMax+1, instrument.envelopes[envelopeIndex].delay));
 			this._envelopeDelayInputBoxes[envelopeIndex].value = String(clamp(0, Config.envelopeDelayMax+1, instrument.envelopes[envelopeIndex].delay));
-			this._pitchStartSliders[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instrument.envelopes[envelopeIndex].pitchStart));
-			this._pitchStartInputBoxes[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instrument.envelopes[envelopeIndex].pitchStart));
-			this._pitchEndSliders[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instrument.envelopes[envelopeIndex].pitchEnd));
-			this._pitchEndInputBoxes[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instrument.envelopes[envelopeIndex].pitchEnd));
-			this._targetSelects[envelopeIndex].value = String(instrument.envelopes[envelopeIndex].target + instrument.envelopes[envelopeIndex].index * Config.instrumentAutomationTargets.length);
-			this._envelopeSelects[envelopeIndex].selectedIndex = instrument.envelopes[envelopeIndex].envelope;
-
-			// Reset min/max for pitch envelope UI elements.
+			// Reset min/max for pitch envelope UI elements before resetting value.
 			this._pitchStartSliders[envelopeIndex].min = (drumPitchEnvBoolean ? 1 : 0).toString();
 			this._pitchStartSliders[envelopeIndex].max = (drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch).toString();
 			this._pitchStartInputBoxes[envelopeIndex].min = (drumPitchEnvBoolean ? 1 : 0).toString();
@@ -464,12 +452,17 @@ export class EnvelopeEditor {
 			this._pitchEndSliders[envelopeIndex].max = (drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch).toString();
 			this._pitchEndInputBoxes[envelopeIndex].min = (drumPitchEnvBoolean ? 1 : 0).toString();
 			this._pitchEndInputBoxes[envelopeIndex].max = (drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch).toString();
-			// These bad boys don't reset correctly when changing from a drum channel and swapping back to a pitch channel. How to fix?
-			this._pitchEndSliders[envelopeIndex].value;
-			this._pitchEndInputBoxes[envelopeIndex].value;
+			this._pitchStartSliders[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instrument.envelopes[envelopeIndex].pitchStart));
+			this._pitchStartInputBoxes[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instrument.envelopes[envelopeIndex].pitchStart));
+			this._pitchEndSliders[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instrument.envelopes[envelopeIndex].pitchEnd));
+			this._pitchEndInputBoxes[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instrument.envelopes[envelopeIndex].pitchEnd));
+			this._targetSelects[envelopeIndex].value = String(instrument.envelopes[envelopeIndex].target + instrument.envelopes[envelopeIndex].index * Config.instrumentAutomationTargets.length);
+			this._envelopeSelects[envelopeIndex].selectedIndex = instrument.envelopes[envelopeIndex].envelope;
 			
 			if ( // Special case on envelope plotters
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["none"].index
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["none"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["note size"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["pitch"].index
 			) {
 				this._envelopePlotterRows[envelopeIndex].style.display = "none";
 				this._plotterTimeRangeRows[envelopeIndex].style.display = "none";

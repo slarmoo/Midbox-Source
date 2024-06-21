@@ -34,5 +34,12 @@ export function clamp(min: number, max: number, val: number): number {
     }
 }
 
-// 
-// 
+// Linear interpolate.
+export function lerp(a: number, b: number, c: number) {
+    return a + (b - a) * c;
+}
+
+// Normalize
+export function norm(a: number, b: number, c: number) {
+    return (c - a) / (b - a);
+}
