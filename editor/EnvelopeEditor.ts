@@ -350,13 +350,16 @@ export class EnvelopeEditor {
 				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("pitchEnvelope")}, HTML.span(_.pitchEndLabel)),
 				HTML.div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, pitchEndInputBox),
 			), pitchEndSlider);
-			const pitchAmplifyToggle: HTMLInputElement = HTML.input({style: "width: 3em; padding: 0; margin-right: 3em;", type: "checkbox"});
-			const pitchBounceToggle: HTMLInputElement = HTML.input({style: "width: 3em; padding: 0; margin-right: 3em;", type: "checkbox"});
-			const extraPitchSettingRow: HTMLElement = HTML.div({class: "selectRow dropFader"}, HTML.div({},
-				HTML.span({class: "tip", style: "height: 1em; font-size: 10px;", onclick: () => this._openPrompt("extraPitchEnvSettings")}, HTML.span(_.pitchAmplifyLabel)), 
-				HTML.span({class: "tip", style: "height: 1em; font-size: 10px;", onclick: () => this._openPrompt("extraPitchEnvSettings")}, HTML.span(_.pitchBounceLabel))
-			), pitchAmplifyToggle, pitchBounceToggle);
-			const envelopeDropdownGroup: HTMLElement = HTML.div({class: "editor-controls", style: "display: none;"}, plotterTimeRangeRow, envelopePlotterRow, pitchStartGroup, pitchEndGroup, perEnvelopeSpeedRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, stairsStepAmountRow, envelopeDelayRow);
+			const pitchAmplifyToggle: HTMLInputElement = HTML.input({style: "width: 3em; padding: 0;", type: "checkbox"});
+			const pitchBounceToggle: HTMLInputElement = HTML.input({style: "width: 3em; padding: 0;", type: "checkbox"});
+			// Still broken. Hey mid little blue headphone guy fix this why wouldn't cha
+			const extraPitchSettingRow: HTMLElement = HTML.div({class: "selectRow dropFader", style: ""}, HTML.div({},
+				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("extraPitchEnvSettings")}, HTML.span(_.pitchAmplifyLabel)), 
+				HTML.div({}, pitchAmplifyToggle),
+				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("extraPitchEnvSettings")}, HTML.span(_.pitchBounceLabel)),
+				HTML.div({}, pitchBounceToggle),
+			));
+			const envelopeDropdownGroup: HTMLElement = HTML.div({class: "editor-controls", style: "display: none;"}, plotterTimeRangeRow, envelopePlotterRow, pitchStartGroup, pitchEndGroup, extraPitchSettingRow, perEnvelopeSpeedRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, stairsStepAmountRow, envelopeDelayRow);
 			const envelopeDropdown: HTMLButtonElement = HTML.button({style: "margin-left: 0.6em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.PerEnvelope, envelopeIndex)}, "▼");
 
 			const targetSelect: HTMLSelectElement = HTML.select();
@@ -513,9 +516,7 @@ export class EnvelopeEditor {
 			}
 
 			if ( // Special case on lower/upper boundaries.
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["none"].index ||
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["note size"].index
-				// Pitch would go here but these are used as the start/end bounds instead. Innovative!
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["none"].index
 			) {
 				this._lowerBoundRows[envelopeIndex].style.display = "none";
 				this._upperBoundRows[envelopeIndex].style.display = "none";

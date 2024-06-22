@@ -56,17 +56,13 @@ function encodeUnisonSettings(buffer: number[], v: number, s: number, o: number,
 }
 
 function encodeEnvelopeSettings(buffer: number[], s: number, d: boolean, lb: number, ub: number, sa: number, dl: number, ps: number, pe: number, peA: boolean, peB: boolean): void {
-    // Discrete
-    buffer.push(base64IntToCharCode[+d]); 
-
-    // Pitch Envelope Amplify/Bounce
-    buffer.push(base64IntToCharCode[+peA]);
-    buffer.push(base64IntToCharCode[+peB]);
-    
     // IES (Speed)
     let cleanS = Math.round(Math.abs(s) * 1000);
     let cleanSDivided = Math.floor(cleanS / 63);
     buffer.push(base64IntToCharCode[cleanS % 63], base64IntToCharCode[cleanSDivided % 63], base64IntToCharCode[Math.floor(cleanSDivided / 63)]);
+
+    // Discrete
+    buffer.push(base64IntToCharCode[+d]); 
 
     // Lower/Upper Bound
     let cleanLB = Math.round(Math.abs(lb) * 1000);
@@ -93,6 +89,10 @@ function encodeEnvelopeSettings(buffer: number[], s: number, d: boolean, lb: num
     let cleanPE = Math.round(Math.abs(pe) * 1000);
     let cleanPEDivided = Math.floor(cleanPE / 63);
     buffer.push(base64IntToCharCode[cleanPE % 63], base64IntToCharCode[cleanPEDivided % 63], base64IntToCharCode[Math.floor(cleanPEDivided / 63)]);
+
+    // Pitch Envelope Amplify/Bounce
+    buffer.push(base64IntToCharCode[+peA]);
+    buffer.push(base64IntToCharCode[+peB]);
 }
 
 function encodeDrumEnvelopeSettings(buffer: number[], s: number): void {
@@ -7177,7 +7177,7 @@ export class EnvelopeComputer {
             }
         */
         switch (envelope.type) {
-            case EnvelopeType.noteSize: return Synth.noteSizeToVolumeMult(noteSize);
+            case EnvelopeType.noteSize: return Synth.noteSizeToVolumeMult(noteSize) * (upperBound - lowerBound) + lowerBound;
             case EnvelopeType.none: return 1.0;
             case EnvelopeType.twang: {
                 time = Math.max(0, time - delay);
@@ -7304,8 +7304,8 @@ export class EnvelopeComputer {
             } 
             // SlarmooBox's pitch envelope. 
             case EnvelopeType.pitch: {
-                // This is done similar to note size with a function from Synth.
-                return Synth.notePitchToEnvelopeValue(instrument);
+                // This is done similar to note size with a function at the bottom of the Synth class.
+                return Synth.notePitchToEnvelopeValue(instrument) * (upperBound - lowerBound) + lowerBound;
             }
             // MID TODO: Wanna try the Sandbox envelopes? Do them next!
             default: throw new Error("Unrecognized operator envelope type.");
