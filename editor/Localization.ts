@@ -71,8 +71,8 @@ export class Localization {
     public static upperBoundLabel: string = "‣ Upr Bnd:";
     public static stairsStepAmountLabel: string = "‣ Steps:";
     public static envelopeDelayLabel: string = "‣ Delay:";
-    public static pitchStartLabel = "‣ Pitch St:";
-    public static pitchEndLabel = "‣ Pitch End:";
+    public static pitchStartLabel = "‣ Pch St ";
+    public static pitchEndLabel = "‣ Pch End ";
     public static pitchAmplifyLabel = "Amplify:";
     public static pitchBounceLabel = "Bounce:";
     public static wavetableSpeedLabel: string = "Spd:";
@@ -1038,8 +1038,8 @@ if (language == "spanish") {
     Localization.upperBoundLabel = "‣ Lmt Alto:";
     Localization.stairsStepAmountLabel = "‣ Pasos:";
     Localization.envelopeDelayLabel = "‣ Retraso:";
-    Localization.pitchStartLabel = "‣ In. Tono:";
-    Localization.pitchEndLabel = "‣ Tono Fin:";
+    Localization.pitchStartLabel = "‣ In. Ton ";
+    Localization.pitchEndLabel = "‣ Ton Fin ";
     Localization.pitchAmplifyLabel = "Amplifica:";
     Localization.pitchBounceLabel = "Rebote:";
     Localization.wavetableSpeedLabel = "Vel:";

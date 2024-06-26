@@ -37,7 +37,8 @@ export class EnvelopeLineGraph {
 			const beats: number = (time * this.range) * speed;
 			const beatNote: number = (time * this.range) * speed;
 			const noteSize: number = (1 - time) * Config.noteSizeMax;
-			let value = EnvelopeComputer.computeEnvelope(envelope, seconds, beats, beatNote, noteSize, lowerBound, upperBound, stepAmount, delay, instrument);
+			const pitch: number = 1;
+			let value = EnvelopeComputer.computeEnvelope(envelope, seconds, beats, beatNote, noteSize, lowerBound, upperBound, stepAmount, delay, pitch);
 			envelopeGraph.push(value);
 			maxValue = Math.max(value, maxValue);
         	minValue = Math.min(value, minValue);
@@ -294,6 +295,24 @@ export class EnvelopeEditor {
 		}
 	}
 
+	private _pitchToNote(value: number): string {
+		let text = "";
+		const offset: number = Config.keys[this._doc.song.key].basePitch % Config.pitchesPerOctave;
+		const keyValue = (value + offset) % Config.pitchesPerOctave;
+		if (Config.keys[keyValue].isWhiteKey) {
+			text = Config.keys[keyValue].name;
+		} else {
+			const shiftDir: number = Config.blackKeyNameParents[value % Config.pitchesPerOctave];
+			text = Config.keys[(keyValue + Config.pitchesPerOctave + shiftDir) % Config.pitchesPerOctave].name;
+			if (shiftDir == 1) {
+				text += "♭";
+			} else if (shiftDir == -1) {
+				text += "♯";
+			}
+		}
+		return "[" + text + Math.floor((value + Config.pitchesPerOctave) / 12 + this._doc.song.octave - 1) + "]";
+	}
+
 	public render(): void {
 		const instrument: Instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
 		let drumPitchEnvBoolean: boolean = instrument.isNoiseInstrument;
@@ -345,16 +364,16 @@ export class EnvelopeEditor {
 			const pitchEndSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: drumPitchEnvBoolean ? 1 : 0, max: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, value: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, step: "1"});
 			const pitchEndInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "pitchEndInputBox", type: "number", step: "1", min: drumPitchEnvBoolean ? 1 : 0, max: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, value: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch});
 			const pitchStartGroup: HTMLElement = div({class: "selectRow dropFader"}, div({},
-				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("pitchEnvelope")}, span(_.pitchStartLabel)),
+				span({class: "tip", id: "pitchStartNote", style: "height: 1em; white-space: nowrap; font-size: 12px;", onclick: () => this._openPrompt("pitchEnvelope")}, span(_.pitchStartLabel + this._pitchToNote(parseInt(pitchStartInputBox.value)) + ":")),
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, pitchStartInputBox),
 			), pitchStartSlider);
 			const pitchEndGroup: HTMLElement = div({class: "selectRow dropFader"}, div({},
-				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("pitchEnvelope")}, span(_.pitchEndLabel)),
+				span({class: "tip", id: "pitchEndNote", style: "height: 1em; white-space: nowrap; font-size: 12px;", onclick: () => this._openPrompt("pitchEnvelope")}, span(_.pitchEndLabel + this._pitchToNote(parseInt(pitchEndInputBox.value)) + ":")),
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, pitchEndInputBox),
 			), pitchEndSlider);
 			const pitchAmplifyToggle: HTMLInputElement = input({style: "width: 3em; padding: 0;", type: "checkbox"});
 			const pitchBounceToggle: HTMLInputElement = input({style: "width: 3em; padding: 0;", type: "checkbox"});
-			const extraPitchSettingRow: HTMLElement = div({class: "", style: "display: flex; flex-direction: row; justify-content: space-evenly;"}, 
+			const extraPitchSettingRow: HTMLElement = div({}, div({class: "", style: "display: flex; flex-direction: row; justify-content: space-evenly;"},
 				div({style: "display: flex; flex-direction: column; gap: 5px;"},
 					span({class: "tip", style: "height: 1em; width: 4em;", onclick: () => this._openPrompt("extraPitchEnvSettings")}, span(_.pitchAmplifyLabel)),
 					div({style: ""}, pitchAmplifyToggle),
@@ -363,7 +382,7 @@ export class EnvelopeEditor {
 					span({class: "tip", style: "height: 1em; width: 4em;", onclick: () => this._openPrompt("extraPitchEnvSettings")}, span(_.pitchBounceLabel)),
 					div({style: ""}, pitchBounceToggle),
 				),
-			);
+			));
 			const envelopeDropdownGroup: HTMLElement = div({class: "editor-controls", style: "display: none;"}, plotterTimeRangeRow, envelopePlotterRow, pitchStartGroup, pitchEndGroup, extraPitchSettingRow, perEnvelopeSpeedRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, stairsStepAmountRow, envelopeDelayRow);
 			const envelopeDropdown: HTMLButtonElement = button({style: "margin-left: 0.6em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.PerEnvelope, envelopeIndex)}, "▼");
 
