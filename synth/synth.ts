@@ -7228,13 +7228,13 @@ export class EnvelopeComputer {
                 const endTime2: number = 0.7 / Math.sqrt(envelope.speed); 
                 const zeroIntercept: number = 2; 
                 const startValue2: number = 0.9; 
-                return ((time < endTime1 ? ((startValue2 - zeroIntercept) / endTime1) * time + zeroIntercept : time < endTime2 ? ((1 - startValue2) / (endTime2 - endTime1)) * (time - endTime1) + startValue2 : 1.0)) * (upperBound - lowerBound) + lowerBound;
+                return Math.max(-0.1, ((time < endTime1 ? ((startValue2 - zeroIntercept) / endTime1) * time + zeroIntercept : time < endTime2 ? ((1 - startValue2) / (endTime2 - endTime1)) * (time - endTime1) + startValue2 : 1.0)) * (upperBound - lowerBound) + lowerBound);
             }
             case EnvelopeType.modboxClick: {
                 time = Math.max(0, time - delay);
                 const attack: number = 0.25 / envelope.speed; 
                 const zeroIntercept = 6.0; 
-                return ((time < attack ? (time * ((-zeroIntercept) + 1) - attack * (-zeroIntercept)) / attack : 1.0)) * (upperBound - lowerBound) + lowerBound;
+                return Math.max(-0.15, ((time < attack ? (time * ((-zeroIntercept) + 1) - attack * (-zeroIntercept)) / attack : 1.0)) * (upperBound - lowerBound) + lowerBound);
             }
             case EnvelopeType.modboxBow: {
                 time = Math.max(0, time - delay);

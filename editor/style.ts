@@ -304,6 +304,7 @@ document.head.appendChild(HTML.style({ type: "text/css" }, `
 
 .beepboxEditor .tip:hover {
 	color: ${ColorConfig.linkAccent};
+	text-decoration: underline;
 }
 .beepboxEditor .tip:active {
 	color: ${ColorConfig.primaryText};

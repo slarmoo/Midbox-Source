@@ -51,11 +51,11 @@ export const enum EnvelopeType {
     twang,
     swell,
     tremolo,
-    tremolo2,
-    tremolo3,
-    triptremolo,
-    triptremolo2,
-    triptremolo3,
+    tremolo2, // to be removed
+    tremolo3, // to be removed
+    triptremolo, // to be removed
+    triptremolo2, // to be removed
+    triptremolo3, // to be removed
     decay,
     modboxBlip,
     modboxTrill,
@@ -69,6 +69,8 @@ export const enum EnvelopeType {
     stairs,
     loopStairs,
     pitch,
+    LFO, // to later replace tremolo
+    sandboxRev,
 }
 
 

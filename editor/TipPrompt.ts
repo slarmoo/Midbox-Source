@@ -541,7 +541,21 @@ export class TipPrompt implements Prompt {
 				message = div(
 					h2("Envelope Delay"),
 					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously."),
-					p("Envelopes typically will start their behaviors instantly the moment a note plays. With this setting, you can delay when the envelope starts changing values instead for better control over them. (This delay is in beats.)"),
+					p("Envelopes typically will start their behaviors instantly the moment a note plays. With this setting, you can delay when the envelope starts changing values instead for better control over them."),
+				);
+			} break;
+			case "envelopeDelayMeasurement": {
+				message = div(
+					h2("Delay Measurement Type"),
+					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously."),
+					p("By default, delay is measured in beats. This setting toggles whether delay is measured in beats or seconds."),
+				);
+			} break;
+			case "delaySubstituteNumber": {
+				message = div(
+					h2("Substituting Number"),
+					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously."),
+					p("As self-explained by the name, delay 'delays' the envelope by temporarily substituting the current value of the envelope by a number. This slider/input box allows you to change what number delay substitutes to."),
 				);
 			} break;
 			case "pitchEnvelope": {
@@ -562,6 +576,41 @@ export class TipPrompt implements Prompt {
 					p("For these two settings in specific, they toggle certain interactions when a note's pitch value is more/less than the start/end points, and by default, both of these settings are off meaning pitch values above/below the start/end points will remain capped at their respective upper and lower starting bounds."),
 					p("Amplify will instead proceed to increment the envelope target's value as normal instead of being capped, which can be dangerous when not used cautiously. Bounce will make the pitch value reflect backwards upon being above/below the set points. Try them out for yourself!"),
 					p("The pitch envelope type was ported from Slarmoo's Box!")
+				);
+			} break;
+			case "envelopePhase": {
+				message = div(
+					h2("Envelope Phase"),
+					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously."),
+					p("This setting allows you to set where in the envelope it starts computing values from."),
+				);
+			} break;
+			case "LFOEnvelope": {
+				message = div(
+					h2("LFO Envelope Type"),
+					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously. These settings apply specifically to the more-unique envelope type, LFO."),
+					p("The LFO envelope type is the upgrade to the previous tremolo envelope. An LFO is an envelope that continously loops a shape, and with this particular setting, you can change the shape of the LFO."),
+				);
+			} break;
+			case "LFOLoops": {
+				message = div(
+					h2("LFO Envelope Type"),
+					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously. These settings apply specifically to the more-unique envelope type, LFO."),
+					p("The LFO envelope type is an envelope that continously loops a shape, and with this particular setting, you can toggle whether the LFO loops or not. Some LFO shapes may not have this."),
+				);
+			} break;
+			case "LFOTrapezoidRatio": {
+				message = div(
+					h2("Trapezoid LFO Ratio"),
+					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously. These settings apply specifically to the more-unique envelope type, LFO."),
+					p("This LFO shape mimicks the appearence of a trapezoid, going up and down in increments and slopes. This setting changes the ratio of the trapezoid-shape, from nearly a triangle to a pulse."),
+				);
+			} break;
+			case "LFODoubleSine": {
+				message = div(
+					h2("Double Sine LFO"),
+					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously. These settings apply specifically to the more-unique envelope type, LFO."),
+					p("This LFO shape is shaped like a sine, with another sine being drawn using the previous sine. These two settings individually control the speed of both sines."),
 				);
 			} break;
 			case "usedInstrument": {

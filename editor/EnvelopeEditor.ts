@@ -72,7 +72,7 @@ export class EnvelopeLineGraph {
 	}
 
 	private remap(x: number, a: number, b: number, c: number, d: number) {
-		return lerp(norm(x, a, b), c, d);
+		return lerp(c, d, norm(a, b, x));
 	}
 }
 
@@ -105,8 +105,10 @@ export class EnvelopeEditor {
 	private readonly _envelopeDelayRows: HTMLElement[] = [];
 	private readonly _pitchStartSliders: HTMLInputElement[] = [];
 	private readonly _pitchStartInputBoxes: HTMLInputElement[] = [];
+	private readonly _pitchStartNoteTexts: HTMLSpanElement[] = [];
 	private readonly _pitchEndSliders: HTMLInputElement[] = [];
 	private readonly _pitchEndInputBoxes: HTMLInputElement[] = [];
+	private readonly _pitchEndNoteTexts: HTMLSpanElement[] = [];
 	private readonly _pitchStartGroups: HTMLElement[] = [];
 	private readonly _pitchEndGroups: HTMLElement[] = [];
 	private readonly _pitchAmplifyToggles: HTMLInputElement[] = [];
@@ -137,6 +139,8 @@ export class EnvelopeEditor {
 	}
 	
 	private _onChange = (event: Event): void => {
+		const instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
+		
 		const targetSelectIndex: number = this._targetSelects.indexOf(<any> event.target);
 		const envelopeSelectIndex: number = this._envelopeSelects.indexOf(<any> event.target);
 		if (targetSelectIndex != -1) {
@@ -146,6 +150,34 @@ export class EnvelopeEditor {
 			this._doc.record(new ChangeSetEnvelopeTarget(this._doc, targetSelectIndex, target, index));
 		} else if (envelopeSelectIndex != -1) {
 			this._doc.record(new ChangeSetEnvelopeType(this._doc, envelopeSelectIndex, this._envelopeSelects[envelopeSelectIndex].selectedIndex));
+		}
+		const perEnvelopeSpeedSliderIndex = this._perEnvelopeSpeedSliders.indexOf(<any> event.target);
+		if (perEnvelopeSpeedSliderIndex != -1) {
+			this._doc.record(new ChangePerEnvelopeSpeed(this._doc, perEnvelopeSpeedSliderIndex, instrument.envelopes[perEnvelopeSpeedSliderIndex].envelopeSpeed, +(this._perEnvelopeSpeedSliders[perEnvelopeSpeedSliderIndex].value)));
+		}
+		const lowerBoundSliderIndex = this._lowerBoundSliders.indexOf(<any> event.target);
+		const upperBoundSliderIndex = this._upperBoundSliders.indexOf(<any> event.target);
+		if (lowerBoundSliderIndex != -1) {
+			this._doc.record(new ChangeLowerBound(this._doc, lowerBoundSliderIndex, instrument.envelopes[lowerBoundSliderIndex].lowerBound, +(this._lowerBoundSliders[lowerBoundSliderIndex].value)));
+		}
+		if (upperBoundSliderIndex != -1) {
+			this._doc.record(new ChangeUpperBound(this._doc, upperBoundSliderIndex, instrument.envelopes[upperBoundSliderIndex].upperBound, +(this._upperBoundSliders[upperBoundSliderIndex].value)));
+		}
+		const stairsStepAmountSliderIndex = this._stairsStepAmountSliders.indexOf(<any> event.target);
+		if (stairsStepAmountSliderIndex != -1) {
+			this._doc.record(new ChangeStairsStepAmount(this._doc, stairsStepAmountSliderIndex, instrument.envelopes[stairsStepAmountSliderIndex].stepAmount, +(this._stairsStepAmountSliders[stairsStepAmountSliderIndex].value)));
+		}
+		const envelopeDelaySliderIndex = this._envelopeDelaySliders.indexOf(<any> event.target);
+		if (envelopeDelaySliderIndex != -1) {
+			this._doc.record(new ChangeEnvelopeDelay(this._doc, envelopeDelaySliderIndex, instrument.envelopes[envelopeDelaySliderIndex].stepAmount, +(this._envelopeDelaySliders[envelopeDelaySliderIndex].value)));
+		}
+		const startSliderIndex = this._pitchStartSliders.indexOf(<any>event.target);
+		const endSliderIndex = this._pitchEndSliders.indexOf(<any>event.target);
+		if (startSliderIndex != -1) {
+			this._doc.record(new ChangePitchEnvelopeStart(this._doc, startSliderIndex, instrument.envelopes[startSliderIndex].pitchStart, +(this._pitchStartSliders[startSliderIndex].value)));
+		}
+		if (endSliderIndex != -1) {
+			this._doc.record(new ChangePitchEnvelopeEnd(this._doc, endSliderIndex, instrument.envelopes[endSliderIndex].pitchEnd, +(this._pitchEndSliders[endSliderIndex].value)));
 		}
 	}
 	
@@ -157,13 +189,16 @@ export class EnvelopeEditor {
 			this._changeTimeRange(this._doc, plotterTimeRangeInputBoxIndex, this._envelopePlotters[plotterTimeRangeInputBoxIndex].range, +(this._plotterTimeRangeInputBoxes[plotterTimeRangeInputBoxIndex].value));
 		}
 
+		// For sliders here, we'll only record the change in _onChange(). Instead, just call the
+		// change class but don't record so the audible effect is heard.
 		const perEnvelopeSpeedInputBoxIndex = this._perEnvelopeSpeedInputBoxes.indexOf(<any> event.target);
 		const perEnvelopeSpeedSliderIndex = this._perEnvelopeSpeedSliders.indexOf(<any> event.target);
 		if (perEnvelopeSpeedInputBoxIndex != -1) {
 			this._doc.record(new ChangePerEnvelopeSpeed(this._doc, perEnvelopeSpeedInputBoxIndex, instrument.envelopes[perEnvelopeSpeedInputBoxIndex].envelopeSpeed, +(this._perEnvelopeSpeedInputBoxes[perEnvelopeSpeedInputBoxIndex].value)));
 		}
 		if (perEnvelopeSpeedSliderIndex != -1) {
-			this._doc.record(new ChangePerEnvelopeSpeed(this._doc, perEnvelopeSpeedSliderIndex, instrument.envelopes[perEnvelopeSpeedSliderIndex].envelopeSpeed, +(this._perEnvelopeSpeedSliders[perEnvelopeSpeedSliderIndex].value)));
+			this._perEnvelopeSpeedInputBoxes[perEnvelopeSpeedSliderIndex].value = this._perEnvelopeSpeedSliders[perEnvelopeSpeedSliderIndex].value;
+			new ChangePerEnvelopeSpeed(this._doc, perEnvelopeSpeedSliderIndex, instrument.envelopes[perEnvelopeSpeedSliderIndex].envelopeSpeed, +(this._perEnvelopeSpeedSliders[perEnvelopeSpeedSliderIndex].value));
 		}
 		const discreteEnvelopeToggleIndex = this._discreteEnvelopeToggles.indexOf(<any> event.target);
 		if (discreteEnvelopeToggleIndex != -1) {
@@ -177,13 +212,15 @@ export class EnvelopeEditor {
 			this._doc.record(new ChangeLowerBound(this._doc, lowerBoundInputBoxIndex, instrument.envelopes[lowerBoundInputBoxIndex].lowerBound, +(this._lowerBoundInputBoxes[lowerBoundInputBoxIndex].value)));
 		}
 		if (lowerBoundSliderIndex != -1) {
-			this._doc.record(new ChangeLowerBound(this._doc, lowerBoundSliderIndex, instrument.envelopes[lowerBoundSliderIndex].lowerBound, +(this._lowerBoundSliders[lowerBoundSliderIndex].value)));
+			this._lowerBoundInputBoxes[lowerBoundSliderIndex].value = this._lowerBoundSliders[lowerBoundSliderIndex].value;
+			new ChangeLowerBound(this._doc, lowerBoundSliderIndex, instrument.envelopes[lowerBoundSliderIndex].lowerBound, +(this._lowerBoundSliders[lowerBoundSliderIndex].value));
 		}
 		if (upperBoundInputBoxIndex != -1) {
 			this._doc.record(new ChangeUpperBound(this._doc, upperBoundInputBoxIndex, instrument.envelopes[upperBoundInputBoxIndex].upperBound, +(this._upperBoundInputBoxes[upperBoundInputBoxIndex].value)));
 		}
 		if (upperBoundSliderIndex != -1) {
-			this._doc.record(new ChangeUpperBound(this._doc, upperBoundSliderIndex, instrument.envelopes[upperBoundSliderIndex].upperBound, +(this._upperBoundSliders[upperBoundSliderIndex].value)));
+			this._upperBoundInputBoxes[upperBoundSliderIndex].value = this._upperBoundSliders[upperBoundSliderIndex].value;
+			new ChangeUpperBound(this._doc, upperBoundSliderIndex, instrument.envelopes[upperBoundSliderIndex].upperBound, +(this._upperBoundSliders[upperBoundSliderIndex].value));
 		}
 		const stairsStepAmountInputBoxIndex = this._stairsStepAmountInputBoxes.indexOf(<any> event.target);
 		const stairsStepAmountSliderIndex = this._stairsStepAmountSliders.indexOf(<any> event.target);
@@ -191,7 +228,8 @@ export class EnvelopeEditor {
 			this._doc.record(new ChangeStairsStepAmount(this._doc, stairsStepAmountInputBoxIndex, instrument.envelopes[stairsStepAmountInputBoxIndex].stepAmount, +(this._stairsStepAmountInputBoxes[stairsStepAmountInputBoxIndex].value)));
 		}
 		if (stairsStepAmountSliderIndex != -1) {
-			this._doc.record(new ChangeStairsStepAmount(this._doc, stairsStepAmountSliderIndex, instrument.envelopes[stairsStepAmountSliderIndex].stepAmount, +(this._stairsStepAmountSliders[stairsStepAmountSliderIndex].value)));
+			this._stairsStepAmountInputBoxes[stairsStepAmountSliderIndex].value = this._stairsStepAmountSliders[stairsStepAmountSliderIndex].value;
+			new ChangeStairsStepAmount(this._doc, stairsStepAmountSliderIndex, instrument.envelopes[stairsStepAmountSliderIndex].stepAmount, +(this._stairsStepAmountSliders[stairsStepAmountSliderIndex].value));
 		}
 		const envelopeDelayInputBoxIndex = this._envelopeDelayInputBoxes.indexOf(<any> event.target);
 		const envelopeDelaySliderIndex = this._envelopeDelaySliders.indexOf(<any> event.target);
@@ -199,7 +237,8 @@ export class EnvelopeEditor {
 			this._doc.record(new ChangeEnvelopeDelay(this._doc, envelopeDelayInputBoxIndex, instrument.envelopes[envelopeDelayInputBoxIndex].stepAmount, +(this._envelopeDelayInputBoxes[envelopeDelayInputBoxIndex].value)));
 		}
 		if (envelopeDelaySliderIndex != -1) {
-			this._doc.record(new ChangeEnvelopeDelay(this._doc, envelopeDelaySliderIndex, instrument.envelopes[envelopeDelaySliderIndex].stepAmount, +(this._envelopeDelaySliders[envelopeDelaySliderIndex].value)));
+			this._envelopeDelayInputBoxes[envelopeDelaySliderIndex].value = this._envelopeDelaySliders[envelopeDelaySliderIndex].value;
+			new ChangeEnvelopeDelay(this._doc, envelopeDelaySliderIndex, instrument.envelopes[envelopeDelaySliderIndex].stepAmount, +(this._envelopeDelaySliders[envelopeDelaySliderIndex].value));
 		}
 		const startInputBoxIndex = this._pitchStartInputBoxes.indexOf(<any>event.target);
 		const endInputBoxIndex = this._pitchEndInputBoxes.indexOf(<any>event.target);
@@ -207,12 +246,19 @@ export class EnvelopeEditor {
 		const endSliderIndex = this._pitchEndSliders.indexOf(<any>event.target);
 		if (startInputBoxIndex != -1) {
 			this._doc.record(new ChangePitchEnvelopeStart(this._doc, startInputBoxIndex, instrument.envelopes[startInputBoxIndex].pitchStart, +(this._pitchStartInputBoxes[startInputBoxIndex].value)));
-		} else if (endInputBoxIndex != -1) {
+		}
+		if (endInputBoxIndex != -1) {
 			this._doc.record(new ChangePitchEnvelopeEnd(this._doc, endInputBoxIndex, instrument.envelopes[endInputBoxIndex].pitchEnd, +(this._pitchEndInputBoxes[endInputBoxIndex].value)));
-		} else if (startSliderIndex != -1) {
-			this._doc.record(new ChangePitchEnvelopeStart(this._doc, startSliderIndex, instrument.envelopes[startSliderIndex].pitchStart, +(this._pitchStartSliders[startSliderIndex].value)));
-		} else if (endSliderIndex != -1) {
-			this._doc.record(new ChangePitchEnvelopeEnd(this._doc, endSliderIndex, instrument.envelopes[endSliderIndex].pitchEnd, +(this._pitchEndSliders[endSliderIndex].value)));
+		} 
+		if (startSliderIndex != -1) {
+			this._pitchStartInputBoxes[startSliderIndex].value = this._pitchStartSliders[startSliderIndex].value;
+			this._pitchStartNoteTexts[startSliderIndex].textContent = String(_.pitchStartLabel + this._pitchToNote(parseInt(this._pitchStartInputBoxes[startSliderIndex].value)) + ":");
+			new ChangePitchEnvelopeStart(this._doc, startSliderIndex, instrument.envelopes[startSliderIndex].pitchStart, +(this._pitchStartSliders[startSliderIndex].value));
+		} 
+		if (endSliderIndex != -1) {
+			this._pitchEndInputBoxes[endSliderIndex].value = this._pitchEndSliders[endSliderIndex].value;
+			this._pitchEndNoteTexts[endSliderIndex].textContent = String(_.pitchEndLabel + this._pitchToNote(parseInt(this._pitchEndInputBoxes[endSliderIndex].value)) + ":");
+			new ChangePitchEnvelopeEnd(this._doc, endSliderIndex, instrument.envelopes[endSliderIndex].pitchEnd, +(this._pitchEndSliders[endSliderIndex].value));
 		}
 		const pitchAmplifyToggleIndex = this._pitchAmplifyToggles.indexOf(<any> event.target);
 		const pitchBounceToggleIndex = this._pitchBounceToggles.indexOf(<any> event.target);
@@ -361,14 +407,16 @@ export class EnvelopeEditor {
 			), envelopeDelaySlider);
 			const pitchStartSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: drumPitchEnvBoolean ? 1 : 0, max: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, value: "0", step: "1"});
 			const pitchStartInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "pitchStartInputBox", type: "number", step: "1", min: drumPitchEnvBoolean ? 1 : 0, max: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, value: "0"});
+			const pitchStartNoteText: HTMLSpanElement = span({class: "tip", style: "height: 1em; white-space: nowrap; font-size: smaller;", onclick: () => this._openPrompt("pitchEnvelope")}, span(_.pitchStartLabel + this._pitchToNote(parseInt(pitchStartInputBox.value)) + ":"));
 			const pitchEndSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: drumPitchEnvBoolean ? 1 : 0, max: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, value: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, step: "1"});
 			const pitchEndInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "pitchEndInputBox", type: "number", step: "1", min: drumPitchEnvBoolean ? 1 : 0, max: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, value: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch});
+			const pitchEndNoteText: HTMLSpanElement = span({class: "tip", style: "height: 1em; white-space: nowrap; font-size: smaller;", onclick: () => this._openPrompt("pitchEnvelope")}, span(_.pitchEndLabel + this._pitchToNote(parseInt(pitchEndInputBox.value)) + ":"));
 			const pitchStartGroup: HTMLElement = div({class: "selectRow dropFader"}, div({},
-				span({class: "tip", id: "pitchStartNote", style: "height: 1em; white-space: nowrap; font-size: 12px;", onclick: () => this._openPrompt("pitchEnvelope")}, span(_.pitchStartLabel + this._pitchToNote(parseInt(pitchStartInputBox.value)) + ":")),
+				pitchStartNoteText,
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, pitchStartInputBox),
 			), pitchStartSlider);
 			const pitchEndGroup: HTMLElement = div({class: "selectRow dropFader"}, div({},
-				span({class: "tip", id: "pitchEndNote", style: "height: 1em; white-space: nowrap; font-size: 12px;", onclick: () => this._openPrompt("pitchEnvelope")}, span(_.pitchEndLabel + this._pitchToNote(parseInt(pitchEndInputBox.value)) + ":")),
+				pitchEndNoteText,
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, pitchEndInputBox),
 			), pitchEndSlider);
 			const pitchAmplifyToggle: HTMLInputElement = input({style: "width: 3em; padding: 0;", type: "checkbox"});
@@ -437,8 +485,10 @@ export class EnvelopeEditor {
 			this._envelopeDelayRows[envelopeIndex] = envelopeDelayRow;
 			this._pitchStartSliders[envelopeIndex] = pitchStartSlider;
 			this._pitchStartInputBoxes[envelopeIndex] = pitchStartInputBox;
+			this._pitchStartNoteTexts[envelopeIndex] = pitchStartNoteText;
 			this._pitchEndSliders[envelopeIndex] = pitchEndSlider;
 			this._pitchEndInputBoxes[envelopeIndex] = pitchEndInputBox;
+			this._pitchEndNoteTexts[envelopeIndex] = pitchEndNoteText;
 			this._pitchStartGroups[envelopeIndex] = pitchStartGroup;
 			this._pitchEndGroups[envelopeIndex] = pitchEndGroup;
 			this._pitchAmplifyToggles[envelopeIndex] = pitchAmplifyToggle;
@@ -500,8 +550,10 @@ export class EnvelopeEditor {
 			this._pitchEndInputBoxes[envelopeIndex].max = (drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch).toString();
 			this._pitchStartSliders[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instrument.envelopes[envelopeIndex].pitchStart));
 			this._pitchStartInputBoxes[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instrument.envelopes[envelopeIndex].pitchStart));
+			this._pitchStartNoteTexts[envelopeIndex].textContent = String(_.pitchStartLabel + this._pitchToNote(parseInt(this._pitchStartInputBoxes[envelopeIndex].value)) + ":");
 			this._pitchEndSliders[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instrument.envelopes[envelopeIndex].pitchEnd));
 			this._pitchEndInputBoxes[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instrument.envelopes[envelopeIndex].pitchEnd));
+			this._pitchEndNoteTexts[envelopeIndex].textContent = String(_.pitchEndLabel + this._pitchToNote(parseInt(this._pitchEndInputBoxes[envelopeIndex].value)) + ":");
 			this._pitchAmplifyToggles[envelopeIndex].checked = instrument.envelopes[envelopeIndex].pitchAmplify ? true : false;
 			this._pitchBounceToggles[envelopeIndex].checked = instrument.envelopes[envelopeIndex].pitchBounce ? true : false;
 			this._targetSelects[envelopeIndex].value = String(instrument.envelopes[envelopeIndex].target + instrument.envelopes[envelopeIndex].index * Config.instrumentAutomationTargets.length);
