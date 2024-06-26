@@ -1040,8 +1040,8 @@ if (language == "spanish") {
     Localization.envelopeDelayLabel = "‣ Retraso:";
     Localization.pitchStartLabel = "‣ In. Tono:";
     Localization.pitchEndLabel = "‣ Tono Fin:";
-    Localization.pitchAmplifyLabel = "Amplificar";
-    Localization.pitchBounceLabel = "Rebote";
+    Localization.pitchAmplifyLabel = "Amplifica:";
+    Localization.pitchBounceLabel = "Rebote:";
     Localization.wavetableSpeedLabel = "Vel:";
     Localization.interpolateWavesLabel = "Interpolar:";
     Localization.resetCyclePerNoteLabel = "Ciclo por Nota:";

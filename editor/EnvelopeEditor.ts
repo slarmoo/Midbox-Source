@@ -9,6 +9,8 @@ import {HTML} from "imperative-html/dist/esm/elements-strict";
 import {Localization as _} from "./Localization";
 import {clamp, lerp, norm} from "./UsefulCodingStuff";
 
+const {div, span, canvas, option, input, button, select} = HTML;
+
 export class EnvelopeLineGraph {
 	public range: number = 4;
 
@@ -74,7 +76,7 @@ export class EnvelopeLineGraph {
 }
 
 export class EnvelopeEditor {
-	public readonly container: HTMLElement = HTML.div({class: "envelopeEditor"});
+	public readonly container: HTMLElement = div({class: "envelopeEditor"});
 	
 	// Everything must be declared as arrays for each envelope
 	// Properly given styles and what not in render()
@@ -279,7 +281,7 @@ export class EnvelopeEditor {
 				displayName += " " + (index+1);
 			}
 		}
-		return HTML.option({value: target + index * Config.instrumentAutomationTargets.length}, displayName);
+		return option({value: target + index * Config.instrumentAutomationTargets.length}, displayName);
 	}
 	
 	private _updateTargetOptionVisibility(menu: HTMLSelectElement, instrument: Instrument): void {
@@ -297,72 +299,75 @@ export class EnvelopeEditor {
 		let drumPitchEnvBoolean: boolean = instrument.isNoiseInstrument;
 		
 		for (let envelopeIndex: number = this._rows.length; envelopeIndex < instrument.envelopeCount; envelopeIndex++) {
-			const envelopePlotter: EnvelopeLineGraph = new EnvelopeLineGraph(HTML.canvas({ width: 180, height: 80, style: `border: 2px solid ${ColorConfig.uiWidgetBackground}; width: 140px; height: 60px; margin-left: 24px;`, id: "EnvelopeLineGraph" }), this._doc, envelopeIndex);
-			const envelopePlotterRow: HTMLElement = HTML.div({class: "selectRow dropFader", style: "margin-top: 5px; margin-bottom: 25px;"}, envelopePlotter.canvas);
-			const plotterTimeRangeInputBox: HTMLInputElement = HTML.input({style: "width: 13.1em; font-size: 80%; margin-left: 0px; vertical-align: middle;", id: "timeRangeInputBox", type: "number", step: "0.1", min: "0.1", max: "200", value: "4"});
-			const plotterTimeRangeRow: HTMLElement = HTML.div({ class: "selectRow dropFader", style: "margin-left: 25px; margin-bottom: 20px;" }, HTML.div({},
-				HTML.span({ class: "tip", style: "height:1em; font-size: small; white-space: nowrap;", onclick: () => this._openPrompt("plotterTimeRange") }, _.timeRangeLabel),
-				HTML.div({ style: "color: " + ColorConfig.secondaryText + "; margin-top: -3px;" }, plotterTimeRangeInputBox),
+			const envelopePlotter: EnvelopeLineGraph = new EnvelopeLineGraph(canvas({ width: 180, height: 80, style: `border: 2px solid ${ColorConfig.uiWidgetBackground}; width: 140px; height: 60px; margin-left: 24px;`, id: "EnvelopeLineGraph" }), this._doc, envelopeIndex);
+			const envelopePlotterRow: HTMLElement = div({class: "selectRow dropFader", style: "margin-top: 5px; margin-bottom: 25px;"}, envelopePlotter.canvas);
+			const plotterTimeRangeInputBox: HTMLInputElement = input({style: "width: 13.1em; font-size: 80%; margin-left: 0px; vertical-align: middle;", id: "timeRangeInputBox", type: "number", step: "0.1", min: "0.1", max: "200", value: "4"});
+			const plotterTimeRangeRow: HTMLElement = div({ class: "selectRow dropFader", style: "margin-left: 25px; margin-bottom: 20px;" }, div({},
+				span({ class: "tip", style: "height:1em; font-size: small; white-space: nowrap;", onclick: () => this._openPrompt("plotterTimeRange") }, _.timeRangeLabel),
+				div({ style: "color: " + ColorConfig.secondaryText + "; margin-top: -3px;" }, plotterTimeRangeInputBox),
 			));
-			const perEnvelopeSpeedSlider: HTMLInputElement = HTML.input({style: "margin: 0;", type: "range", min: Config.perEnvelopeSpeedMin, max: Config.perEnvelopeSpeedMax, value: "1", step: "0.25"});
-			const perEnvelopeSpeedInputBox: HTMLInputElement = HTML.input({style: "width: 4em; font-size: 80%; ", id: "perEnvelopeSpeedInputBox", type: "number", step: "0.001", min: Config.perEnvelopeSpeedMin, max: Config.perEnvelopeSpeedMax, value: "1"});
-			const perEnvelopeSpeedRow: HTMLElement = HTML.div({class: "selectRow dropFader"}, HTML.div({},
-				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("perEnvelopeSpeed")}, HTML.span(_.perEnvelopeSpeedLabel)),
-				HTML.div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, perEnvelopeSpeedInputBox),
+			const perEnvelopeSpeedSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: Config.perEnvelopeSpeedMin, max: Config.perEnvelopeSpeedMax, value: "1", step: "0.25"});
+			const perEnvelopeSpeedInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "perEnvelopeSpeedInputBox", type: "number", step: "0.001", min: Config.perEnvelopeSpeedMin, max: Config.perEnvelopeSpeedMax, value: "1"});
+			const perEnvelopeSpeedRow: HTMLElement = div({class: "selectRow dropFader"}, div({},
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("perEnvelopeSpeed")}, span(_.perEnvelopeSpeedLabel)),
+				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, perEnvelopeSpeedInputBox),
 			), perEnvelopeSpeedSlider);
-			const discreteEnvelopeToggle: HTMLInputElement = HTML.input({style: "width: 3em; padding: 0; margin-right: 3em;", type: "checkbox"});
-			const discreteEnvelopeRow: HTMLElement = HTML.div({class: "selectRow dropFader"}, HTML.div({},
-				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("discreteEnvelope")}, HTML.span(_.discreteEnvelopeLabel))
+			const discreteEnvelopeToggle: HTMLInputElement = input({style: "width: 3em; padding: 0; margin-right: 3em;", type: "checkbox"});
+			const discreteEnvelopeRow: HTMLElement = div({class: "selectRow dropFader"}, div({},
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("discreteEnvelope")}, span(_.discreteEnvelopeLabel))
 			), discreteEnvelopeToggle);
-			const lowerBoundSlider: HTMLInputElement = HTML.input({style: "margin: 0;", type: "range", min: Config.lowerBoundMin, max: Config.lowerBoundMax, value: "0", step: "0.20"});
-			const upperBoundSlider: HTMLInputElement = HTML.input({style: "margin: 0;", type: "range", min: Config.upperBoundMin, max: Config.upperBoundMax, value: "1", step: "0.20"});
-			const lowerBoundInputBox: HTMLInputElement = HTML.input({style: "width: 4em; font-size: 80%; ", id: "lowerBoundInputBox", type: "number", step: "0.001", min: Config.lowerBoundMin, max: Config.lowerBoundMax, value: "0"});
-			const upperBoundInputBox: HTMLInputElement = HTML.input({style: "width: 4em; font-size: 80%; ", id: "upperBoundInputBox", type: "number", step: "0.001", min: Config.upperBoundMin, max: Config.upperBoundMax, value: "1"});
-			const lowerBoundRow: HTMLElement = HTML.div({class: "selectRow dropFader"}, HTML.div({},
-				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeBounds")}, HTML.span(_.lowerBoundLabel)),
-				HTML.div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, lowerBoundInputBox),
+			const lowerBoundSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: Config.lowerBoundMin, max: Config.lowerBoundMax, value: "0", step: "0.20"});
+			const upperBoundSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: Config.upperBoundMin, max: Config.upperBoundMax, value: "1", step: "0.20"});
+			const lowerBoundInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "lowerBoundInputBox", type: "number", step: "0.001", min: Config.lowerBoundMin, max: Config.lowerBoundMax, value: "0"});
+			const upperBoundInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "upperBoundInputBox", type: "number", step: "0.001", min: Config.upperBoundMin, max: Config.upperBoundMax, value: "1"});
+			const lowerBoundRow: HTMLElement = div({class: "selectRow dropFader"}, div({},
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeBounds")}, span(_.lowerBoundLabel)),
+				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, lowerBoundInputBox),
 			), lowerBoundSlider);
-			const upperBoundRow: HTMLElement = HTML.div({class: "selectRow dropFader"}, HTML.div({},
-				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeBounds")}, HTML.span(_.upperBoundLabel)),
-				HTML.div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, upperBoundInputBox),
+			const upperBoundRow: HTMLElement = div({class: "selectRow dropFader"}, div({},
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeBounds")}, span(_.upperBoundLabel)),
+				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, upperBoundInputBox),
 			), upperBoundSlider);
-			const stairsStepAmountSlider: HTMLInputElement = HTML.input({style: "margin: 0;", type: "range", min: 1, max: Config.stairsStepAmountMax, value: "4", step: "1"});
-			const stairsStepAmountInputBox: HTMLInputElement = HTML.input({style: "width: 4em; font-size: 80%; ", id: "stairsStepAmountInputBox", type: "number", step: "1", min: 1, max: Config.stairsStepAmountMax, value: "4"});
-			const stairsStepAmountRow: HTMLElement = HTML.div({class: "selectRow dropFader"}, HTML.div({},
-				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("stepAmount")}, HTML.span(_.stairsStepAmountLabel)),
-				HTML.div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, stairsStepAmountInputBox),
+			const stairsStepAmountSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: 1, max: Config.stairsStepAmountMax, value: "4", step: "1"});
+			const stairsStepAmountInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "stairsStepAmountInputBox", type: "number", step: "1", min: 1, max: Config.stairsStepAmountMax, value: "4"});
+			const stairsStepAmountRow: HTMLElement = div({class: "selectRow dropFader"}, div({},
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("stepAmount")}, span(_.stairsStepAmountLabel)),
+				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, stairsStepAmountInputBox),
 			), stairsStepAmountSlider);
-			const envelopeDelaySlider: HTMLInputElement = HTML.input({style: "margin: 0;", type: "range", min: 0, max: Config.envelopeDelayMax, value: "0", step: "0.5"});
-			const envelopeDelayInputBox: HTMLInputElement = HTML.input({style: "width: 4em; font-size: 80%; ", id: "envelopeDelayInputBox", type: "number", step: "0.01", min: 0, max: Config.envelopeDelayMax, value: "0"});
-			const envelopeDelayRow: HTMLElement = HTML.div({class: "selectRow dropFader"}, HTML.div({},
-				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeDelay")}, HTML.span(_.envelopeDelayLabel)),
-				HTML.div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, envelopeDelayInputBox),
+			const envelopeDelaySlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: 0, max: Config.envelopeDelayMax, value: "0", step: "0.5"});
+			const envelopeDelayInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "envelopeDelayInputBox", type: "number", step: "0.01", min: 0, max: Config.envelopeDelayMax, value: "0"});
+			const envelopeDelayRow: HTMLElement = div({class: "selectRow dropFader"}, div({},
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeDelay")}, span(_.envelopeDelayLabel)),
+				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, envelopeDelayInputBox),
 			), envelopeDelaySlider);
-			const pitchStartSlider: HTMLInputElement = HTML.input({style: "margin: 0;", type: "range", min: drumPitchEnvBoolean ? 1 : 0, max: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, value: "0", step: "1"});
-			const pitchStartInputBox: HTMLInputElement = HTML.input({style: "width: 4em; font-size: 80%; ", id: "pitchStartInputBox", type: "number", step: "1", min: drumPitchEnvBoolean ? 1 : 0, max: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, value: "0"});
-			const pitchEndSlider: HTMLInputElement = HTML.input({style: "margin: 0;", type: "range", min: drumPitchEnvBoolean ? 1 : 0, max: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, value: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, step: "1"});
-			const pitchEndInputBox: HTMLInputElement = HTML.input({style: "width: 4em; font-size: 80%; ", id: "pitchEndInputBox", type: "number", step: "1", min: drumPitchEnvBoolean ? 1 : 0, max: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, value: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch});
-			const pitchStartGroup: HTMLElement = HTML.div({class: "selectRow dropFader"}, HTML.div({},
-				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("pitchEnvelope")}, HTML.span(_.pitchStartLabel)),
-				HTML.div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, pitchStartInputBox),
+			const pitchStartSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: drumPitchEnvBoolean ? 1 : 0, max: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, value: "0", step: "1"});
+			const pitchStartInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "pitchStartInputBox", type: "number", step: "1", min: drumPitchEnvBoolean ? 1 : 0, max: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, value: "0"});
+			const pitchEndSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: drumPitchEnvBoolean ? 1 : 0, max: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, value: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, step: "1"});
+			const pitchEndInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "pitchEndInputBox", type: "number", step: "1", min: drumPitchEnvBoolean ? 1 : 0, max: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, value: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch});
+			const pitchStartGroup: HTMLElement = div({class: "selectRow dropFader"}, div({},
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("pitchEnvelope")}, span(_.pitchStartLabel)),
+				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, pitchStartInputBox),
 			), pitchStartSlider);
-			const pitchEndGroup: HTMLElement = HTML.div({class: "selectRow dropFader"}, HTML.div({},
-				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("pitchEnvelope")}, HTML.span(_.pitchEndLabel)),
-				HTML.div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, pitchEndInputBox),
+			const pitchEndGroup: HTMLElement = div({class: "selectRow dropFader"}, div({},
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("pitchEnvelope")}, span(_.pitchEndLabel)),
+				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, pitchEndInputBox),
 			), pitchEndSlider);
-			const pitchAmplifyToggle: HTMLInputElement = HTML.input({style: "width: 3em; padding: 0;", type: "checkbox"});
-			const pitchBounceToggle: HTMLInputElement = HTML.input({style: "width: 3em; padding: 0;", type: "checkbox"});
-			// Still broken. Hey mid little blue headphone guy fix this why wouldn't cha
-			const extraPitchSettingRow: HTMLElement = HTML.div({class: "selectRow dropFader", style: ""}, HTML.div({},
-				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("extraPitchEnvSettings")}, HTML.span(_.pitchAmplifyLabel)), 
-				HTML.div({}, pitchAmplifyToggle),
-				HTML.span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("extraPitchEnvSettings")}, HTML.span(_.pitchBounceLabel)),
-				HTML.div({}, pitchBounceToggle),
-			));
-			const envelopeDropdownGroup: HTMLElement = HTML.div({class: "editor-controls", style: "display: none;"}, plotterTimeRangeRow, envelopePlotterRow, pitchStartGroup, pitchEndGroup, extraPitchSettingRow, perEnvelopeSpeedRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, stairsStepAmountRow, envelopeDelayRow);
-			const envelopeDropdown: HTMLButtonElement = HTML.button({style: "margin-left: 0.6em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.PerEnvelope, envelopeIndex)}, "▼");
+			const pitchAmplifyToggle: HTMLInputElement = input({style: "width: 3em; padding: 0;", type: "checkbox"});
+			const pitchBounceToggle: HTMLInputElement = input({style: "width: 3em; padding: 0;", type: "checkbox"});
+			const extraPitchSettingRow: HTMLElement = div({class: "", style: "display: flex; flex-direction: row; justify-content: space-evenly;"}, 
+				div({style: "display: flex; flex-direction: column; gap: 5px;"},
+					span({class: "tip", style: "height: 1em; width: 4em;", onclick: () => this._openPrompt("extraPitchEnvSettings")}, span(_.pitchAmplifyLabel)),
+					div({style: ""}, pitchAmplifyToggle),
+				),
+				div({style: "display: flex; flex-direction: column; gap: 5px;"},
+					span({class: "tip", style: "height: 1em; width: 4em;", onclick: () => this._openPrompt("extraPitchEnvSettings")}, span(_.pitchBounceLabel)),
+					div({style: ""}, pitchBounceToggle),
+				),
+			);
+			const envelopeDropdownGroup: HTMLElement = div({class: "editor-controls", style: "display: none;"}, plotterTimeRangeRow, envelopePlotterRow, pitchStartGroup, pitchEndGroup, extraPitchSettingRow, perEnvelopeSpeedRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, stairsStepAmountRow, envelopeDelayRow);
+			const envelopeDropdown: HTMLButtonElement = button({style: "margin-left: 0.6em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.PerEnvelope, envelopeIndex)}, "▼");
 
-			const targetSelect: HTMLSelectElement = HTML.select();
+			const targetSelect: HTMLSelectElement = select();
 			for (let target: number = 0; target < Config.instrumentAutomationTargets.length; target++) {
 				const interleaved: boolean = (Config.instrumentAutomationTargets[target].interleave);
 				for (let index: number = 0; index < Config.instrumentAutomationTargets[target].maxCount; index++) {
@@ -374,17 +379,17 @@ export class EnvelopeEditor {
 				if (interleaved) target++;
 			}
 			
-			const envelopeSelect: HTMLSelectElement = HTML.select();
+			const envelopeSelect: HTMLSelectElement = select();
 			for (let envelope: number = 0; envelope < Config.envelopes.length; envelope++) {
-				envelopeSelect.appendChild(HTML.option({value: envelope}, Config.envelopes[envelope].name));
+				envelopeSelect.appendChild(option({value: envelope}, Config.envelopes[envelope].name));
 			} 
 			
-			const deleteButton: HTMLButtonElement = HTML.button({type: "button", class: "delete-envelope"});
+			const deleteButton: HTMLButtonElement = button({type: "button", class: "delete-envelope"});
 			
-			const row: HTMLDivElement = HTML.div(HTML.div({class: "envelope-row"},
-				HTML.div({style: "width: 0; flex: 0.2; margin-top: 3px;"}, envelopeDropdown),
-				HTML.div({class: "selectContainer", style: "width: 0; flex: 0.8;"}, targetSelect),
-				HTML.div({class: "selectContainer", style: "width: 0; flex: 0.7;"}, envelopeSelect),
+			const row: HTMLDivElement = div(div({class: "envelope-row"},
+				div({style: "width: 0; flex: 0.2; margin-top: 3px;"}, envelopeDropdown),
+				div({class: "selectContainer", style: "width: 0; flex: 0.8;"}, targetSelect),
+				div({class: "selectContainer", style: "width: 0; flex: 0.7;"}, envelopeSelect),
 				deleteButton,
 			), envelopeDropdownGroup);
 			
