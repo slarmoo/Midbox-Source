@@ -534,7 +534,6 @@ export class TipPrompt implements Prompt {
 					h2("Amount of Steps"),
 					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously. This setting in specific is unique to stair-based envelopes."),
 					p("Stair-based envelopes change values in 'steps', and using this option allows you to configure how many steps the envelope has."),
-					p("SUPPORTS: Stairs, Looped Stairs.")
 				);
 			} break;
 			case "envelopeDelay": {
@@ -544,18 +543,11 @@ export class TipPrompt implements Prompt {
 					p("Envelopes typically will start their behaviors instantly the moment a note plays. With this setting, you can delay when the envelope starts changing values instead for better control over them."),
 				);
 			} break;
-			case "envelopeDelayMeasurement": {
+			case "envelopeDelayPhaseMeasurement": {
 				message = div(
-					h2("Delay Measurement Type"),
+					h2("Delay/Position Measurement Type"),
 					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously."),
-					p("By default, delay is measured in beats. This setting toggles whether delay is measured in beats or seconds."),
-				);
-			} break;
-			case "delaySubstituteNumber": {
-				message = div(
-					h2("Substituting Number"),
-					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously."),
-					p("As self-explained by the name, delay 'delays' the envelope by temporarily substituting the current value of the envelope by a number. This slider/input box allows you to change what number delay substitutes to."),
+					p("By default, delay and position are measured in beats. This setting toggles whether delay or position are measured in beats or seconds."),
 				);
 			} break;
 			case "pitchEnvelope": {
@@ -580,7 +572,7 @@ export class TipPrompt implements Prompt {
 			} break;
 			case "envelopePhase": {
 				message = div(
-					h2("Envelope Phase"),
+					h2("Starting Position"),
 					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously."),
 					p("This setting allows you to set where in the envelope it starts computing values from."),
 				);

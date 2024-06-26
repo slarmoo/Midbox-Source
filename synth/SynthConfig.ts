@@ -795,6 +795,7 @@ export class Config {
     public static readonly upperBoundMax: number = 8;
     public static readonly stairsStepAmountMax: number = 64;
     public static readonly envelopeDelayMax: number = 32;
+    public static readonly envelopePhaseMax: number = this.envelopeDelayMax * 2;
 
     public static readonly feedbacks: DictionaryArray<Feedback> = toNameMap([
         { name: "1⟲",         indices: [[1], [],  [],  [] ]},

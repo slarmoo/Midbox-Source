@@ -55,7 +55,7 @@ function encodeUnisonSettings(buffer: number[], v: number, s: number, o: number,
     buffer.push(base64IntToCharCode[cleanI % 63], base64IntToCharCode[Math.floor(cleanI / 63)]);
 }
 
-function encodeEnvelopeSettings(buffer: number[], s: number, d: boolean, lb: number, ub: number, sa: number, dl: number, ps: number, pe: number, peA: boolean, peB: boolean): void {
+function encodeEnvelopeSettings(buffer: number[], s: number, d: boolean, lb: number, ub: number, sa: number, dl: number, ps: number, pe: number, peA: boolean, peB: boolean, ph: number): void {
     // IES (Speed)
     let cleanS = Math.round(Math.abs(s) * 1000);
     let cleanSDivided = Math.floor(cleanS / 63);
@@ -78,7 +78,7 @@ function encodeEnvelopeSettings(buffer: number[], s: number, d: boolean, lb: num
     buffer.push(base64IntToCharCode[cleanSA % 63], base64IntToCharCode[cleanSADivided % 63], base64IntToCharCode[Math.floor(cleanSADivided / 63)]);
 
     // Delay
-    let cleanDL = Math.round(Math.abs(dl) * 100);
+    let cleanDL = Math.round(Math.abs(dl) * 1000);
     let cleanDLDivided = Math.floor(cleanDL / 63);
     buffer.push(base64IntToCharCode[cleanDL % 63], base64IntToCharCode[cleanDLDivided % 63], base64IntToCharCode[Math.floor(cleanDLDivided / 63)]);
 
@@ -93,6 +93,11 @@ function encodeEnvelopeSettings(buffer: number[], s: number, d: boolean, lb: num
     // Pitch Envelope Amplify/Bounce
     buffer.push(base64IntToCharCode[+peA]);
     buffer.push(base64IntToCharCode[+peB]);
+
+    // Phase
+    let cleanPH = Math.round(Math.abs(ph) * 1000);
+    let cleanPHDivided = Math.floor(cleanPH / 63);
+    buffer.push(base64IntToCharCode[cleanPH % 63], base64IntToCharCode[cleanPHDivided % 63], base64IntToCharCode[Math.floor(cleanPHDivided / 63)]);
 }
 
 function encodeDrumEnvelopeSettings(buffer: number[], s: number): void {
@@ -1319,6 +1324,7 @@ export class EnvelopeSettings {
     public pitchEnd: number = Config.maxPitch;
     public pitchAmplify: boolean = false;
     public pitchBounce: boolean = false;
+    public phase: number = 0;
 
     constructor(instrument: Instrument) {
         this.reset(instrument);
@@ -1340,6 +1346,7 @@ export class EnvelopeSettings {
         this.pitchEnd = drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch;
         this.pitchAmplify = false;
         this.pitchBounce = false;
+        this.phase = 0;
     }
 
     public toJsonObject(): Object {
@@ -1360,6 +1367,8 @@ export class EnvelopeSettings {
         // Only one can be active at a time!
         if (this.pitchAmplify != false && this.pitchBounce != true) envelopeObject["pitchAmplify"] = this.pitchAmplify;
         if (this.pitchBounce != false && this.pitchAmplify != true) envelopeObject["pitchBounce"] = this.pitchBounce;
+        // Continue
+        if (this.phase != 0) envelopeObject["phase"] = this.phase;
         if (Config.instrumentAutomationTargets[this.target].maxCount > 1) envelopeObject["index"] = this.index;
         return envelopeObject;
     }
@@ -1441,6 +1450,12 @@ export class EnvelopeSettings {
             this.pitchBounce = envelopeObject["pitchBounce"];
         } else {
             this.pitchBounce = false;
+        }
+
+        if (envelopeObject["phase"] != undefined) {
+            this.phase = clamp(0, Config.envelopePhaseMax+1, envelopeObject["phase"]);
+        } else {
+            this.phase = 0;
         }
     }
 }
@@ -1865,9 +1880,9 @@ export class Instrument {
 
         if (this.type == InstrumentType.fm || this.type == InstrumentType.advfm) {
             if (allCarriersControlledByNoteSize && noteSizeControlsSomethingElse) {
-                this.addEnvelope(Config.instrumentAutomationTargets.dictionary["noteVolume"].index, 0, Config.envelopes.dictionary["note size"].index, 1, false, 0, 1, 4, 0, 0, 96, false, false);
+                this.addEnvelope(Config.instrumentAutomationTargets.dictionary["noteVolume"].index, 0, Config.envelopes.dictionary["note size"].index, 1, false, 0, 1, 4, 0, 0, 96, false, false, 0);
             } else if (noCarriersControlledByNoteSize && !noteSizeControlsSomethingElse) {
-                this.addEnvelope(Config.instrumentAutomationTargets.dictionary["none"].index, 0, Config.envelopes.dictionary["note size"].index, 1, false, 0, 1, 4, 0, 0, 96, false, false);
+                this.addEnvelope(Config.instrumentAutomationTargets.dictionary["none"].index, 0, Config.envelopes.dictionary["note size"].index, 1, false, 0, 1, 4, 0, 0, 96, false, false, 0);
             }
         }
 
@@ -1888,7 +1903,7 @@ export class Instrument {
             this.noteFilterType = false;
             this.noteFilter.convertLegacySettings(legacyCutoffSetting, legacyResonanceSetting, legacyFilterEnv);
             this.effects |= 1 << EffectType.noteFilter;
-            this.addEnvelope(Config.instrumentAutomationTargets.dictionary["noteFilterAllFreqs"].index, 0, legacyFilterEnv.index, 1, false, 0, 1, 4, 0, 0, 96, false, false);
+            this.addEnvelope(Config.instrumentAutomationTargets.dictionary["noteFilterAllFreqs"].index, 0, legacyFilterEnv.index, 1, false, 0, 1, 4, 0, 0, 96, false, false, 0);
             if (forceSimpleFilter || this.noteFilterType) {
                 this.noteFilterType = true;
                 this.noteFilterSimpleCut = legacyCutoffSetting;
@@ -1897,18 +1912,18 @@ export class Instrument {
         }
 
         if (legacyPulseEnv.type != EnvelopeType.none) {
-            this.addEnvelope(Config.instrumentAutomationTargets.dictionary["pulseWidth"].index, 0, legacyPulseEnv.index, 1, false, 0, 1, 4, 0, 0, 96, false, false);
+            this.addEnvelope(Config.instrumentAutomationTargets.dictionary["pulseWidth"].index, 0, legacyPulseEnv.index, 1, false, 0, 1, 4, 0, 0, 96, false, false, 0);
         }
 
         for (let i: number = 0; i < legacyOperatorEnvelopes.length; i++) {
             if (i < carrierCount && allCarriersControlledByNoteSize) continue;
             if (legacyOperatorEnvelopes[i].type != EnvelopeType.none) {
-                this.addEnvelope(Config.instrumentAutomationTargets.dictionary["operatorAmplitude"].index, i, legacyOperatorEnvelopes[i].index, 1, false, 0, 1, 4, 0, 0, 96, false, false);
+                this.addEnvelope(Config.instrumentAutomationTargets.dictionary["operatorAmplitude"].index, i, legacyOperatorEnvelopes[i].index, 1, false, 0, 1, 4, 0, 0, 96, false, false, 0);
             }
         }
 
         if (legacyFeedbackEnv.type != EnvelopeType.none) {
-            this.addEnvelope(Config.instrumentAutomationTargets.dictionary["feedbackAmplitude"].index, 0, legacyFeedbackEnv.index, 1, false, 0, 1, 4, 0, 0, 96, false, false);
+            this.addEnvelope(Config.instrumentAutomationTargets.dictionary["feedbackAmplitude"].index, 0, legacyFeedbackEnv.index, 1, false, 0, 1, 4, 0, 0, 96, false, false, 0);
         }
     }
 
@@ -2351,7 +2366,7 @@ export class Instrument {
                                 instrumentObject["detuneCents"] = Config.detuneCenter - 1200;
                             }
                         }
-                        this.addEnvelope(env.target, env.index, env.envelope, env.envelopeSpeed, env.discrete, env.lowerBound, env.upperBound, env.stepAmount, env.delay, env.pitchStart, env.pitchEnd, env.pitchAmplify, env.pitchBounce);
+                        this.addEnvelope(env.target, env.index, env.envelope, env.envelopeSpeed, env.discrete, env.lowerBound, env.upperBound, env.stepAmount, env.delay, env.pitchStart, env.pitchEnd, env.pitchAmplify, env.pitchBounce, env.phase);
                     }
                 }
             }
@@ -3343,7 +3358,7 @@ export class Instrument {
                         const newIndex: number | null = oldNameToNewIndex[rawEnvelopeName];
                         if (newIndex != null) tempEnvelope.envelope = newIndex;
                     }
-                    this.addEnvelope(tempEnvelope.target, tempEnvelope.index, tempEnvelope.envelope, tempEnvelope.envelopeSpeed, tempEnvelope.discrete, tempEnvelope.lowerBound, tempEnvelope.upperBound, tempEnvelope.stepAmount, tempEnvelope.delay, tempEnvelope.pitchStart, tempEnvelope.pitchEnd, tempEnvelope.pitchAmplify, tempEnvelope.pitchBounce);
+                    this.addEnvelope(tempEnvelope.target, tempEnvelope.index, tempEnvelope.envelope, tempEnvelope.envelopeSpeed, tempEnvelope.discrete, tempEnvelope.lowerBound, tempEnvelope.upperBound, tempEnvelope.stepAmount, tempEnvelope.delay, tempEnvelope.pitchStart, tempEnvelope.pitchEnd, tempEnvelope.pitchAmplify, tempEnvelope.pitchBounce, tempEnvelope.phase);
                 }
             }
 
@@ -3383,7 +3398,7 @@ export class Instrument {
         return 440.0 * Math.pow(2.0, (pitch - 69.0) / 12.0);
     }
 
-    public addEnvelope(target: number, index: number, envelope: number, envelopeSpeed: number, discrete: boolean, lowerBound: number, upperBound: number, stepAmount: number, delay: number, pitchStart: number, pitchEnd: number, pitchAmplify: boolean, pitchBounce: boolean): void {
+    public addEnvelope(target: number, index: number, envelope: number, envelopeSpeed: number, discrete: boolean, lowerBound: number, upperBound: number, stepAmount: number, delay: number, pitchStart: number, pitchEnd: number, pitchAmplify: boolean, pitchBounce: boolean, phase: number): void {
         let makeEmpty: boolean = false;
         if (!this.supportsEnvelopeTarget(target, index)) makeEmpty = true;
         if (this.envelopeCount >= Config.maxEnvelopeCount) throw new Error();
@@ -3402,6 +3417,7 @@ export class Instrument {
         envelopeSettings.pitchEnd = pitchEnd;
         envelopeSettings.pitchAmplify = pitchAmplify;
         envelopeSettings.pitchBounce = pitchBounce;
+        envelopeSettings.phase = phase;
         this.envelopeCount++;
     }
 
@@ -4098,7 +4114,7 @@ export class Song {
                     buffer.push(base64IntToCharCode[idx.envelope >> 6], base64IntToCharCode[idx.envelope & 0x3F]);
                     // Other per-envelope settings have already been done in a function way above, so call that here.
                     // Discrete was also moved. It goes here.
-                    encodeEnvelopeSettings(buffer, idx.envelopeSpeed, idx.discrete, idx.lowerBound, idx.upperBound, idx.stepAmount, idx.delay, idx.pitchStart, idx.pitchEnd, idx.pitchAmplify, idx.pitchBounce);
+                    encodeEnvelopeSettings(buffer, idx.envelopeSpeed, idx.discrete, idx.lowerBound, idx.upperBound, idx.stepAmount, idx.delay, idx.pitchStart, idx.pitchEnd, idx.pitchAmplify, idx.pitchBounce, idx.phase);
                 }
             }
         }
@@ -5598,7 +5614,8 @@ export class Song {
                         const pitchEnd: number = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] + ((base64CharCodeToInt[compressed.charCodeAt(charIndex++)] + (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] * 63)) * 63);
                         const pitchAmplify = (base64CharCodeToInt[compressed.charCodeAt(charIndex++)]) ? true : false;
                         const pitchBounce = (base64CharCodeToInt[compressed.charCodeAt(charIndex++)]) ? true : false;
-                        instrument.addEnvelope(target, index, envelope, envSpeed/1000, discrete, lowerBound/1000, upperBound/1000, stepAmount/1000, delay/100, pitchStart/1000, pitchEnd/1000, pitchAmplify, pitchBounce);
+                        const phase: number = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] + ((base64CharCodeToInt[compressed.charCodeAt(charIndex++)] + (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] * 63)) * 63);
+                        instrument.addEnvelope(target, index, envelope, envSpeed/1000, discrete, lowerBound/1000, upperBound/1000, stepAmount/1000, delay/1000, pitchStart/1000, pitchEnd/1000, pitchAmplify, pitchBounce, phase/1000);
                     }
                 }
             } break;
@@ -7070,6 +7087,7 @@ export class EnvelopeComputer {
             let stepAmount: number = 4;
             let delay: number = 0;
             let pitch: number = 1;
+            let phase: number = 0;
             if (envelopeIndex == instrument.envelopeCount) {
                 if (usedNoteSize) break;
                 // Special case: if no other envelopes used note size, default to applying it to note volume.
@@ -7087,30 +7105,31 @@ export class EnvelopeComputer {
                 stepAmount = instrument.envelopes[envelopeIndex].stepAmount;
                 delay = instrument.envelopes[envelopeIndex].delay / beatsPerTick * secondsPerTick;
                 if (tone) pitch = Synth.notePitchToEnvelopeValue(instrument, envelopeIndex, tone, instrumentState);
-
+                phase = instrument.envelopes[envelopeIndex].phase / beatsPerTick * secondsPerTick;
+                
                 if (envelope.type == EnvelopeType.noteSize) usedNoteSize = true;
             }
             if (automationTarget.computeIndex != null) {
                 const computeIndex: number = automationTarget.computeIndex + targetIndex;
-                let envelopeStart: number = EnvelopeComputer.computeEnvelope(envelope, this.noteSecondsStart[envelopeIndex], beatTimeStart[envelopeIndex], beatNoteTimeStart[envelopeIndex], noteSizeStart, lowerBound, upperBound, stepAmount, delay, pitch);
+                let envelopeStart: number = EnvelopeComputer.computeEnvelope(envelope, this.noteSecondsStart[envelopeIndex], beatTimeStart[envelopeIndex], beatNoteTimeStart[envelopeIndex], noteSizeStart, lowerBound, upperBound, stepAmount, delay, pitch, phase);
 
                 if (prevSlideStart) {
-                    const other: number = EnvelopeComputer.computeEnvelope(envelope, this.prevNoteSecondsStart[envelopeIndex], beatTimeStart[envelopeIndex], beatNoteTimeStart[envelopeIndex], prevNoteSize, lowerBound, upperBound, stepAmount, delay, pitch);
+                    const other: number = EnvelopeComputer.computeEnvelope(envelope, this.prevNoteSecondsStart[envelopeIndex], beatTimeStart[envelopeIndex], beatNoteTimeStart[envelopeIndex], prevNoteSize, lowerBound, upperBound, stepAmount, delay, pitch, phase);
                     envelopeStart += (other - envelopeStart) * prevSlideRatioStart;
                 }
                 if (nextSlideStart) {
-                    const other: number = EnvelopeComputer.computeEnvelope(envelope, 0.0, beatTimeStart[envelopeIndex], 0.0, nextNoteSize, lowerBound, upperBound, stepAmount, delay, pitch);
+                    const other: number = EnvelopeComputer.computeEnvelope(envelope, 0.0, beatTimeStart[envelopeIndex], 0.0, nextNoteSize, lowerBound, upperBound, stepAmount, delay, pitch, phase);
                     envelopeStart += (other - envelopeStart) * nextSlideRatioStart;
                 }
                 let envelopeEnd: number = envelopeStart;
                 if (discrete == false) {
-                    envelopeEnd = EnvelopeComputer.computeEnvelope(envelope, this.noteSecondsEnd[envelopeIndex], beatTimeEnd[envelopeIndex], beatNoteTimeEnd[envelopeIndex], noteSizeEnd, lowerBound, upperBound, stepAmount, delay, pitch);
+                    envelopeEnd = EnvelopeComputer.computeEnvelope(envelope, this.noteSecondsEnd[envelopeIndex], beatTimeEnd[envelopeIndex], beatNoteTimeEnd[envelopeIndex], noteSizeEnd, lowerBound, upperBound, stepAmount, delay, pitch, phase);
                     if (prevSlideEnd) {
-                        const other: number = EnvelopeComputer.computeEnvelope(envelope, this.prevNoteSecondsEnd[envelopeIndex], beatNoteTimeEnd[envelopeIndex], beatTimeEnd[envelopeIndex], prevNoteSize, lowerBound, upperBound, stepAmount, delay, pitch);
+                        const other: number = EnvelopeComputer.computeEnvelope(envelope, this.prevNoteSecondsEnd[envelopeIndex], beatNoteTimeEnd[envelopeIndex], beatTimeEnd[envelopeIndex], prevNoteSize, lowerBound, upperBound, stepAmount, delay, pitch, phase);
                         envelopeEnd += (other - envelopeEnd) * prevSlideRatioEnd;
                     }
                     if (nextSlideEnd) {
-                        const other: number = EnvelopeComputer.computeEnvelope(envelope, 0.0, beatTimeEnd[envelopeIndex], 0.0, nextNoteSize, lowerBound, upperBound, stepAmount, delay, pitch);
+                        const other: number = EnvelopeComputer.computeEnvelope(envelope, 0.0, beatTimeEnd[envelopeIndex], 0.0, nextNoteSize, lowerBound, upperBound, stepAmount, delay, pitch, phase);
                         envelopeEnd += (other - envelopeEnd) * nextSlideRatioEnd;
                     }
                 }
@@ -7159,7 +7178,7 @@ export class EnvelopeComputer {
         this._modifiedEnvelopeCount = 0;
     }
 
-    public static computeEnvelope(envelope: Envelope, time: number, beats: number, beatNote: number, noteSize: number, lowerBound: number, upperBound: number, stepAmount: number, delay: number, pitch: number): number {
+    public static computeEnvelope(envelope: Envelope, time: number, beats: number, beatNote: number, noteSize: number, lowerBound: number, upperBound: number, stepAmount: number, delay: number, pitch: number, phase: number): number {
         // This is where each envelope's equations are computed as well as the settings that change their properties.
         // Here is a note of some important parts of equations for future reference: 
         /*
@@ -7179,21 +7198,22 @@ export class EnvelopeComputer {
                 else return (equation);
             }
             Pitch: Was computed outside of this function. The output has been passed into this function and is used for the pitch envelope.
+            Phase: (timeOrBeat +- phase)
         */
         switch (envelope.type) {
             case EnvelopeType.noteSize: return Synth.noteSizeToVolumeMult(noteSize) * (upperBound - lowerBound) + lowerBound;
             case EnvelopeType.none: return 1.0;
             case EnvelopeType.twang: {
-                time = Math.max(0, time - delay);
+                time = Math.max(0, time - delay) + phase;
                 return (1.0 / (1.0 + time * envelope.speed)) * (upperBound - lowerBound) + lowerBound;
             }
             case EnvelopeType.swell: {
-                time = Math.max(0, time - delay);
+                time = Math.max(0, time - delay) + phase;
                 return (1 - 1 / (1.0 + time * envelope.speed)) * (upperBound - lowerBound) + lowerBound;
             }
             case EnvelopeType.tremolo: {
                 const timeLeft: number = -time + delay;
-                beats = Math.max(0, beats - delay);
+                beats = Math.max(0, beats - delay) + phase;
                 if (timeLeft > 0) return lowerBound;
                 else return (0.5 - Math.cos(beats * 2.0 * Math.PI * envelope.speed) * 0.5) * (upperBound - lowerBound) + lowerBound;
             }
@@ -7204,26 +7224,26 @@ export class EnvelopeComputer {
             case EnvelopeType.triptremolo2: return 0.75 - Math.cos(beats * 3.0 * Math.PI * envelope.speed) * 0.25;
             case EnvelopeType.triptremolo3: return 0.875 - Math.cos(beats * 3.0 * Math.PI * envelope.speed) * 0.125;
             case EnvelopeType.punch: {
-                time = Math.max(0, time - delay);
+                time = Math.max(0, time - delay) + phase;
                 return (Math.max(1, 2 - time * 10) - 1) * ((upperBound + 1) - (lowerBound + 1)) + (lowerBound + 1);
             }
             case EnvelopeType.flare: {
-                time = Math.max(0, time - delay);
-                const attack: number = 0.25 / Math.sqrt(envelope.speed); 
+                time = Math.max(0, time - delay) + phase;;
+                const attack: number = (0.25 / Math.sqrt(envelope.speed)); 
                 return (time < attack ? time / attack : 1.0 / (1.0 + (time - attack) * envelope.speed)) * (upperBound - lowerBound) + lowerBound;
             }
             case EnvelopeType.decay: {
-                time = Math.max(0, time - delay);
+                time = Math.max(0, time - delay) + phase;
                 return (Math.pow(2, -envelope.speed * time)) * (upperBound - lowerBound) + lowerBound;
             }
             // The next four are replicas of ModBox's unique transition types as envelopes.
             case EnvelopeType.modboxTrill: {
-                time = Math.max(0, time - delay);
+                time = Math.max(0, time - delay) + phase;
                 const decay = 0.25 / Math.sqrt(envelope.speed); 
                 return ((time < decay ? (decay - time) / decay : 1.0)) * (upperBound - lowerBound) + lowerBound;
             }
             case EnvelopeType.modboxBlip: {
-                time = Math.max(0, time - delay);
+                time = Math.max(0, time - delay) + phase;
                 const endTime1: number = 0.25 / Math.sqrt(envelope.speed); 
                 const endTime2: number = 0.7 / Math.sqrt(envelope.speed); 
                 const zeroIntercept: number = 2; 
@@ -7231,51 +7251,51 @@ export class EnvelopeComputer {
                 return Math.max(-0.1, ((time < endTime1 ? ((startValue2 - zeroIntercept) / endTime1) * time + zeroIntercept : time < endTime2 ? ((1 - startValue2) / (endTime2 - endTime1)) * (time - endTime1) + startValue2 : 1.0)) * (upperBound - lowerBound) + lowerBound);
             }
             case EnvelopeType.modboxClick: {
-                time = Math.max(0, time - delay);
+                time = Math.max(0, time - delay) + phase;
                 const attack: number = 0.25 / envelope.speed; 
                 const zeroIntercept = 6.0; 
                 return Math.max(-0.15, ((time < attack ? (time * ((-zeroIntercept) + 1) - attack * (-zeroIntercept)) / attack : 1.0)) * (upperBound - lowerBound) + lowerBound);
             }
             case EnvelopeType.modboxBow: {
-                time = Math.max(0, time - delay);
+                time = Math.max(0, time - delay) + phase;
                 const attack = 0.25 / Math.sqrt(envelope.speed); 
                 const zeroIntercept = 0.40; 
                 return ((time < attack ? (time * ((-zeroIntercept) + 1) - attack * (-zeroIntercept)) / attack : 1.0)) * (upperBound - lowerBound) + lowerBound;
             }
             // The next three were taken from GoldBox.
             case EnvelopeType.wibble: {
-                time = Math.max(0, time - delay);
+                time = Math.max(0, time - delay) + phase;
                 let temp = 0.5 - Math.cos(beats * envelope.speed) * 0.5;
                 temp = 1.0 / (1.0 + time * (envelope.speed - (temp / (1.5 / envelope.speed))));
                 temp = temp > 0.0 ? temp : 0.0;
                 return temp * (upperBound - lowerBound) + lowerBound;
             }
             case EnvelopeType.linear: {
-                time = Math.max(0, time - delay);
+                time = Math.max(0, time - delay) + phase;
                 let lin = (1.0 - (time / (16 / envelope.speed)));
                 lin = lin > 0.0 ? lin : 0.0;
                 return lin * (upperBound - lowerBound) + lowerBound;
             }
             case EnvelopeType.rise: {
-                time = Math.max(0, time - delay);
+                time = Math.max(0, time - delay) + phase;
                 let lin = (time / (16 / envelope.speed));
                 lin = lin < 1.0 ? lin : 1.0;
                 return lin * (upperBound - lowerBound) + lowerBound;
             }
             // New JummBox V2.6 envelope!
             case EnvelopeType.jummboxBlip: {
-                time = Math.max(0, time - delay);
+                time = Math.max(0, time - delay) + phase;
                 return (1 * +(time < (0.25 / Math.sqrt(envelope.speed)))) * (upperBound - lowerBound) + lowerBound;
             }
             // 3 Midbox-unique envelopes.
             case EnvelopeType.decelerate: {
-                time = Math.max(0, time - delay);
+                time = Math.max(0, time - delay) + phase;
                 return (0.5 - Math.sin(((time + 3) / 8) ** -1.3 * (400 / envelope.speed)) * 0.5) * (upperBound - lowerBound) + lowerBound;
             }
             case EnvelopeType.stairs: {
                 // https://en.wikipedia.org/wiki/Smoothstep
                 // Shows this whole equation for making stair-like stuff.
-                beatNote = Math.max(0, beatNote - delay);
+                beatNote = Math.max(0, beatNote - delay) + phase;
                 const scale: number = envelope.speed;
                 const offset: number = 1;
                 const smoothness: number = 0.000001;
@@ -7291,7 +7311,7 @@ export class EnvelopeComputer {
                 return (Math.max(0, Math.min(1, ((x3 / steps) * scale + offset)))) * (upperBound - lowerBound) + lowerBound;
             } 
             case EnvelopeType.loopStairs: {
-                beatNote = Math.max(0, beatNote - delay);
+                beatNote = Math.max(0, beatNote - delay) + phase;
                 const scale: number = envelope.speed;
                 const offset: number = 1;
                 const smoothness: number = 0.000001;
@@ -8930,6 +8950,7 @@ export class Synth {
             const latencyHint: string = this.anticipatePoorPerformance ? (this.preferLowerLatency ? "balanced" : "playback") : (this.preferLowerLatency ? "interactive" : "balanced");
             this.audioCtx = this.audioCtx || new (window.AudioContext || window.webkitAudioContext)({ latencyHint: latencyHint });
             this.samplesPerSecond = this.audioCtx.sampleRate;
+            // It appears that audioCtx.createScriptProcessor is deprecated?
             this.scriptNode = this.audioCtx.createScriptProcessor ? this.audioCtx.createScriptProcessor(bufferSize, 0, 2) : this.audioCtx.createJavaScriptNode(bufferSize, 0, 2); // bufferSize samples per callback buffer, 0 input channels, 2 output channels (left/right)
             this.scriptNode.onaudioprocess = this.audioProcessCallback;
             this.scriptNode.channelCountMode = 'explicit';
@@ -10869,15 +10890,15 @@ export class Synth {
             noteFilterExpression *= EnvelopeComputer.getLowpassCutoffDecayVolumeCompensation(drumsetFilterEnvelope)
 
             // Drumset filters use the same envelope timing as the rest of the envelopes, but do not include support for slide transitions.
-            let drumsetFilterEnvelopeStart: number = EnvelopeComputer.computeEnvelope(drumsetFilterEnvelope, envelopeComputer.noteSecondsStart[0], beatsPerPart * partTimeStart, beatNoteTimeStart, envelopeComputer.noteSizeStart, 0, 1, 4, 0, 1);
+            let drumsetFilterEnvelopeStart: number = EnvelopeComputer.computeEnvelope(drumsetFilterEnvelope, envelopeComputer.noteSecondsStart[0], beatsPerPart * partTimeStart, beatNoteTimeStart, envelopeComputer.noteSizeStart, 0, 1, 4, 0, 1, 0);
 
             // Apply slide interpolation to drumset envelope.
             if (envelopeComputer.prevSlideStart) {
-                const other: number = EnvelopeComputer.computeEnvelope(drumsetFilterEnvelope, envelopeComputer.prevNoteSecondsStart[0], beatsPerPart * partTimeStart, beatNoteTimeStart, envelopeComputer.prevNoteSize, 0, 1, 4, 0, 1);
+                const other: number = EnvelopeComputer.computeEnvelope(drumsetFilterEnvelope, envelopeComputer.prevNoteSecondsStart[0], beatsPerPart * partTimeStart, beatNoteTimeStart, envelopeComputer.prevNoteSize, 0, 1, 4, 0, 1, 0);
                 drumsetFilterEnvelopeStart += (other - drumsetFilterEnvelopeStart) * envelopeComputer.prevSlideRatioStart;
             }
             if (envelopeComputer.nextSlideStart) {
-                const other: number = EnvelopeComputer.computeEnvelope(drumsetFilterEnvelope, 0.0, beatsPerPart * partTimeStart, 0.0, envelopeComputer.nextNoteSize, 0, 1, 4, 0, 1);
+                const other: number = EnvelopeComputer.computeEnvelope(drumsetFilterEnvelope, 0.0, beatsPerPart * partTimeStart, 0.0, envelopeComputer.nextNoteSize, 0, 1, 4, 0, 1, 0);
                 drumsetFilterEnvelopeStart += (other - drumsetFilterEnvelopeStart) * envelopeComputer.nextSlideRatioStart;
             }
             let drumsetFilterEnvelopeEnd: number = drumsetFilterEnvelopeStart;

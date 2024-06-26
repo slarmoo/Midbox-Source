@@ -72,12 +72,12 @@ export class Localization {
     public static stairsStepAmountLabel: string = "‣ Steps:";
     public static envelopeDelayLabel: string = "‣ Delay:";
     public static delayMeasurementLabel: string = "‣ Delay In Seconds?"; // needs translation
-    public static delaySubNumberLabel: string = "‣ Delay Sub:"; // needs translation
+    public static phaseMeasurementLabel: string = "‣ Posit. In Seconds?"; // needs translation
     public static pitchStartLabel = "‣ Start ";
     public static pitchEndLabel = "‣ End ";
     public static pitchAmplifyLabel = "Amplify:";
     public static pitchBounceLabel = "Bounce:";
-    public static envelopeStartingPointLabel = "‣ Phase:"; // needs translation
+    public static envelopeStartingPointLabel = "‣ Position:"; // needs translation
     public static LFOShapeLabel = "‣ Shape:"; // needs translation
     public static LFOLoopsLabel = "‣ Loops?"; // needs translation
     public static trapezoidRatioLabel = "‣ Ratio:"; // needs translation
