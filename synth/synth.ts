@@ -7180,26 +7180,6 @@ export class EnvelopeComputer {
 
     public static computeEnvelope(envelope: Envelope, time: number, beats: number, beatNote: number, noteSize: number, lowerBound: number, upperBound: number, stepAmount: number, delay: number, pitch: number, phase: number): number {
         // This is where each envelope's equations are computed as well as the settings that change their properties.
-        // Here is a note of some important parts of equations for future reference: 
-        /*
-            IES/Inst-wide Speed: Not here. The variables above were turned into arrays to make this setting.
-            Time: Time-based envelopes. Works based on seconds.
-            Beats: Beat-based envelopes. Ignorant on when the note plays, works based on beats.
-            BeatNote: Beat-based envelopes which aren't ignorant to when the note plays.
-
-            Envelope Speed from SynthConfig.ts: * envelope.speed
-            Lower/Upper Bounds: (equation) * (upperBound - lowerBound) + lowerBound
-            StepAmount: const steps = stepAmount;
-            Delay: timeOrBeatNote = Math.max(0, timeOrBeatNote - delay);
-            Delay layered on constantBeat: {
-                const timeLeft: number = -time + delay; 
-                beats = Math.max(0, beats - delay);
-                if (timeLeft > 0) return lowerBound;
-                else return (equation);
-            }
-            Pitch: Was computed outside of this function. The output has been passed into this function and is used for the pitch envelope.
-            Phase: (timeOrBeat +- phase)
-        */
         switch (envelope.type) {
             case EnvelopeType.noteSize: return Synth.noteSizeToVolumeMult(noteSize) * (upperBound - lowerBound) + lowerBound;
             case EnvelopeType.none: return 1.0;
@@ -7228,7 +7208,7 @@ export class EnvelopeComputer {
                 return (Math.max(1, 2 - time * 10) - 1) * ((upperBound + 1) - (lowerBound + 1)) + (lowerBound + 1);
             }
             case EnvelopeType.flare: {
-                time = Math.max(0, time - delay) + phase;;
+                time = Math.max(0, time - delay) + phase;
                 const attack: number = (0.25 / Math.sqrt(envelope.speed)); 
                 return (time < attack ? time / attack : 1.0 / (1.0 + (time - attack) * envelope.speed)) * (upperBound - lowerBound) + lowerBound;
             }

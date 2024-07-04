@@ -4349,7 +4349,7 @@ export class SongEditor {
     
                             // Pressed while viewing a different bar than the current synth playhead.
                             if (this._doc.bar != Math.floor(this._doc.synth.playhead) && this._doc.synth.loopBarStart != -1) {
-    
+
                                 this._doc.synth.goToBar(this._doc.bar);
                                 this._doc.synth.snapToBar();
                                 this._doc.synth.initModFilters(this._doc.song);
@@ -4357,17 +4357,14 @@ export class SongEditor {
                                 if (this._doc.prefs.autoFollow) {
                                     this._doc.selection.setChannelBar(this._doc.channel, Math.floor(this._doc.synth.playhead));
                                 }
-    
                             }
-    
                             this._loopEditor.setLoopAt(this._doc.synth.loopBarStart, this._doc.synth.loopBarEnd);
-    
                             event.preventDefault();
                         }
                         break;
-                        } else {
-                            break;
-                            }
+                    } else {
+                        break;
+                    }
                 }
                 break;
             case 68: // d

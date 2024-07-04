@@ -7,7 +7,7 @@ import {SongDocument} from "./SongDocument";
 import {ChangeSetEnvelopeTarget, ChangeSetEnvelopeType, ChangeRemoveEnvelope, ChangePerEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeLowerBound, ChangeUpperBound, ChangeStairsStepAmount, ChangeEnvelopeDelay, ChangePitchEnvelopeStart, ChangePitchEnvelopeEnd, ChangePitchAmplify, ChangePitchBounce, ChangeEnvelopePosition} from "./changes";
 import {HTML} from "imperative-html/dist/esm/elements-strict";
 import {Localization as _} from "./Localization";
-import {clamp, lerp, norm} from "./UsefulCodingStuff";
+import {clamp, remap} from "./UsefulCodingStuff";
 import {Change} from "./Change";
 
 const {div, span, canvas, option, input, button, select} = HTML;
@@ -29,7 +29,6 @@ class EnvelopeLineGraph {
 		let upperBound: number = instEnv.upperBound;
 		let stepAmount: number = instEnv.stepAmount;
 		let delay: number = instEnv.delay;
-		let phase: number = instEnv.phase;
 		let qualitySteps: number = 300;
 		let minValue = -0.1;
       	let maxValue = -Infinity;
@@ -40,7 +39,7 @@ class EnvelopeLineGraph {
 			const beatNote: number = (time * this.range) * speed;
 			const noteSize: number = (1 - time) * Config.noteSizeMax;
 			const pitch: number = 1;
-			let value = EnvelopeComputer.computeEnvelope(envelope, seconds, beats, beatNote, noteSize, lowerBound, upperBound, stepAmount, delay, pitch, phase);
+			let value = EnvelopeComputer.computeEnvelope(envelope, seconds, beats, beatNote, noteSize, lowerBound, upperBound, stepAmount, delay, pitch, 0);
 			envelopeGraph.push(value);
 			maxValue = Math.max(value, maxValue);
         	minValue = Math.min(value, minValue);
@@ -59,8 +58,8 @@ class EnvelopeLineGraph {
 		ctx.beginPath();
 		for (let i: number = 0; i < qualitySteps; i++) {
 			const value: number = envelopeGraph[i];
-			const x = graphX + this.remap(i, 0, qualitySteps - 1, 0, graphWidth);
-			const y = (graphY + this.remap(value, minValue, maxValue, graphHeight, 0)) * 1.1;
+			const x = graphX + remap(i, 0, qualitySteps - 1, 0, graphWidth);
+			const y = (graphY + remap(value, minValue, maxValue, graphHeight, 0)) * 1.1;
 			if (i == 0) ctx.moveTo(x, y);
 			else ctx.lineTo(x, y);
 		}
@@ -70,10 +69,6 @@ class EnvelopeLineGraph {
 
 	public render() {
 		this._drawCanvas(0, 0, this.canvas.width, this.canvas.height);
-	}
-
-	private remap(x: number, a: number, b: number, c: number, d: number) {
-		return lerp(c, d, norm(a, b, x));
 	}
 }
 
@@ -103,12 +98,11 @@ class EnvelopeStartLine {
 		// Draw line.
 		ctx.beginPath();
 		ctx.setLineDash([2, 2]);
-		// Dunno a good name for this variable
-		let variable = Math.max(0, (this.timeRange - delay) * speed);
-		let x = graphX + this.remap(phase, 0, variable, 0, graphWidth);
+		let positionLine = Math.max(0, (phase + delay) / speed);
+		let x = graphX + remap(positionLine, 0, this.timeRange, 0, graphWidth);
 		let y = graphY;
 		ctx.moveTo(x, y);
-		x = graphX + this.remap(phase, 0, variable, 0, graphWidth);
+		x = graphX + remap(positionLine, 0, this.timeRange, 0, graphWidth);
 		y = graphY + graphHeight;
 		ctx.lineTo(x, y);
 		
@@ -118,10 +112,6 @@ class EnvelopeStartLine {
 
 	public render() {
 		this._drawCanvas(0, 0, this.canvas.width, this.canvas.height);
-	}
-
-	private remap(x: number, a: number, b: number, c: number, d: number) {
-		return lerp(c, d, norm(a, b, x));
 	}
 }
 
@@ -282,11 +272,11 @@ export class EnvelopeEditor {
 		const envelopePhaseInputBoxIndex = this._envelopePhaseInputBoxes.indexOf(<any> event.target);
 		const envelopePhaseSliderIndex = this._envelopePhaseSliders.indexOf(<any> event.target);
 		if (envelopePhaseInputBoxIndex != -1) {
-			this._doc.record(new ChangeEnvelopePosition(this._doc, envelopePhaseInputBoxIndex, instrument.envelopes[envelopePhaseInputBoxIndex].stepAmount, +(this._envelopePhaseInputBoxes[envelopePhaseInputBoxIndex].value)));
+			this._doc.record(new ChangeEnvelopePosition(this._doc, envelopePhaseInputBoxIndex, instrument.envelopes[envelopePhaseInputBoxIndex].phase, +(this._envelopePhaseInputBoxes[envelopePhaseInputBoxIndex].value)));
 		}
 		if (envelopePhaseSliderIndex != -1) {
 			this._envelopePhaseInputBoxes[envelopePhaseSliderIndex].value = this._envelopePhaseSliders[envelopePhaseSliderIndex].value;
-			this._lastChange = new ChangeEnvelopePosition(this._doc, envelopePhaseSliderIndex, instrument.envelopes[envelopePhaseSliderIndex].stepAmount, +(this._envelopePhaseSliders[envelopePhaseSliderIndex].value));
+			this._lastChange = new ChangeEnvelopePosition(this._doc, envelopePhaseSliderIndex, instrument.envelopes[envelopePhaseSliderIndex].phase, +(this._envelopePhaseSliders[envelopePhaseSliderIndex].value));
 		}
 	};
 

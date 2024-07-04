@@ -43,3 +43,8 @@ export function lerp(a: number, b: number, c: number) {
 export function norm(a: number, b: number, c: number) {
     return (c - a) / (b - a);
 }
+
+// Remap
+export function remap(x: number, a: number, b: number, c: number, d: number) {
+    return lerp(c, d, norm(a, b, x));
+}
