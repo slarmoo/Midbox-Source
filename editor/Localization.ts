@@ -46,6 +46,8 @@ export class Localization {
     public static pitchShiftLabel: string = "Pitch Shift:";
     public static detuneLabel: string = "Detune:";
     public static distortionLabel: string = "Distortion:";
+    public static reshaperLabel: string = "Reshape:";
+    public static reshapeShiftLabel: string = "Shift:";
     public static chordLabel: string = "Chords:";
     public static vibratoLabel: string = "Vibrato:";
     public static aliasingLabel: string = "Aliasing:";
@@ -175,7 +177,8 @@ export class Localization {
     public static noteFiltEffectLabel: string = "note filter";
     public static distortionEffectLabel: string = "distortion";
     public static bitCrushEffectLabel: string = "bitcrusher";
-    public static wavefoldEffectLabel: string = "wavefold";
+    public static wavefoldEffectLabel: string = "wavefold"; // needs translation
+    public static reshapeEffectLabel: string = "reshaper"; // needs translation
     public static chorusEffectLabel: string = "chorus";
     public static echoEffectLabel: string = "echo";
     public static reverbEffectLabel: string = "reverb";

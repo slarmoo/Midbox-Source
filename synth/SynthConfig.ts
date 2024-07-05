@@ -123,6 +123,7 @@ export const enum EffectType {
     chord,
     percussion,
     wavefold,
+    reshaper,
     length,
 }
 
@@ -149,6 +150,7 @@ export const enum EnvelopeComputeIndex {
     freqCrusher,
     chorus,
     reverb,
+    reshapeAmount,
     length,
 }
 
@@ -518,8 +520,8 @@ export class Config {
         { name: "testing unison",  voices: 9, spread: 0.05,     offset:  0.0,    expression: 1.0,  sign:  1.0},
     ]);
 
-    public static readonly effectNames: ReadonlyArray<string> =     ["reverb", "chorus", "panning", "distortion", "bitcrusher", "note filter", "echo", "pitch shift", "detune", "vibrato", "transition type", "chord type", "percussion", "wavefold"];
-    public static readonly effectOrder: ReadonlyArray<EffectType> = [EffectType.panning, EffectType.transition, EffectType.chord, EffectType.pitchShift, EffectType.detune, EffectType.vibrato, EffectType.noteFilter, EffectType.distortion, EffectType.bitcrusher, EffectType.wavefold, EffectType.chorus, EffectType.echo, EffectType.reverb, EffectType.percussion];
+    public static readonly effectNames: ReadonlyArray<string> =     ["reverb", "chorus", "panning", "distortion", "bitcrusher", "note filter", "echo", "pitch shift", "detune", "vibrato", "transition type", "chord type", "percussion", "wavefold", "reshaper"];
+    public static readonly effectOrder: ReadonlyArray<EffectType> = [EffectType.panning, EffectType.transition, EffectType.chord, EffectType.pitchShift, EffectType.detune, EffectType.vibrato, EffectType.noteFilter, EffectType.distortion, EffectType.reshaper, EffectType.bitcrusher, EffectType.wavefold, EffectType.chorus, EffectType.echo, EffectType.reverb, EffectType.percussion];
 
     public static readonly noteSizeMax:         number = 6;
     public static readonly volumeRange:         number = 50;
@@ -927,6 +929,8 @@ export class Config {
     public static readonly pickedStringDispersionFreqMult:   number = 4.0;    // The all-pass corner freq is based on this times the adjusted tone fundamental freq.
     public static readonly pickedStringShelfHz:              number = 4000.0; // The cutoff freq of the shelf filter that is used to decay the high frequency energy in the picked string.
     public static readonly distortionRange:                  number = 16;
+    public static readonly reshapeMax:                       number = 16;
+    public static readonly reshapeShiftMax:                  number = 16;
     public static readonly stringSustainRange:               number = 15;
     public static readonly stringDecayRate:                  number = 0.12;
     public static readonly enableAcousticSustain:            boolean = true;
@@ -964,6 +968,7 @@ export class Config {
         { name: "freqCrusher",            computeIndex: EnvelopeComputeIndex.freqCrusher,            displayName: "freq crush",        interleave: false, isFilter: false, maxCount: 1,                       effect: EffectType.bitcrusher, compatibleInstruments: null },
         { name: "chorus",                 computeIndex: EnvelopeComputeIndex.chorus,                 displayName: "chorus",            interleave: false, isFilter: false, maxCount: 1,                       effect: EffectType.chorus,     compatibleInstruments: null },
         { name: "reverb",                 computeIndex: EnvelopeComputeIndex.reverb,                 displayName: "reverb",            interleave: false, isFilter: false, maxCount: 1,                       effect: EffectType.reverb,     compatibleInstruments: null },
+        { name: "reshapeAmount",          computeIndex: EnvelopeComputeIndex.reshapeAmount,          displayName: "reshape amount",    interleave: false, isFilter: false, maxCount: 1,                       effect: EffectType.reshaper,   compatibleInstruments: null },
 /*      { name: "noteFilterGain",         computeIndex: EnvelopeComputeIndex.noteFilterGain0,        displayName: "n. filter # vol",   interleave: false, isFilter: true,  maxCount: Config.filterMaxPoints,  effect: EffectType.noteFilter, compatibleInstruments: null },
         { name: "eqFilterAllFreqs",       computeIndex: EnvelopeComputeIndex.eqFilterAllFreqs,       displayName: "eq filter freqs",   interleave: false, isFilter: true,  maxCount: 1,                       effect: null,                  compatibleInstruments: null },
         { name: "eqFilterFreq",           computeIndex: EnvelopeComputeIndex.eqFilterFreq0,          displayName: "eq filter # freq",  interleave: true,  isFilter: true,  maxCount: Config.filterMaxPoints,  effect: null,                  compatibleInstruments: null },
@@ -1619,6 +1624,9 @@ export function effectsIncludeNoteFilter(effects: number): boolean {
 }
 export function effectsIncludeDistortion(effects: number): boolean {
     return (effects & (1 << EffectType.distortion)) != 0;
+}
+export function effectsIncludeReshaper(effects: number): boolean {
+    return (effects & (1 << EffectType.reshaper)) != 0;
 }
 export function effectsIncludeBitcrusher(effects: number): boolean {
     return (effects & (1 << EffectType.bitcrusher)) != 0;

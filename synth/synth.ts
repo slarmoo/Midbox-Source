@@ -1,6 +1,6 @@
 // Copyright (c) 2012-2022 John Nesky and contributing authors, distributed under the MIT license, see accompanying the LICENSE.md file.
 
-import { Dictionary, DictionaryArray, FilterType, SustainType, EnvelopeType, InstrumentType, EffectType, EnvelopeComputeIndex, Transition, Unison, Chord, Vibrato, Envelope, AutomationTarget, Config, getDrumWave, drawNoiseSpectrum, getArpeggioPitchIndex, performIntegralOld, getPulseWidthRatio, effectsIncludeTransition, effectsIncludeChord, effectsIncludePitchShift, effectsIncludeDetune, effectsIncludeVibrato, effectsIncludeNoteFilter, effectsIncludeDistortion, effectsIncludeBitcrusher, effectsIncludeWavefold, effectsIncludePanning, effectsIncludeChorus, effectsIncludeEcho, effectsIncludeReverb, effectsIncludePercussion, OperatorWave } from "./SynthConfig";
+import { Dictionary, DictionaryArray, FilterType, SustainType, EnvelopeType, InstrumentType, EffectType, EnvelopeComputeIndex, Transition, Unison, Chord, Vibrato, Envelope, AutomationTarget, Config, getDrumWave, drawNoiseSpectrum, getArpeggioPitchIndex, performIntegralOld, getPulseWidthRatio, effectsIncludeTransition, effectsIncludeChord, effectsIncludePitchShift, effectsIncludeDetune, effectsIncludeVibrato, effectsIncludeNoteFilter, effectsIncludeDistortion, effectsIncludeReshaper, effectsIncludeBitcrusher, effectsIncludeWavefold, effectsIncludePanning, effectsIncludeChorus, effectsIncludeEcho, effectsIncludeReverb, effectsIncludePercussion, OperatorWave } from "./SynthConfig";
 import { EditorConfig } from "../editor/EditorConfig";
 import { scaleElementsByFactor, inverseRealFourierTransform } from "./FFT";
 import { Deque } from "./Deque";
@@ -1543,6 +1543,8 @@ export class Instrument {
     public stringSustain: number = 10;
     public stringSustainType: SustainType = SustainType.acoustic;
     public distortion: number = 0;
+    public reshapeAmount: number = 0;
+    public reshapeShift: number = 0;
     public bitcrusherFreq: number = 0;
     public bitcrusherQuantization: number = 0;
     public wavefoldLower: number = Config.wavefoldLowerMax;
@@ -1671,9 +1673,11 @@ export class Instrument {
         this.noteFilterSimpleCut = Config.filterSimpleCutRange - 1;
         this.noteFilterSimplePeak = 0;
         this.distortion = Math.floor((Config.distortionRange - 1) * 0.75);
+        this.reshapeAmount = Math.floor(Config.reshapeMax / 2);
+        this.reshapeShift = 0;
         this.bitcrusherFreq = Math.floor((Config.bitcrusherFreqRange - 1) * 0.5)
         this.bitcrusherQuantization = Math.floor((Config.bitcrusherQuantizationRange - 1) * 0.5);
-        this.wavefoldLower = Config.wavefoldLowerMax;
+        this.wavefoldLower = Config.wavefoldLowerMin;
         this.wavefoldUpper = Config.wavefoldUpperMax;
         this.pan = Config.panCenter;
         this.panDelay = 10;
@@ -2003,6 +2007,10 @@ export class Instrument {
         if (effectsIncludeDistortion(this.effects)) {
             instrumentObject["distortion"] = Math.round(100 * this.distortion / (Config.distortionRange - 1));
             instrumentObject["aliases"] = this.aliases;
+        }
+        if (effectsIncludeReshaper(this.effects)) {
+            instrumentObject["reshapeAmount"] = this.reshapeAmount;
+            instrumentObject["reshapeShift"] = this.reshapeShift;
         }
         if (effectsIncludeBitcrusher(this.effects)) {
             instrumentObject["bitcrusherOctave"] = (Config.bitcrusherFreqRange - 1 - this.bitcrusherFreq) * Config.bitcrusherOctaveStep;
@@ -2506,6 +2514,13 @@ export class Instrument {
 
         if (instrumentObject["distortion"] != undefined) {
             this.distortion = clamp(0, Config.distortionRange, Math.round((Config.distortionRange - 1) * (instrumentObject["distortion"] | 0) / 100));
+        }
+
+        if (instrumentObject["reshapeAmount"] != undefined) {
+            this.reshapeAmount = clamp(0, Config.reshapeMax, instrumentObject["reshapeAmount"]);
+        }
+        if (instrumentObject["reshapeShift"] != undefined) {
+            this.reshapeShift = clamp(0, Config.reshapeShiftMax, instrumentObject["reshapeShift"]);
         }
 
         if (instrumentObject["bitcrusherOctave"] != undefined) {
@@ -3927,6 +3942,10 @@ export class Song {
                     // Aliasing is tied into distortion for now
                     buffer.push(base64IntToCharCode[+instrument.aliases]);
                 }
+                if (effectsIncludeReshaper(instrument.effects)) {
+                    buffer.push(base64IntToCharCode[instrument.reshapeAmount]);
+                    buffer.push(base64IntToCharCode[instrument.reshapeShift]);
+                }
                 if (effectsIncludeBitcrusher(instrument.effects)) {
                     buffer.push(base64IntToCharCode[instrument.bitcrusherFreq], base64IntToCharCode[instrument.bitcrusherQuantization]);
                 }
@@ -5331,6 +5350,10 @@ export class Song {
                         instrument.distortion = clamp(0, Config.distortionRange, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                         if ((fromJummBox && !beforeFive) || fromMidbox)
                             instrument.aliases = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] ? true : false;
+                    }
+                    if (effectsIncludeReshaper(instrument.effects)) {
+                        instrument.reshapeAmount = clamp(0, Config.reshapeMax, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
+                        instrument.reshapeShift = clamp(0, Config.reshapeShiftMax, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                     }
                     if (effectsIncludeBitcrusher(instrument.effects)) {
                         instrument.bitcrusherFreq = clamp(0, Config.bitcrusherFreqRange, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
@@ -7500,6 +7523,12 @@ export class InstrumentState {
     public distortionPrevInput: number = 0.0;
     public distortionNextOutput: number = 0.0;
 
+    public reshape: number = 0.0;
+    public reshapeDelta: number = 0.0;
+    public reshapeShift: number = 0.0;
+    public reshapePhase: number = 0.0;
+    public reshapePhaseDelta: number = 0.0;
+
     public bitcrusherPrevInput: number = 0.0;
     public bitcrusherCurrentOutput: number = 0.0;
     public bitcrusherPhase: number = 1.0;
@@ -7651,6 +7680,11 @@ export class InstrumentState {
         this.distortionFractionalInput3 = 0.0;
         this.distortionPrevInput = 0.0;
         this.distortionNextOutput = 0.0;
+        this.reshape = 0.0;
+        this.reshapeDelta = 0.0;
+        this.reshapeShift = 0.0;
+        this.reshapePhase = 0.0;
+        this.reshapePhaseDelta = 0.0;
         this.panningDelayPos = 0;
         if (this.panningDelayLine != null) for (let i: number = 0; i < this.panningDelayLine.length; i++) this.panningDelayLine[i] = 0.0;
         this.echoDelayOffsetEnd = null;
@@ -7741,6 +7775,7 @@ export class InstrumentState {
         const envelopeEnds: number[] = this.envelopeComputer.envelopeEnds;
 
         const usesDistortion: boolean = effectsIncludeDistortion(this.effects);
+        const usesReshaper: boolean = effectsIncludeReshaper(this.effects);
         const usesBitcrusher: boolean = effectsIncludeBitcrusher(this.effects);
         const usesWavefold: boolean = effectsIncludeWavefold(this.effects);
         const usesPanning: boolean = effectsIncludePanning(this.effects);
@@ -7771,6 +7806,22 @@ export class InstrumentState {
             this.distortionDelta = (distortionEnd - distortionStart) / roundedSamplesPerTick;
             this.distortionDrive = distortionDriveStart;
             this.distortionDriveDelta = (distortionDriveEnd - distortionDriveStart) / roundedSamplesPerTick;
+        }
+
+        if (usesReshaper) {
+            let reshapeSettingStart: number = instrument.reshapeAmount;
+            let reshapeSettingEnd: number = instrument.reshapeAmount;
+
+            const reshapeEnvelopeStart: number = envelopeStarts[EnvelopeComputeIndex.reshapeAmount];
+            const reshapeEnvelopeEnd: number = envelopeEnds[EnvelopeComputeIndex.reshapeAmount];
+            const reshapeStart: number = (reshapeSettingStart * reshapeEnvelopeStart) / 4;
+            const reshapeEnd: number = (reshapeSettingEnd * reshapeEnvelopeEnd) / 4;
+            const reshapeShiftValue: number = instrument.reshapeShift / 10;
+            const phaseDelta: number = 220 / samplesPerSecond;
+            this.reshape = reshapeStart;
+            this.reshapeDelta = (reshapeEnd - reshapeStart) / roundedSamplesPerTick;
+            this.reshapeShift = reshapeShiftValue;
+            this.reshapePhaseDelta = phaseDelta;
         }
 
         if (usesBitcrusher) {
@@ -11897,6 +11948,7 @@ export class Synth {
         // @jummbus - ^ Correct, removed the non-zero checks as modulation can change them.
 
         const usesDistortion: boolean = effectsIncludeDistortion(instrumentState.effects);
+        const usesReshaper: boolean = effectsIncludeReshaper(instrumentState.effects);
         const usesBitcrusher: boolean = effectsIncludeBitcrusher(instrumentState.effects);
         const usesWavefold: boolean = effectsIncludeWavefold(instrumentState.effects);
         const usesEqFilter: boolean = instrumentState.eqFilterCount > 0;
@@ -11905,6 +11957,7 @@ export class Synth {
         const usesEcho: boolean = effectsIncludeEcho(instrumentState.effects);
         const usesReverb: boolean = effectsIncludeReverb(instrumentState.effects);
         let signature: number = 0; if (usesDistortion) signature = signature | 1;
+        signature = signature << 1; if (usesReshaper) signature = signature | 1;
         signature = signature << 1; if (usesBitcrusher) signature = signature | 1;
         signature = signature << 1; if (usesWavefold) signature = signature | 1;
         signature = signature << 1; if (usesEqFilter) signature = signature | 1;
@@ -11974,6 +12027,15 @@ export class Synth {
 				let distortionNextOutput = +instrumentState.distortionNextOutput;`
             }
 
+            if (usesReshaper) {
+                effectsSource += `
+                let reshape = +instrumentState.reshape;
+                const reshapeDelta = +instrumentState.reshapeDelta;
+                let reshapeShift = +instrumentState.reshapeShift;
+                let reshapePhase = +instrumentState.reshapePhase;
+                const reshapePhaseDelta = +instrumentState.reshapePhaseDelta;`
+            }
+
             if (usesBitcrusher) {
                 effectsSource += `
 				
@@ -11991,6 +12053,7 @@ export class Synth {
             if (usesWavefold) {
                 // MID TODO: Base it off of bitcrush's wavefolding?
                 effectsSource += `
+
 				// Nothing.
                 `
             }
@@ -12148,6 +12211,15 @@ export class Synth {
 					distortionPrevInput = distortionNextInput;
 					distortion += distortionDelta;
 					distortionDrive += distortionDriveDelta;`
+            }
+
+            if (usesReshaper) {
+                effectsSource += `
+
+                    let reshapeEquation = Math.abs((-Math.abs(Math.asin(Math.sin(reshapePhase * Math.PI * 0.5))) + reshapeShift) * (reshape / 3)) - ((reshape / 3) * 0.8);
+                    sample *= 1 + reshapeEquation;
+                    reshape += reshapeDelta;
+                    reshapePhase += reshapePhaseDelta;`
             }
 
             if (usesBitcrusher) {
@@ -12379,6 +12451,13 @@ export class Synth {
 				instrumentState.distortionFractionalInput3 = distortionFractionalInput3;
 				instrumentState.distortionPrevInput = distortionPrevInput;
 				instrumentState.distortionNextOutput = distortionNextOutput;`
+            }
+
+            if (usesReshaper) {
+                effectsSource += `
+                
+                instrumentState.reshape = reshape;
+                instrumentState.reshapePhase = reshapePhase;`
             }
 
             if (usesBitcrusher) {

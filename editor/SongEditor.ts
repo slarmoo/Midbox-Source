@@ -1,7 +1,7 @@
 // Copyright (c) 2012-2022 John Nesky and contributing authors, distributed under the MIT license, see accompanying the LICENSE.md file.
 
 //import {Layout} from "./Layout";
-import { InstrumentType, EffectType, Config, getPulseWidthRatio, effectsIncludeTransition, effectsIncludeChord, effectsIncludePitchShift, effectsIncludeDetune, effectsIncludeVibrato, effectsIncludeNoteFilter, effectsIncludeDistortion, effectsIncludeBitcrusher, effectsIncludeWavefold, effectsIncludePanning, effectsIncludeChorus, effectsIncludeEcho, effectsIncludeReverb, effectsIncludePercussion, DropdownID } from "../synth/SynthConfig";
+import { InstrumentType, EffectType, Config, getPulseWidthRatio, effectsIncludeTransition, effectsIncludeChord, effectsIncludePitchShift, effectsIncludeDetune, effectsIncludeVibrato, effectsIncludeNoteFilter, effectsIncludeDistortion, effectsIncludeReshaper, effectsIncludeBitcrusher, effectsIncludeWavefold, effectsIncludePanning, effectsIncludeChorus, effectsIncludeEcho, effectsIncludeReverb, effectsIncludePercussion, DropdownID } from "../synth/SynthConfig";
 import { BarScrollBar } from "./BarScrollBar";
 import { BeatsPerBarPrompt } from "./BeatsPerBarPrompt";
 import { Change, ChangeGroup } from "./Change";
@@ -48,7 +48,7 @@ import { ThemePrompt } from "./ThemePrompt";
 import { TipPrompt } from "./TipPrompt";
 import { LanguagePrompt } from "./LanguagePrompt";
 import { Localization as _ } from "./Localization";
-import { ChangeTempo, ChangeKeyOctave, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangeSupersawDynamism, ChangeSupersawSpread, ChangeSupersawShape, ChangeWavetableSpeed, ChangeWaveInterpolation, ChangeCyclePerNote, ChangeOneShotCycle, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeCustomAlgorithmOrFeedback, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, Change6OpFeedbackType, Change6OpAlgorithm, ChangeChipWave, ChangeNoiseWave, /*ChangeNoiseSeedRandomization, ChangeNoiseSeed,*/ ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeUnisonVoices, ChangeUnisonSpread, ChangeUnisonOffset, ChangeUnisonExpression, ChangeUnisonSign, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeLowerWavefold, ChangeUpperWavefold, ChangeAddEnvelope, ChangeEnvelopeSpeed, ChangeDrumEnvelopeSpeed, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeWavetableCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeArpeggioPattern, ChangeClicklessTransition, ChangeContinueThruPattern, ChangeAliasing, ChangePercussion, ChangeSDAffected, ChangeSOAffected, ChangeStrumSpeed, ChangeSlideSpeed, ChangeSongSubtitle, ChangeSetPatternInstruments, ChangeHoldingModRecording } from "./changes";
+import { ChangeTempo, ChangeKeyOctave, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangeSupersawDynamism, ChangeSupersawSpread, ChangeSupersawShape, ChangeWavetableSpeed, ChangeWaveInterpolation, ChangeCyclePerNote, ChangeOneShotCycle, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeCustomAlgorithmOrFeedback, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, Change6OpFeedbackType, Change6OpAlgorithm, ChangeChipWave, ChangeNoiseWave, /*ChangeNoiseSeedRandomization, ChangeNoiseSeed,*/ ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeUnisonVoices, ChangeUnisonSpread, ChangeUnisonOffset, ChangeUnisonExpression, ChangeUnisonSign, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeReshapeAmount, ChangeReshapeShift, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeLowerWavefold, ChangeUpperWavefold, ChangeAddEnvelope, ChangeEnvelopeSpeed, ChangeDrumEnvelopeSpeed, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeWavetableCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeArpeggioPattern, ChangeClicklessTransition, ChangeContinueThruPattern, ChangeAliasing, ChangePercussion, ChangeSDAffected, ChangeSOAffected, ChangeStrumSpeed, ChangeSlideSpeed, ChangeSongSubtitle, ChangeSetPatternInstruments, ChangeHoldingModRecording } from "./changes";
 import { oscilloscopeCanvas } from "../global/Oscilloscope";
 import { TrackEditor } from "./TrackEditor";
 import { clamp } from "./UsefulCodingStuff";
@@ -1205,6 +1205,10 @@ export class SongEditor {
     private readonly _songDetuneEffectedRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "margin-left:10px;", onclick: () => this._openPrompt("songDetuneEffected") }, span(_.songDetuneEffectedLabel)), this._songDetuneEffectedBox);
     private readonly _songOctaveEffectedBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
     private readonly _songOctaveEffectedRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "margin-left:10px;", onclick: () => this._openPrompt("songOctaveEffected") }, span(_.songOctaveEffectedLabel)), this._songOctaveEffectedBox);
+    private readonly _reshapeAmountSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.reshapeMax, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeReshapeAmount(this._doc, oldValue, newValue), false);
+    private readonly _reshapeAmountRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("reshaper") }, span(_.reshaperLabel)), this._reshapeAmountSlider.container);
+    private readonly _reshapeShiftSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.reshapeShiftMax, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeReshapeShift(this._doc, oldValue, newValue), false);
+    private readonly _reshapeShiftRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("reshaper") }, span(_.reshapeShiftLabel)), this._reshapeShiftSlider.container);
     private readonly _bitcrusherQuantizationSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.bitcrusherQuantizationRange - 1, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeBitcrusherQuantization(this._doc, oldValue, newValue), false);
     private readonly _bitcrusherQuantizationRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", title: (_.bitCrushHover), onclick: () => this._openPrompt("bitcrusherQuantization") }, span(_.bitCrushLabel)), this._bitcrusherQuantizationSlider.container);
     private readonly _bitcrusherFreqSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.bitcrusherFreqRange - 1, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeBitcrusherFreq(this._doc, oldValue, newValue), false);
@@ -1542,6 +1546,8 @@ export class SongEditor {
         this._noteFilterSimplePeakRow,
         this._distortionRow,
         this._aliasingRow,
+        this._reshapeAmountRow,
+        this._reshapeShiftRow,
         this._bitcrusherQuantizationRow,
         this._bitcrusherFreqRow,
         this._wavefoldLowerRow,
@@ -2643,7 +2649,8 @@ export class SongEditor {
             (_.transitionEffectLabel),
             (_.chordEffectLabel),
             (_.percussionEffectLabel),
-            (_.wavefoldEffectLabel)
+            (_.wavefoldEffectLabel),
+            (_.reshapeEffectLabel),
         ];
         for (let i: number = 0; i < Config.effectOrder.length; i++) {
             let effectFlag: number = Config.effectOrder[i];
@@ -3018,6 +3025,16 @@ export class SongEditor {
                 this._aliasingRow.style.display = "none";
             }
 
+            if (effectsIncludeReshaper(instrument.effects)) {
+                this._reshapeAmountRow.style.display = "";
+                this._reshapeShiftRow.style.display = "";
+                this._reshapeAmountSlider.updateValue(instrument.reshapeAmount);
+                this._reshapeShiftSlider.updateValue(instrument.reshapeShift);
+            } else {
+                this._reshapeAmountRow.style.display = "none";
+                this._reshapeShiftRow.style.display = "none";
+            }
+
             if (effectsIncludeBitcrusher(instrument.effects)) {
                 this._bitcrusherQuantizationRow.style.display = "";
                 this._bitcrusherFreqRow.style.display = "";
@@ -3359,6 +3376,7 @@ export class SongEditor {
                             anyInstrumentVibratos:       boolean = false,
                             anyInstrumentNoteFilters:    boolean = false,
                             anyInstrumentDistorts:       boolean = false,
+                            anyInstrumentReshapes:       boolean = false,
                             anyInstrumentBitcrushes:     boolean = false,
                             anyInstrumentPans:           boolean = false,
                             anyInstrumentChorus:         boolean = false,
@@ -3370,6 +3388,7 @@ export class SongEditor {
                             allInstrumentDetunes:        boolean = true,
                             allInstrumentVibratos:       boolean = true,
                             allInstrumentDistorts:       boolean = true,
+                            allInstrumentReshapes:       boolean = true,
                             allInstrumentBitcrushes:     boolean = true,
                             allInstrumentPans:           boolean = true,
                             allInstrumentChorus:         boolean = true,
@@ -3425,6 +3444,12 @@ export class SongEditor {
                             }
                             else {
                                 allInstrumentDistorts = false;
+                            }
+                            if (effectsIncludeReshaper(channel.instruments[instrumentIndex].effects)) {
+                                anyInstrumentReshapes = true;
+                            }
+                            else {
+                                allInstrumentReshapes = false;
                             }
                             if (effectsIncludeBitcrusher(channel.instruments[instrumentIndex].effects)) {
                                 anyInstrumentBitcrushes = true;
@@ -3553,6 +3578,14 @@ export class SongEditor {
                         }
                         if (!allInstrumentDistorts) {
                             unusedSettingList.push("+ distortion");
+                        }
+                        if (anyInstrumentReshapes) {
+                            //settingList.push("reshape");
+                            //settingList.push("shift");
+                        }
+                        if (!allInstrumentReshapes) {
+                            //unusedSettingList.push("+ reshape");
+                            //settingList.push("+ shift");
                         }
                         if (anyInstrumentBitcrushes) {
                             settingList.push("bit crush");

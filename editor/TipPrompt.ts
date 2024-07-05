@@ -456,6 +456,13 @@ export class TipPrompt implements Prompt {
 					p("Finally, I recommend adjusting the fade-out setting to allow the end of each note to overlap a little bit with the beginning of the next, but not too much!"),
 				);
 			} break;
+			case "reshaper": {
+				message = div(
+					h2("Reshaper"),
+					p("This is a new effect from Midbox that changes the shape of the instrument's wave. It comes with two sliders."),
+					p("The first slider sets the intensity of the reshaping, while the second slider changes the position in which the instrument's wave is shifted. Mess with it and see what they do!")
+				);
+			} break;
 			case "bitcrusherQuantization": {
 				message = div(
 					h2("Bitcrusher Quantization"),
