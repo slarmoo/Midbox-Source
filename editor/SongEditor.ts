@@ -165,6 +165,11 @@ class CustomChipCanvas {
         canvas.addEventListener("mouseup", this._onMouseUp);
         canvas.addEventListener("mouseleave", this._onMouseUp);
 
+        canvas.addEventListener("touchstart", this._onTouchDown);
+		canvas.addEventListener("touchmove", this._onTouchMove);
+		canvas.addEventListener("touchend", this._onMouseUp);
+		canvas.addEventListener("touchcancel", this._onMouseUp);
+
         this.mouseDown = false;
         this.continuousEdit = false;
         this.lastX = 0;
@@ -294,10 +299,89 @@ class CustomChipCanvas {
         this._getChange(this.newArray);
     }
 
+    private _onTouchMove = (event: TouchEvent): void => {
+        if (this.mouseDown) {
+            var x = (event.touches[0].clientX || event.touches[0].pageX) - this.canvas.getBoundingClientRect().left;
+            var y = Math.floor((event.touches[0].clientY || event.touches[0].pageY) - this.canvas.getBoundingClientRect().top);
+
+            if (y < 2) y = 2;
+            if (y > 50) y = 50;
+
+            var ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
+
+            if (this.continuousEdit == true && Math.abs(this.lastX - x) < 40) {
+                var lowerBound = (x < this.lastX) ? x : this.lastX;
+                var upperBound = (x < this.lastX) ? this.lastX : x;
+
+                for (let i = lowerBound; i <= upperBound; i += 2) {
+                    var progress = (Math.abs(x - this.lastX) > 2.0) ? ((x > this.lastX) ?
+                        1.0 - ((i - lowerBound) / (upperBound - lowerBound))
+                        : ((i - lowerBound) / (upperBound - lowerBound))) : 0.0;
+                    var j = Math.round(y + (this.lastY - y) * progress);
+
+                    ctx.fillStyle = ColorConfig.getComputed("--editor-background");
+                    ctx.fillRect(Math.floor(i / 2) * 2, 0, 2, 53);
+                    ctx.fillStyle = ColorConfig.getComputed("--ui-widget-background");
+                    ctx.fillRect(Math.floor(i / 2) * 2, 25, 2, 2);
+                    ctx.fillStyle = ColorConfig.getComputed("--track-editor-bg-pitch-dim");
+                    ctx.fillRect(Math.floor(i / 2) * 2, 13, 2, 1);
+                    ctx.fillRect(Math.floor(i / 2) * 2, 39, 2, 1);
+                    ctx.fillStyle = ColorConfig.getComputedChannelColor(this._doc.song, this._doc.channel).primaryNote;
+                    ctx.fillRect(Math.floor(i / 2) * 2, j - 2, 2, 4);
+
+                    // Actually update current instrument's custom waveform
+                    this.newArray[Math.floor(i / 2)] = (j - 26);
+                }
+            } else {
+                ctx.fillStyle = ColorConfig.getComputed("--editor-background");
+                ctx.fillRect(Math.floor(x / 2) * 2, 0, 2, 52);
+                ctx.fillStyle = ColorConfig.getComputed("--ui-widget-background");
+                ctx.fillRect(Math.floor(x / 2) * 2, 25, 2, 2);
+                ctx.fillStyle = ColorConfig.getComputed("--track-editor-bg-pitch-dim");
+                ctx.fillRect(Math.floor(x / 2) * 2, 13, 2, 1);
+                ctx.fillRect(Math.floor(x / 2) * 2, 39, 2, 1);
+                ctx.fillStyle = ColorConfig.getComputedChannelColor(this._doc.song, this._doc.channel).primaryNote;
+                ctx.fillRect(Math.floor(x / 2) * 2, y - 2, 2, 4);
+
+                // Actually update current instrument's custom waveform
+                this.newArray[Math.floor(x / 2)] = (y - 26);
+            }
+            this.continuousEdit = true;
+            this.lastX = x;
+            this.lastY = y;
+
+            // Preview - update integral used for sound synthesis based on new array, not actual stored array. When mouse is released, real update will happen.
+            let instrument: Instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
+            let sum: number = 0.0;
+            for (let i: number = 0; i < this.newArray.length; i++) {
+                sum += this.newArray[i];
+            }
+            const average: number = sum / this.newArray.length;
+            // Perform the integral on the wave. The chipSynth will perform the derivative to get the original wave back but with antialiasing.
+            let cumulative: number = 0;
+            let wavePrev: number = 0;
+            for (let i: number = 0; i < this.newArray.length; i++) {
+                cumulative += wavePrev;
+                wavePrev = this.newArray[i] - average;
+                instrument.customChipWaveIntegral[i] = cumulative;
+            }
+            instrument.customChipWaveIntegral[64] = 0.0;
+        }
+        // Just call a change here to prevent issue with the autoFollow preference
+        // messing with the canvas.
+        this._getChange(this.newArray);
+    }
+
     private _onMouseDown = (event: MouseEvent): void => {
         this.mouseDown = true;
         // Allow single-click edit
         this._onMouseMove(event);
+    }
+
+    private _onTouchDown = (event: TouchEvent): void => {
+        this.mouseDown = true;
+        // Allow single-tap edit
+        this._onTouchMove(event);
     }
     
     private _onMouseUp = (): void => {
@@ -332,6 +416,11 @@ class WavetableCustomChipCanvas {
         canvas.addEventListener("mousedown", this._onMouseDown);
         canvas.addEventListener("mouseup", this._onMouseUp);
         canvas.addEventListener("mouseleave", this._onMouseUp);
+
+        canvas.addEventListener("touchstart", this._onTouchDown);
+		canvas.addEventListener("touchmove", this._onTouchMove);
+		canvas.addEventListener("touchend", this._onMouseUp);
+		canvas.addEventListener("touchcancel", this._onMouseUp);
 
         this.mouseDown = false;
         this.continuousEdit = false;
@@ -477,10 +566,89 @@ class WavetableCustomChipCanvas {
         this._getChange(this.newArray);
     }
 
+    private _onTouchMove = (event: TouchEvent): void => {
+        if (this.mouseDown) {
+            var x = (event.touches[0].clientX || event.touches[0].pageX) - this.canvas.getBoundingClientRect().left;
+            var y = Math.floor((event.touches[0].clientY || event.touches[0].pageY) - this.canvas.getBoundingClientRect().top);
+
+            if (y < 2) y = 2;
+            if (y > 50) y = 50;
+
+            var ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
+
+            if (this.continuousEdit == true && Math.abs(this.lastX - x) < 40) {
+                var lowerBound = (x < this.lastX) ? x : this.lastX;
+                var upperBound = (x < this.lastX) ? this.lastX : x;
+
+                for (let i = lowerBound; i <= upperBound; i += 2) {
+                    var progress = (Math.abs(x - this.lastX) > 2.0) ? ((x > this.lastX) ?
+                        1.0 - ((i - lowerBound) / (upperBound - lowerBound))
+                        : ((i - lowerBound) / (upperBound - lowerBound))) : 0.0;
+                    var j = Math.round(y + (this.lastY - y) * progress);
+
+                    ctx.fillStyle = ColorConfig.getComputed("--editor-background");
+                    ctx.fillRect(Math.floor(i / 2) * 2, 0, 2, 53);
+                    ctx.fillStyle = ColorConfig.getComputed("--ui-widget-background");
+                    ctx.fillRect(Math.floor(i / 2) * 2, 25, 2, 2);
+                    ctx.fillStyle = ColorConfig.getComputed("--track-editor-bg-pitch-dim");
+                    ctx.fillRect(Math.floor(i / 2) * 2, 13, 2, 1);
+                    ctx.fillRect(Math.floor(i / 2) * 2, 39, 2, 1);
+                    ctx.fillStyle = ColorConfig.getComputedChannelColor(this._doc.song, this._doc.channel).primaryNote;
+                    ctx.fillRect(Math.floor(i / 2) * 2, j - 2, 2, 4);
+
+                    // Actually update current instrument's custom waveform
+                    this.newArray[Math.floor(i / 2)] = (j - 26);
+                }
+            } else {
+                ctx.fillStyle = ColorConfig.getComputed("--editor-background");
+                ctx.fillRect(Math.floor(x / 2) * 2, 0, 2, 52);
+                ctx.fillStyle = ColorConfig.getComputed("--ui-widget-background");
+                ctx.fillRect(Math.floor(x / 2) * 2, 25, 2, 2);
+                ctx.fillStyle = ColorConfig.getComputed("--track-editor-bg-pitch-dim");
+                ctx.fillRect(Math.floor(x / 2) * 2, 13, 2, 1);
+                ctx.fillRect(Math.floor(x / 2) * 2, 39, 2, 1);
+                ctx.fillStyle = ColorConfig.getComputedChannelColor(this._doc.song, this._doc.channel).primaryNote;
+                ctx.fillRect(Math.floor(x / 2) * 2, y - 2, 2, 4);
+
+                // Actually update current instrument's custom waveform
+                this.newArray[Math.floor(x / 2)] = (y - 26);
+            }
+            this.continuousEdit = true;
+            this.lastX = x;
+            this.lastY = y;
+
+            // Preview - update integral used for sound synthesis based on new array, not actual stored array. When mouse is released, real update will happen.
+            let instrument: Instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
+            let sum: number = 0.0;
+            for (let i: number = 0; i < this.newArray.length; i++) {
+                sum += this.newArray[i];
+            }
+            const average: number = sum / this.newArray.length;
+            // Perform the integral on the wave. The chipSynth will perform the derivative to get the original wave back but with antialiasing.
+            let cumulative: number = 0;
+            let wavePrev: number = 0;
+            for (let i: number = 0; i < this.newArray.length; i++) {
+                cumulative += wavePrev;
+                wavePrev = this.newArray[i] - average;
+                instrument.customChipWaveIntegral[i] = cumulative;
+            }
+            instrument.customChipWaveIntegral[64] = 0.0;
+        }
+        // Just call a change here to prevent issue with the autoFollow preference
+        // messing with the canvas.
+        this._getChange(this.newArray);
+    }
+
     private _onMouseDown = (event: MouseEvent): void => {
         this.mouseDown = true;
         // Allow single-click edit
         this._onMouseMove(event);
+    }
+
+    private _onTouchDown = (event: TouchEvent): void => {
+        this.mouseDown = true;
+        // Allow single-tap edit
+        this._onTouchMove(event);
     }
 
     private _onMouseUp = (): void => {
@@ -5520,7 +5688,6 @@ export class SongEditor {
     }
 
     private _customWavePresetHandler = (event: Event): void => {
-
         // Update custom wave value
         let customWaveArray: Float32Array = new Float32Array(64);
         let index: number = this._customWavePresetDrop.selectedIndex - 1;
@@ -5533,11 +5700,8 @@ export class SongEditor {
             // Compute derivative to get original wave.
             customWaveArray[i] = (Config.chipWaves[index].samples[Math.floor(arrayPoint)] - Config.chipWaves[index].samples[(Math.floor(arrayPoint) + 1)]) / arrayStep;
 
-            if (customWaveArray[i] < minValue)
-                minValue = customWaveArray[i];
-
-            if (customWaveArray[i] > maxValue)
-                maxValue = customWaveArray[i];
+            if (customWaveArray[i] < minValue) minValue = customWaveArray[i];
+            if (customWaveArray[i] > maxValue) maxValue = customWaveArray[i];
 
             // Scale an any-size array to 64 elements
             arrayPoint += arrayStep;
@@ -5568,7 +5732,6 @@ export class SongEditor {
     }
 
     private _wavetableCustomWavePresetHandler = (event: Event): void => {
-
         // Update custom wave value
         let customWaveArray: Float32Array = new Float32Array(64);
         let index: number = this._wavetableCustomWavePresetDrop.selectedIndex - 1;

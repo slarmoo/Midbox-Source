@@ -1065,6 +1065,182 @@ export class WavetablePromptCanvas {
 				} break;
 			}
 		} else if (this.drawMode == DrawMode.Selection) {
+			switch (this.selectionModeStep) {
+				case SelectionModeStep.NoSelection: {
+					this.selectionModeStep = SelectionModeStep.MakingSelection;
+
+					const newSelectionStart: number = Math.min(63, Math.max(0, Math.floor(this._mouseX * 64 / this._editorWidth)));
+					const newSelectionEnd: number = newSelectionStart + 1;
+					this._selectionBounds = {
+						start: newSelectionStart,
+						end: newSelectionEnd,
+					};
+					this._tentativeSelectionBounds = {
+						start: newSelectionStart,
+						end: newSelectionEnd,
+					};
+				} break;
+				case SelectionModeStep.MakingSelection: {
+					// Why is this supposed to be unreachable?
+					// Well, while this is a state that's entered in this event,
+					// only subsequent events will have it as a current state, at the
+					// point where switch (this.selectionModeStep) starts.
+					// Similar reasoning applies to the other unreachable cases below.
+					throw new Error("This should be unreachable!");
+				} break;
+				case SelectionModeStep.HasSelection: {
+					const bounds: SelectionBounds = this._selectionBounds!;
+
+					const selectionBoxWidth: number = (bounds.end - bounds.start) / 64 * this._editorWidth;
+
+					const selectionBoxX0: number = bounds.start / 64 * this._editorWidth;
+					const selectionBoxX1: number = selectionBoxX0 + selectionBoxWidth;
+
+					const selectionBoxStartX0: number = selectionBoxX0 - this._selectionEdgeMargin;
+					const selectionBoxStartX1: number = selectionBoxX0 + this._selectionEdgeMargin;
+
+					const selectionBoxEndX0: number = selectionBoxX1 - this._selectionEdgeMargin;
+					const selectionBoxEndX1: number = selectionBoxX1 + this._selectionEdgeMargin;
+
+					const mouseIsInsideSelection: boolean = (
+						this._mouseX >= selectionBoxX0
+						&& this._mouseX <= selectionBoxX1
+						&& this._mouseY >= 0
+						&& this._mouseY <= this._editorHeight
+					);
+					const mouseIsAtStartOfSelection: boolean = (
+						this._mouseX >= selectionBoxStartX0
+						&& this._mouseX <= selectionBoxStartX1
+						&& this._mouseY >= 0
+						&& this._mouseY <= this._editorHeight
+					);
+					const mouseIsAtEndOfSelection: boolean = (
+						this._mouseX >= selectionBoxEndX0
+						&& this._mouseX <= selectionBoxEndX1
+						&& this._mouseY >= 0
+						&& this._mouseY <= this._editorHeight
+					);
+
+					if (mouseIsAtStartOfSelection) {
+						if (this.selectionDragEvent == SelectionDragEvent.Stretching) {
+							if (this._floatingSelection == null) {
+								for (let i = 0; i < 64; i++) this.temporaryArray[i] = this.chipData[i];
+								this._floatingSelection = createFloatingSelectionFromBounds(this.chipData, bounds);
+							}
+
+							this.selectionModeStep = SelectionModeStep.StretchingFromStart;
+							this._removeSelectionButton.style.display = "";
+
+							this._floatingSelectionDragStartX = this._mouseX;
+							this._floatingSelectionDragStartY = this._mouseY;
+
+							this._tentativeSelectionBounds = {
+								start: Math.min(64, Math.max(0, this._floatingSelection.destinationStart)),
+								end: Math.min(64, Math.max(0, this._floatingSelection.destinationEnd)),
+							};
+
+							this._tentativeDestinationStart = this._floatingSelection.destinationStart;
+							this._tentativeDestinationEnd = this._floatingSelection.destinationEnd;
+						} else {
+							this.commitFloatingSelection();
+
+							this.selectionModeStep = SelectionModeStep.MovingSelectionStart;
+							this._removeSelectionButton.style.display = "";
+
+							this._tentativeSelectionBounds = {
+								start: this._selectionBounds!.start,
+								end: this._selectionBounds!.end,
+							};
+						}
+					} else if (mouseIsAtEndOfSelection) {
+						if (this.selectionDragEvent == SelectionDragEvent.Stretching) {
+							if (this._floatingSelection == null) {
+								for (let i = 0; i < 64; i++) this.temporaryArray[i] = this.chipData[i];
+								this._floatingSelection = createFloatingSelectionFromBounds(this.chipData, bounds);
+							}
+
+							this.selectionModeStep = SelectionModeStep.StretchingFromEnd;
+							this._removeSelectionButton.style.display = "";
+
+							this._tentativeSelectionBounds = {
+								start: Math.min(64, Math.max(0, this._floatingSelection.destinationStart)),
+								end: Math.min(64, Math.max(0, this._floatingSelection.destinationEnd)),
+							};
+
+							this._floatingSelectionDragStartX = this._mouseX;
+							this._floatingSelectionDragStartY = this._mouseY;
+
+							this._tentativeDestinationStart = this._floatingSelection.destinationStart;
+							this._tentativeDestinationEnd = this._floatingSelection.destinationEnd;
+						} else {
+							this.commitFloatingSelection();
+
+							this.selectionModeStep = SelectionModeStep.MovingSelectionEnd;
+							this._removeSelectionButton.style.display = "";
+
+							this._tentativeSelectionBounds = {
+								start: this._selectionBounds!.start,
+								end: this._selectionBounds!.end,
+							};
+						}
+					} else if (mouseIsInsideSelection) {
+						this.selectionModeStep = SelectionModeStep.MovingFloatingSelection;
+						this._removeSelectionButton.style.display = "";
+						if (this._floatingSelection == null) {
+							for (let i = 0; i < 64; i++) this.temporaryArray[i] = this.chipData[i];
+							this._floatingSelection = createFloatingSelectionFromBounds(this.chipData, bounds);
+						}
+
+						this._floatingSelectionDragStartX = this._mouseX;
+						this._floatingSelectionDragStartY = this._mouseY;
+
+						this._tentativeSelectionBounds = {
+							start: Math.min(64, Math.max(0, this._floatingSelection.destinationStart)),
+							end: Math.min(64, Math.max(0, this._floatingSelection.destinationEnd)),
+						};
+
+						this._tentativeDestinationStart = this._floatingSelection.destinationStart;
+						this._tentativeDestinationEnd = this._floatingSelection.destinationEnd;
+						this._tentativeAmplitudeOffset = this._floatingSelection.amplitudeOffset;
+
+						if (event.shiftKey) {
+							this._lockSelectionHorizontally = true;
+						} else {
+							this._lockSelectionHorizontally = false;
+						}
+					} else {
+						this.commitFloatingSelection();
+
+						this.selectionModeStep = SelectionModeStep.MakingSelection;
+
+						const newSelectionStart: number = Math.min(63, Math.max(0, Math.floor(this._mouseX * 64 / this._editorWidth)));
+						const newSelectionEnd: number = newSelectionStart;
+						this._selectionBounds = {
+							start: newSelectionStart,
+							end: newSelectionEnd,
+						};
+						this._tentativeSelectionBounds = {
+							start: newSelectionStart,
+							end: newSelectionEnd,
+						};
+					}
+				} break;
+				case SelectionModeStep.MovingSelectionStart: {
+					throw new Error("This should be unreachable!");
+				} break;
+				case SelectionModeStep.MovingSelectionEnd: {
+					throw new Error("This should be unreachable!");
+				} break;
+				case SelectionModeStep.MovingFloatingSelection: {
+					throw new Error("This should be unreachable!");
+				} break;
+				case SelectionModeStep.StretchingFromStart: {
+					throw new Error("This should be unreachable!");
+				} break;
+				case SelectionModeStep.StretchingFromEnd: {
+					throw new Error("This should be unreachable!");
+				} break;
+			}
 			this._renderSelection();
 		}
 		this._whenCursorMoved();
@@ -1277,6 +1453,156 @@ export class WavetablePromptCanvas {
 				} break;
 			}
 		} else if (this.drawMode == DrawMode.Selection) {
+			switch (this.selectionModeStep) {
+				case SelectionModeStep.NoSelection: {
+					// Do nothing.
+				} break;
+				case SelectionModeStep.MakingSelection: {
+					if (this._mouseDown) {
+						const newSelectionEnd: number = Math.min(64, Math.max(0, Math.floor(this._mouseX * 64 / this._editorWidth)));
+						if (newSelectionEnd > this._selectionBounds!.start) {
+							this._tentativeSelectionBounds!.start = this._selectionBounds!.start;
+							this._tentativeSelectionBounds!.end = newSelectionEnd;
+						} else if (newSelectionEnd < this._selectionBounds!.start) {
+							this._tentativeSelectionBounds!.start = newSelectionEnd;
+							this._tentativeSelectionBounds!.end = this._selectionBounds!.start + 1;
+						} else {
+							// newSelectionEnd is the same as this._selectionBounds.start.
+							// In this case the selection bounds remain what they initially
+							// were when entering the MakingSelection state.
+							this._tentativeSelectionBounds!.start = this._selectionBounds!.start;
+							this._tentativeSelectionBounds!.end = this._selectionBounds!.end;
+						}
+					} else {
+						// throw new Error("This should be unreachable!");
+					}
+				} break;
+				case SelectionModeStep.HasSelection: {
+					// Do nothing.
+				} break;
+				case SelectionModeStep.MovingSelectionStart: {
+					if (this._mouseDown) {
+						// This uses 64 as the maximum x coordinate because we want
+						// to be able to make this selection empty by moving
+						// the start edge.
+						const newSelectionStart: number = Math.min(64, Math.max(0, Math.floor(this._mouseX * 64 / this._editorWidth)));
+						if (newSelectionStart < this._selectionBounds!.end) {
+							this._tentativeSelectionBounds!.start = newSelectionStart;
+							this._tentativeSelectionBounds!.end = this._selectionBounds!.end;
+						} else {
+							// Make selection empty, just like in the piano roll.
+							this._tentativeSelectionBounds!.start = this._selectionBounds!.start;
+							this._tentativeSelectionBounds!.end = this._selectionBounds!.start;
+						}
+					} else {
+						// throw new Error("This should be unreachable!");
+					}
+				} break;
+				case SelectionModeStep.MovingSelectionEnd: {
+					if (this._mouseDown) {
+						const newSelectionEnd: number = Math.min(64, Math.max(0, Math.floor(this._mouseX * 64 / this._editorWidth)));
+						if (newSelectionEnd > this._selectionBounds!.start) {
+							this._tentativeSelectionBounds!.start = this._selectionBounds!.start;
+							this._tentativeSelectionBounds!.end = newSelectionEnd;
+						} else {
+							// Make selection empty, just like in the piano roll.
+							this._tentativeSelectionBounds!.start = this._selectionBounds!.start;
+							this._tentativeSelectionBounds!.end = this._selectionBounds!.start;
+						}
+					} else {
+						// throw new Error("This should be unreachable!");
+					}
+				} break;
+				case SelectionModeStep.MovingFloatingSelection: {
+					if (this._mouseDown) {
+						const chipMouseX: number = Math.floor(this._mouseX * 64 / this._editorWidth);
+						const chipMouseY: number = Math.floor(this._mouseY * 49 / this._editorHeight);
+						const chipDragStartX: number = Math.floor(this._floatingSelectionDragStartX! * 64 / this._editorWidth);
+						const chipDragStartY: number = Math.floor(this._floatingSelectionDragStartY! * 49 / this._editorHeight);
+						const displacementX: number = chipMouseX - chipDragStartX;
+						let displacementY: number = chipMouseY - chipDragStartY;
+						if (this._lockSelectionHorizontally) {
+							displacementY = 0;
+						}
+
+						this._tentativeDestinationStart = this._floatingSelection!.destinationStart + displacementX;
+						this._tentativeDestinationEnd = this._floatingSelection!.destinationEnd + displacementX;
+						this._tentativeSelectionBounds!.start = Math.min(64, Math.max(0, this._tentativeDestinationStart));
+						this._tentativeSelectionBounds!.end = Math.min(64, Math.max(0, this._tentativeDestinationEnd));
+						this._tentativeAmplitudeOffset = this._floatingSelection!.amplitudeOffset + displacementY;
+
+						for (let i = 0; i < 64; i++) this.chipData[i] = this.temporaryArray[i];
+						stampFloatingSelectionOntoChipWave(
+							this.chipData,
+							this._floatingSelection!.data,
+							this._tentativeDestinationStart,
+							this._tentativeDestinationEnd,
+							this._tentativeAmplitudeOffset
+						);
+						new ChangeWavetableCustomWave(this._doc, this.chipData, this.wavetableIndex);
+					} else {
+						// throw new Error("This should be unreachable!");
+					}
+				} break;
+				case SelectionModeStep.StretchingFromStart: {
+					if (this._mouseDown) {
+						const chipMouseX: number = Math.floor(this._mouseX * 64 / this._editorWidth);
+						const chipDragStartX: number = Math.floor(this._floatingSelectionDragStartX! * 64 / this._editorWidth);
+						const displacementX: number = chipMouseX - chipDragStartX;
+
+						this._tentativeDestinationStart = this._floatingSelection!.destinationStart + displacementX;
+						this._tentativeDestinationEnd = this._floatingSelection!.destinationEnd;
+						this._tentativeSelectionBounds!.start = Math.min(64, Math.max(0, this._tentativeDestinationStart));
+						this._tentativeSelectionBounds!.end = Math.min(64, Math.max(0, this._tentativeDestinationEnd));
+
+						if (this._tentativeSelectionBounds!.start < this._tentativeSelectionBounds!.end) {
+							for (let i = 0; i < 64; i++) this.chipData[i] = this.temporaryArray[i];
+							stampFloatingSelectionOntoChipWave(
+								this.chipData,
+								this._floatingSelection!.data,
+								this._tentativeDestinationStart,
+								this._tentativeDestinationEnd,
+								this._floatingSelection!.amplitudeOffset
+							);
+							new ChangeWavetableCustomWave(this._doc, this.chipData, this.wavetableIndex);
+						} else {
+							for (let i = 0; i < 64; i++) this.chipData[i] = this.temporaryArray[i];
+							new ChangeWavetableCustomWave(this._doc, this.chipData, this.wavetableIndex);
+						}
+					} else {
+						// throw new Error("This should be unreachable!");
+					}
+				} break;
+				case SelectionModeStep.StretchingFromEnd: {
+					if (this._mouseDown) {
+						const chipMouseX: number = Math.floor(this._mouseX * 64 / this._editorWidth);
+						const chipDragStartX: number = Math.floor(this._floatingSelectionDragStartX! * 64 / this._editorWidth);
+						const displacementX: number = chipMouseX - chipDragStartX;
+
+						this._tentativeDestinationStart = this._floatingSelection!.destinationStart;
+						this._tentativeDestinationEnd = this._floatingSelection!.destinationEnd + displacementX;
+						this._tentativeSelectionBounds!.start = Math.min(64, Math.max(0, this._tentativeDestinationStart));
+						this._tentativeSelectionBounds!.end = Math.min(64, Math.max(0, this._tentativeDestinationEnd));
+
+						if (this._tentativeSelectionBounds!.start < this._tentativeSelectionBounds!.end) {
+							for (let i = 0; i < 64; i++) this.chipData[i] = this.temporaryArray[i];
+							stampFloatingSelectionOntoChipWave(
+								this.chipData,
+								this._floatingSelection!.data,
+								this._tentativeDestinationStart,
+								this._tentativeDestinationEnd,
+								this._floatingSelection!.amplitudeOffset
+							);
+							new ChangeWavetableCustomWave(this._doc, this.chipData, this.wavetableIndex);
+						} else {
+							for (let i = 0; i < 64; i++) this.chipData[i] = this.temporaryArray[i];
+							new ChangeWavetableCustomWave(this._doc, this.chipData, this.wavetableIndex);
+						}
+					} else {
+						// throw new Error("This should be unreachable!");
+					}
+				} break;
+			}
 			this._renderSelection();
 		}
 		this._whenCursorMoved();
@@ -1422,7 +1748,7 @@ export class WavetablePromptCanvas {
 		}
 	}
 
-	public _whenCursorReleased = (event: Event): void => {
+	public _whenCursorReleased = (): void => {
 		if (this.drawMode == DrawMode.Curve && this._mouseDown) {
 			switch (this.curveModeStep) {
 				case CurveModeStep.First: {
