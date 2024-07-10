@@ -73,8 +73,9 @@ export class Localization {
     public static upperBoundLabel: string = "‣ Upr Bnd:";
     public static stairsStepAmountLabel: string = "‣ Steps:";
     public static envelopeDelayLabel: string = "‣ Delay:";
-    public static delayMeasurementLabel: string = "‣ Delay In Seconds?"; // needs translation
-    public static phaseMeasurementLabel: string = "‣ Posit. In Seconds?"; // needs translation
+    public static delayPhaseMeasurementLabel: string = "‣ Measure:"; // needs translation
+    public static measureInSecondsLabel: string = "Seconds"; // needs translation
+    public static measureInBeatsLabel: string = "Beats"; // needs translation
     public static pitchStartLabel = "‣ Start ";
     public static pitchEndLabel = "‣ End ";
     public static pitchAmplifyLabel = "Amplify:";
@@ -315,6 +316,7 @@ export class Localization {
     public static unison23Label: string = "weird octave";
     public static unison24Label: string = "bent";
     public static unison25Label: string = "hecking gosh";
+    public static unisonTEST: string = "Testing Unison";
     public static transition1Label: string = "normal";
     public static transition2Label: string = "interrupt";
     public static transition3Label: string = "continue";

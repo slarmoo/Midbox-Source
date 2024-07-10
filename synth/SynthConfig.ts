@@ -517,7 +517,7 @@ export class Config {
         { name: "weird octave",    voices: 2, spread: 5.85,     offset:  5.85,   expression: 0.75, sign:  1.0 },
         { name: "bent",            voices: 2, spread: 9.5,      offset:  4.5,    expression: 0.8,  sign: -0.6 },
         { name: "hecking gosh",    voices: 2, spread: 6.25,     offset: -6.0,    expression: 0.8,  sign: -0.7 },
-        { name: "testing unison",  voices: 9, spread: 0.05,     offset:  0.0,    expression: 1.0,  sign:  1.0},
+        { name: "testing unison",  voices: 3, spread: 0.05,     offset:  0.0,    expression: 1.0,  sign:  1.0 },
     ]);
 
     public static readonly effectNames: ReadonlyArray<string> =     ["reverb", "chorus", "panning", "distortion", "bitcrusher", "note filter", "echo", "pitch shift", "detune", "vibrato", "transition type", "chord type", "percussion", "wavefold", "reshaper"];

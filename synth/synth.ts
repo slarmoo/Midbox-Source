@@ -55,7 +55,7 @@ function encodeUnisonSettings(buffer: number[], v: number, s: number, o: number,
     buffer.push(base64IntToCharCode[cleanI % 63], base64IntToCharCode[Math.floor(cleanI / 63)]);
 }
 
-function encodeEnvelopeSettings(buffer: number[], s: number, d: boolean, lb: number, ub: number, sa: number, dl: number, ps: number, pe: number, peA: boolean, peB: boolean, ph: number): void {
+function encodeEnvelopeSettings(buffer: number[], s: number, d: boolean, lb: number, ub: number, sa: number, dl: number, ps: number, pe: number, peA: boolean, peB: boolean, ph: number, mt: boolean): void {
     // IES (Speed)
     let cleanS = Math.round(Math.abs(s) * 1000);
     let cleanSDivided = Math.floor(cleanS / 63);
@@ -98,6 +98,9 @@ function encodeEnvelopeSettings(buffer: number[], s: number, d: boolean, lb: num
     let cleanPH = Math.round(Math.abs(ph) * 1000);
     let cleanPHDivided = Math.floor(cleanPH / 63);
     buffer.push(base64IntToCharCode[cleanPH % 63], base64IntToCharCode[cleanPHDivided % 63], base64IntToCharCode[Math.floor(cleanPHDivided / 63)]);
+
+    // Measurement Type
+    buffer.push(base64IntToCharCode[+mt]);
 }
 
 function encodeDrumEnvelopeSettings(buffer: number[], s: number): void {
@@ -1325,6 +1328,7 @@ export class EnvelopeSettings {
     public pitchAmplify: boolean = false;
     public pitchBounce: boolean = false;
     public phase: number = 0;
+    public measurementType: boolean = true;
 
     constructor(instrument: Instrument) {
         this.reset(instrument);
@@ -1347,6 +1351,7 @@ export class EnvelopeSettings {
         this.pitchAmplify = false;
         this.pitchBounce = false;
         this.phase = 0;
+        this.measurementType = true;
     }
 
     public toJsonObject(instrument: Instrument): Object {
@@ -1373,6 +1378,7 @@ export class EnvelopeSettings {
         if (this.pitchBounce != false && this.pitchAmplify != true) envelopeObject["pitchBounce"] = this.pitchBounce;
         // Continue
         if (this.phase != 0) envelopeObject["phase"] = this.phase;
+        if (this.measurementType != false) envelopeObject["measurementType"] = this.measurementType;
         if (Config.instrumentAutomationTargets[this.target].maxCount > 1) envelopeObject["index"] = this.index;
         return envelopeObject;
     }
@@ -1460,6 +1466,12 @@ export class EnvelopeSettings {
             this.phase = clamp(0, Config.envelopePhaseMax+1, envelopeObject["phase"]);
         } else {
             this.phase = 0;
+        }
+
+        if (envelopeObject["measurementType"] != undefined) {
+            this.measurementType = envelopeObject["measurementType"];
+        } else {
+            this.measurementType = true;
         }
     }
 }
@@ -1888,9 +1900,9 @@ export class Instrument {
 
         if (this.type == InstrumentType.fm || this.type == InstrumentType.advfm) {
             if (allCarriersControlledByNoteSize && noteSizeControlsSomethingElse) {
-                this.addEnvelope(Config.instrumentAutomationTargets.dictionary["noteVolume"].index, 0, Config.envelopes.dictionary["note size"].index, 1, false, 0, 1, 4, 0, 0, 96, false, false, 0);
+                this.addEnvelope(Config.instrumentAutomationTargets.dictionary["noteVolume"].index, 0, Config.envelopes.dictionary["note size"].index, 1, false, 0, 1, 4, 0, 0, 96, false, false, 0, true);
             } else if (noCarriersControlledByNoteSize && !noteSizeControlsSomethingElse) {
-                this.addEnvelope(Config.instrumentAutomationTargets.dictionary["none"].index, 0, Config.envelopes.dictionary["note size"].index, 1, false, 0, 1, 4, 0, 0, 96, false, false, 0);
+                this.addEnvelope(Config.instrumentAutomationTargets.dictionary["none"].index, 0, Config.envelopes.dictionary["note size"].index, 1, false, 0, 1, 4, 0, 0, 96, false, false, 0, true);
             }
         }
 
@@ -1911,7 +1923,7 @@ export class Instrument {
             this.noteFilterType = false;
             this.noteFilter.convertLegacySettings(legacyCutoffSetting, legacyResonanceSetting, legacyFilterEnv);
             this.effects |= 1 << EffectType.noteFilter;
-            this.addEnvelope(Config.instrumentAutomationTargets.dictionary["noteFilterAllFreqs"].index, 0, legacyFilterEnv.index, 1, false, 0, 1, 4, 0, 0, 96, false, false, 0);
+            this.addEnvelope(Config.instrumentAutomationTargets.dictionary["noteFilterAllFreqs"].index, 0, legacyFilterEnv.index, 1, false, 0, 1, 4, 0, 0, 96, false, false, 0, true);
             if (forceSimpleFilter || this.noteFilterType) {
                 this.noteFilterType = true;
                 this.noteFilterSimpleCut = legacyCutoffSetting;
@@ -1920,18 +1932,18 @@ export class Instrument {
         }
 
         if (legacyPulseEnv.type != EnvelopeType.none) {
-            this.addEnvelope(Config.instrumentAutomationTargets.dictionary["pulseWidth"].index, 0, legacyPulseEnv.index, 1, false, 0, 1, 4, 0, 0, 96, false, false, 0);
+            this.addEnvelope(Config.instrumentAutomationTargets.dictionary["pulseWidth"].index, 0, legacyPulseEnv.index, 1, false, 0, 1, 4, 0, 0, 96, false, false, 0, true);
         }
 
         for (let i: number = 0; i < legacyOperatorEnvelopes.length; i++) {
             if (i < carrierCount && allCarriersControlledByNoteSize) continue;
             if (legacyOperatorEnvelopes[i].type != EnvelopeType.none) {
-                this.addEnvelope(Config.instrumentAutomationTargets.dictionary["operatorAmplitude"].index, i, legacyOperatorEnvelopes[i].index, 1, false, 0, 1, 4, 0, 0, 96, false, false, 0);
+                this.addEnvelope(Config.instrumentAutomationTargets.dictionary["operatorAmplitude"].index, i, legacyOperatorEnvelopes[i].index, 1, false, 0, 1, 4, 0, 0, 96, false, false, 0, true);
             }
         }
 
         if (legacyFeedbackEnv.type != EnvelopeType.none) {
-            this.addEnvelope(Config.instrumentAutomationTargets.dictionary["feedbackAmplitude"].index, 0, legacyFeedbackEnv.index, 1, false, 0, 1, 4, 0, 0, 96, false, false, 0);
+            this.addEnvelope(Config.instrumentAutomationTargets.dictionary["feedbackAmplitude"].index, 0, legacyFeedbackEnv.index, 1, false, 0, 1, 4, 0, 0, 96, false, false, 0, true);
         }
     }
 
@@ -2378,7 +2390,7 @@ export class Instrument {
                                 instrumentObject["detuneCents"] = Config.detuneCenter - 1200;
                             }
                         }
-                        this.addEnvelope(env.target, env.index, env.envelope, env.envelopeSpeed, env.discrete, env.lowerBound, env.upperBound, env.stepAmount, env.delay, env.pitchStart, env.pitchEnd, env.pitchAmplify, env.pitchBounce, env.phase);
+                        this.addEnvelope(env.target, env.index, env.envelope, env.envelopeSpeed, env.discrete, env.lowerBound, env.upperBound, env.stepAmount, env.delay, env.pitchStart, env.pitchEnd, env.pitchAmplify, env.pitchBounce, env.phase, env.measurementType);
                     }
                 }
             }
@@ -3377,7 +3389,7 @@ export class Instrument {
                         const newIndex: number | null = oldNameToNewIndex[rawEnvelopeName];
                         if (newIndex != null) tempEnvelope.envelope = newIndex;
                     }
-                    this.addEnvelope(tempEnvelope.target, tempEnvelope.index, tempEnvelope.envelope, tempEnvelope.envelopeSpeed, tempEnvelope.discrete, tempEnvelope.lowerBound, tempEnvelope.upperBound, tempEnvelope.stepAmount, tempEnvelope.delay, tempEnvelope.pitchStart, tempEnvelope.pitchEnd, tempEnvelope.pitchAmplify, tempEnvelope.pitchBounce, tempEnvelope.phase);
+                    this.addEnvelope(tempEnvelope.target, tempEnvelope.index, tempEnvelope.envelope, tempEnvelope.envelopeSpeed, tempEnvelope.discrete, tempEnvelope.lowerBound, tempEnvelope.upperBound, tempEnvelope.stepAmount, tempEnvelope.delay, tempEnvelope.pitchStart, tempEnvelope.pitchEnd, tempEnvelope.pitchAmplify, tempEnvelope.pitchBounce, tempEnvelope.phase, tempEnvelope.measurementType);
                 }
             }
 
@@ -3417,7 +3429,7 @@ export class Instrument {
         return 440.0 * Math.pow(2.0, (pitch - 69.0) / 12.0);
     }
 
-    public addEnvelope(target: number, index: number, envelope: number, envelopeSpeed: number, discrete: boolean, lowerBound: number, upperBound: number, stepAmount: number, delay: number, pitchStart: number, pitchEnd: number, pitchAmplify: boolean, pitchBounce: boolean, phase: number): void {
+    public addEnvelope(target: number, index: number, envelope: number, envelopeSpeed: number, discrete: boolean, lowerBound: number, upperBound: number, stepAmount: number, delay: number, pitchStart: number, pitchEnd: number, pitchAmplify: boolean, pitchBounce: boolean, phase: number, measurementType: boolean): void {
         let makeEmpty: boolean = false;
         if (!this.supportsEnvelopeTarget(target, index)) makeEmpty = true;
         if (this.envelopeCount >= Config.maxEnvelopeCount) throw new Error();
@@ -3437,6 +3449,7 @@ export class Instrument {
         envelopeSettings.pitchAmplify = pitchAmplify;
         envelopeSettings.pitchBounce = pitchBounce;
         envelopeSettings.phase = phase;
+        envelopeSettings.measurementType = measurementType;
         this.envelopeCount++;
     }
 
@@ -4137,7 +4150,7 @@ export class Song {
                     buffer.push(base64IntToCharCode[idx.envelope >> 6], base64IntToCharCode[idx.envelope & 0x3F]);
                     // Other per-envelope settings have already been done in a function way above, so call that here.
                     // Discrete was also moved. It goes here.
-                    encodeEnvelopeSettings(buffer, idx.envelopeSpeed, idx.discrete, idx.lowerBound, idx.upperBound, idx.stepAmount, idx.delay, idx.pitchStart, idx.pitchEnd, idx.pitchAmplify, idx.pitchBounce, idx.phase);
+                    encodeEnvelopeSettings(buffer, idx.envelopeSpeed, idx.discrete, idx.lowerBound, idx.upperBound, idx.stepAmount, idx.delay, idx.pitchStart, idx.pitchEnd, idx.pitchAmplify, idx.pitchBounce, idx.phase, idx.measurementType);
                 }
             }
         }
@@ -5642,7 +5655,8 @@ export class Song {
                         const pitchAmplify = (base64CharCodeToInt[compressed.charCodeAt(charIndex++)]) ? true : false;
                         const pitchBounce = (base64CharCodeToInt[compressed.charCodeAt(charIndex++)]) ? true : false;
                         const phase: number = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] + ((base64CharCodeToInt[compressed.charCodeAt(charIndex++)] + (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] * 63)) * 63);
-                        instrument.addEnvelope(target, index, envelope, envSpeed/1000, discrete, lowerBound/1000, upperBound/1000, stepAmount/1000, delay/1000, pitchStart/1000, pitchEnd/1000, pitchAmplify, pitchBounce, phase/1000);
+                        const measurementType = (base64CharCodeToInt[compressed.charCodeAt(charIndex++)]) ? true : false;
+                        instrument.addEnvelope(target, index, envelope, envSpeed/1000, discrete, lowerBound/1000, upperBound/1000, stepAmount/1000, delay/1000, pitchStart/1000, pitchEnd/1000, pitchAmplify, pitchBounce, phase/1000, measurementType);
                     }
                 }
             } break;
@@ -7132,10 +7146,20 @@ export class EnvelopeComputer {
                 lowerBound = instrument.envelopes[envelopeIndex].lowerBound;
                 upperBound = instrument.envelopes[envelopeIndex].upperBound;
                 stepAmount = instrument.envelopes[envelopeIndex].stepAmount;
-                delayBeats = instrument.envelopes[envelopeIndex].delay;
-                delaySeconds = delayBeats / secondsPerTick * beatsPerTick;
-                phaseBeats = instrument.envelopes[envelopeIndex].phase;
-                phaseSeconds = phaseBeats / secondsPerTick * beatsPerTick;
+                let measureInBeats = instrument.envelopes[envelopeIndex].measurementType;
+                // Delay is unaffected by IES (individual envelope speed). 
+                let envSpeed = instrument.envelopes[envelopeIndex].envelopeSpeed;
+                if (measureInBeats) {
+                    delayBeats = instrument.envelopes[envelopeIndex].delay * envSpeed;
+                    delaySeconds = (delayBeats / beatsPerTick * secondsPerTick);
+                    phaseBeats = instrument.envelopes[envelopeIndex].phase;
+                    phaseSeconds = phaseBeats / beatsPerTick * secondsPerTick;
+                } else {
+                    delaySeconds = instrument.envelopes[envelopeIndex].delay * envSpeed;
+                    delayBeats = (delaySeconds / secondsPerTick * beatsPerTick);
+                    phaseSeconds = instrument.envelopes[envelopeIndex].phase;
+                    phaseBeats = phaseSeconds / secondsPerTick * beatsPerTick;
+                }
                 if (tone) pitch = Synth.notePitchToEnvelopeValue(instrument, envelopeIndex, tone, instrumentState);
                 
                 if (envelope.type == EnvelopeType.noteSize) usedNoteSize = true;

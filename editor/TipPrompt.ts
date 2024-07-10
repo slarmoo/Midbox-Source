@@ -548,13 +548,14 @@ export class TipPrompt implements Prompt {
 					h2("Envelope Delay"),
 					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously."),
 					p("Envelopes typically will start their behaviors instantly the moment a note plays. With this setting, you can delay when the envelope starts changing values instead for better control over them."),
+					p("Note: Delay is not affected by individual envelope speed.")
 				);
 			} break;
 			case "envelopeDelayPhaseMeasurement": {
 				message = div(
-					h2("Delay/Position Measurement Type"),
-					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously."),
-					p("By default, delay and position are measured in beats. This setting toggles whether delay or position are measured in beats or seconds."),
+					h2("Measurement Type"),
+					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously. This is a subsetting that effects other settings."),
+					p("By default, delay and position are measured in beats. This setting toggles whether delay and position are measured in beats or seconds."),
 				);
 			} break;
 			case "pitchEnvelope": {

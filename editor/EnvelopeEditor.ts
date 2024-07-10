@@ -4,7 +4,7 @@ import {InstrumentType, Config, DropdownID} from "../synth/SynthConfig";
 import {Instrument, EnvelopeComputer} from "../synth/synth";
 import {ColorConfig} from "./ColorConfig";
 import {SongDocument} from "./SongDocument";
-import {ChangeSetEnvelopeTarget, ChangeSetEnvelopeType, ChangeRemoveEnvelope, ChangePerEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeLowerBound, ChangeUpperBound, ChangeStairsStepAmount, ChangeEnvelopeDelay, ChangePitchEnvelopeStart, ChangePitchEnvelopeEnd, ChangePitchAmplify, ChangePitchBounce, ChangeEnvelopePosition} from "./changes";
+import {ChangeSetEnvelopeTarget, ChangeSetEnvelopeType, ChangeRemoveEnvelope, ChangePerEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeLowerBound, ChangeUpperBound, ChangeStairsStepAmount, ChangeEnvelopeDelay, ChangePitchEnvelopeStart, ChangePitchEnvelopeEnd, ChangePitchAmplify, ChangePitchBounce, ChangeEnvelopePosition, ChangeMeasurementType} from "./changes";
 import {HTML} from "imperative-html/dist/esm/elements-strict";
 import {Localization as _} from "./Localization";
 import {clamp, remap} from "./UsefulCodingStuff";
@@ -157,6 +157,9 @@ export class EnvelopeEditor {
 	private readonly _envelopePhaseSliders: HTMLInputElement[] = [];
 	private readonly _envelopePhaseInputBoxes: HTMLInputElement[] = [];
 	private readonly _envelopePhaseRows: HTMLElement[] = [];
+	private readonly _measureInSecondButtons: HTMLButtonElement[] = [];
+	private readonly _measureInBeatButtons: HTMLButtonElement[] = [];
+	private readonly _measurementTypeRows: HTMLElement[] = [];
 	private readonly _envelopeDropdownGroups: HTMLElement[] = [];
 	private readonly _envelopeDropdowns: HTMLButtonElement[] = [];
 	private readonly _targetSelects: HTMLSelectElement[] = [];
@@ -235,11 +238,11 @@ export class EnvelopeEditor {
 		const envelopeDelayInputBoxIndex = this._envelopeDelayInputBoxes.indexOf(<any> event.target);
 		const envelopeDelaySliderIndex = this._envelopeDelaySliders.indexOf(<any> event.target);
 		if (envelopeDelayInputBoxIndex != -1) {
-			this._doc.record(new ChangeEnvelopeDelay(this._doc, envelopeDelayInputBoxIndex, instrument.envelopes[envelopeDelayInputBoxIndex].stepAmount, +(this._envelopeDelayInputBoxes[envelopeDelayInputBoxIndex].value)));
+			this._doc.record(new ChangeEnvelopeDelay(this._doc, envelopeDelayInputBoxIndex, instrument.envelopes[envelopeDelayInputBoxIndex].delay, +(this._envelopeDelayInputBoxes[envelopeDelayInputBoxIndex].value)));
 		}
 		if (envelopeDelaySliderIndex != -1) {
 			this._envelopeDelayInputBoxes[envelopeDelaySliderIndex].value = this._envelopeDelaySliders[envelopeDelaySliderIndex].value;
-			this._lastChange = new ChangeEnvelopeDelay(this._doc, envelopeDelaySliderIndex, instrument.envelopes[envelopeDelaySliderIndex].stepAmount, +(this._envelopeDelaySliders[envelopeDelaySliderIndex].value));
+			this._lastChange = new ChangeEnvelopeDelay(this._doc, envelopeDelaySliderIndex, instrument.envelopes[envelopeDelaySliderIndex].delay, +(this._envelopeDelaySliders[envelopeDelaySliderIndex].value));
 		}
 		const startInputBoxIndex = this._pitchStartInputBoxes.indexOf(<any>event.target);
 		const endInputBoxIndex = this._pitchEndInputBoxes.indexOf(<any>event.target);
@@ -521,7 +524,10 @@ export class EnvelopeEditor {
 				span({class: "tip", style: "height: 1em; font-size: 11px;", onclick: () => this._openPrompt("envelopePhase")}, span(_.envelopeStartingPointLabel)),
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, envelopePhaseInputBox),
 			), envelopePhaseSlider);
-			const envelopeDropdownGroup: HTMLElement = div({class: "editor-controls", style: "display: none;"}, plotterTimeRangeRow, envelopePlotterRow, pitchStartGroup, pitchEndGroup, extraPitchSettingRow, perEnvelopeSpeedRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, stairsStepAmountRow, envelopeDelayRow, envelopePhaseRow);
+			const measureInBeatsButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "no-underline", onclick: () => this._switchMeasurementType(true, envelopeIndex) }, span(_.measureInBeatsLabel));
+    		const measureInSecondsButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "last-button no-underline", onclick: () => this._switchMeasurementType(false, envelopeIndex) }, span(_.measureInSecondsLabel));
+    		const measurementTypeRow: HTMLElement = div({ class: "selectRow", style: "padding-top: 4px; margin-bottom: -3px;" }, span({ style: "font-size: small;", class: "tip", onclick: () => this._openPrompt("envelopeDelayPhaseMeasurement") }, span(_.delayPhaseMeasurementLabel)), div({ class: "instrument-bar" }, measureInBeatsButton, measureInSecondsButton));
+			const envelopeDropdownGroup: HTMLElement = div({class: "editor-controls", style: "display: none;"}, plotterTimeRangeRow, envelopePlotterRow, pitchStartGroup, pitchEndGroup, extraPitchSettingRow, perEnvelopeSpeedRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, stairsStepAmountRow, measurementTypeRow, envelopeDelayRow, envelopePhaseRow);
 			const envelopeDropdown: HTMLButtonElement = button({style: "margin-left: 0.6em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.PerEnvelope, envelopeIndex)}, "▼");
 
 			const targetSelect: HTMLSelectElement = select();
@@ -588,6 +594,9 @@ export class EnvelopeEditor {
 			this._envelopePhaseSliders[envelopeIndex] = envelopePhaseSlider;
 			this._envelopePhaseInputBoxes[envelopeIndex] = envelopePhaseInputBox;
 			this._envelopePhaseRows[envelopeIndex] = envelopePhaseRow;
+			this._measureInBeatButtons[envelopeIndex] = measureInBeatsButton;
+			this._measureInSecondButtons[envelopeIndex] = measureInSecondsButton;
+			this._measurementTypeRows[envelopeIndex] = measurementTypeRow;
 			this._envelopeDropdownGroups[envelopeIndex] = envelopeDropdownGroup;
 			this._envelopeDropdowns[envelopeIndex] = envelopeDropdown;
 			this._targetSelects[envelopeIndex] = targetSelect;
@@ -620,20 +629,21 @@ export class EnvelopeEditor {
 		}
 		
 		for (let envelopeIndex: number = 0; envelopeIndex < instrument.envelopeCount; envelopeIndex++) {
+			const instEnv = instrument.envelopes[envelopeIndex];
 			this._envelopePlotters[envelopeIndex].render();
 			this._envelopeStartPlotterLines[envelopeIndex].render();
 			this._plotterTimeRangeInputBoxes[envelopeIndex].value = String(clamp(0.1, 201, this._envelopePlotters[envelopeIndex].range));
-			this._perEnvelopeSpeedSliders[envelopeIndex].value = String(clamp(Config.perEnvelopeSpeedMin, Config.perEnvelopeSpeedMax+1, instrument.envelopes[envelopeIndex].envelopeSpeed));
-			this._perEnvelopeSpeedInputBoxes[envelopeIndex].value = String(clamp(Config.perEnvelopeSpeedMin, Config.perEnvelopeSpeedMax+1, instrument.envelopes[envelopeIndex].envelopeSpeed));
-			this._discreteEnvelopeToggles[envelopeIndex].checked = instrument.envelopes[envelopeIndex].discrete ? true : false;
-			this._lowerBoundSliders[envelopeIndex].value = String(clamp(Config.lowerBoundMin, Config.lowerBoundMax+1, instrument.envelopes[envelopeIndex].lowerBound));
-			this._upperBoundSliders[envelopeIndex].value = String(clamp(Config.upperBoundMin, Config.upperBoundMax+1, instrument.envelopes[envelopeIndex].upperBound));
-			this._lowerBoundInputBoxes[envelopeIndex].value = String(clamp(Config.lowerBoundMin, Config.lowerBoundMax+1, instrument.envelopes[envelopeIndex].lowerBound));
-			this._upperBoundInputBoxes[envelopeIndex].value = String(clamp(Config.upperBoundMin, Config.upperBoundMax+1, instrument.envelopes[envelopeIndex].upperBound));
-			this._stairsStepAmountSliders[envelopeIndex].value = String(clamp(1, Config.stairsStepAmountMax+1, instrument.envelopes[envelopeIndex].stepAmount));
-			this._stairsStepAmountInputBoxes[envelopeIndex].value = String(clamp(1, Config.stairsStepAmountMax+1, instrument.envelopes[envelopeIndex].stepAmount));
-			this._envelopeDelaySliders[envelopeIndex].value = String(clamp(0, Config.envelopeDelayMax+1, instrument.envelopes[envelopeIndex].delay));
-			this._envelopeDelayInputBoxes[envelopeIndex].value = String(clamp(0, Config.envelopeDelayMax+1, instrument.envelopes[envelopeIndex].delay));
+			this._perEnvelopeSpeedSliders[envelopeIndex].value = String(clamp(Config.perEnvelopeSpeedMin, Config.perEnvelopeSpeedMax+1, instEnv.envelopeSpeed));
+			this._perEnvelopeSpeedInputBoxes[envelopeIndex].value = String(clamp(Config.perEnvelopeSpeedMin, Config.perEnvelopeSpeedMax+1, instEnv.envelopeSpeed));
+			this._discreteEnvelopeToggles[envelopeIndex].checked = instEnv.discrete ? true : false;
+			this._lowerBoundSliders[envelopeIndex].value = String(clamp(Config.lowerBoundMin, Config.lowerBoundMax+1, instEnv.lowerBound));
+			this._upperBoundSliders[envelopeIndex].value = String(clamp(Config.upperBoundMin, Config.upperBoundMax+1, instEnv.upperBound));
+			this._lowerBoundInputBoxes[envelopeIndex].value = String(clamp(Config.lowerBoundMin, Config.lowerBoundMax+1, instEnv.lowerBound));
+			this._upperBoundInputBoxes[envelopeIndex].value = String(clamp(Config.upperBoundMin, Config.upperBoundMax+1, instEnv.upperBound));
+			this._stairsStepAmountSliders[envelopeIndex].value = String(clamp(1, Config.stairsStepAmountMax+1, instEnv.stepAmount));
+			this._stairsStepAmountInputBoxes[envelopeIndex].value = String(clamp(1, Config.stairsStepAmountMax+1, instEnv.stepAmount));
+			this._envelopeDelaySliders[envelopeIndex].value = String(clamp(0, Config.envelopeDelayMax+1, instEnv.delay));
+			this._envelopeDelayInputBoxes[envelopeIndex].value = String(clamp(0, Config.envelopeDelayMax+1, instEnv.delay));
 			// Reset min/max for pitch envelope UI elements before resetting value.
 			this._pitchStartSliders[envelopeIndex].min = (drumPitchEnvBoolean ? 1 : 0).toString();
 			this._pitchStartSliders[envelopeIndex].max = (drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch).toString();
@@ -643,16 +653,23 @@ export class EnvelopeEditor {
 			this._pitchEndSliders[envelopeIndex].max = (drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch).toString();
 			this._pitchEndInputBoxes[envelopeIndex].min = (drumPitchEnvBoolean ? 1 : 0).toString();
 			this._pitchEndInputBoxes[envelopeIndex].max = (drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch).toString();
-			this._pitchStartSliders[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instrument.envelopes[envelopeIndex].pitchStart));
-			this._pitchStartInputBoxes[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instrument.envelopes[envelopeIndex].pitchStart));
+			this._pitchStartSliders[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instEnv.pitchStart));
+			this._pitchStartInputBoxes[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instEnv.pitchStart));
 			this._pitchStartNoteTexts[envelopeIndex].textContent = String(_.pitchStartLabel + this._pitchToNote(parseInt(this._pitchStartInputBoxes[envelopeIndex].value)) + ":");
-			this._pitchEndSliders[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instrument.envelopes[envelopeIndex].pitchEnd));
-			this._pitchEndInputBoxes[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instrument.envelopes[envelopeIndex].pitchEnd));
+			this._pitchEndSliders[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instEnv.pitchEnd));
+			this._pitchEndInputBoxes[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instEnv.pitchEnd));
 			this._pitchEndNoteTexts[envelopeIndex].textContent = String(_.pitchEndLabel + this._pitchToNote(parseInt(this._pitchEndInputBoxes[envelopeIndex].value)) + ":");
-			this._pitchAmplifyToggles[envelopeIndex].checked = instrument.envelopes[envelopeIndex].pitchAmplify ? true : false;
-			this._pitchBounceToggles[envelopeIndex].checked = instrument.envelopes[envelopeIndex].pitchBounce ? true : false;
-			this._envelopePhaseSliders[envelopeIndex].value = String(clamp(0, Config.envelopePhaseMax+1, instrument.envelopes[envelopeIndex].phase));
-			this._envelopePhaseInputBoxes[envelopeIndex].value = String(clamp(0, Config.envelopePhaseMax+1, instrument.envelopes[envelopeIndex].phase));
+			this._pitchAmplifyToggles[envelopeIndex].checked = instEnv.pitchAmplify ? true : false;
+			this._pitchBounceToggles[envelopeIndex].checked = instEnv.pitchBounce ? true : false;
+			this._envelopePhaseSliders[envelopeIndex].value = String(clamp(0, Config.envelopePhaseMax+1, instEnv.phase));
+			this._envelopePhaseInputBoxes[envelopeIndex].value = String(clamp(0, Config.envelopePhaseMax+1, instEnv.phase));
+			if (instEnv.measurementType) {
+				this._measureInBeatButtons[envelopeIndex].classList.remove("deactivated");
+				this._measureInSecondButtons[envelopeIndex].classList.add("deactivated");
+			} else {
+				this._measureInBeatButtons[envelopeIndex].classList.add("deactivated");
+				this._measureInSecondButtons[envelopeIndex].classList.remove("deactivated");
+			}
 			this._targetSelects[envelopeIndex].value = String(instrument.envelopes[envelopeIndex].target + instrument.envelopes[envelopeIndex].index * Config.instrumentAutomationTargets.length);
 			this._envelopeSelects[envelopeIndex].selectedIndex = instrument.envelopes[envelopeIndex].envelope;
 			
@@ -715,17 +732,21 @@ export class EnvelopeEditor {
 				this._stairsStepAmountRows[envelopeIndex].style.display = "none";
 			}
 
-			if ( // Special case on delay.
+			if ( // Special case on delay and phase.
 				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["none"].index ||
 				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["note size"].index ||
 				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["pitch"].index
 			) {
+				this._measurementTypeRows[envelopeIndex].style.display = "none";
 				this._envelopeDelayRows[envelopeIndex].style.display = "none";
+				this._envelopePhaseRows[envelopeIndex].style.display = "none";
 			} else {
+				this._measurementTypeRows[envelopeIndex].style.display = "";
 				this._envelopeDelayRows[envelopeIndex].style.display = "";
+				this._envelopePhaseRows[envelopeIndex].style.display = "";
 			}
 
-			if ( // Pitch settings are special-cased to the pitch envelope
+			if ( // Pitch settings are special-cased to the pitch envelope.
 				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["pitch"].index
 			) {
 				this._pitchStartGroups[envelopeIndex].style.display = "";
@@ -736,16 +757,6 @@ export class EnvelopeEditor {
 				this._pitchEndGroups[envelopeIndex].style.display = "none";
 				this._extraPitchSettingRows[envelopeIndex].style.display = "none";
 			}
-
-			if ( // Special case on phase.
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["none"].index ||
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["note size"].index ||
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["pitch"].index
-			) {
-				this._envelopePhaseRows[envelopeIndex].style.display = "none";
-			} else {
-				this._envelopePhaseRows[envelopeIndex].style.display = "";
-			}
 		}
 		
 		this._renderedEnvelopeCount = instrument.envelopeCount;
@@ -754,6 +765,11 @@ export class EnvelopeEditor {
 		this._renderedInstrumentType = instrument.type;
 		this._renderedEffects = instrument.effects;
 	}
+
+	private _switchMeasurementType(type: boolean, index: number) {
+		const measurementType = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].envelopes[index].measurementType;
+		this._doc.record(new ChangeMeasurementType(this._doc, index, measurementType, type))
+    }
 
 	private _toggleDropdownMenu(dropdown: DropdownID, submenu: number = 0): void {
         let target: HTMLButtonElement = this._envelopeDropdowns[submenu];
