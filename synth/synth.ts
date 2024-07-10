@@ -2263,33 +2263,6 @@ export class Instrument {
     public fromJsonObject(instrumentObject: any, isNoiseChannel: boolean, isModChannel: boolean, useSlowerRhythm: boolean, useFastTwoNoteArp: boolean, legacyGlobalReverb: number = 0, jsonFormat: string = Config.jsonFormat): void {
         if (instrumentObject == undefined) instrumentObject = {};
 
-        // The automatic mode will follow plenty of rules to find which jsonFormat the song is in.
-        /*if (jsonFormat == "automatic") {
-            if (instrumentObject["format"] == "BeepBox") 
-                jsonFormat = "beepbox";
-
-            if (instrumentObject["format"] == "BeepBox"
-            || instrumentObject["blend"] != null
-            || instrumentObject["riff"] != null) 
-                jsonFormat = "modbox";
-
-            if (instrumentObject["format"] == "BeepBox" 
-            && instrumentObject["type"] == "duty cycle"
-            && instrumentObject["cycleTime"] != null) 
-                jsonFormat = "sandbox";
-
-            if (instrumentObject["format"] == "JummBox") 
-                jsonFormat = "jummbox";
-
-            if (instrumentObject["format"] == "BeepBox" 
-            && instrumentObject["type"] == "FM6op") 
-                jsonFormat = "goldbox";
-
-            if (instrumentObject["format"] == "UltraBox") 
-                jsonFormat = "ultrabox";
-        }*/
-        // Assuming it worked, that is...
-
         let type: InstrumentType = Config.instrumentTypeNames.indexOf(instrumentObject["type"]);
         if (<any>type == -1) type = isModChannel ? InstrumentType.mod : (isNoiseChannel ? InstrumentType.noise : InstrumentType.chip);
         this.setTypeAndReset(type, isNoiseChannel, isModChannel);
@@ -3203,7 +3176,6 @@ export class Instrument {
                         Stairs 1
                         Looped Stairs 1
                         */
-                        const envelopeProperty: any = instrumentObject["envelope"];
                         const oldNameToNewData = (<any>{
                             "none":            {envelope: "none",          envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4},
                             "note size":       {envelope: "note size",     envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4},
@@ -3313,12 +3285,16 @@ export class Instrument {
                             "looped stairs 2": {envelope: "looped stairs", envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 8},
                             "looped stairs 3": {envelope: "looped stairs", envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 16},
                             "looped stairs 4": {envelope: "looped stairs", envelopeSpeed: 0.125, lowerBound: 0,    stepAmount: 32},
-                        })[envelopeProperty];
-                        if (oldNameToNewData != undefined) {
-                            if (oldNameToNewData.envelope != null) tempEnvelope.envelope = Config.envelopes.dictionary[oldNameToNewData.envelope].index;
-                            if (oldNameToNewData.envelopeSpeed != null) tempEnvelope.envelopeSpeed = oldNameToNewData.envelopeSpeed;
-                            if (oldNameToNewData.lowerBound != null) tempEnvelope.lowerBound = oldNameToNewData.lowerBound;
-                            if (oldNameToNewData.stepAmount != null) tempEnvelope.stepAmount = oldNameToNewData.stepAmount;
+                        });
+                        if (oldNameToNewData[rawEnvelopeName] != undefined) {
+                            if (oldNameToNewData[rawEnvelopeName].envelope != null && rawEnvelopeName != null) 
+                                tempEnvelope.envelope = Config.envelopes.dictionary[oldNameToNewData[rawEnvelopeName].envelope].index;
+                            if (oldNameToNewData[rawEnvelopeName].envelopeSpeed != null && rawEnvelopeName != null) 
+                                tempEnvelope.envelopeSpeed = oldNameToNewData[rawEnvelopeName].envelopeSpeed;
+                            if (oldNameToNewData[rawEnvelopeName].lowerBound != null && rawEnvelopeName != null) 
+                                tempEnvelope.lowerBound = oldNameToNewData[rawEnvelopeName].lowerBound;
+                            if (oldNameToNewData[rawEnvelopeName].stepAmount != null && rawEnvelopeName != null) 
+                                tempEnvelope.stepAmount = oldNameToNewData[rawEnvelopeName].stepAmount;
                         }
                     }
                     if (jsonFormat != "midbox") {

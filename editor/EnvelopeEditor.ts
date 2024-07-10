@@ -29,17 +29,35 @@ class EnvelopeLineGraph {
 		let upperBound: number = instEnv.upperBound;
 		let stepAmount: number = instEnv.stepAmount;
 		let delay: number = instEnv.delay;
+		const beatsPerTick: number = 1.0 / (Config.ticksPerPart * Config.partsPerBeat);
+		const beatsPerMinute: number = this._doc.song != null ? this._doc.song.getBeatsPerMinute() : 0;
+        const beatsPerSecond: number = beatsPerMinute / 60.0;
+        const partsPerSecond: number = Config.partsPerBeat * beatsPerSecond;
+        const tickPerSecond: number = Config.ticksPerPart * partsPerSecond;
+        const samplesPerTick: number = this._doc.synth.samplesPerSecond / tickPerSecond;
+		const secondsPerTick: number = samplesPerTick / this._doc.synth.samplesPerSecond;
+		let xAxisIsInSeconds: boolean = instEnv.measurementType === false;
+		let timeRangeInBeats: number = this.range;
+		let timeRangeInSeconds: number = this.range / beatsPerTick * secondsPerTick;
+		let delayInBeats: number = delay * speed;
+		let delayInSeconds: number = delayInBeats / beatsPerTick * secondsPerTick;
+		if (xAxisIsInSeconds) {
+			timeRangeInBeats = this.range / secondsPerTick * beatsPerTick;
+			timeRangeInSeconds = this.range;
+			delayInSeconds = delay * speed;
+			delayInBeats = delayInSeconds / secondsPerTick * beatsPerTick;
+		}
 		let qualitySteps: number = 300;
 		let minValue = -0.1;
       	let maxValue = -Infinity;
 		for (let i: number = 0; i < qualitySteps; i++) {
-			const time: number = i / (qualitySteps - 1);
-			const seconds: number = (time * this.range) * speed;
-			const beats: number = (time * this.range) * speed;
-			const beatNote: number = (time * this.range) * speed;
-			const noteSize: number = (1 - time) * Config.noteSizeMax;
+			const x: number = i / (qualitySteps - 1);
+			const seconds: number = (x * timeRangeInSeconds) * speed;
+			const beats: number = (x * timeRangeInBeats) * speed;
+			const beatNote: number = (x * timeRangeInBeats) * speed;
+			const noteSize: number = (1 - x) * Config.noteSizeMax;
 			const pitch: number = 1;
-			let value = EnvelopeComputer.computeEnvelope(envelope, seconds, beats, beatNote, noteSize, lowerBound, upperBound, stepAmount, delay, delay, 0, 0, pitch);
+			let value = EnvelopeComputer.computeEnvelope(envelope, seconds, beats, beatNote, noteSize, lowerBound, upperBound, stepAmount, delayInBeats, delayInSeconds, 0, 0, pitch);
 			envelopeGraph.push(value);
 			maxValue = Math.max(value, maxValue);
         	minValue = Math.min(value, minValue);
@@ -85,29 +103,61 @@ class EnvelopeStartLine {
 		let speed: number = instEnv.envelopeSpeed;
 		let delay: number = instEnv.delay;
 		let phase: number = instEnv.phase;
+		const beatsPerTick: number = 1.0 / (Config.ticksPerPart * Config.partsPerBeat);
+		const beatsPerMinute: number = this._doc.song != null ? this._doc.song.getBeatsPerMinute() : 0;
+        const beatsPerSecond: number = beatsPerMinute / 60.0;
+        const partsPerSecond: number = Config.partsPerBeat * beatsPerSecond;
+        const tickPerSecond: number = Config.ticksPerPart * partsPerSecond;
+        const samplesPerTick: number = this._doc.synth.samplesPerSecond / tickPerSecond;
+		const secondsPerTick: number = samplesPerTick / this._doc.synth.samplesPerSecond;
+		let xAxisIsInSeconds: boolean = instEnv.measurementType === false;
+		let delayInBeats: number = delay * speed;
+		let delayInSeconds: number = delayInBeats / beatsPerTick * secondsPerTick;
+		let phaseInBeats: number = phase;
+		let phaseInSeconds: number = phaseInBeats / beatsPerTick * secondsPerTick;
+		let positionLine: number = Math.max(0, (phaseInBeats + delayInBeats));
+		let timeRange: number = this.timeRange * speed;
+		if (xAxisIsInSeconds) {
+			delayInSeconds = delay * speed;
+			delayInBeats = delayInSeconds / secondsPerTick * beatsPerTick;
+			phaseInSeconds = phase;
+			phaseInBeats = phaseInSeconds / secondsPerTick * beatsPerTick;
+			positionLine = Math.max(0, (phaseInSeconds + delayInSeconds));
+		}
 
 		var ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
 		ctx.clearRect(0, 0, graphWidth, graphHeight);
 
 		// Draw background.
-		ctx.fillStyle = ColorConfig.getComputed("--loop-accent");
         ctx.fillRect(0, 0, graphX, graphY);
 
 		ctx.strokeStyle = ColorConfig.getComputed("--playhead");
+		ctx.fillStyle = ColorConfig.getComputed("--playhead");
 
 		// Draw line.
 		ctx.beginPath();
 		ctx.setLineDash([2, 2]);
-		let positionLine = Math.max(0, (phase + delay) / speed);
-		let x = graphX + remap(positionLine, 0, this.timeRange, 0, graphWidth);
+		let x = graphX + remap(positionLine, 0, timeRange, 0, graphWidth);
 		let y = graphY;
 		ctx.moveTo(x, y);
-		x = graphX + remap(positionLine, 0, this.timeRange, 0, graphWidth);
+		x = graphX + remap(positionLine, 0, timeRange, 0, graphWidth);
 		y = graphY + graphHeight;
 		ctx.lineTo(x, y);
 		
 		ctx.lineWidth = 3;
 		ctx.stroke();
+
+		// Draw a triangle mark at the top.
+		const triangleWidth: number = 16;
+		const halfTriangleWidth: number = triangleWidth / 2;
+		const triangleHeight: number = 14;
+		y = graphY + triangleHeight;
+		ctx.setLineDash([]);
+		ctx.beginPath();
+		ctx.moveTo(x - halfTriangleWidth, y - triangleHeight);
+		ctx.lineTo(x + halfTriangleWidth, y - triangleHeight);
+		ctx.lineTo(x, y);
+		ctx.fill();
 	}
 
 	public render() {
@@ -190,15 +240,16 @@ export class EnvelopeEditor {
 
 		const plotterTimeRangeInputBoxIndex = this._plotterTimeRangeInputBoxes.indexOf(<any> event.target);
 		if (plotterTimeRangeInputBoxIndex != -1) {
-			this._changeTimeRange(this._doc, plotterTimeRangeInputBoxIndex, this._envelopePlotters[plotterTimeRangeInputBoxIndex].range, +(this._plotterTimeRangeInputBoxes[plotterTimeRangeInputBoxIndex].value));
+			this._changeTimeRange(plotterTimeRangeInputBoxIndex, this._envelopePlotters[plotterTimeRangeInputBoxIndex].range, +(this._plotterTimeRangeInputBoxes[plotterTimeRangeInputBoxIndex].value));
 		}
 
 		// For sliders here, we'll only record the change in _onChange(). Instead, just assign the
 		// change class to this._lastChange but don't record yet.
+		// MID TODO: Reorganize this and _onChange() a tiny bit for my OCD pleaseeeeeeeee
 		const perEnvelopeSpeedInputBoxIndex = this._perEnvelopeSpeedInputBoxes.indexOf(<any> event.target);
 		const perEnvelopeSpeedSliderIndex = this._perEnvelopeSpeedSliders.indexOf(<any> event.target);
 		if (perEnvelopeSpeedInputBoxIndex != -1) {
-			this._doc.record(new ChangePerEnvelopeSpeed(this._doc, perEnvelopeSpeedInputBoxIndex, instrument.envelopes[perEnvelopeSpeedInputBoxIndex].envelopeSpeed, +(this._perEnvelopeSpeedInputBoxes[perEnvelopeSpeedInputBoxIndex].value)));
+			this._lastChange = new ChangePerEnvelopeSpeed(this._doc, perEnvelopeSpeedInputBoxIndex, instrument.envelopes[perEnvelopeSpeedInputBoxIndex].envelopeSpeed, +(this._perEnvelopeSpeedInputBoxes[perEnvelopeSpeedInputBoxIndex].value));
 		}
 		if (perEnvelopeSpeedSliderIndex != -1) {
 			this._perEnvelopeSpeedInputBoxes[perEnvelopeSpeedSliderIndex].value = this._perEnvelopeSpeedSliders[perEnvelopeSpeedSliderIndex].value;
@@ -213,14 +264,14 @@ export class EnvelopeEditor {
 		const upperBoundInputBoxIndex = this._upperBoundInputBoxes.indexOf(<any> event.target);
 		const upperBoundSliderIndex = this._upperBoundSliders.indexOf(<any> event.target);
 		if (lowerBoundInputBoxIndex != -1) {
-			this._doc.record(new ChangeLowerBound(this._doc, lowerBoundInputBoxIndex, instrument.envelopes[lowerBoundInputBoxIndex].lowerBound, +(this._lowerBoundInputBoxes[lowerBoundInputBoxIndex].value)));
+			this._lastChange = new ChangeLowerBound(this._doc, lowerBoundInputBoxIndex, instrument.envelopes[lowerBoundInputBoxIndex].lowerBound, +(this._lowerBoundInputBoxes[lowerBoundInputBoxIndex].value));
 		}
 		if (lowerBoundSliderIndex != -1) {
 			this._lowerBoundInputBoxes[lowerBoundSliderIndex].value = this._lowerBoundSliders[lowerBoundSliderIndex].value;
 			this._lastChange = new ChangeLowerBound(this._doc, lowerBoundSliderIndex, instrument.envelopes[lowerBoundSliderIndex].lowerBound, +(this._lowerBoundSliders[lowerBoundSliderIndex].value));
 		}
 		if (upperBoundInputBoxIndex != -1) {
-			this._doc.record(new ChangeUpperBound(this._doc, upperBoundInputBoxIndex, instrument.envelopes[upperBoundInputBoxIndex].upperBound, +(this._upperBoundInputBoxes[upperBoundInputBoxIndex].value)));
+			this._lastChange = new ChangeUpperBound(this._doc, upperBoundInputBoxIndex, instrument.envelopes[upperBoundInputBoxIndex].upperBound, +(this._upperBoundInputBoxes[upperBoundInputBoxIndex].value));
 		}
 		if (upperBoundSliderIndex != -1) {
 			this._upperBoundInputBoxes[upperBoundSliderIndex].value = this._upperBoundSliders[upperBoundSliderIndex].value;
@@ -229,7 +280,7 @@ export class EnvelopeEditor {
 		const stairsStepAmountInputBoxIndex = this._stairsStepAmountInputBoxes.indexOf(<any> event.target);
 		const stairsStepAmountSliderIndex = this._stairsStepAmountSliders.indexOf(<any> event.target);
 		if (stairsStepAmountInputBoxIndex != -1) {
-			this._doc.record(new ChangeStairsStepAmount(this._doc, stairsStepAmountInputBoxIndex, instrument.envelopes[stairsStepAmountInputBoxIndex].stepAmount, +(this._stairsStepAmountInputBoxes[stairsStepAmountInputBoxIndex].value)));
+			this._lastChange = new ChangeStairsStepAmount(this._doc, stairsStepAmountInputBoxIndex, instrument.envelopes[stairsStepAmountInputBoxIndex].stepAmount, +(this._stairsStepAmountInputBoxes[stairsStepAmountInputBoxIndex].value));
 		}
 		if (stairsStepAmountSliderIndex != -1) {
 			this._stairsStepAmountInputBoxes[stairsStepAmountSliderIndex].value = this._stairsStepAmountSliders[stairsStepAmountSliderIndex].value;
@@ -238,7 +289,7 @@ export class EnvelopeEditor {
 		const envelopeDelayInputBoxIndex = this._envelopeDelayInputBoxes.indexOf(<any> event.target);
 		const envelopeDelaySliderIndex = this._envelopeDelaySliders.indexOf(<any> event.target);
 		if (envelopeDelayInputBoxIndex != -1) {
-			this._doc.record(new ChangeEnvelopeDelay(this._doc, envelopeDelayInputBoxIndex, instrument.envelopes[envelopeDelayInputBoxIndex].delay, +(this._envelopeDelayInputBoxes[envelopeDelayInputBoxIndex].value)));
+			this._lastChange = new ChangeEnvelopeDelay(this._doc, envelopeDelayInputBoxIndex, instrument.envelopes[envelopeDelayInputBoxIndex].delay, +(this._envelopeDelayInputBoxes[envelopeDelayInputBoxIndex].value));
 		}
 		if (envelopeDelaySliderIndex != -1) {
 			this._envelopeDelayInputBoxes[envelopeDelaySliderIndex].value = this._envelopeDelaySliders[envelopeDelaySliderIndex].value;
@@ -249,10 +300,10 @@ export class EnvelopeEditor {
 		const startSliderIndex = this._pitchStartSliders.indexOf(<any>event.target);
 		const endSliderIndex = this._pitchEndSliders.indexOf(<any>event.target);
 		if (startInputBoxIndex != -1) {
-			this._doc.record(new ChangePitchEnvelopeStart(this._doc, startInputBoxIndex, instrument.envelopes[startInputBoxIndex].pitchStart, +(this._pitchStartInputBoxes[startInputBoxIndex].value)));
+			this._lastChange = new ChangePitchEnvelopeStart(this._doc, startInputBoxIndex, instrument.envelopes[startInputBoxIndex].pitchStart, +(this._pitchStartInputBoxes[startInputBoxIndex].value));
 		}
 		if (endInputBoxIndex != -1) {
-			this._doc.record(new ChangePitchEnvelopeEnd(this._doc, endInputBoxIndex, instrument.envelopes[endInputBoxIndex].pitchEnd, +(this._pitchEndInputBoxes[endInputBoxIndex].value)));
+			this._lastChange = new ChangePitchEnvelopeEnd(this._doc, endInputBoxIndex, instrument.envelopes[endInputBoxIndex].pitchEnd, +(this._pitchEndInputBoxes[endInputBoxIndex].value));
 		} 
 		if (startSliderIndex != -1) {
 			this._pitchStartInputBoxes[startSliderIndex].value = this._pitchStartSliders[startSliderIndex].value;
@@ -275,7 +326,7 @@ export class EnvelopeEditor {
 		const envelopePhaseInputBoxIndex = this._envelopePhaseInputBoxes.indexOf(<any> event.target);
 		const envelopePhaseSliderIndex = this._envelopePhaseSliders.indexOf(<any> event.target);
 		if (envelopePhaseInputBoxIndex != -1) {
-			this._doc.record(new ChangeEnvelopePosition(this._doc, envelopePhaseInputBoxIndex, instrument.envelopes[envelopePhaseInputBoxIndex].phase, +(this._envelopePhaseInputBoxes[envelopePhaseInputBoxIndex].value)));
+			this._lastChange = new ChangeEnvelopePosition(this._doc, envelopePhaseInputBoxIndex, instrument.envelopes[envelopePhaseInputBoxIndex].phase, +(this._envelopePhaseInputBoxes[envelopePhaseInputBoxIndex].value));
 		}
 		if (envelopePhaseSliderIndex != -1) {
 			this._envelopePhaseInputBoxes[envelopePhaseSliderIndex].value = this._envelopePhaseSliders[envelopePhaseSliderIndex].value;
@@ -294,15 +345,36 @@ export class EnvelopeEditor {
 		} else if (envelopeSelectIndex != -1) {
 			this._doc.record(new ChangeSetEnvelopeType(this._doc, envelopeSelectIndex, this._envelopeSelects[envelopeSelectIndex].selectedIndex));
 		}
+		const perEnvelopeSpeedInputBoxIndex = this._perEnvelopeSpeedInputBoxes.indexOf(<any> event.target);
 		const perEnvelopeSpeedSliderIndex = this._perEnvelopeSpeedSliders.indexOf(<any> event.target);
+		if (perEnvelopeSpeedInputBoxIndex != -1) {
+			if (this._lastChange != null) {
+				this._doc.record(this._lastChange);
+				this._lastChange = null;
+			}
+		}
 		if (perEnvelopeSpeedSliderIndex != -1) {
 			if (this._lastChange != null) {
 				this._doc.record(this._lastChange);
 				this._lastChange = null;
 			}
 		}
+		const lowerBoundInputBoxIndex = this._lowerBoundInputBoxes.indexOf(<any> event.target);
+		const upperBoundInputBoxIndex = this._upperBoundInputBoxes.indexOf(<any> event.target);
 		const lowerBoundSliderIndex = this._lowerBoundSliders.indexOf(<any> event.target);
 		const upperBoundSliderIndex = this._upperBoundSliders.indexOf(<any> event.target);
+		if (lowerBoundInputBoxIndex != -1) {
+			if (this._lastChange != null) {
+				this._doc.record(this._lastChange);
+				this._lastChange = null;
+			}
+		}
+		if (upperBoundInputBoxIndex != -1) {
+			if (this._lastChange != null) {
+				this._doc.record(this._lastChange);
+				this._lastChange = null;
+			}
+		}
 		if (lowerBoundSliderIndex != -1) {
 			if (this._lastChange != null) {
 				this._doc.record(this._lastChange);
@@ -315,22 +387,50 @@ export class EnvelopeEditor {
 				this._lastChange = null;
 			}
 		}
+		const stairsStepAmountInputBoxIndex = this._stairsStepAmountInputBoxes.indexOf(<any> event.target);
 		const stairsStepAmountSliderIndex = this._stairsStepAmountSliders.indexOf(<any> event.target);
+		if (stairsStepAmountInputBoxIndex != -1) {
+			if (this._lastChange != null) {
+				this._doc.record(this._lastChange);
+				this._lastChange = null;
+			}
+		}
 		if (stairsStepAmountSliderIndex != -1) {
 			if (this._lastChange != null) {
 				this._doc.record(this._lastChange);
 				this._lastChange = null;
 			}
 		}
+		const envelopeDelayInputBoxIndex = this._envelopeDelayInputBoxes.indexOf(<any> event.target);
 		const envelopeDelaySliderIndex = this._envelopeDelaySliders.indexOf(<any> event.target);
+		if (envelopeDelayInputBoxIndex != -1) {
+			if (this._lastChange != null) {
+				this._doc.record(this._lastChange);
+				this._lastChange = null;
+			}
+		}
 		if (envelopeDelaySliderIndex != -1) {
 			if (this._lastChange != null) {
 				this._doc.record(this._lastChange);
 				this._lastChange = null;
 			}
 		}
+		const startInputBoxIndex = this._pitchStartInputBoxes.indexOf(<any>event.target);
+		const endInputBoxIndex = this._pitchEndInputBoxes.indexOf(<any>event.target);
 		const startSliderIndex = this._pitchStartSliders.indexOf(<any>event.target);
 		const endSliderIndex = this._pitchEndSliders.indexOf(<any>event.target);
+		if (startInputBoxIndex != -1) {
+			if (this._lastChange != null) {
+				this._doc.record(this._lastChange);
+				this._lastChange = null;
+			}
+		}
+		if (endInputBoxIndex != -1) {
+			if (this._lastChange != null) {
+				this._doc.record(this._lastChange);
+				this._lastChange = null;
+			}
+		}
 		if (startSliderIndex != -1) {
 			if (this._lastChange != null) {
 				this._doc.record(this._lastChange);
@@ -343,7 +443,14 @@ export class EnvelopeEditor {
 				this._lastChange = null;
 			}
 		}
+		const envelopePhaseInputBoxIndex = this._envelopePhaseInputBoxes.indexOf(<any> event.target);
 		const envelopePhaseSliderIndex = this._envelopePhaseSliders.indexOf(<any> event.target);
+		if (envelopePhaseInputBoxIndex != -1) {
+			if (this._lastChange != null) {
+				this._doc.record(this._lastChange);
+				this._lastChange = null;
+			}
+		}
 		if (envelopePhaseSliderIndex != -1) {
 			if (this._lastChange != null) {
 				this._doc.record(this._lastChange);
@@ -352,10 +459,11 @@ export class EnvelopeEditor {
 		}
 	}
 
-	private _changeTimeRange(doc: SongDocument, envelopeIndex: number, oldValue: number, newValue: number): void {
+	private _changeTimeRange(envelopeIndex: number, oldValue: number, newValue: number): void {
         if (oldValue != newValue) {
             this._envelopePlotters[envelopeIndex].range = newValue;
-            doc.notifier.changed();
+			this._envelopeStartPlotterLines[envelopeIndex].timeRange = newValue;
+            this._doc.notifier.changed();
         }
 	}
 
@@ -716,16 +824,8 @@ export class EnvelopeEditor {
 			}
 
 			if ( // Special case on step amount.
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["stairs 0"].index ||
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["stairs 1"].index ||
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["stairs 2"].index ||
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["stairs 3"].index ||
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["stairs 4"].index ||
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["looped stairs 0"].index ||
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["looped stairs 1"].index ||
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["looped stairs 2"].index ||
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["looped stairs 3"].index ||
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["looped stairs 4"].index 
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["stairs"].index ||
+				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["looped stairs"].index 
 			) {
 				this._stairsStepAmountRows[envelopeIndex].style.display = "";
 			} else {

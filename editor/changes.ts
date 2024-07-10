@@ -977,16 +977,8 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "decelerate 1", weight: 2},
                         { item: "decelerate 2", weight: 2},
                         { item: "decelerate 3", weight: 2},
-                        { item: "stairs 0", weight: 2},
-                        { item: "stairs 1", weight: 2},
-                        { item: "stairs 2", weight: 2},
-                        { item: "stairs 3", weight: 2},
-                        { item: "stairs 4", weight: 2},
-                        { item: "looped stairs 0", weight: 2},
-                        { item: "looped stairs 1", weight: 2},
-                        { item: "looped stairs 2", weight: 2},
-                        { item: "looped stairs 3", weight: 2},
-                        { item: "looped stairs 4", weight: 2},
+                        { item: "stairs", weight: 2},
+                        { item: "looped stairs", weight: 2},
                     ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
                 }
             }
@@ -1095,16 +1087,8 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "decelerate 1", weight: 2},
                         { item: "decelerate 2", weight: 2},
                         { item: "decelerate 3", weight: 2},
-                        { item: "stairs 0", weight: 2},
-                        { item: "stairs 1", weight: 2},
-                        { item: "stairs 2", weight: 2},
-                        { item: "stairs 3", weight: 2},
-                        { item: "stairs 4", weight: 2},
-                        { item: "looped stairs 0", weight: 2},
-                        { item: "looped stairs 1", weight: 2},
-                        { item: "looped stairs 2", weight: 2},
-                        { item: "looped stairs 3", weight: 2},
-                        { item: "looped stairs 4", weight: 2},
+                        { item: "stairs", weight: 2},
+                        { item: "looped stairs", weight: 2},
                 ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
             } else {
                 instrument.noteFilter = instrument.noteFilter;
@@ -1202,16 +1186,8 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "decelerate 1", weight: 2},
                         { item: "decelerate 2", weight: 2},
                         { item: "decelerate 3", weight: 2},
-                        { item: "stairs 0", weight: 2},
-                        { item: "stairs 1", weight: 2},
-                        { item: "stairs 2", weight: 2},
-                        { item: "stairs 3", weight: 2},
-                        { item: "stairs 4", weight: 2},
-                        { item: "looped stairs 0", weight: 2},
-                        { item: "looped stairs 1", weight: 2},
-                        { item: "looped stairs 2", weight: 2},
-                        { item: "looped stairs 3", weight: 2},
-                        { item: "looped stairs 4", weight: 2},
+                        { item: "stairs", weight: 2},
+                        { item: "looped stairs", weight: 2},
                 ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
             }
             if (Math.random() < 0.15) {
@@ -1308,16 +1284,8 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "decelerate 1", weight: 2},
                     { item: "decelerate 2", weight: 2},
                     { item: "decelerate 3", weight: 2},
-                    { item: "stairs 0", weight: 2},
-                    { item: "stairs 1", weight: 2},
-                    { item: "stairs 2", weight: 2},
-                    { item: "stairs 3", weight: 2},
-                    { item: "stairs 4", weight: 2},
-                    { item: "looped stairs 0", weight: 2},
-                    { item: "looped stairs 1", weight: 2},
-                    { item: "looped stairs 2", weight: 2},
-                    { item: "looped stairs 3", weight: 2},
-                    { item: "looped stairs 4", weight: 2},
+                    { item: "stairs", weight: 2},
+                    { item: "looped stairs", weight: 2},
                 ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
                 if (Math.random() < 0.25) instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["freqCrusher"].index, 0, Config.envelopes.dictionary[selectWeightedRandom([
                     { item: "note size", weight: 2},
@@ -1409,16 +1377,8 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "decelerate 1", weight: 2},
                     { item: "decelerate 2", weight: 2},
                     { item: "decelerate 3", weight: 2},
-                    { item: "stairs 0", weight: 2},
-                    { item: "stairs 1", weight: 2},
-                    { item: "stairs 2", weight: 2},
-                    { item: "stairs 3", weight: 2},
-                    { item: "stairs 4", weight: 2},
-                    { item: "looped stairs 0", weight: 2},
-                    { item: "looped stairs 1", weight: 2},
-                    { item: "looped stairs 2", weight: 2},
-                    { item: "looped stairs 3", weight: 2},
-                    { item: "looped stairs 4", weight: 2},
+                    { item: "stairs", weight: 2},
+                    { item: "looped stairs", weight: 2},
                 ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
             }
             if (Math.random() < 0.15) {
@@ -1514,16 +1474,8 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "decelerate 1", weight: 2},
                     { item: "decelerate 2", weight: 2},
                     { item: "decelerate 3", weight: 2},
-                    { item: "stairs 0", weight: 2},
-                    { item: "stairs 1", weight: 2},
-                    { item: "stairs 2", weight: 2},
-                    { item: "stairs 3", weight: 2},
-                    { item: "stairs 4", weight: 2},
-                    { item: "looped stairs 0", weight: 2},
-                    { item: "looped stairs 1", weight: 2},
-                    { item: "looped stairs 2", weight: 2},
-                    { item: "looped stairs 3", weight: 2},
-                    { item: "looped stairs 4", weight: 2},
+                    { item: "stairs", weight: 2},
+                    { item: "looped stairs", weight: 2},
                 ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
             }
             if (Math.random() < 0.1) {
@@ -1626,16 +1578,8 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "decelerate 1", weight: 2},
                     { item: "decelerate 2", weight: 2},
                     { item: "decelerate 3", weight: 2},
-                    { item: "stairs 0", weight: 2},
-                    { item: "stairs 1", weight: 2},
-                    { item: "stairs 2", weight: 2},
-                    { item: "stairs 3", weight: 2},
-                    { item: "stairs 4", weight: 2},
-                    { item: "looped stairs 0", weight: 2},
-                    { item: "looped stairs 1", weight: 2},
-                    { item: "looped stairs 2", weight: 2},
-                    { item: "looped stairs 3", weight: 2},
-                    { item: "looped stairs 4", weight: 2},
+                    { item: "stairs", weight: 2},
+                    { item: "looped stairs", weight: 2},
                 ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
             }
 
@@ -1747,16 +1691,8 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "decelerate 1", weight: 2},
                         { item: "decelerate 2", weight: 2},
                         { item: "decelerate 3", weight: 2},
-                        { item: "stairs 0", weight: 2},
-                        { item: "stairs 1", weight: 2},
-                        { item: "stairs 2", weight: 2},
-                        { item: "stairs 3", weight: 2},
-                        { item: "stairs 4", weight: 2},
-                        { item: "looped stairs 0", weight: 2},
-                        { item: "looped stairs 1", weight: 2},
-                        { item: "looped stairs 2", weight: 2},
-                        { item: "looped stairs 3", weight: 2},
-                        { item: "looped stairs 4", weight: 2},
+                        { item: "stairs", weight: 2},
+                        { item: "looped stairs", weight: 2},
                     ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
                 }
             }
@@ -2020,16 +1956,8 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "decelerate 1", weight: 2},
                         { item: "decelerate 2", weight: 2},
                         { item: "decelerate 3", weight: 2},
-                        { item: "stairs 0", weight: 2},
-                        { item: "stairs 1", weight: 2},
-                        { item: "stairs 2", weight: 2},
-                        { item: "stairs 3", weight: 2},
-                        { item: "stairs 4", weight: 2},
-                        { item: "looped stairs 0", weight: 2},
-                        { item: "looped stairs 1", weight: 2},
-                        { item: "looped stairs 2", weight: 2},
-                        { item: "looped stairs 3", weight: 2},
-                        { item: "looped stairs 4", weight: 2},
+                        { item: "stairs", weight: 2},
+                        { item: "looped stairs", weight: 2},
                     ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
                 }
             }
@@ -2136,16 +2064,8 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "decelerate 1", weight: 2},
                     { item: "decelerate 2", weight: 2},
                     { item: "decelerate 3", weight: 2},
-                    { item: "stairs 0", weight: 2},
-                    { item: "stairs 1", weight: 2},
-                    { item: "stairs 2", weight: 2},
-                    { item: "stairs 3", weight: 2},
-                    { item: "stairs 4", weight: 2},
-                    { item: "looped stairs 0", weight: 2},
-                    { item: "looped stairs 1", weight: 2},
-                    { item: "looped stairs 2", weight: 2},
-                    { item: "looped stairs 3", weight: 2},
-                    { item: "looped stairs 4", weight: 2},
+                    { item: "stairs", weight: 2},
+                    { item: "looped stairs", weight: 2},
                 ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
             }
             if (Math.random() < 0.12) {
@@ -2242,16 +2162,8 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "decelerate 1", weight: 2},
                     { item: "decelerate 2", weight: 2},
                     { item: "decelerate 3", weight: 2},
-                    { item: "stairs 0", weight: 2},
-                    { item: "stairs 1", weight: 2},
-                    { item: "stairs 2", weight: 2},
-                    { item: "stairs 3", weight: 2},
-                    { item: "stairs 4", weight: 2},
-                    { item: "looped stairs 0", weight: 2},
-                    { item: "looped stairs 1", weight: 2},
-                    { item: "looped stairs 2", weight: 2},
-                    { item: "looped stairs 3", weight: 2},
-                    { item: "looped stairs 4", weight: 2},
+                    { item: "stairs", weight: 2},
+                    { item: "looped stairs", weight: 2},
                 ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
                 if (Math.random() < 0.18) instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["freqCrusher"].index, 0, Config.envelopes.dictionary[selectWeightedRandom([
                     { item: "note size", weight: 2},
@@ -2343,16 +2255,8 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "decelerate 1", weight: 2},
                     { item: "decelerate 2", weight: 2},
                     { item: "decelerate 3", weight: 2},
-                    { item: "stairs 0", weight: 2},
-                    { item: "stairs 1", weight: 2},
-                    { item: "stairs 2", weight: 2},
-                    { item: "stairs 3", weight: 2},
-                    { item: "stairs 4", weight: 2},
-                    { item: "looped stairs 0", weight: 2},
-                    { item: "looped stairs 1", weight: 2},
-                    { item: "looped stairs 2", weight: 2},
-                    { item: "looped stairs 3", weight: 2},
-                    { item: "looped stairs 4", weight: 2},
+                    { item: "stairs", weight: 2},
+                    { item: "looped stairs", weight: 2},
                 ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
             }
             if (effectsIncludeDistortion(instrument.effects) && Math.random() < 0.8 && (doc.prefs.noteFilterOnRandomization)) {
@@ -2435,12 +2339,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "rise 3", weight: 2},
                     { item: "rise 4", weight: 2},
                     { item: "decelerate 3", weight: 2},
-                    { item: "stairs 3", weight: 2},
-                    { item: "stairs 4", weight: 2},
-                    { item: "looped stairs 1", weight: 2},
-                    { item: "looped stairs 2", weight: 2},
-                    { item: "looped stairs 3", weight: 2},
-                    { item: "looped stairs 4", weight: 2},
+                    { item: "looped stairs", weight: 2},
                 ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
             } else if (Math.random() < 0.5 && (doc.prefs.noteFilterOnRandomization)) {
                 instrument.effects |= 1 << EffectType.noteFilter;
@@ -2537,16 +2436,8 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "decelerate 1", weight: 2},
                         { item: "decelerate 2", weight: 2},
                         { item: "decelerate 3", weight: 2},
-                        { item: "stairs 0", weight: 2},
-                        { item: "stairs 1", weight: 2},
-                        { item: "stairs 2", weight: 2},
-                        { item: "stairs 3", weight: 2},
-                        { item: "stairs 4", weight: 2},
-                        { item: "looped stairs 0", weight: 2},
-                        { item: "looped stairs 1", weight: 2},
-                        { item: "looped stairs 2", weight: 2},
-                        { item: "looped stairs 3", weight: 2},
-                        { item: "looped stairs 4", weight: 2},
+                        { item: "stairs", weight: 2},
+                        { item: "looped stairs", weight: 2},
                 ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
             } else {
                 instrument.noteFilter = instrument.noteFilter;
@@ -2644,16 +2535,8 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "decelerate 1", weight: 2},
                     { item: "decelerate 2", weight: 2},
                     { item: "decelerate 3", weight: 2},
-                    { item: "stairs 0", weight: 2},
-                    { item: "stairs 1", weight: 2},
-                    { item: "stairs 2", weight: 2},
-                    { item: "stairs 3", weight: 2},
-                    { item: "stairs 4", weight: 2},
-                    { item: "looped stairs 0", weight: 2},
-                    { item: "looped stairs 1", weight: 2},
-                    { item: "looped stairs 2", weight: 2},
-                    { item: "looped stairs 3", weight: 2},
-                    { item: "looped stairs 4", weight: 2},
+                    { item: "stairs", weight: 2},
+                    { item: "looped stairs", weight: 2},
                 ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
             }
             if (Math.random() < 0.12) {
@@ -2756,16 +2639,8 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "decelerate 1", weight: 2},
                     { item: "decelerate 2", weight: 2},
                     { item: "decelerate 3", weight: 2},
-                    { item: "stairs 0", weight: 2},
-                    { item: "stairs 1", weight: 2},
-                    { item: "stairs 2", weight: 2},
-                    { item: "stairs 3", weight: 2},
-                    { item: "stairs 4", weight: 2},
-                    { item: "looped stairs 0", weight: 2},
-                    { item: "looped stairs 1", weight: 2},
-                    { item: "looped stairs 2", weight: 2},
-                    { item: "looped stairs 3", weight: 2},
-                    { item: "looped stairs 4", weight: 2},
+                    { item: "stairs", weight: 2},
+                    { item: "looped stairs", weight: 2},
                 ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
             }
 
@@ -2875,16 +2750,8 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "decelerate 1", weight: 2},
                         { item: "decelerate 2", weight: 2},
                         { item: "decelerate 3", weight: 2},
-                        { item: "stairs 0", weight: 2},
-                        { item: "stairs 1", weight: 2},
-                        { item: "stairs 2", weight: 2},
-                        { item: "stairs 3", weight: 2},
-                        { item: "stairs 4", weight: 2},
-                        { item: "looped stairs 0", weight: 2},
-                        { item: "looped stairs 1", weight: 2},
-                        { item: "looped stairs 2", weight: 2},
-                        { item: "looped stairs 3", weight: 2},
-                        { item: "looped stairs 4", weight: 2},
+                        { item: "stairs", weight: 2},
+                        { item: "looped stairs", weight: 2},
                         ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
                     }
                 } break;
@@ -2984,16 +2851,8 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "decelerate 1", weight: 2},
                                 { item: "decelerate 2", weight: 2},
                                 { item: "decelerate 3", weight: 2},
-                                { item: "stairs 0", weight: 2},
-                                { item: "stairs 1", weight: 2},
-                                { item: "stairs 2", weight: 2},
-                                { item: "stairs 3", weight: 2},
-                                { item: "stairs 4", weight: 2},
-                                { item: "looped stairs 0", weight: 2},
-                                { item: "looped stairs 1", weight: 2},
-                                { item: "looped stairs 2", weight: 2},
-                                { item: "looped stairs 3", weight: 2},
-                                { item: "looped stairs 4", weight: 2},
+                                { item: "stairs", weight: 2},
+                                { item: "looped stairs", weight: 2},
                         ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
                     }
                     if (instrument.envelopeCount < Config.maxEnvelopeCount && Math.random() < 0.3) {
@@ -3085,16 +2944,8 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "decelerate 1", weight: 2},
                                 { item: "decelerate 2", weight: 2},
                                 { item: "decelerate 3", weight: 2},
-                                { item: "stairs 0", weight: 2},
-                                { item: "stairs 1", weight: 2},
-                                { item: "stairs 2", weight: 2},
-                                { item: "stairs 3", weight: 2},
-                                { item: "stairs 4", weight: 2},
-                                { item: "looped stairs 0", weight: 2},
-                                { item: "looped stairs 1", weight: 2},
-                                { item: "looped stairs 2", weight: 2},
-                                { item: "looped stairs 3", weight: 2},
-                                { item: "looped stairs 4", weight: 2},
+                                { item: "stairs", weight: 2},
+                                { item: "looped stairs", weight: 2},
                         ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
                     }
                     if (instrument.envelopeCount < Config.maxEnvelopeCount && Math.random() < 0.3) {
@@ -3187,16 +3038,8 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "decelerate 1", weight: 2},
                                 { item: "decelerate 2", weight: 2},
                                 { item: "decelerate 3", weight: 2},
-                                { item: "stairs 0", weight: 2},
-                                { item: "stairs 1", weight: 2},
-                                { item: "stairs 2", weight: 2},
-                                { item: "stairs 3", weight: 2},
-                                { item: "stairs 4", weight: 2},
-                                { item: "looped stairs 0", weight: 2},
-                                { item: "looped stairs 1", weight: 2},
-                                { item: "looped stairs 2", weight: 2},
-                                { item: "looped stairs 3", weight: 2},
-                                { item: "looped stairs 4", weight: 2},
+                                { item: "stairs", weight: 2},
+                                { item: "looped stairs", weight: 2},
                         ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
                     }
                     if (instrument.envelopeCount < Config.maxEnvelopeCount && Math.random() < 0.3) {
@@ -3288,16 +3131,8 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "decelerate 1", weight: 2},
                                 { item: "decelerate 2", weight: 2},
                                 { item: "decelerate 3", weight: 2},
-                                { item: "stairs 0", weight: 2},
-                                { item: "stairs 1", weight: 2},
-                                { item: "stairs 2", weight: 2},
-                                { item: "stairs 3", weight: 2},
-                                { item: "stairs 4", weight: 2},
-                                { item: "looped stairs 0", weight: 2},
-                                { item: "looped stairs 1", weight: 2},
-                                { item: "looped stairs 2", weight: 2},
-                                { item: "looped stairs 3", weight: 2},
-                                { item: "looped stairs 4", weight: 2},
+                                { item: "stairs", weight: 2},
+                                { item: "looped stairs", weight: 2},
                         ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
                     }
                 } break;
@@ -3517,16 +3352,8 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "decelerate 1", weight: 2},
                                 { item: "decelerate 2", weight: 2},
                                 { item: "decelerate 3", weight: 2},
-                                { item: "stairs 0", weight: 2},
-                                { item: "stairs 1", weight: 2},
-                                { item: "stairs 2", weight: 2},
-                                { item: "stairs 3", weight: 2},
-                                { item: "stairs 4", weight: 2},
-                                { item: "looped stairs 0", weight: 2},
-                                { item: "looped stairs 1", weight: 2},
-                                { item: "looped stairs 2", weight: 2},
-                                { item: "looped stairs 3", weight: 2},
-                                { item: "looped stairs 4", weight: 2},
+                                { item: "stairs", weight: 2},
+                                { item: "looped stairs", weight: 2},
                             ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
                             instrument.operators[i].waveform = Config.operatorWaves.dictionary[selectWeightedRandom([
                                 { item: "sine", weight: 3 },
@@ -3667,16 +3494,8 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "decelerate 1", weight: 2},
                                 { item: "decelerate 2", weight: 2},
                                 { item: "decelerate 3", weight: 2},
-                                { item: "stairs 0", weight: 2},
-                                { item: "stairs 1", weight: 2},
-                                { item: "stairs 2", weight: 2},
-                                { item: "stairs 3", weight: 2},
-                                { item: "stairs 4", weight: 2},
-                                { item: "looped stairs 0", weight: 2},
-                                { item: "looped stairs 1", weight: 2},
-                                { item: "looped stairs 2", weight: 2},
-                                { item: "looped stairs 3", weight: 2},
-                                { item: "looped stairs 4", weight: 2},
+                                { item: "stairs", weight: 2},
+                                { item: "looped stairs", weight: 2},
                             ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
                         }
                     }
@@ -3771,16 +3590,8 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "decelerate 1", weight: 2},
                                 { item: "decelerate 2", weight: 2},
                                 { item: "decelerate 3", weight: 2},
-                                { item: "stairs 0", weight: 2},
-                                { item: "stairs 1", weight: 2},
-                                { item: "stairs 2", weight: 2},
-                                { item: "stairs 3", weight: 2},
-                                { item: "stairs 4", weight: 2},
-                                { item: "looped stairs 0", weight: 2},
-                                { item: "looped stairs 1", weight: 2},
-                                { item: "looped stairs 2", weight: 2},
-                                { item: "looped stairs 3", weight: 2},
-                                { item: "looped stairs 4", weight: 2},
+                                { item: "stairs", weight: 2},
+                                { item: "looped stairs", weight: 2},
                         ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
                     }
                 } break;

@@ -555,7 +555,7 @@ export class TipPrompt implements Prompt {
 				message = div(
 					h2("Measurement Type"),
 					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously. This is a subsetting that effects other settings."),
-					p("By default, delay and position are measured in beats. This setting toggles whether delay and position are measured in beats or seconds."),
+					p("By default, delay and position are measured in beats. This setting toggles whether delay and position are measured in beats or seconds. This will also change the envelope graph to redisplay the envelope in the selected measurement."),
 				);
 			} break;
 			case "pitchEnvelope": {
