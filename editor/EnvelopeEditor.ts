@@ -4,8 +4,8 @@ import {InstrumentType, Config, DropdownID} from "../synth/SynthConfig";
 import {Instrument, EnvelopeComputer} from "../synth/synth";
 import {ColorConfig} from "./ColorConfig";
 import {SongDocument} from "./SongDocument";
-import {ChangeSetEnvelopeTarget, ChangeSetEnvelopeType, ChangeRemoveEnvelope, ChangePerEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeLowerBound, ChangeUpperBound, ChangeStairsStepAmount, ChangeEnvelopeDelay, ChangePitchEnvelopeStart, ChangePitchEnvelopeEnd, ChangePitchAmplify, ChangePitchBounce, ChangeEnvelopePosition, ChangeMeasurementType} from "./changes";
-import {HTML} from "imperative-html/dist/esm/elements-strict";
+import {ChangeSetEnvelopeTarget, ChangeSetEnvelopeType, ChangeRemoveEnvelope, ChangeEnvelopeOrder, ChangePerEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeLowerBound, ChangeUpperBound, ChangeStairsStepAmount, ChangeEnvelopeDelay, ChangePitchEnvelopeStart, ChangePitchEnvelopeEnd, ChangePitchAmplify, ChangePitchBounce, ChangeEnvelopePosition, ChangeMeasurementType, ChangePasteEnvelope} from "./changes";
+import {HTML, SVG} from "imperative-html/dist/esm/elements-strict";
 import {Localization as _} from "./Localization";
 import {clamp, remap} from "./UsefulCodingStuff";
 import {Change} from "./Change";
@@ -210,6 +210,11 @@ export class EnvelopeEditor {
 	private readonly _measureInSecondButtons: HTMLButtonElement[] = [];
 	private readonly _measureInBeatButtons: HTMLButtonElement[] = [];
 	private readonly _measurementTypeRows: HTMLElement[] = [];
+	private readonly _envelopeCopyButtons: HTMLButtonElement[] = [];
+	private readonly _envelopePasteButtons: HTMLButtonElement[] = [];
+	private readonly _envelopeMoveUpButtons: HTMLButtonElement[] = [];
+	private readonly _envelopeMoveDownButtons: HTMLButtonElement[] = [];
+	private readonly _envelopeButtonContainers: HTMLElement[] = [];
 	private readonly _envelopeDropdownGroups: HTMLElement[] = [];
 	private readonly _envelopeDropdowns: HTMLButtonElement[] = [];
 	private readonly _targetSelects: HTMLSelectElement[] = [];
@@ -468,9 +473,17 @@ export class EnvelopeEditor {
 	}
 
 	private _onClick = (event: MouseEvent): void => {
-		const index: number = this._deleteButtons.indexOf(<any> event.target);
-		if (index != -1) {
-			this._doc.record(new ChangeRemoveEnvelope(this._doc, index));
+		const deleteButtonIndex: number = this._deleteButtons.indexOf(<any> event.target);
+		if (deleteButtonIndex != -1) {
+			this._doc.record(new ChangeRemoveEnvelope(this._doc, deleteButtonIndex));
+		}
+		const moveUpButtonIndex: number = this._envelopeMoveUpButtons.indexOf(<any> event.target);
+		if (moveUpButtonIndex != -1) {
+			this._doc.record(new ChangeEnvelopeOrder(this._doc, moveUpButtonIndex, true));
+		}
+		const moveDownButtonIndex: number = this._envelopeMoveDownButtons.indexOf(<any> event.target);
+		if (moveDownButtonIndex != -1) {
+			this._doc.record(new ChangeEnvelopeOrder(this._doc, moveDownButtonIndex, false));
 		}
 	}
 
@@ -635,7 +648,33 @@ export class EnvelopeEditor {
 			const measureInBeatsButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "no-underline", onclick: () => this._switchMeasurementType(true, envelopeIndex) }, span(_.measureInBeatsLabel));
     		const measureInSecondsButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "last-button no-underline", onclick: () => this._switchMeasurementType(false, envelopeIndex) }, span(_.measureInSecondsLabel));
     		const measurementTypeRow: HTMLElement = div({ class: "selectRow", style: "padding-top: 4px; margin-bottom: -3px;" }, span({ style: "font-size: small;", class: "tip", onclick: () => this._openPrompt("envelopeDelayPhaseMeasurement") }, span(_.delayPhaseMeasurementLabel)), div({ class: "instrument-bar" }, measureInBeatsButton, measureInSecondsButton));
-			const envelopeDropdownGroup: HTMLElement = div({class: "editor-controls", style: "display: none;"}, plotterTimeRangeRow, envelopePlotterRow, pitchStartGroup, pitchEndGroup, extraPitchSettingRow, perEnvelopeSpeedRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, stairsStepAmountRow, measurementTypeRow, envelopeDelayRow, envelopePhaseRow);
+			const envelopeCopyButton: HTMLButtonElement = button({style: "flex: 3; margin-right: 0.3em;", onclick: () => this._copyEnvelopeSettings(envelopeIndex)}, 
+				// Copy icon:
+				SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 20%; top: 37%; margin-top: -0.75em; pointer-events: none;", width: "2em", height: "2em", viewBox: "-5 -21 26 26" }, [
+					SVG.path({ d: "M 0 -15 L 1 -15 L 1 0 L 13 0 L 13 1 L 0 1 L 0 -15 z M 2 -1 L 2 -17 L 10 -17 L 14 -13 L 14 -1 z M 3 -2 L 13 -2 L 13 -12 L 9 -12 L 9 -16 L 3 -16 z", fill: "currentColor" }),
+				]),
+			);
+			const envelopePasteButton: HTMLButtonElement = button({style: "flex: 3; margin-left: 0.3em; margin-right: 0.3em;", onclick: () => this._pasteEnvelopeSettings(envelopeIndex)}, 
+				// Paste icon:
+				SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 18%; top: 37%; margin-top: -0.75em; pointer-events: none;", width: "2em", height: "2em", viewBox: "0 0 26 26" }, [
+					SVG.path({ d: "M 8 18 L 6 18 L 6 5 L 17 5 L 17 7 M 9 8 L 16 8 L 20 12 L 20 22 L 9 22 z", stroke: "currentColor", fill: "none" }),
+					SVG.path({ d: "M 9 3 L 14 3 L 14 6 L 9 6 L 9 3 z M 16 8 L 20 12 L 16 12 L 16 8 z", fill: "currentColor", }),
+				]),
+			);
+			const envelopeMoveUpButton: HTMLButtonElement = button({style: "flex: 3; margin-left: 0.3em; margin-right: 0.3em;"}, 
+				// Up-arrow icon:
+				SVG.svg({ style: "flex-shrink: 0; position: absolute; left: -6%; top: 40%; margin-top: -0.75em; pointer-events: none;", width: "2.4em", height: "2.4em", viewBox: "0 0 3 9" }, [
+					SVG.path({ d: "M 2 3 L 4 1 L 6 3 L 4.5 3 L 4.5 6.5 L 3.5 6.5 L 3.5 3 L 2 3 z", fill: "currentColor" }),
+				]),
+			);
+			const envelopeMoveDownButton: HTMLButtonElement = button({style: "flex: 3; margin-left: 0.3em;"}, 
+				// Down-arrow icon:
+				SVG.svg({ style: "flex-shrink: 0; position: absolute; left: -6%; top: 35%; margin-top: -0.75em; pointer-events: none;", width: "2.4em", height: "2.4em", viewBox: "0 0 3 9" }, [
+					SVG.path({ d: "M 6 5 L 4 7 L 2 5 L 3.5 5 L 3.5 1.5 L 4.5 1.5 L 4.5 5 L 6 5 z", fill: "currentColor"}),
+				]),
+			);
+			const envelopeButtonContainer: HTMLElement = div({ class: "selectRow", style: "padding-top: 1px; margin-bottom: 2px; display: flex;"}, envelopeCopyButton, envelopePasteButton, envelopeMoveUpButton, envelopeMoveDownButton);
+			const envelopeDropdownGroup: HTMLElement = div({class: "editor-controls", style: "display: none;"}, envelopeButtonContainer, plotterTimeRangeRow, envelopePlotterRow, pitchStartGroup, pitchEndGroup, extraPitchSettingRow, perEnvelopeSpeedRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, stairsStepAmountRow, measurementTypeRow, envelopeDelayRow, envelopePhaseRow);
 			const envelopeDropdown: HTMLButtonElement = button({style: "margin-left: 0.6em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.PerEnvelope, envelopeIndex)}, "▼");
 
 			const targetSelect: HTMLSelectElement = select();
@@ -705,6 +744,11 @@ export class EnvelopeEditor {
 			this._measureInBeatButtons[envelopeIndex] = measureInBeatsButton;
 			this._measureInSecondButtons[envelopeIndex] = measureInSecondsButton;
 			this._measurementTypeRows[envelopeIndex] = measurementTypeRow;
+			this._envelopeCopyButtons[envelopeIndex] = envelopeCopyButton;
+			this._envelopePasteButtons[envelopeIndex] = envelopePasteButton;
+			this._envelopeMoveUpButtons[envelopeIndex] = envelopeMoveUpButton;
+			this._envelopeMoveDownButtons[envelopeIndex] = envelopeMoveDownButton;
+			this._envelopeButtonContainers[envelopeIndex] = envelopeButtonContainer;
 			this._envelopeDropdownGroups[envelopeIndex] = envelopeDropdownGroup;
 			this._envelopeDropdowns[envelopeIndex] = envelopeDropdown;
 			this._targetSelects[envelopeIndex] = targetSelect;
@@ -868,8 +912,21 @@ export class EnvelopeEditor {
 
 	private _switchMeasurementType(type: boolean, index: number) {
 		const measurementType = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].envelopes[index].measurementType;
-		this._doc.record(new ChangeMeasurementType(this._doc, index, measurementType, type))
+		this._doc.record(new ChangeMeasurementType(this._doc, index, measurementType, type));
     }
+
+	private _copyEnvelopeSettings(copiedIndex: number): void {
+		let instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
+		let envelope = instrument.envelopes[copiedIndex];
+		const envelopeCopy: any = envelope.toJsonObject(instrument);
+		window.localStorage.setItem("envelopeCopy", JSON.stringify(envelopeCopy));
+	}
+
+	private _pasteEnvelopeSettings(pasteIndex: number): void {
+		let instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
+		const storedEnvelope: any = JSON.parse(String(window.localStorage.getItem("envelopeCopy")));
+		this._doc.record(new ChangePasteEnvelope(this._doc, instrument, instrument.envelopes[pasteIndex], storedEnvelope))
+	}
 
 	private _toggleDropdownMenu(dropdown: DropdownID, submenu: number = 0): void {
         let target: HTMLButtonElement = this._envelopeDropdowns[submenu];
