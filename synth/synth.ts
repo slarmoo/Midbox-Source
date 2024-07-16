@@ -3158,9 +3158,8 @@ export class Instrument {
                     const rawEnvelopeName: string = envelopeObject["envelope"];
                     tempEnvelope.fromJsonObject(envelopeObject, this);
                     if (jsonFormat == "midbox") {
-                        // Default Envelope Table
-                        // Used as the center point for grabbing all other speed values from other speed numbers.
-                        /*
+                        /* Default Envelope Table
+                        Used as the center point for grabbing all other speed values from other speed numbers.
                         None/Note Size/Punch | stay the same
                         Flare 3
                         Twang 3
@@ -3174,8 +3173,7 @@ export class Instrument {
                         JummBox Blip 3
                         Decelerate 0
                         Stairs 1
-                        Looped Stairs 1
-                        */
+                        Looped Stairs 1*/
                         const oldNameToNewData = (<any>{
                             "none":            {envelope: "none",          envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
                             "note size":       {envelope: "note size",     envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
@@ -3293,74 +3291,111 @@ export class Instrument {
                             if (oldNameToNewData[rawEnvelopeName].stepAmount != null && rawEnvelopeName != null) tempEnvelope.stepAmount = oldNameToNewData[rawEnvelopeName].stepAmount;
                             if (oldNameToNewData[rawEnvelopeName].phase != null && rawEnvelopeName != null) tempEnvelope.phase = oldNameToNewData[rawEnvelopeName].phase;
                         }
-                    }
-                    if (jsonFormat != "midbox") {
+                    } else {
                         // Midbox changes the names and values of various envelopes. Change them here.
-                        const oldNameToNewIndex: Dictionary<number> = {
-                            // Note: NPA = Not Perfectly Accurate: Original speed to Midbox (Resolved later with envelopeSpeed)
-                            // -1/-2 to 0. Inherited from GoldBox and forks:
-                            "flare -1": Config.envelopes.dictionary["flare 0"].index, // NPA: 128 to 64
-                            "twang -1": Config.envelopes.dictionary["twang 0"].index, // NPA: 128 to 64
-                            "swell -1": Config.envelopes.dictionary["swell 0"].index, // NPA: 128 to 64
-                            "decay -1": Config.envelopes.dictionary["decay 0"].index, // NPA: 40 to 18
-                            "wibble-1": Config.envelopes.dictionary["wibble 0"].index,
-                            "linear-2": Config.envelopes.dictionary["linear 0"].index,
-                            "linear-1": Config.envelopes.dictionary["linear 1"].index,
-                            "rise -2": Config.envelopes.dictionary["rise 0"].index,
-                            "rise -1": Config.envelopes.dictionary["rise 1"].index,
-                            // Value change:
-                            // Often, this change is 2 -> 3, 3 -> 5.
-                            "flare 2": Config.envelopes.dictionary["flare 3"].index,
-                            "flare 3": Config.envelopes.dictionary["flare 5"].index,
-                            "twang 2": Config.envelopes.dictionary["twang 3"].index,
-                            "twang 3": Config.envelopes.dictionary["twang 5"].index,
-                            "swell 2": Config.envelopes.dictionary["swell 3"].index,
-                            "swell 3": Config.envelopes.dictionary["swell 5"].index,
-                            // Name change:
-                            // This type of stuff occurs frequently with tremolos/tripolos.
-                            "tremolo0": Config.envelopes.dictionary["full tremolo 0"].index,
-                            "tremolo1": Config.envelopes.dictionary["full tremolo 1"].index,
-                            "tremolo2": Config.envelopes.dictionary["full tremolo 2"].index,
-                            "tremolo3": Config.envelopes.dictionary["full tremolo 3"].index,
-                            "tremolo4": Config.envelopes.dictionary["semi tremolo 1"].index,
-                            "tremolo5": Config.envelopes.dictionary["semi tremolo 2"].index,
-                            "tremolo6": Config.envelopes.dictionary["semi tremolo 3"].index,
-                            "tripolo1": Config.envelopes.dictionary["full tripolo 0"].index, 
-                            "tripolo2": Config.envelopes.dictionary["full tripolo 1"].index, 
-                            "tripolo3": Config.envelopes.dictionary["full tripolo 2"].index, 
-                            "tripolo4": Config.envelopes.dictionary["semi tripolo 0"].index, 
-                            "tripolo5": Config.envelopes.dictionary["semi tripolo 1"].index, 
-                            "tripolo6": Config.envelopes.dictionary["semi tripolo 2"].index, 
-                            // JummBox Blip:
-                            // For this envelope, its name was changed and its values were inverted to fit with all other envelopes.
-                            // Dogebox2's blip also gets confused here. That is handled later on.
-                            "blip 1": Config.envelopes.dictionary["jummbox blip 5"].index, 
-                            "blip 2": Config.envelopes.dictionary["jummbox blip 4"].index,
-                            "blip 3": Config.envelopes.dictionary["jummbox blip 3"].index,
-                            // Missing Envelopes:
-                            // Flute is just a copy of wibble. Try to translate accurately.
-                            "flute 1": Config.envelopes.dictionary["wibble 2"].index,
-                            "flute 2": Config.envelopes.dictionary["wibble 2"].index,
-                            "flute 3": Config.envelopes.dictionary["wibble 3"].index, 
-                            // Pentolo is heavily reliant on more speed checks as in this scenario there is no 1/5 tremolo in Midbox.
-                            "pentolo1": Config.envelopes.dictionary["full tremolo 0"].index,
-                            "pentolo2": Config.envelopes.dictionary["full tremolo 1"].index,
-                            "pentolo3": Config.envelopes.dictionary["full tripolo 2"].index, 
-                            "pentolo4": Config.envelopes.dictionary["semi tremolo 0"].index, 
-                            "pentolo5": Config.envelopes.dictionary["semi tremolo 1"].index, 
-                            "pentolo6": Config.envelopes.dictionary["semi tripolo 2"].index, 
-                            // Flutter envelopes are just very fast tremolos/tripolos. Convert to the fastest tripolo as that is closest.
-                            "flutter 1": Config.envelopes.dictionary["full tripolo 0"].index,
-                            "flutter 2": Config.envelopes.dictionary["semi tripolo 0"].index,
-                            // Same translation as tripolo1 as they are the same.
-                            "water-y flutter": Config.envelopes.dictionary["full tripolo 0"].index, 
-                            // By sound, clap is very similar to twang. It is later layered with modbox trill.
-                            "clap 1": Config.envelopes.dictionary["twang 0"].index,
-                            "clap 2": Config.envelopes.dictionary["twang 1"].index,
-                            "clap 3": Config.envelopes.dictionary["twang 2"].index,
-                        };
-                        const newIndex: number | null = oldNameToNewIndex[rawEnvelopeName];
-                        if (newIndex != null) tempEnvelope.envelope = newIndex;
+                        // Note: NPA = Not Perfectly Accurate
+                        const oldNameToNewData = (<any>{
+                            // BeepBox
+                            "none":            {envelope: "none",          envelopeSpeed: 1,     lowerBound: 0},
+                            "note size":       {envelope: "note size",     envelopeSpeed: 1,     lowerBound: 0},
+                            "punch":           {envelope: "punch",         envelopeSpeed: 1,     lowerBound: 0},
+                            "flare 1":         {envelope: "flare",         envelopeSpeed: 4,     lowerBound: 0},
+                            "flare 2":         {envelope: "flare",         envelopeSpeed: 1,     lowerBound: 0},
+                            "flare 3":         {envelope: "flare",         envelopeSpeed: 0.25,  lowerBound: 0},
+                            "twang 1":         {envelope: "twang",         envelopeSpeed: 4,     lowerBound: 0},
+                            "twang 2":         {envelope: "twang",         envelopeSpeed: 1,     lowerBound: 0},
+                            "twang 3":         {envelope: "twang",         envelopeSpeed: 0.25,  lowerBound: 0},
+                            "swell 1":         {envelope: "swell",         envelopeSpeed: 4,     lowerBound: 0},
+                            "swell 2":         {envelope: "swell",         envelopeSpeed: 1,     lowerBound: 0},
+                            "swell 3":         {envelope: "swell",         envelopeSpeed: 0.25,  lowerBound: 0},
+                            "tremolo1":        {envelope: "tremolo",       envelopeSpeed: 2,     lowerBound: 0},
+                            "tremolo2":        {envelope: "tremolo",       envelopeSpeed: 1,     lowerBound: 0},
+                            "tremolo3":        {envelope: "tremolo",       envelopeSpeed: 0.5,   lowerBound: 0},
+                            "tremolo4":        {envelope: "tremolo",       envelopeSpeed: 2,     lowerBound: 0.5},
+                            "tremolo5":        {envelope: "tremolo",       envelopeSpeed: 1,     lowerBound: 0.5},
+                            "tremolo6":        {envelope: "tremolo",       envelopeSpeed: 0.5,   lowerBound: 0.5},
+                            "decay 1":         {envelope: "decay",         envelopeSpeed: 5,     lowerBound: 0},
+                            "decay 2":         {envelope: "decay",         envelopeSpeed: 3.5,   lowerBound: 0},
+                            "decay 3":         {envelope: "decay",         envelopeSpeed: 2,     lowerBound: 0},
+                            // JummBox
+                            // This blip gets confused with Dogebox2 Blip, that'll get its own condition to be 
+                            // detected.
+                            "blip 1":          {envelope: "jummbox blip",  envelopeSpeed: 0.866, lowerBound: 0},
+                            "blip 2":          {envelope: "jummbox blip",  envelopeSpeed: 1.414, lowerBound: 0},
+                            "blip 3":          {envelope: "jummbox blip",  envelopeSpeed: 2,     lowerBound: 0},
+                            // GoldBox
+                            "flare -1":        {envelope: "flare",         envelopeSpeed: 16,    lowerBound: 0},
+                            "twang -1":        {envelope: "twang",         envelopeSpeed: 16,    lowerBound: 0},
+                            "swell -1":        {envelope: "swell",         envelopeSpeed: 16,    lowerBound: 0},
+                            "tremolo0":        {envelope: "tremolo",       envelopeSpeed: 4,     lowerBound: 0},
+                            "decay -1":        {envelope: "decay",         envelopeSpeed: 16,    lowerBound: 0}, // NPA, would need 20 envSpeed.
+                            "wibble-1":        {envelope: "wibble",        envelopeSpeed: 8,     lowerBound: 0},
+                            "wibble 1":        {envelope: "wibble",        envelopeSpeed: 2,     lowerBound: 0},
+                            "wibble 2":        {envelope: "wibble",        envelopeSpeed: 1,     lowerBound: 0},
+                            "wibble 3":        {envelope: "wibble",        envelopeSpeed: 0.333, lowerBound: 0},
+                            "linear-2":        {envelope: "linear",        envelopeSpeed: 8,     lowerBound: 0},
+                            "linear-1":        {envelope: "linear",        envelopeSpeed: 4,     lowerBound: 0},
+                            "linear 1":        {envelope: "linear",        envelopeSpeed: 1,     lowerBound: 0},
+                            "linear 2":        {envelope: "linear",        envelopeSpeed: 0.25,  lowerBound: 0},
+                            "linear 3":        {envelope: "linear",        envelopeSpeed: 0.063, lowerBound: 0},
+                            "rise -2":         {envelope: "rise",          envelopeSpeed: 8,     lowerBound: 0},
+                            "rise -1":         {envelope: "rise",          envelopeSpeed: 4,     lowerBound: 0},
+                            "rise 1":          {envelope: "rise",          envelopeSpeed: 1,     lowerBound: 0},
+                            "rise 2":          {envelope: "rise",          envelopeSpeed: 0.25,  lowerBound: 0},
+                            "rise 3":          {envelope: "rise",          envelopeSpeed: 0.063, lowerBound: 0},
+                            // UltraBox, Sandbox, and TodBox
+                            // UltraBox flute is just wibble. ModBox flute is a different story though, as that 
+                            // is not replicatable in Midbox.
+                            "flute 1":         {envelope: "wibble",        envelopeSpeed: 1.333, lowerBound: 0},
+                            "flute 2":         {envelope: "wibble",        envelopeSpeed: 0.666, lowerBound: 0},
+                            "flute 3":         {envelope: "wibble",        envelopeSpeed: 0.333, lowerBound: 0},
+                            "tripolo1":        {envelope: "tremolo",       envelopeSpeed: 4.5,   lowerBound: 0},
+                            "tripolo2":        {envelope: "tremolo",       envelopeSpeed: 3,     lowerBound: 0},
+                            "tripolo3":        {envelope: "tremolo",       envelopeSpeed: 1.5,   lowerBound: 0},
+                            "tripolo4":        {envelope: "tremolo",       envelopeSpeed: 4.5,   lowerBound: 0.5},
+                            "tripolo5":        {envelope: "tremolo",       envelopeSpeed: 3,     lowerBound: 0.5},
+                            "tripolo6":        {envelope: "tremolo",       envelopeSpeed: 1.5,   lowerBound: 0.5},
+                            "pentolo1":        {envelope: "tremolo",       envelopeSpeed: 5,     lowerBound: 0},
+                            "pentolo2":        {envelope: "tremolo",       envelopeSpeed: 2.5,   lowerBound: 0},
+                            "pentolo3":        {envelope: "tremolo",       envelopeSpeed: 1.25,  lowerBound: 0},
+                            "pentolo4":        {envelope: "tremolo",       envelopeSpeed: 5,     lowerBound: 0.5},
+                            "pentolo5":        {envelope: "tremolo",       envelopeSpeed: 2.5,   lowerBound: 0.5},
+                            "pentolo6":        {envelope: "tremolo",       envelopeSpeed: 1.25,  lowerBound: 0.5},
+                            "flutter 1":       {envelope: "tremolo",       envelopeSpeed: 7,     lowerBound: 0},
+                            "flutter 2":       {envelope: "tremolo",       envelopeSpeed: 5.5,   lowerBound: 0.5},
+                            "water-y flutter": {envelope: "tremolo",       envelopeSpeed: 4.5,   lowerBound: 0},
+                            // Slarmoo's Box
+                            "pitch":           {envelope: "pitch",         envelopeSpeed: 1,     lowerBound: 0},
+                        });
+
+                        // Slarmoo's Box pitch envelope support.
+                        if (tempEnvelope.envelope == Config.envelopes.dictionary["pitch"].index && jsonFormat == "slarmoobox") {
+                            tempEnvelope.pitchStart = 0;
+                            tempEnvelope.pitchEnd = this.isNoiseInstrument ? Config.drumCount : Config.maxPitch;
+                            if (instrumentObject["pitchEnvelopeStart" + i] != undefined && instrumentObject["pitchEnvelopeStart" + i] != null) {
+                                tempEnvelope.pitchStart = instrumentObject["pitchEnvelopeStart" + i];
+                            }
+                            if (instrumentObject["pitchEnvelopeEnd" + i] != undefined && instrumentObject["pitchEnvelopeEnd" + i] != null) {
+                                tempEnvelope.pitchEnd = instrumentObject["pitchEnvelopeEnd" + i];
+                            }
+                        }
+
+                        if (oldNameToNewData[rawEnvelopeName] != undefined && Config.envelopes.dictionary[oldNameToNewData[rawEnvelopeName].envelope] != undefined) {
+                            if (oldNameToNewData[rawEnvelopeName].envelope != null && rawEnvelopeName != null) tempEnvelope.envelope = Config.envelopes.dictionary[oldNameToNewData[rawEnvelopeName].envelope].index;
+                            if (oldNameToNewData[rawEnvelopeName].envelopeSpeed != null && rawEnvelopeName != null) tempEnvelope.envelopeSpeed = oldNameToNewData[rawEnvelopeName].envelopeSpeed;
+                            if (oldNameToNewData[rawEnvelopeName].lowerBound != null && rawEnvelopeName != null) tempEnvelope.lowerBound = oldNameToNewData[rawEnvelopeName].lowerBound;
+                        }
+
+                        // Slarmoo's Box / VoxBox inverse toggle support.
+                        if (jsonFormat == "slarmoobox" || jsonFormat == "voxbox") {
+                            let storedLowerBound = tempEnvelope.lowerBound;
+                            if (instrumentObject["envelopeInverse" + i] != undefined && instrumentObject["envelopeInverse" + i] != null) {
+                                if (instrumentObject["envelopeInverse" + i]) {
+                                    tempEnvelope.lowerBound = 1;
+                                    tempEnvelope.upperBound = storedLowerBound;
+                                }
+                            }
+                        }
                     }
                     this.addEnvelope(tempEnvelope.target, tempEnvelope.index, tempEnvelope.envelope, tempEnvelope.envelopeSpeed, tempEnvelope.discrete, tempEnvelope.lowerBound, tempEnvelope.upperBound, tempEnvelope.stepAmount, tempEnvelope.delay, tempEnvelope.pitchStart, tempEnvelope.pitchEnd, tempEnvelope.pitchAmplify, tempEnvelope.pitchBounce, tempEnvelope.phase, tempEnvelope.measurementType);
                 }
@@ -13303,7 +13338,7 @@ export class Synth {
         const aliases: boolean = (effectsIncludeDistortion(instrumentState.effects) && instrumentState.aliases);
         const oneShotBoolean: boolean = instrumentState.oneShotCycle;
         const data: Float32Array = synth.tempMonoInstrumentSampleBuffer!;
-        const currentWave: number = tone.currentWave + 0.000000001; //ugly small number to get rid of slight desyncing issues
+        const currentWave: number = tone.currentWave;
         let waveCrossfade: number = tone.waveCrossfade;
         const waveCrossfadeDelta: number = tone.waveCrossfadeDelta;
         // Trick to avoid branching in the loop below.
@@ -13554,10 +13589,11 @@ export class Synth {
             pitch = tone.lastInterval != tonePitch ? tonePitch + tone.lastInterval : tonePitch; //account for pitch bends
         }
         let range: number = endNote - startNote + 1;
-        if (startNote > endNote) range = Math.abs(endNote - startNote - 1);
+        if (startNote > endNote) range = (endNote - startNote - 1);
         if (instrument.isNoiseInstrument) {
             startNote -= 1;
         }
+
         if (amplify) {
             return clamp(0, 11, (pitch - startNote) / range);
         } else if (bounce) {

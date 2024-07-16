@@ -51,11 +51,6 @@ export const enum EnvelopeType {
     twang,
     swell,
     tremolo,
-    //tremolo2, // to be removed
-    //tremolo3, // to be removed
-    //triptremolo, // to be removed
-    //triptremolo2, // to be removed
-    //triptremolo3, // to be removed
     decay,
     modboxBlip,
     modboxTrill,
@@ -70,7 +65,9 @@ export const enum EnvelopeType {
     loopStairs,
     pitch,
     LFO, // to later replace tremolo
-    sandboxRev,
+    dogebox2Blip,
+    dogebox2Clap,
+    dogebox2Spike,
 }
 
 
@@ -655,51 +652,32 @@ export class Config {
     ]);
 
     public static readonly envelopes: DictionaryArray<Envelope> = toNameMap([
-        { name: "none",           type: EnvelopeType.none,         speed: 0.0   },
-        { name: "note size",      type: EnvelopeType.noteSize,     speed: 0.0   },
-        { name: "pitch",          type: EnvelopeType.pitch,        speed: 0.0   },
-        { name: "punch",          type: EnvelopeType.punch,        speed: 0.0   },
-        { name: "flare",          type: EnvelopeType.flare,        speed: 8.0   },
-        { name: "twang",          type: EnvelopeType.twang,        speed: 8.0   },
-        { name: "swell",          type: EnvelopeType.swell,        speed: 8.0   },
-        { name: "tremolo",        type: EnvelopeType.tremolo,      speed: 2.0   },
-        { name: "decay",          type: EnvelopeType.decay,        speed: 2.0   },
-        { name: "modbox trill",   type: EnvelopeType.modboxTrill,  speed: 40    },
-        { name: "modbox blip",    type: EnvelopeType.modboxBlip,   speed: 4     },
-        { name: "modbox click",   type: EnvelopeType.modboxClick,  speed: 5     },
-        { name: "modbox bow",     type: EnvelopeType.modboxBow,    speed: 90    },
-        { name: "wibble",         type: EnvelopeType.wibble,       speed: 12.0  },
-        { name: "linear",         type: EnvelopeType.linear,       speed: 32.0  },
-        { name: "rise",           type: EnvelopeType.rise,         speed: 32.0  },
-        { name: "jummbox blip",   type: EnvelopeType.jummboxBlip,  speed: 8.0   },
-        { name: "decelerate",     type: EnvelopeType.decelerate,   speed: 1.0   },
-        { name: "stairs",         type: EnvelopeType.stairs,       speed: -1.0  },
-        { name: "looped stairs",  type: EnvelopeType.loopStairs,   speed: -1.0  },
+        { name: "none",           type: EnvelopeType.none,          speed:  0   },
+        { name: "note size",      type: EnvelopeType.noteSize,      speed:  0   },
+        { name: "pitch",          type: EnvelopeType.pitch,         speed:  0   },
+        { name: "punch",          type: EnvelopeType.punch,         speed:  0   },
+        { name: "flare",          type: EnvelopeType.flare,         speed:  8   },
+        { name: "twang",          type: EnvelopeType.twang,         speed:  8   },
+        { name: "swell",          type: EnvelopeType.swell,         speed:  8   },
+        { name: "tremolo",        type: EnvelopeType.tremolo,       speed:  2   },
+      //{ name: "LFO",            type: EnvelopeType.LFO,           speed:  2   },
+        { name: "decay",          type: EnvelopeType.decay,         speed:  2   },
+        { name: "modbox trill",   type: EnvelopeType.modboxTrill,   speed:  4   },
+        { name: "modbox blip",    type: EnvelopeType.modboxBlip,    speed:  4   },
+        { name: "modbox click",   type: EnvelopeType.modboxClick,   speed:  5   },
+        { name: "modbox bow",     type: EnvelopeType.modboxBow,     speed:  90  },
+      //{ name: "dogebox2 blip",  type: EnvelopeType.dogebox2Blip,  speed:  16  },
+      //{ name: "dogebox2 clap",  type: EnvelopeType.dogebox2Clap,  speed:  64  },
+      //{ name: "dogebox2 spike", type: EnvelopeType.dogebox2Spike, speed:  8   },
+        { name: "wibble",         type: EnvelopeType.wibble,        speed:  12  },
+        { name: "linear",         type: EnvelopeType.linear,        speed:  32  },
+        { name: "rise",           type: EnvelopeType.rise,          speed:  32  },
+        { name: "jummbox blip",   type: EnvelopeType.jummboxBlip,   speed:  8   },
+        { name: "decelerate",     type: EnvelopeType.decelerate,    speed:  1   },
+        { name: "stairs",         type: EnvelopeType.stairs,        speed: -1  },
+        { name: "looped stairs",  type: EnvelopeType.loopStairs,    speed: -1  },
     ]);
-    /*
-    public static readonly envelopes: DictionaryArray<Envelope> = toNameMap([
-        { name: "none",           type: EnvelopeType.none,         speed: 0.0   },
-        { name: "note size",      type: EnvelopeType.noteSize,     speed: 0.0   },
-        { name: "pitch",          type: EnvelopeType.pitch,        speed: 0.0   },
-        { name: "punch",          type: EnvelopeType.punch,        speed: 0.0   },
-        { name: "flare",          type: EnvelopeType.flare,        speed: 8.0   },
-        { name: "twang",          type: EnvelopeType.twang,        speed: 8.0   },
-        { name: "swell",          type: EnvelopeType.swell,        speed: 8.0   },
-        { name: "tremolo",        type: EnvelopeType.tremolo,      speed: 2.0   },
-        { name: "decay",          type: EnvelopeType.decay,        speed: 2.0   },
-        { name: "modbox trill",   type: EnvelopeType.modboxTrill,  speed: 40    },
-        { name: "modbox blip",    type: EnvelopeType.modboxBlip,   speed: 4     },
-        { name: "modbox click",   type: EnvelopeType.modboxClick,  speed: 5     },
-        { name: "modbox bow",     type: EnvelopeType.modboxBow,    speed: 90    },
-        { name: "wibble",         type: EnvelopeType.wibble,       speed: 12.0  },
-        { name: "linear",         type: EnvelopeType.linear,       speed: 32.0  },
-        { name: "rise",           type: EnvelopeType.rise,         speed: 32.0  },
-        { name: "jummBox blip",   type: EnvelopeType.jummboxBlip,  speed: 8.0   },
-        { name: "decelerate",     type: EnvelopeType.decelerate,   speed: 1.0   },
-        { name: "stairs",         type: EnvelopeType.stairs,       speed: -1.0  },
-        { name: "looped stairs",  type: EnvelopeType.loopStairs,   speed: -1.0  },
-    ]);
-    */
+
     public static readonly perEnvelopeSpeedMin: number = 0;
     public static readonly perEnvelopeSpeedMax: number = 16;
     public static readonly lowerBoundMin: number = 0;

@@ -312,12 +312,12 @@ export class EnvelopeEditor {
 		} 
 		if (startSliderIndex != -1) {
 			this._pitchStartInputBoxes[startSliderIndex].value = this._pitchStartSliders[startSliderIndex].value;
-			this._pitchStartNoteTexts[startSliderIndex].textContent = String(_.pitchStartLabel + this._pitchToNote(parseInt(this._pitchStartInputBoxes[startSliderIndex].value)) + ":");
+			this._pitchStartNoteTexts[startSliderIndex].textContent = String(_.pitchStartLabel + this._pitchToNote(parseInt(this._pitchStartInputBoxes[startSliderIndex].value), instrument.isNoiseInstrument) + ":");
 			this._lastChange = new ChangePitchEnvelopeStart(this._doc, startSliderIndex, instrument.envelopes[startSliderIndex].pitchStart, +(this._pitchStartSliders[startSliderIndex].value));
 		} 
 		if (endSliderIndex != -1) {
 			this._pitchEndInputBoxes[endSliderIndex].value = this._pitchEndSliders[endSliderIndex].value;
-			this._pitchEndNoteTexts[endSliderIndex].textContent = String(_.pitchEndLabel + this._pitchToNote(parseInt(this._pitchEndInputBoxes[endSliderIndex].value)) + ":");
+			this._pitchEndNoteTexts[endSliderIndex].textContent = String(_.pitchEndLabel + this._pitchToNote(parseInt(this._pitchEndInputBoxes[endSliderIndex].value), instrument.isNoiseInstrument) + ":");
 			this._lastChange = new ChangePitchEnvelopeEnd(this._doc, endSliderIndex, instrument.envelopes[endSliderIndex].pitchEnd, +(this._pitchEndSliders[endSliderIndex].value));
 		}
 		const pitchAmplifyToggleIndex = this._pitchAmplifyToggles.indexOf(<any> event.target);
@@ -548,8 +548,9 @@ export class EnvelopeEditor {
 		}
 	}
 
-	private _pitchToNote(value: number): string {
+	private _pitchToNote(value: number, isNoise: boolean): string {
 		let text = "";
+		if (isNoise) value = value * 6 + 12;
 		const offset: number = Config.keys[this._doc.song.key].basePitch % Config.pitchesPerOctave;
 		const keyValue = (value + offset) % Config.pitchesPerOctave;
 		if (Config.keys[keyValue].isWhiteKey) {
@@ -615,10 +616,10 @@ export class EnvelopeEditor {
 			), envelopeDelaySlider);
 			const pitchStartSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: drumPitchEnvBoolean ? 1 : 0, max: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, value: "0", step: "1"});
 			const pitchStartInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "pitchStartInputBox", type: "number", step: "1", min: drumPitchEnvBoolean ? 1 : 0, max: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, value: "0"});
-			const pitchStartNoteText: HTMLSpanElement = span({class: "tip", style: "height: 1em; white-space: nowrap; font-size: smaller;", onclick: () => this._openPrompt("pitchEnvelope")}, span(_.pitchStartLabel + this._pitchToNote(parseInt(pitchStartInputBox.value)) + ":"));
+			const pitchStartNoteText: HTMLSpanElement = span({class: "tip", style: "height: 1em; white-space: nowrap; font-size: smaller;", onclick: () => this._openPrompt("pitchEnvelope")}, span(_.pitchStartLabel + this._pitchToNote(parseInt(pitchStartInputBox.value), drumPitchEnvBoolean) + ":"));
 			const pitchEndSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: drumPitchEnvBoolean ? 1 : 0, max: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, value: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, step: "1"});
 			const pitchEndInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "pitchEndInputBox", type: "number", step: "1", min: drumPitchEnvBoolean ? 1 : 0, max: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, value: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch});
-			const pitchEndNoteText: HTMLSpanElement = span({class: "tip", style: "height: 1em; white-space: nowrap; font-size: smaller;", onclick: () => this._openPrompt("pitchEnvelope")}, span(_.pitchEndLabel + this._pitchToNote(parseInt(pitchEndInputBox.value)) + ":"));
+			const pitchEndNoteText: HTMLSpanElement = span({class: "tip", style: "height: 1em; white-space: nowrap; font-size: smaller;", onclick: () => this._openPrompt("pitchEnvelope")}, span(_.pitchEndLabel + this._pitchToNote(parseInt(pitchEndInputBox.value), drumPitchEnvBoolean) + ":"));
 			const pitchStartGroup: HTMLElement = div({class: "selectRow dropFader"}, div({},
 				pitchStartNoteText,
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, pitchStartInputBox),
@@ -807,10 +808,10 @@ export class EnvelopeEditor {
 			this._pitchEndInputBoxes[envelopeIndex].max = (drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch).toString();
 			this._pitchStartSliders[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instEnv.pitchStart));
 			this._pitchStartInputBoxes[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instEnv.pitchStart));
-			this._pitchStartNoteTexts[envelopeIndex].textContent = String(_.pitchStartLabel + this._pitchToNote(parseInt(this._pitchStartInputBoxes[envelopeIndex].value)) + ":");
+			this._pitchStartNoteTexts[envelopeIndex].textContent = String(_.pitchStartLabel + this._pitchToNote(parseInt(this._pitchStartInputBoxes[envelopeIndex].value), drumPitchEnvBoolean) + ":");
 			this._pitchEndSliders[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instEnv.pitchEnd));
 			this._pitchEndInputBoxes[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instEnv.pitchEnd));
-			this._pitchEndNoteTexts[envelopeIndex].textContent = String(_.pitchEndLabel + this._pitchToNote(parseInt(this._pitchEndInputBoxes[envelopeIndex].value)) + ":");
+			this._pitchEndNoteTexts[envelopeIndex].textContent = String(_.pitchEndLabel + this._pitchToNote(parseInt(this._pitchEndInputBoxes[envelopeIndex].value), drumPitchEnvBoolean) + ":");
 			this._pitchAmplifyToggles[envelopeIndex].checked = instEnv.pitchAmplify ? true : false;
 			this._pitchBounceToggles[envelopeIndex].checked = instEnv.pitchBounce ? true : false;
 			this._envelopePhaseSliders[envelopeIndex].value = String(clamp(0, Config.envelopePhaseMax+1, instEnv.phase));
