@@ -2059,13 +2059,12 @@ export class SongEditor {
         );
         for (let i: number = Config.drumCount - 1; i >= 0; i--) {
             const instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
-            const drumIndex: number = i;
-            const spectrumEditor: SpectrumEditor = new SpectrumEditor(this._doc, drumIndex);
+            const spectrumEditor: SpectrumEditor = new SpectrumEditor(this._doc, i);
             spectrumEditor.container.addEventListener("mousedown", this.refocusStage);
 
             const envelopeSelect: HTMLSelectElement = buildOptions(select({ style: "width: 100%;", title: _.hoverText13Label }), Config.envelopes.map(envelope => envelope.name));
 
-            const envelopeSpeedSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: Config.perEnvelopeSpeedMin, max: Config.perEnvelopeSpeedMax, value: "1", step: "0.25" }), this._doc, (oldValue: number, newValue: number) => new ChangeDrumEnvelopeSpeed(this._doc, drumIndex, oldValue, newValue), false);
+            const envelopeSpeedSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: Config.perEnvelopeSpeedMin, max: Config.perEnvelopeSpeedMax, value: "1", step: "0.25" }), this._doc, (oldValue: number, newValue: number) => new ChangeDrumEnvelopeSpeed(this._doc, i, oldValue, newValue), false);
             const envelopeSpeedInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "perEnvelopeSpeedInputBox", type: "number", step: "0.001", min: Config.perEnvelopeSpeedMin, max: Config.perEnvelopeSpeedMax, value: "1"});
 			const envelopeSpeedRow: HTMLDivElement = div({class: "selectRow dropFader"}, div({},
 				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("perEnvelopeSpeed")}, span(_.perEnvelopeSpeedLabel)),
@@ -2075,9 +2074,9 @@ export class SongEditor {
             const drumsetEnvelopeDropdown: HTMLButtonElement = button({ style: "margin-left: 0.6em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.DrumsetEnv, i) }, "▼");
 
             envelopeSelect.addEventListener("change", () => {
-                this._doc.record(new ChangeDrumsetEnvelope(this._doc, drumIndex, envelopeSelect.selectedIndex));
+                this._doc.record(new ChangeDrumsetEnvelope(this._doc, i, envelopeSelect.selectedIndex));
             });
-            envelopeSpeedInputBox.addEventListener("input", () => { this._doc.record(new ChangeDrumEnvelopeSpeed(this._doc, drumIndex, instrument.drumsetEnvelopeSpeeds[drumIndex], Math.min(Config.perEnvelopeSpeedMax, Math.max(Config.perEnvelopeSpeedMin, +envelopeSpeedInputBox.value)))) });
+            envelopeSpeedInputBox.addEventListener("input", () => { this._doc.record(new ChangeDrumEnvelopeSpeed(this._doc, i, instrument.drumsetEnvelopes[i].envelopeSpeed, Math.min(Config.perEnvelopeSpeedMax, Math.max(Config.perEnvelopeSpeedMin, +envelopeSpeedInputBox.value)))) });
 
             this._drumsetSpectrumEditors[i] = spectrumEditor;
             this._drumsetEnvelopeSelects[i] = envelopeSelect;
@@ -2095,8 +2094,8 @@ export class SongEditor {
             ), drumsetEnvelopeDropdownGroup);
             this._drumsetGroup.appendChild(row);
 
-            this._drumsetEnvelopeSpeedSliders[i].updateValue(instrument.drumsetEnvelopeSpeeds[i]);
-            this._drumsetEnvelopeSpeedInputBoxes[i].value = String(clamp(Config.perEnvelopeSpeedMin, Config.perEnvelopeSpeedMax+1, instrument.drumsetEnvelopeSpeeds[i]));
+            this._drumsetEnvelopeSpeedSliders[i].updateValue(instrument.drumsetEnvelopes[i].envelopeSpeed);
+            this._drumsetEnvelopeSpeedInputBoxes[i].value = String(clamp(Config.perEnvelopeSpeedMin, Config.perEnvelopeSpeedMax+1, instrument.drumsetEnvelopes[i].envelopeSpeed));
         }
 
         this._modNameRows = [];
@@ -2948,9 +2947,8 @@ export class SongEditor {
                 this._chipWaveSelectRow.style.display = "none";
                 this._fadeInOutRow.style.display = "none";
                 for (let i: number = 0; i < Config.drumCount; i++) {
-                    setSelectedValue(this._drumsetEnvelopeSelects[i], instrument.drumsetEnvelopes[i]);
+                    setSelectedValue(this._drumsetEnvelopeSelects[i], instrument.drumsetEnvelopes[i].envelope);
                     this._drumsetSpectrumEditors[i].render();
-                    this._drumsetEnvelopeSpeedSliders[i].updateValue(instrument.drumsetEnvelopeSpeeds[i]);
                 }
             } else {
                 this._drumsetGroup.style.display = "none";

@@ -1164,7 +1164,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                 } break;
                 case InstrumentType.drumset: {
                     for (let i: number = 0; i < Config.drumCount; i++) {
-                        instrument.drumsetEnvelopes[i] = Math.floor(Math.random() * Config.envelopes.length);
+                        instrument.drumsetEnvelopes[i].envelope = Math.floor(Math.random() * Config.drumsetEnvelopes.length);
                         const spectrum: number[] = [];
                         let randomFactor: number = Math.floor(Math.random() * 3)
                         for (let j = 0; j < Config.spectrumControlPoints; j++) {
@@ -2553,7 +2553,7 @@ export class ChangeDrumEnvelopeSpeed extends Change {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
         if (oldValue != newValue) {
-            instrument.drumsetEnvelopeSpeeds[drumIndex] = newValue;
+            instrument.drumsetEnvelopes[drumIndex].envelopeSpeed = newValue;
             instrument.preset = instrument.type;
             doc.notifier.changed();
             this._didSomething();
@@ -2952,9 +2952,9 @@ export class ChangeDrumsetEnvelope extends Change {
     constructor(doc: SongDocument, drumIndex: number, newValue: number) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        const oldValue: number = instrument.drumsetEnvelopes[drumIndex];
+        const oldValue: number = instrument.drumsetEnvelopes[drumIndex].envelope;
         if (oldValue != newValue) {
-            instrument.drumsetEnvelopes[drumIndex] = newValue;
+            instrument.drumsetEnvelopes[drumIndex].envelope = newValue;
             instrument.preset = instrument.type;
             doc.notifier.changed();
             this._didSomething();
