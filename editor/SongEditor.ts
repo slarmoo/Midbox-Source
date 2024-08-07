@@ -2062,7 +2062,7 @@ export class SongEditor {
             const spectrumEditor: SpectrumEditor = new SpectrumEditor(this._doc, i);
             spectrumEditor.container.addEventListener("mousedown", this.refocusStage);
 
-            const envelopeSelect: HTMLSelectElement = buildOptions(select({ style: "width: 100%;", title: _.hoverText13Label }), Config.envelopes.map(envelope => envelope.name));
+            const envelopeSelect: HTMLSelectElement = buildOptions(select({ style: "width: 100%;", title: _.hoverText13Label }), Config.drumsetEnvelopes.map(envelope => envelope.name));
 
             const envelopeSpeedSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: Config.perEnvelopeSpeedMin, max: Config.perEnvelopeSpeedMax, value: "1", step: "0.25" }), this._doc, (oldValue: number, newValue: number) => new ChangeDrumEnvelopeSpeed(this._doc, i, oldValue, newValue), false);
             const envelopeSpeedInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "perEnvelopeSpeedInputBox", type: "number", step: "0.001", min: Config.perEnvelopeSpeedMin, max: Config.perEnvelopeSpeedMax, value: "1"});
