@@ -19,11 +19,11 @@ import { Instrument, Channel, Synth } from "../synth/synth";
 import { HTML, SVG } from "imperative-html/dist/esm/elements-strict";
 import { Preferences } from "./Preferences";
 import { HarmonicsEditor } from "./HarmonicsEditor";
-import { InputBox, Slider } from "./HTMLWrapper";
+import { InputBox, Slider, SliderNoParse } from "./HTMLWrapper";
 import { ImportPrompt } from "./ImportPrompt";
 import { ChannelRow } from "./ChannelRow";
 import { LayoutPrompt } from "./LayoutPrompt";
-import { EnvelopeEditor } from "./EnvelopeEditor";
+import { EnvelopeEditor, EnvelopeLineGraph, EnvelopeStartLine } from "./EnvelopeEditor";
 import { FadeInOutEditor } from "./FadeInOutEditor";
 import { FilterEditor } from "./FilterEditor";
 import { LimiterPrompt } from "./LimiterPrompt";
@@ -48,7 +48,7 @@ import { ThemePrompt } from "./ThemePrompt";
 import { TipPrompt } from "./TipPrompt";
 import { LanguagePrompt } from "./LanguagePrompt";
 import { Localization as _ } from "./Localization";
-import { ChangeTempo, ChangeKeyOctave, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangeSupersawDynamism, ChangeSupersawSpread, ChangeSupersawShape, ChangeWavetableSpeed, ChangeWaveInterpolation, ChangeCyclePerNote, ChangeOneShotCycle, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeCustomAlgorithmOrFeedback, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, Change6OpFeedbackType, Change6OpAlgorithm, ChangeChipWave, ChangeNoiseWave, /*ChangeNoiseSeedRandomization, ChangeNoiseSeed,*/ ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeUnisonVoices, ChangeUnisonSpread, ChangeUnisonOffset, ChangeUnisonExpression, ChangeUnisonSign, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeReshapeAmount, ChangeReshapeShift, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeLowerWavefold, ChangeUpperWavefold, ChangeAddEnvelope, ChangeEnvelopeSpeed, ChangeDrumEnvelopeSpeed, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeWavetableCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeArpeggioPattern, ChangeClicklessTransition, ChangeContinueThruPattern, ChangeAliasing, ChangePercussion, ChangeSDAffected, ChangeSOAffected, ChangeStrumSpeed, ChangeSlideSpeed, ChangeSongSubtitle, ChangeSetPatternInstruments, ChangeHoldingModRecording } from "./changes";
+import { ChangeTempo, ChangeKeyOctave, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangeSupersawDynamism, ChangeSupersawSpread, ChangeSupersawShape, ChangeWavetableSpeed, ChangeWaveInterpolation, ChangeCyclePerNote, ChangeOneShotCycle, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeCustomAlgorithmOrFeedback, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, Change6OpFeedbackType, Change6OpAlgorithm, ChangeChipWave, ChangeNoiseWave, /*ChangeNoiseSeedRandomization, ChangeNoiseSeed,*/ ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeUnisonVoices, ChangeUnisonSpread, ChangeUnisonOffset, ChangeUnisonExpression, ChangeUnisonSign, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeReshapeAmount, ChangeReshapeShift, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeLowerWavefold, ChangeUpperWavefold, ChangeAddEnvelope, ChangeEnvelopeSpeed, ChangeDrumsetEnvelopeSpeed, ChangeDrumsetDiscreteEnvelope, ChangeDrumsetLowerBound, ChangeDrumsetUpperBound, ChangeDrumsetStairsStepAmount, ChangeDrumsetEnvelopeDelay, ChangeDrumsetEnvelopePosition, ChangeDrumsetMeasurementType, ChangePasteDrumsetEnvelope, ChangeDrumsetEnvelopeOrder, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeWavetableCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeArpeggioPattern, ChangeClicklessTransition, ChangeContinueThruPattern, ChangeAliasing, ChangePercussion, ChangeSDAffected, ChangeSOAffected, ChangeStrumSpeed, ChangeSlideSpeed, ChangeSongSubtitle, ChangeSetPatternInstruments, ChangeHoldingModRecording } from "./changes";
 import { oscilloscopeCanvas } from "../global/Oscilloscope";
 import { TrackEditor } from "./TrackEditor";
 import { clamp } from "./UsefulCodingStuff";
@@ -1918,9 +1918,39 @@ export class SongEditor {
     private readonly _operatorDropdownGroups: HTMLDivElement[] = [];
     private readonly _drumsetSpectrumEditors: SpectrumEditor[] = [];
     private readonly _drumsetEnvelopeSelects: HTMLSelectElement[] = [];
-    private readonly _drumsetEnvelopeSpeedSliders: Slider[] = [];
+    private readonly _drumsetEnvelopePlotters: EnvelopeLineGraph[] = [];
+	private readonly _drumsetEnvelopeStartPlotterLines: EnvelopeStartLine[] = [];
+	private readonly _drumsetEnvelopePlotterRows: HTMLDivElement[] = [];
+	private readonly _drumsetPlotterTimeRangeInputBoxes: HTMLInputElement[] = [];
+	private readonly _drumsetPlotterTimeRangeRows: HTMLDivElement[] = [];
+    private readonly _drumsetEnvelopeSpeedSliders: SliderNoParse[] = [];
     private readonly _drumsetEnvelopeSpeedInputBoxes: HTMLInputElement[] = [];
     private readonly _drumsetEnvelopeSpeedRows: HTMLDivElement[] = [];
+    private readonly _drumsetDiscreteEnvelopeToggles: HTMLInputElement[] = [];
+    private readonly _drumsetDiscreteEnvelopeRows: HTMLDivElement[] = [];
+    private readonly _drumsetLowerBoundSliders: SliderNoParse[] = [];
+    private readonly _drumsetLowerBoundInputBoxes: HTMLInputElement[] = [];
+    private readonly _drumsetLowerBoundRows: HTMLDivElement[] = [];
+    private readonly _drumsetUpperBoundSliders: SliderNoParse[] = [];
+    private readonly _drumsetUpperBoundInputBoxes: HTMLInputElement[] = [];
+    private readonly _drumsetUpperBoundRows: HTMLDivElement[] = [];
+    private readonly _drumsetStepAmountSliders: SliderNoParse[] = [];
+    private readonly _drumsetStepAmountInputBoxes: HTMLInputElement[] = [];
+    private readonly _drumsetStepAmountRows: HTMLDivElement[] = [];
+    private readonly _drumsetEnvelopeDelaySliders: SliderNoParse[] = [];
+    private readonly _drumsetEnvelopeDelayInputBoxes: HTMLInputElement[] = [];
+    private readonly _drumsetEnvelopeDelayRows: HTMLDivElement[] = [];
+    private readonly _drumsetEnvelopePhaseSliders: SliderNoParse[] = [];
+    private readonly _drumsetEnvelopePhaseInputBoxes: HTMLInputElement[] = [];
+    private readonly _drumsetEnvelopePhaseRows: HTMLDivElement[] = [];
+    private readonly _drumsetMeasureInSecondButtons: HTMLButtonElement[] = [];
+	private readonly _drumsetMeasureInBeatButtons: HTMLButtonElement[] = [];
+	private readonly _drumsetMeasurementTypeRows: HTMLDivElement[] = [];
+    private readonly _drumsetCopyEnvelopeButtons: HTMLButtonElement[] = [];
+    private readonly _drumsetPasteEnvelopeButtons: HTMLButtonElement[] = [];
+    private readonly _drumsetMoveUpEnvelopeButtons: HTMLButtonElement[] = [];
+    private readonly _drumsetMoveDownEnvelopeButtons: HTMLButtonElement[] = [];
+    private readonly _drumsetEnvelopeButtonContainers: HTMLDivElement[] = [];
     private readonly _drumsetEnvelopeDropdownGroups: HTMLDivElement[] = [];
     private readonly _drumsetEnvelopeDropdowns: HTMLButtonElement[] = [];
     private _showModSliders: boolean[] = [];
@@ -1945,7 +1975,6 @@ export class SongEditor {
     private _modRecTimeout: number = -1;
 
     constructor(private _doc: SongDocument) {
-
         this._doc.notifier.watch(this.whenUpdated);
         this._doc.modRecordingHandler = () => { this.handleModRecording() };
         new MidiInputHandler(this._doc);
@@ -2063,26 +2092,133 @@ export class SongEditor {
             spectrumEditor.container.addEventListener("mousedown", this.refocusStage);
 
             const envelopeSelect: HTMLSelectElement = buildOptions(select({ style: "width: 100%;", title: _.hoverText13Label }), Config.drumsetEnvelopes.map(envelope => envelope.name));
-
-            const envelopeSpeedSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: Config.perEnvelopeSpeedMin, max: Config.perEnvelopeSpeedMax, value: "1", step: "0.25" }), this._doc, (oldValue: number, newValue: number) => new ChangeDrumEnvelopeSpeed(this._doc, i, oldValue, newValue), false);
-            const envelopeSpeedInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "perEnvelopeSpeedInputBox", type: "number", step: "0.001", min: Config.perEnvelopeSpeedMin, max: Config.perEnvelopeSpeedMax, value: "1"});
+            const envelopePlotter: EnvelopeLineGraph = new EnvelopeLineGraph(canvas({ width: 180, height: 80, style: `border: 2px solid ${ColorConfig.uiWidgetBackground}; width: 140px; height: 60px; margin-left: 24px;`, id: "EnvelopeLineGraph" }), this._doc, i, true);
+			const envelopeStartPlotLine: EnvelopeStartLine = new EnvelopeStartLine(canvas({ width: 180, height: 90, style: `width: 142px; height: 70px; top: -6px; right: -1px; position: relative; margin-left: 24px;`, id: "EnvelopeStartPlotLine" }), this._doc, i, true);
+			const envelopePlotterRow: HTMLDivElement = div({class: "selectRow dropFader", style: "margin-top: 18px; margin-bottom: 25px;"}, envelopePlotter.canvas, envelopeStartPlotLine.canvas);
+			const plotterTimeRangeInputBox: HTMLInputElement = input({style: "width: 13.1em; font-size: 80%; margin-left: 0px; vertical-align: middle;", id: "drumsetTimeRangeInputBox", type: "number", step: "0.1", min: "0.1", max: "200", value: "4"});
+			const plotterTimeRangeRow: HTMLDivElement = div({ class: "selectRow dropFader", style: "margin-left: 25px; margin-bottom: 20px;" }, div({},
+				span({ class: "tip", style: "height:1em; font-size: small; white-space: nowrap;", onclick: () => this._openPrompt("plotterTimeRange") }, _.timeRangeLabel),
+				div({ style: "color: " + ColorConfig.secondaryText + "; margin-top: -3px;" }, plotterTimeRangeInputBox),
+			));
+            const envelopeSpeedSlider: SliderNoParse = new SliderNoParse(input({ style: "margin: 0;", type: "range", min: Config.perEnvelopeSpeedMin, max: Config.perEnvelopeSpeedMax, value: "1", step: "0.25" }), this._doc, (oldValue: number, newValue: number) => new ChangeDrumsetEnvelopeSpeed(this._doc, i, oldValue, newValue), false);
+            const envelopeSpeedInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "drumsetPerEnvelopeSpeedInputBox", type: "number", step: "0.001", min: Config.perEnvelopeSpeedMin, max: Config.perEnvelopeSpeedMax, value: "1"});
 			const envelopeSpeedRow: HTMLDivElement = div({class: "selectRow dropFader"}, div({},
 				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("perEnvelopeSpeed")}, span(_.perEnvelopeSpeedLabel)),
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, envelopeSpeedInputBox),
 			), envelopeSpeedSlider.container);
-            const drumsetEnvelopeDropdownGroup: HTMLDivElement = div({class: "editor-controls", style: "display: none;"}, envelopeSpeedRow);
+            const discreteEnvelopeToggle: HTMLInputElement = input({style: "width: 3em; padding: 0; margin-right: 3em;", type: "checkbox"});
+			const discreteEnvelopeRow: HTMLDivElement = div({class: "selectRow dropFader"}, div({},
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("discreteEnvelope")}, span(_.discreteEnvelopeLabel))
+			), discreteEnvelopeToggle);
+            const lowerBoundSlider: SliderNoParse = new SliderNoParse(input({ style: "margin: 0;", type: "range", min: Config.lowerBoundMin, max: Config.lowerBoundMax, value: "0", step: "0.25" }), this._doc, (oldValue: number, newValue: number) => new ChangeDrumsetLowerBound(this._doc, i, oldValue, newValue), false);
+            const lowerBoundInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "drumsetLowerBoundInputBox", type: "number", step: "0.001", min: Config.lowerBoundMin, max: Config.lowerBoundMax, value: "0"});
+			const lowerBoundRow: HTMLDivElement = div({class: "selectRow dropFader"}, div({},
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeBounds")}, span(_.lowerBoundLabel)),
+				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, lowerBoundInputBox),
+			), lowerBoundSlider.container);
+            const upperBoundSlider: SliderNoParse = new SliderNoParse(input({ style: "margin: 0;", type: "range", min: Config.upperBoundMin, max: Config.upperBoundMax, value: "1", step: "0.25" }), this._doc, (oldValue: number, newValue: number) => new ChangeDrumsetUpperBound(this._doc, i, oldValue, newValue), false);
+            const upperBoundInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "drumsetUpperBoundInputBox", type: "number", step: "0.001", min: Config.upperBoundMin, max: Config.upperBoundMax, value: "1"});
+			const upperBoundRow: HTMLDivElement = div({class: "selectRow dropFader"}, div({},
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeBounds")}, span(_.upperBoundLabel)),
+				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, upperBoundInputBox),
+			), upperBoundSlider.container);
+            const stepAmountSlider: SliderNoParse = new SliderNoParse(input({ style: "margin: 0;", type: "range", min: "0", max: Config.stairsStepAmountMax, value: "4", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeDrumsetStairsStepAmount(this._doc, i, oldValue, newValue), false);
+            const stepAmountInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "drumsetStairsStepAmountInputBox", type: "number", step: "1", min: "0", max: Config.stairsStepAmountMax, value: "4"});
+			const stepAmountRow: HTMLDivElement = div({class: "selectRow dropFader"}, div({},
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("stepAmount")}, span(_.stairsStepAmountLabel)),
+				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, stepAmountInputBox),
+			), stepAmountSlider.container);
+            const envelopeDelaySlider: SliderNoParse = new SliderNoParse(input({ style: "margin: 0;", type: "range", min: "0", max: Config.envelopeDelayMax, value: "0", step: "0.5" }), this._doc, (oldValue: number, newValue: number) => new ChangeDrumsetEnvelopeDelay(this._doc, i, oldValue, newValue), false);
+            const envelopeDelayInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "drumsetEnvelopeDelayInputBox", type: "number", step: "0.01", min: "0", max: Config.envelopeDelayMax, value: "0"});
+			const envelopeDelayRow: HTMLDivElement = div({class: "selectRow dropFader"}, div({},
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeDelay")}, span(_.envelopeDelayLabel)),
+				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, envelopeDelayInputBox),
+			), envelopeDelaySlider.container);
+            const envelopePhaseSlider: SliderNoParse = new SliderNoParse(input({ style: "margin: 0;", type: "range", min: "0", max: Config.envelopePhaseMax, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeDrumsetEnvelopePosition(this._doc, i, oldValue, newValue), false);
+            const envelopePhaseInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "drumsetEnvelopePhaseInputBox", type: "number", step: "0.01", min: "0", max: Config.envelopePhaseMax, value: "0"});
+			const envelopePhaseRow: HTMLDivElement = div({class: "selectRow dropFader"}, div({},
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopePhase")}, span(_.envelopeStartingPointLabel)),
+				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, envelopePhaseInputBox),
+			), envelopePhaseSlider.container);
+            const measureInBeatsButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "no-underline", onclick: () => this._switchDrumsetMeasurementType(true, i) }, span(_.measureInBeatsLabel));
+    		const measureInSecondsButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "last-button no-underline", onclick: () => this._switchDrumsetMeasurementType(false, i) }, span(_.measureInSecondsLabel));
+    		const measurementTypeRow: HTMLDivElement = div({ class: "selectRow", style: "padding-top: 4px; margin-bottom: -3px;" }, span({ style: "font-size: small;", class: "tip", onclick: () => this._openPrompt("envelopeDelayPhaseMeasurement") }, span(_.delayPhaseMeasurementLabel)), div({ class: "instrument-bar" }, measureInBeatsButton, measureInSecondsButton));
+            const envelopeCopyButton: HTMLButtonElement = button({style: "flex: 3; margin-right: 0.3em;", onclick: () => this._copyDrumsetEnvelopeSettings(i)}, 
+				// Copy icon:
+				SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 20%; top: 37%; margin-top: -0.75em; pointer-events: none;", width: "2em", height: "2em", viewBox: "-5 -21 26 26" }, [
+					SVG.path({ d: "M 0 -15 L 1 -15 L 1 0 L 13 0 L 13 1 L 0 1 L 0 -15 z M 2 -1 L 2 -17 L 10 -17 L 14 -13 L 14 -1 z M 3 -2 L 13 -2 L 13 -12 L 9 -12 L 9 -16 L 3 -16 z", fill: "currentColor" }),
+				]),
+			);
+			const envelopePasteButton: HTMLButtonElement = button({style: "flex: 3; margin-left: 0.3em; margin-right: 0.3em;", onclick: () => this._pasteDrumsetEnvelopeSettings(i)}, 
+				// Paste icon:
+				SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 18%; top: 37%; margin-top: -0.75em; pointer-events: none;", width: "2em", height: "2em", viewBox: "0 0 26 26" }, [
+					SVG.path({ d: "M 8 18 L 6 18 L 6 5 L 17 5 L 17 7 M 9 8 L 16 8 L 20 12 L 20 22 L 9 22 z", stroke: "currentColor", fill: "none" }),
+					SVG.path({ d: "M 9 3 L 14 3 L 14 6 L 9 6 L 9 3 z M 16 8 L 20 12 L 16 12 L 16 8 z", fill: "currentColor", }),
+				]),
+			);
+			const envelopeMoveUpButton: HTMLButtonElement = button({style: "flex: 3; margin-left: 0.3em; margin-right: 0.3em;", onclick: () => this._reorderDrumsetEnvelope(i, false)}, 
+				// Up-arrow icon:
+				SVG.svg({ style: "flex-shrink: 0; position: absolute; left: -6%; top: 40%; margin-top: -0.75em; pointer-events: none;", width: "2.4em", height: "2.4em", viewBox: "0 0 3 9" }, [
+					SVG.path({ d: "M 2 3 L 4 1 L 6 3 L 4.5 3 L 4.5 6.5 L 3.5 6.5 L 3.5 3 L 2 3 z", fill: "currentColor" }),
+				]),
+			);
+			const envelopeMoveDownButton: HTMLButtonElement = button({style: "flex: 3; margin-left: 0.3em;", onclick: () => this._reorderDrumsetEnvelope(i, true)}, 
+				// Down-arrow icon:
+				SVG.svg({ style: "flex-shrink: 0; position: absolute; left: -6%; top: 35%; margin-top: -0.75em; pointer-events: none;", width: "2.4em", height: "2.4em", viewBox: "0 0 3 9" }, [
+					SVG.path({ d: "M 6 5 L 4 7 L 2 5 L 3.5 5 L 3.5 1.5 L 4.5 1.5 L 4.5 5 L 6 5 z", fill: "currentColor"}),
+				]),
+			);
+			const envelopeButtonContainer: HTMLDivElement = div({ class: "selectRow", style: "padding-top: 1px; margin-bottom: 2px; display: flex;"}, envelopeCopyButton, envelopePasteButton, envelopeMoveUpButton, envelopeMoveDownButton);
+            const drumsetEnvelopeDropdownGroup: HTMLDivElement = div({class: "editor-controls", style: "display: none;"}, envelopeButtonContainer, plotterTimeRangeRow, envelopePlotterRow, envelopeSpeedRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, stepAmountRow, measurementTypeRow, envelopeDelayRow, envelopePhaseRow);
             const drumsetEnvelopeDropdown: HTMLButtonElement = button({ style: "margin-left: 0.6em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.DrumsetEnv, i) }, "▼");
-
             envelopeSelect.addEventListener("change", () => {
                 this._doc.record(new ChangeDrumsetEnvelope(this._doc, i, envelopeSelect.selectedIndex));
             });
-            envelopeSpeedInputBox.addEventListener("input", () => { this._doc.record(new ChangeDrumEnvelopeSpeed(this._doc, i, instrument.drumsetEnvelopes[i].envelopeSpeed, Math.min(Config.perEnvelopeSpeedMax, Math.max(Config.perEnvelopeSpeedMin, +envelopeSpeedInputBox.value)))) });
+
+            envelopeSpeedInputBox.addEventListener("input", () => { this._doc.record(new ChangeDrumsetEnvelopeSpeed(this._doc, i, instrument.drumsetEnvelopes[i].envelopeSpeed, Math.min(Config.perEnvelopeSpeedMax, Math.max(Config.perEnvelopeSpeedMin, +envelopeSpeedInputBox.value))))});
+            discreteEnvelopeToggle.addEventListener("input", () => { this._doc.record(new ChangeDrumsetDiscreteEnvelope(this._doc, i, discreteEnvelopeToggle.checked))});
+            lowerBoundInputBox.addEventListener("input", () => { this._doc.record(new ChangeDrumsetLowerBound(this._doc, i, instrument.drumsetEnvelopes[i].lowerBound, Math.min(Config.lowerBoundMax, Math.max(Config.lowerBoundMin, +lowerBoundInputBox.value))))});
+            upperBoundInputBox.addEventListener("input", () => { this._doc.record(new ChangeDrumsetUpperBound(this._doc, i, instrument.drumsetEnvelopes[i].upperBound, Math.min(Config.upperBoundMax, Math.max(Config.upperBoundMin, +upperBoundInputBox.value))))});
+            stepAmountInputBox.addEventListener("input", () => { this._doc.record(new ChangeDrumsetStairsStepAmount(this._doc, i, instrument.drumsetEnvelopes[i].stepAmount, Math.min(Config.stairsStepAmountMax, Math.max(0, +stepAmountInputBox.value))))});
+            envelopeDelayInputBox.addEventListener("input", () => { this._doc.record(new ChangeDrumsetEnvelopeDelay(this._doc, i, instrument.drumsetEnvelopes[i].delay, Math.min(Config.envelopeDelayMax, Math.max(0, +envelopeDelayInputBox.value))))});
+            envelopePhaseInputBox.addEventListener("input", () => { this._doc.record(new ChangeDrumsetEnvelopePosition(this._doc, i, instrument.drumsetEnvelopes[i].phase, Math.min(Config.envelopePhaseMax, Math.max(0, +envelopePhaseInputBox.value))))});
+            plotterTimeRangeInputBox.addEventListener("input", () => { this._changeDrumsetTimeRange(i, envelopePlotter.range, +(plotterTimeRangeInputBox.value))});
 
             this._drumsetSpectrumEditors[i] = spectrumEditor;
             this._drumsetEnvelopeSelects[i] = envelopeSelect;
+            this._drumsetEnvelopePlotters[i] = envelopePlotter;
+            this._drumsetEnvelopeStartPlotterLines[i] = envelopeStartPlotLine;
+            this._drumsetEnvelopePlotterRows[i] = envelopePlotterRow;
+            this._drumsetPlotterTimeRangeInputBoxes[i] = plotterTimeRangeInputBox;
+            this._drumsetPlotterTimeRangeRows[i] = plotterTimeRangeRow;
             this._drumsetEnvelopeSpeedSliders[i] = envelopeSpeedSlider;
             this._drumsetEnvelopeSpeedInputBoxes[i] = envelopeSpeedInputBox;
             this._drumsetEnvelopeSpeedRows[i] = envelopeSpeedRow;
+            this._drumsetDiscreteEnvelopeToggles[i] = discreteEnvelopeToggle;
+            this._drumsetDiscreteEnvelopeRows[i] = discreteEnvelopeRow;
+            this._drumsetLowerBoundSliders[i] = lowerBoundSlider;
+            this._drumsetLowerBoundInputBoxes[i] = lowerBoundInputBox;
+            this._drumsetLowerBoundRows[i] = lowerBoundRow;
+            this._drumsetUpperBoundSliders[i] = upperBoundSlider;
+            this._drumsetUpperBoundInputBoxes[i] = upperBoundInputBox;
+            this._drumsetUpperBoundRows[i] = upperBoundRow;
+            this._drumsetStepAmountSliders[i] = stepAmountSlider;
+            this._drumsetStepAmountInputBoxes[i] = stepAmountInputBox;
+            this._drumsetStepAmountRows[i] = stepAmountRow;
+            this._drumsetEnvelopeDelaySliders[i] = envelopeDelaySlider;
+            this._drumsetEnvelopeDelayInputBoxes[i] = envelopeDelayInputBox;
+            this._drumsetEnvelopeDelayRows[i] = envelopeDelayRow;
+            this._drumsetEnvelopePhaseSliders[i] = envelopePhaseSlider;
+            this._drumsetEnvelopePhaseInputBoxes[i] = envelopePhaseInputBox;
+            this._drumsetEnvelopePhaseRows[i] = envelopePhaseRow;
+            this._drumsetMeasureInSecondButtons[i] = measureInSecondsButton;
+            this._drumsetMeasureInBeatButtons[i] = measureInBeatsButton;
+            this._drumsetMeasurementTypeRows[i] = measurementTypeRow;
+            this._drumsetCopyEnvelopeButtons[i] = envelopeCopyButton;
+            this._drumsetPasteEnvelopeButtons[i] = envelopePasteButton;
+            this._drumsetMoveUpEnvelopeButtons[i] = envelopeMoveUpButton;
+            this._drumsetMoveDownEnvelopeButtons[i] = envelopeMoveDownButton;
+            this._drumsetEnvelopeButtonContainers[i] = envelopeButtonContainer;
             this._drumsetEnvelopeDropdownGroups[i] = drumsetEnvelopeDropdownGroup;
             this._drumsetEnvelopeDropdowns[i] = drumsetEnvelopeDropdown;
             this._openDrumsetEnvDropdowns[i] = false;
@@ -2093,9 +2229,6 @@ export class SongEditor {
                 spectrumEditor.container,
             ), drumsetEnvelopeDropdownGroup);
             this._drumsetGroup.appendChild(row);
-
-            this._drumsetEnvelopeSpeedSliders[i].updateValue(instrument.drumsetEnvelopes[i].envelopeSpeed);
-            this._drumsetEnvelopeSpeedInputBoxes[i].value = String(clamp(Config.perEnvelopeSpeedMin, Config.perEnvelopeSpeedMax+1, instrument.drumsetEnvelopes[i].envelopeSpeed));
         }
 
         this._modNameRows = [];
@@ -2107,7 +2240,6 @@ export class SongEditor {
         this._modFilterBoxes = [];
         this._modTargetIndicators = [];
         for (let mod: number = 0; mod < Config.modCount; mod++) {
-
             let modChannelBox: HTMLSelectElement = select({ style: "width: 100%; color: currentColor; text-overflow:ellipsis;" });
             let modInstrumentBox: HTMLSelectElement = select({ style: "width: 100%; color: currentColor;" });
 
@@ -2317,6 +2449,48 @@ export class SongEditor {
         }
         this._customAlgorithmCanvas.redrawCanvas();
     }
+
+    private _switchDrumsetMeasurementType(type: boolean, index: number) {
+		const measurementType = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].drumsetEnvelopes[index].measurementType;
+		this._doc.record(new ChangeDrumsetMeasurementType(this._doc, index, measurementType, type));
+    }
+
+    private _copyDrumsetEnvelopeSettings(copiedIndex: number): void {
+		let instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
+		let drumsetEnvelope = instrument.drumsetEnvelopes[copiedIndex];
+		const envelopeCopy: any = drumsetEnvelope.toJsonObject();
+		window.localStorage.setItem("drumsetEnvelopeCopy", JSON.stringify(envelopeCopy));
+	}
+
+	private _pasteDrumsetEnvelopeSettings(pasteIndex: number): void {
+		let instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
+		const storedEnvelope: any = JSON.parse(String(window.localStorage.getItem("drumsetEnvelopeCopy")));
+		this._doc.record(new ChangePasteDrumsetEnvelope(this._doc, instrument.drumsetEnvelopes[pasteIndex], storedEnvelope));
+	}
+
+    private _reorderDrumsetEnvelope(index: number, moveWhere: boolean): void {
+        //let dropdownStatus: boolean;
+        //if (moveWhere) {
+        //    dropdownStatus = this._openDrumsetEnvDropdowns[index+1];
+        //} else {
+        //    dropdownStatus = this._openDrumsetEnvDropdowns[index-1];
+        //}
+        this._doc.record(new ChangeDrumsetEnvelopeOrder(this._doc, index, moveWhere));
+        //this._openDrumsetEnvDropdowns[index] = dropdownStatus;
+        //if (moveWhere) {
+		//    this._openDrumsetEnvDropdowns[index+1] = true;
+        //} else {
+        //    this._openDrumsetEnvDropdowns[index-1] = true;
+        //}
+    }
+
+    private _changeDrumsetTimeRange(index: number, oldValue: number, newValue: number): void {
+        if (oldValue != newValue) {
+            this._drumsetEnvelopePlotters[index].range = newValue;
+			this._drumsetEnvelopeStartPlotterLines[index].timeRange = newValue;
+            this._doc.notifier.changed();
+        }
+	}
 
     private _toggleDropdownMenu(dropdown: DropdownID, submenu: number = 0): void {
         let target: HTMLButtonElement = this._vibratoDropdown;
@@ -2949,6 +3123,83 @@ export class SongEditor {
                 for (let i: number = 0; i < Config.drumCount; i++) {
                     setSelectedValue(this._drumsetEnvelopeSelects[i], instrument.drumsetEnvelopes[i].envelope);
                     this._drumsetSpectrumEditors[i].render();
+                    this._drumsetEnvelopePlotters[i].render();
+			        this._drumsetEnvelopeStartPlotterLines[i].render();
+                    this._drumsetPlotterTimeRangeInputBoxes[i].value = String(clamp(0.1, 201, this._drumsetEnvelopePlotters[i].range));
+                    this._drumsetEnvelopeSpeedSliders[i].updateValue(instrument.drumsetEnvelopes[i].envelopeSpeed);
+                    this._drumsetEnvelopeSpeedInputBoxes[i].value = String(clamp(Config.perEnvelopeSpeedMin, Config.perEnvelopeSpeedMax+1, instrument.drumsetEnvelopes[i].envelopeSpeed));
+                    this._drumsetLowerBoundSliders[i].updateValue(instrument.drumsetEnvelopes[i].lowerBound);
+                    this._drumsetLowerBoundInputBoxes[i].value = String(clamp(Config.lowerBoundMin, Config.lowerBoundMax+1, instrument.drumsetEnvelopes[i].lowerBound));
+                    this._drumsetUpperBoundSliders[i].updateValue(instrument.drumsetEnvelopes[i].upperBound);
+                    this._drumsetUpperBoundInputBoxes[i].value = String(clamp(Config.upperBoundMin, Config.upperBoundMax+1, instrument.drumsetEnvelopes[i].upperBound));
+                    this._drumsetStepAmountSliders[i].updateValue(instrument.drumsetEnvelopes[i].stepAmount);
+                    this._drumsetStepAmountInputBoxes[i].value = String(clamp(0, Config.stairsStepAmountMax+1, instrument.drumsetEnvelopes[i].stepAmount));
+                    this._drumsetEnvelopeDelaySliders[i].updateValue(instrument.drumsetEnvelopes[i].delay);
+                    this._drumsetEnvelopeDelayInputBoxes[i].value = String(clamp(0, Config.envelopeDelayMax+1, instrument.drumsetEnvelopes[i].delay));
+                    this._drumsetEnvelopePhaseSliders[i].updateValue(instrument.drumsetEnvelopes[i].phase);
+                    this._drumsetEnvelopePhaseInputBoxes[i].value = String(clamp(0, Config.envelopePhaseMax+1, instrument.drumsetEnvelopes[i].phase));
+                    if (instrument.drumsetEnvelopes[i].measurementType) {
+                        this._drumsetMeasureInBeatButtons[i].classList.remove("deactivated");
+                        this._drumsetMeasureInSecondButtons[i].classList.add("deactivated");
+                    } else {
+                        this._drumsetMeasureInBeatButtons[i].classList.add("deactivated");
+                        this._drumsetMeasureInSecondButtons[i].classList.remove("deactivated");
+                    }
+
+                    if (
+                        instrument.drumsetEnvelopes[i].envelope == Config.drumsetEnvelopes.dictionary["none"].index ||
+                        instrument.drumsetEnvelopes[i].envelope == Config.drumsetEnvelopes.dictionary["note size"].index
+                    ) {
+                        this._drumsetEnvelopePlotterRows[i].style.display = "none";
+                        this._drumsetPlotterTimeRangeRows[i].style.display = "none";
+                    } else {
+                        this._drumsetEnvelopePlotterRows[i].style.display = "";
+                        this._drumsetPlotterTimeRangeRows[i].style.display = "";
+                    }
+                    if (
+                        instrument.drumsetEnvelopes[i].envelope == Config.drumsetEnvelopes.dictionary["none"].index ||
+                        instrument.drumsetEnvelopes[i].envelope == Config.drumsetEnvelopes.dictionary["note size"].index
+                    ) {
+                        this._drumsetEnvelopeSpeedRows[i].style.display = "none";
+                    } else {
+                        this._drumsetEnvelopeSpeedRows[i].style.display = "";
+                    }
+                    if (
+                        instrument.drumsetEnvelopes[i].envelope == Config.drumsetEnvelopes.dictionary["none"].index
+                    ) {
+                        this._drumsetDiscreteEnvelopeRows[i].style.display = "none";
+                    } else {
+                        this._drumsetDiscreteEnvelopeRows[i].style.display = "";
+                    }
+                    if (
+                        instrument.drumsetEnvelopes[i].envelope == Config.drumsetEnvelopes.dictionary["none"].index
+                    ) {
+                        this._drumsetLowerBoundRows[i].style.display = "none";
+                        this._drumsetUpperBoundRows[i].style.display = "none";
+                    } else {
+                        this._drumsetLowerBoundRows[i].style.display = "";
+                        this._drumsetUpperBoundRows[i].style.display = "";
+                    }
+                    if (
+                        instrument.drumsetEnvelopes[i].envelope == Config.drumsetEnvelopes.dictionary["stairs"].index ||
+                        instrument.drumsetEnvelopes[i].envelope == Config.drumsetEnvelopes.dictionary["looped stairs"].index
+                    ) {
+                        this._drumsetStepAmountRows[i].style.display = "";
+                    } else {
+                        this._drumsetStepAmountRows[i].style.display = "none";
+                    }
+                    if (
+                        instrument.drumsetEnvelopes[i].envelope == Config.drumsetEnvelopes.dictionary["none"].index ||
+                        instrument.drumsetEnvelopes[i].envelope == Config.drumsetEnvelopes.dictionary["note size"].index
+                    ) {
+                        this._drumsetMeasurementTypeRows[i].style.display = "none";
+                        this._drumsetEnvelopeDelayRows[i].style.display = "none";
+                        this._drumsetEnvelopePhaseRows[i].style.display = "none";
+                    } else {
+                        this._drumsetMeasurementTypeRows[i].style.display = "";
+                        this._drumsetEnvelopeDelayRows[i].style.display = "";
+                        this._drumsetEnvelopePhaseRows[i].style.display = "";
+                    }
                 }
             } else {
                 this._drumsetGroup.style.display = "none";
@@ -4357,6 +4608,13 @@ export class SongEditor {
             || document.activeElement == this._unisonSignInputBox
             || document.activeElement == this._wavefoldLowerInputBox
             || document.activeElement == this._wavefoldUpperInputBox
+            || this._drumsetEnvelopeSpeedInputBoxes.find(x => x == document.activeElement)
+            || this._drumsetLowerBoundInputBoxes.find(x => x == document.activeElement)
+            || this._drumsetUpperBoundInputBoxes.find(x => x == document.activeElement)
+            || this._drumsetStepAmountInputBoxes.find(x => x == document.activeElement)
+            || this._drumsetEnvelopeDelayInputBoxes.find(x => x == document.activeElement)
+            || this._drumsetEnvelopePhaseInputBoxes.find(x => x == document.activeElement)
+            || this._drumsetPlotterTimeRangeInputBoxes.find(x => x == document.activeElement)
             ){
             // Enter/esc returns focus to form
             if (event.keyCode == 13 || event.keyCode == 27) {

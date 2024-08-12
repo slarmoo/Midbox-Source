@@ -515,8 +515,8 @@ export class TipPrompt implements Prompt {
 			case "plotterTimeRange": {
 				message = div(
 					h2("Envelope Graph"),
-					p("This box with the line going across it is a visual representation of the envelope type and how its settings affect it. It can be useful for learning what each setting does."),
-					p("The input box beneath it is for changing the time range of the graph, allowing you to view a larger portion of the envelope.")
+					p("The graph with the line going across it is a visual representation of the envelope type and how its settings affect it. This graph can be useful for learning what each setting does or reviewing your changes."),
+					p("The input box above changes the time range of the graph, allowing you to view a larger portion of the envelope.")
 				);
 			} break;
 			case "perEnvelopeSpeed": {

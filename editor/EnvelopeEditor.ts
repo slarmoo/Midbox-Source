@@ -12,18 +12,26 @@ import {Change} from "./Change";
 
 const {div, span, canvas, option, input, button, select} = HTML;
 
-class EnvelopeLineGraph {
+export class EnvelopeLineGraph {
 	public range: number = 4;
 
-    constructor(public readonly canvas: HTMLCanvasElement, private readonly _doc: SongDocument, public index: number) {
+    constructor(public readonly canvas: HTMLCanvasElement, private readonly _doc: SongDocument, public index: number, public forDrumset: boolean) {
 		this.render();
     }
 
 	private _drawCanvas(graphX: number, graphY: number, graphWidth: number, graphHeight: number): void {
 		const envelopeGraph: number[] = [];
 		let instrument: Instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
-		let instEnv = instrument.envelopes[this.index];
-		let envelope = Config.envelopes[instEnv.envelope];
+		
+		let instEnv;
+		let envelope;
+		if (this.forDrumset) {
+			instEnv = instrument.drumsetEnvelopes[this.index];
+			envelope = Config.drumsetEnvelopes[instEnv.envelope];
+		} else {
+			instEnv = instrument.envelopes[this.index];
+			envelope = Config.envelopes[instEnv.envelope];
+		}
 		let speed: number = instEnv.envelopeSpeed;
 		let lowerBound: number = instEnv.lowerBound;
 		let upperBound: number = instEnv.upperBound;
@@ -90,16 +98,22 @@ class EnvelopeLineGraph {
 	}
 }
 
-class EnvelopeStartLine {
+export class EnvelopeStartLine {
+	// MID TODO: Merge this with the EnvelopeLineGraph class.
 	public timeRange: number = 4;
 
-    constructor(public readonly canvas: HTMLCanvasElement, private readonly _doc: SongDocument, public index: number) {
+    constructor(public readonly canvas: HTMLCanvasElement, private readonly _doc: SongDocument, public index: number, public forDrumset: boolean) {
 		this.render();
     }
 
 	private _drawCanvas(graphX: number, graphY: number, graphWidth: number, graphHeight: number): void {
 		let instrument: Instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
-		let instEnv = instrument.envelopes[this.index];
+		let instEnv;
+		if (this.forDrumset) {
+			instEnv = instrument.drumsetEnvelopes[this.index];
+		} else {
+			instEnv = instrument.envelopes[this.index];
+		}
 		let speed: number = instEnv.envelopeSpeed;
 		let delay: number = instEnv.delay;
 		let phase: number = instEnv.phase;
@@ -477,13 +491,20 @@ export class EnvelopeEditor {
 		if (deleteButtonIndex != -1) {
 			this._doc.record(new ChangeRemoveEnvelope(this._doc, deleteButtonIndex));
 		}
+		//let dropdownStatus: boolean;
 		const moveUpButtonIndex: number = this._envelopeMoveUpButtons.indexOf(<any> event.target);
 		if (moveUpButtonIndex != -1) {
+			//dropdownStatus = this._openPerEnvelopeDropdowns[moveUpButtonIndex-1];
 			this._doc.record(new ChangeEnvelopeOrder(this._doc, moveUpButtonIndex, true));
+			//this._openPerEnvelopeDropdowns[moveUpButtonIndex] = dropdownStatus;
+			//this._openPerEnvelopeDropdowns[moveUpButtonIndex-1] = true;
 		}
 		const moveDownButtonIndex: number = this._envelopeMoveDownButtons.indexOf(<any> event.target);
 		if (moveDownButtonIndex != -1) {
+			//dropdownStatus = this._openPerEnvelopeDropdowns[moveUpButtonIndex+1];
 			this._doc.record(new ChangeEnvelopeOrder(this._doc, moveDownButtonIndex, false));
+			//this._openPerEnvelopeDropdowns[moveUpButtonIndex] = dropdownStatus;
+			//this._openPerEnvelopeDropdowns[moveUpButtonIndex+1] = true;
 		}
 	}
 
@@ -572,8 +593,8 @@ export class EnvelopeEditor {
 		let drumPitchEnvBoolean: boolean = instrument.isNoiseInstrument;
 		
 		for (let envelopeIndex: number = this._rows.length; envelopeIndex < instrument.envelopeCount; envelopeIndex++) {
-			const envelopePlotter: EnvelopeLineGraph = new EnvelopeLineGraph(canvas({ width: 180, height: 80, style: `border: 2px solid ${ColorConfig.uiWidgetBackground}; width: 140px; height: 60px; margin-left: 24px;`, id: "EnvelopeLineGraph" }), this._doc, envelopeIndex);
-			const envelopeStartPlotLine: EnvelopeStartLine = new EnvelopeStartLine(canvas({ width: 180, height: 90, style: `width: 142px; height: 70px; top: -6px; right: -1px; position: relative; margin-left: 24px;`, id: "EnvelopeStartPlotLine" }), this._doc, envelopeIndex);
+			const envelopePlotter: EnvelopeLineGraph = new EnvelopeLineGraph(canvas({ width: 180, height: 80, style: `border: 2px solid ${ColorConfig.uiWidgetBackground}; width: 140px; height: 60px; margin-left: 24px;`, id: "EnvelopeLineGraph" }), this._doc, envelopeIndex, false);
+			const envelopeStartPlotLine: EnvelopeStartLine = new EnvelopeStartLine(canvas({ width: 180, height: 90, style: `width: 142px; height: 70px; top: -6px; right: -1px; position: relative; margin-left: 24px;`, id: "EnvelopeStartPlotLine" }), this._doc, envelopeIndex, false);
 			const envelopePlotterRow: HTMLElement = div({class: "selectRow dropFader", style: "margin-top: 18px; margin-bottom: 25px;"}, envelopePlotter.canvas, envelopeStartPlotLine.canvas);
 			const plotterTimeRangeInputBox: HTMLInputElement = input({style: "width: 13.1em; font-size: 80%; margin-left: 0px; vertical-align: middle;", id: "timeRangeInputBox", type: "number", step: "0.1", min: "0.1", max: "200", value: "4"});
 			const plotterTimeRangeRow: HTMLElement = div({ class: "selectRow dropFader", style: "margin-left: 25px; margin-bottom: 20px;" }, div({},
@@ -926,7 +947,7 @@ export class EnvelopeEditor {
 	private _pasteEnvelopeSettings(pasteIndex: number): void {
 		let instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
 		const storedEnvelope: any = JSON.parse(String(window.localStorage.getItem("envelopeCopy")));
-		this._doc.record(new ChangePasteEnvelope(this._doc, instrument, instrument.envelopes[pasteIndex], storedEnvelope))
+		this._doc.record(new ChangePasteEnvelope(this._doc, instrument, instrument.envelopes[pasteIndex], storedEnvelope));
 	}
 
 	private _toggleDropdownMenu(dropdown: DropdownID, submenu: number = 0): void {
@@ -950,8 +971,7 @@ export class EnvelopeEditor {
                     (group.children[i] as HTMLElement).style.opacity = '1';}
                 );
             }
-        }
-        else {
+        } else {
             for (let i: number = 0; i < group.children.length; i++) {
                 (group.children[i] as HTMLElement).style.animationDelay = '0s';
                 (group.children[i] as HTMLElement).style.opacity = '0';

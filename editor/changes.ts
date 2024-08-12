@@ -1,7 +1,7 @@
 // Copyright (c) 2012-2022 John Nesky and contributing authors, distributed under the MIT license, see accompanying the LICENSE.md file.
 
 import { Algorithm, Dictionary, FilterType, SustainType, InstrumentType, EffectType, AutomationTarget, Config, effectsIncludeDistortion, effectsIncludeBitcrusher } from "../synth/SynthConfig";
-import { NotePin, Note, makeNotePin, Pattern, FilterSettings, FilterControlPoint, SpectrumWave, HarmonicsWave, Instrument, Channel, Song, Synth, convertChipWaveToCustomChip, EnvelopeSettings } from "../synth/synth";
+import { NotePin, Note, makeNotePin, Pattern, FilterSettings, FilterControlPoint, SpectrumWave, HarmonicsWave, Instrument, Channel, Song, Synth, convertChipWaveToCustomChip, EnvelopeSettings, DrumsetEnvelopeSettings } from "../synth/synth";
 import { Preset, PresetCategory, EditorConfig } from "./EditorConfig";
 import { Change, ChangeGroup, ChangeSequence, UndoableChange } from "./Change";
 import { SongDocument } from "./SongDocument";
@@ -2548,7 +2548,7 @@ export class ChangePerEnvelopeSpeed extends Change {
     }
 }
 
-export class ChangeDrumEnvelopeSpeed extends Change {
+export class ChangeDrumsetEnvelopeSpeed extends Change {
     constructor(doc: SongDocument, drumIndex: number, oldValue: number, newValue: number) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
@@ -2575,12 +2575,39 @@ export class ChangeDiscreteEnvelope extends Change {
     }
 }
 
+export class ChangeDrumsetDiscreteEnvelope extends Change {
+    constructor(doc: SongDocument, drumIndex: number, newValue: boolean) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        const oldValue = instrument.drumsetEnvelopes[drumIndex].discrete;
+        if (oldValue != newValue) {
+            instrument.drumsetEnvelopes[drumIndex].discrete = newValue;
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
 export class ChangeLowerBound extends Change {
     constructor(doc: SongDocument, envelopeIndex: number, oldValue: number, newValue: number) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
         if (oldValue != newValue) {
             instrument.envelopes[envelopeIndex].lowerBound = newValue;
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
+export class ChangeDrumsetLowerBound extends Change {
+    constructor(doc: SongDocument, drumIndex: number, oldValue: number, newValue: number) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        if (oldValue != newValue) {
+            instrument.drumsetEnvelopes[drumIndex].lowerBound = newValue;
             instrument.preset = instrument.type;
             doc.notifier.changed();
             this._didSomething();
@@ -2601,6 +2628,19 @@ export class ChangeUpperBound extends Change {
     }
 }
 
+export class ChangeDrumsetUpperBound extends Change {
+    constructor(doc: SongDocument, drumIndex: number, oldValue: number, newValue: number) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        if (oldValue != newValue) {
+            instrument.drumsetEnvelopes[drumIndex].upperBound = newValue;
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
 export class ChangeStairsStepAmount extends Change {
     constructor(doc: SongDocument, envelopeIndex: number, oldValue: number, newValue: number) {
         super();
@@ -2614,12 +2654,38 @@ export class ChangeStairsStepAmount extends Change {
     }
 }
 
+export class ChangeDrumsetStairsStepAmount extends Change {
+    constructor(doc: SongDocument, drumIndex: number, oldValue: number, newValue: number) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        if (oldValue != newValue) {
+            instrument.drumsetEnvelopes[drumIndex].stepAmount = newValue;
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
 export class ChangeEnvelopeDelay extends Change {
     constructor(doc: SongDocument, envelopeIndex: number, oldValue: number, newValue: number) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
         if (oldValue != newValue) {
             instrument.envelopes[envelopeIndex].delay = newValue;
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
+export class ChangeDrumsetEnvelopeDelay extends Change {
+    constructor(doc: SongDocument, drumIndex: number, oldValue: number, newValue: number) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        if (oldValue != newValue) {
+            instrument.drumsetEnvelopes[drumIndex].delay = newValue;
             instrument.preset = instrument.type;
             doc.notifier.changed();
             this._didSomething();
@@ -2700,12 +2766,38 @@ export class ChangeEnvelopePosition extends Change {
     }
 }
 
+export class ChangeDrumsetEnvelopePosition extends Change {
+    constructor(doc: SongDocument, drumIndex: number, oldValue: number, newValue: number) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        if (oldValue != newValue) {
+            instrument.drumsetEnvelopes[drumIndex].phase = newValue;
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
 export class ChangeMeasurementType extends Change {
     constructor(doc: SongDocument, envelopeIndex: number, oldValue: boolean, newValue: boolean) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
         if (oldValue != newValue) {
             instrument.envelopes[envelopeIndex].measurementType = newValue;
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
+export class ChangeDrumsetMeasurementType extends Change {
+    constructor(doc: SongDocument, drumIndex: number, oldValue: boolean, newValue: boolean) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        if (oldValue != newValue) {
+            instrument.drumsetEnvelopes[drumIndex].measurementType = newValue;
             instrument.preset = instrument.type;
             doc.notifier.changed();
             this._didSomething();
@@ -3952,6 +4044,15 @@ export class ChangePasteEnvelope extends ChangeGroup {
     }
 }
 
+export class ChangePasteDrumsetEnvelope extends ChangeGroup {
+    constructor(doc: SongDocument, drumsetEnvelopeSettings: DrumsetEnvelopeSettings, envelopeCopy: any) {
+        super();
+        drumsetEnvelopeSettings.fromJsonObject(envelopeCopy);
+        doc.notifier.changed();
+        this._didSomething();
+    }
+}
+
 export class ChangeSetPatternInstruments extends Change {
     constructor(doc: SongDocument, channelIndex: number, instruments: number[], pattern: Pattern) {
         super();
@@ -4590,7 +4691,7 @@ export function pickRandomPresetValue(isNoise: boolean): number {
     const eligiblePresetValues: number[] = [];
     for (let categoryIndex: number = 0; categoryIndex < EditorConfig.presetCategories.length; categoryIndex++) {
         const category: PresetCategory = EditorConfig.presetCategories[categoryIndex];
-        if (category.name == "Novelty Presets") continue;
+        //if (category.name == "Novelty Presets") continue; I wonder why this is here...
         for (let presetIndex: number = 0; presetIndex < category.presets.length; presetIndex++) {
             const preset: Preset = category.presets[presetIndex];
             if (preset.settings != undefined && (preset.isNoise == true) == isNoise) {
@@ -5759,6 +5860,86 @@ export class ChangeEnvelopeOrder extends Change {
             instrument.envelopes[index].pitchBounce = env2PitchBounce;
             instrument.envelopes[index].phase = env2Phase;
             instrument.envelopes[index].measurementType = env2MeasurementType;
+        }
+        
+        doc.notifier.changed();
+        this._didSomething();
+    }
+}
+
+export class ChangeDrumsetEnvelopeOrder extends Change {
+    constructor(doc: SongDocument, index: number, moveWhere: boolean) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        let env1Envelope = instrument.drumsetEnvelopes[index].envelope;
+        let env1Speed = instrument.drumsetEnvelopes[index].envelopeSpeed;
+        let env1Discrete = instrument.drumsetEnvelopes[index].discrete;
+        let env1LowerBound = instrument.drumsetEnvelopes[index].lowerBound;
+        let env1UpperBound = instrument.drumsetEnvelopes[index].upperBound;
+        let env1StepAmount = instrument.drumsetEnvelopes[index].stepAmount;
+        let env1Delay = instrument.drumsetEnvelopes[index].delay;
+        let env1Phase = instrument.drumsetEnvelopes[index].phase;
+        let env1MeasurementType = instrument.drumsetEnvelopes[index].measurementType;
+        // This is flipped because the drum order is flipped.
+        // moveWhere:  False = Up, True = Down
+        let idxUp = mod(index - 1, Config.drumCount);
+        let idxDown = mod(index + 1, Config.drumCount);
+        if (moveWhere) {
+            let env2Envelope = instrument.drumsetEnvelopes[idxUp].envelope;
+            let env2Speed = instrument.drumsetEnvelopes[idxUp].envelopeSpeed;
+            let env2Discrete = instrument.drumsetEnvelopes[idxUp].discrete;
+            let env2LowerBound = instrument.drumsetEnvelopes[idxUp].lowerBound;
+            let env2UpperBound = instrument.drumsetEnvelopes[idxUp].upperBound;
+            let env2StepAmount = instrument.drumsetEnvelopes[idxUp].stepAmount;
+            let env2Delay = instrument.drumsetEnvelopes[idxUp].delay;
+            let env2Phase = instrument.drumsetEnvelopes[idxUp].phase;
+            let env2MeasurementType = instrument.drumsetEnvelopes[idxUp].measurementType;
+            instrument.drumsetEnvelopes[idxUp].envelope = env1Envelope;
+            instrument.drumsetEnvelopes[idxUp].envelopeSpeed = env1Speed;
+            instrument.drumsetEnvelopes[idxUp].discrete = env1Discrete;
+            instrument.drumsetEnvelopes[idxUp].lowerBound = env1LowerBound;
+            instrument.drumsetEnvelopes[idxUp].upperBound = env1UpperBound;
+            instrument.drumsetEnvelopes[idxUp].stepAmount = env1StepAmount;
+            instrument.drumsetEnvelopes[idxUp].delay = env1Delay;
+            instrument.drumsetEnvelopes[idxUp].phase = env1Phase;
+            instrument.drumsetEnvelopes[idxUp].measurementType = env1MeasurementType;
+            instrument.drumsetEnvelopes[index].envelope = env2Envelope;
+            instrument.drumsetEnvelopes[index].envelopeSpeed = env2Speed;
+            instrument.drumsetEnvelopes[index].discrete = env2Discrete;
+            instrument.drumsetEnvelopes[index].lowerBound = env2LowerBound;
+            instrument.drumsetEnvelopes[index].upperBound = env2UpperBound;
+            instrument.drumsetEnvelopes[index].stepAmount = env2StepAmount;
+            instrument.drumsetEnvelopes[index].delay = env2Delay;
+            instrument.drumsetEnvelopes[index].phase = env2Phase;
+            instrument.drumsetEnvelopes[index].measurementType = env2MeasurementType;
+        } else {
+            let env2Envelope = instrument.drumsetEnvelopes[idxDown].envelope;
+            let env2Speed = instrument.drumsetEnvelopes[idxDown].envelopeSpeed;
+            let env2Discrete = instrument.drumsetEnvelopes[idxDown].discrete;
+            let env2LowerBound = instrument.drumsetEnvelopes[idxDown].lowerBound;
+            let env2UpperBound = instrument.drumsetEnvelopes[idxDown].upperBound;
+            let env2StepAmount = instrument.drumsetEnvelopes[idxDown].stepAmount;
+            let env2Delay = instrument.drumsetEnvelopes[idxDown].delay;
+            let env2Phase = instrument.drumsetEnvelopes[idxDown].phase;
+            let env2MeasurementType = instrument.drumsetEnvelopes[idxDown].measurementType;
+            instrument.drumsetEnvelopes[idxDown].envelope = env1Envelope;
+            instrument.drumsetEnvelopes[idxDown].envelopeSpeed = env1Speed;
+            instrument.drumsetEnvelopes[idxDown].discrete = env1Discrete;
+            instrument.drumsetEnvelopes[idxDown].lowerBound = env1LowerBound;
+            instrument.drumsetEnvelopes[idxDown].upperBound = env1UpperBound;
+            instrument.drumsetEnvelopes[idxDown].stepAmount = env1StepAmount;
+            instrument.drumsetEnvelopes[idxDown].delay = env1Delay;
+            instrument.drumsetEnvelopes[idxDown].phase = env1Phase;
+            instrument.drumsetEnvelopes[idxDown].measurementType = env1MeasurementType;
+            instrument.drumsetEnvelopes[index].envelope = env2Envelope;
+            instrument.drumsetEnvelopes[index].envelopeSpeed = env2Speed;
+            instrument.drumsetEnvelopes[index].discrete = env2Discrete;
+            instrument.drumsetEnvelopes[index].lowerBound = env2LowerBound;
+            instrument.drumsetEnvelopes[index].upperBound = env2UpperBound;
+            instrument.drumsetEnvelopes[index].stepAmount = env2StepAmount;
+            instrument.drumsetEnvelopes[index].delay = env2Delay;
+            instrument.drumsetEnvelopes[index].phase = env2Phase;
+            instrument.drumsetEnvelopes[index].measurementType = env2MeasurementType;
         }
         
         doc.notifier.changed();
