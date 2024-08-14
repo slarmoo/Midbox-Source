@@ -20,6 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { clamp, mod } from "../editor/UsefulCodingStuff";
 import { Localization as _ } from "../editor/Localization";
 
 export interface Dictionary<T> {
@@ -331,11 +332,14 @@ export class Config {
 
     public static readonly blackKeyNameParents:       ReadonlyArray<number> = [-1, 1, -1, 1, -1, 1, -1, -1, 1, -1, 1, -1];
     public static readonly tempoMin:                  number = 1;
-    public static readonly tempoMax:                  number = 750; // MID TODO: Raise to 1k or 2k.
+    public static readonly tempoMax:                  number = 750; // MID TODO: Raise to 1k.
     public static readonly octaveMin:                 number = -2;
 	public static readonly octaveMax:                 number = 2;
     public static readonly echoDelayRange:            number = 48;
     public static readonly echoDelayStepTicks:        number = 4;
+    public static readonly echoDelayMax:              number = 8;
+    public static readonly echoDelayIntervals:        number = 0.001;
+    public static readonly echoDelaySliderNumbers:    ReadonlyArray<number> = [0, 0.083, 0.167, 0.25, 0.333, 0.417, 0.5, 0.583, 0.667, 0.75, 0.833, 0.917, 1, 1.083, 1.167, 1.25, 1.333, 1.417, 1.5, 1.583, 1.667, 1.75, 1.833, 1.917, 2, 2.083, 2.167, 2.25, 2.333, 2.417, 2.5, 2.583, 2.667, 2.75, 2.833, 2.917, 3, 3.083, 3.167, 3.25, 3.333, 3.417, 3.5, 3.583, 3.667, 3.75, 3.833, 3.917, 4, 4.25, 4.5, 4.75, 5, 5.25, 5.5, 5.75, 6, 6.5, 7, 7.5, 8];
     public static readonly echoSustainRange:          number = 8;
     public static readonly echoShelfHz:               number = 4000.0; 
     public static readonly echoShelfGain:             number = Math.pow(2.0, -0.5);
@@ -432,22 +436,31 @@ export class Config {
     public static readonly chipWaves:  DictionaryArray<ChipWave>  = rawChipToIntegrated(Config.rawChipWaves);
 //  Noise waves have too many samples to write by hand, so they're generated on-demand by getDrumWave instead.
     public static readonly chipNoises: DictionaryArray<ChipNoise> = toNameMap([
-        { name: "retro",            expression: 0.25,  basePitch: 69,  pitchFilterMult: 1024.0, isSoft: false, samples: null },
-        { name: "white",            expression: 1.0,   basePitch: 69,  pitchFilterMult: 8.0,    isSoft: true,  samples: null },
-        { name: "clang",            expression: 0.4,   basePitch: 69,  pitchFilterMult: 1024.0, isSoft: false, samples: null },
-        { name: "buzz",             expression: 0.3,   basePitch: 69,  pitchFilterMult: 1024.0, isSoft: false, samples: null },
-        { name: "hollow",           expression: 1.5,   basePitch: 96,  pitchFilterMult: 1.0,    isSoft: true,  samples: null },
-        { name: "shine",            expression: 0.755, basePitch: 69,  pitchFilterMult: 1024.0, isSoft: false, samples: null },
-        { name: "deep",             expression: 1.5,   basePitch: 120, pitchFilterMult: 1024.0, isSoft: true,  samples: null },
-        { name: "cutter",           expression: 0.005, basePitch: 96,  pitchFilterMult: 1024.0, isSoft: false, samples: null },
-        { name: "metallic",         expression: 1.0,   basePitch: 96,  pitchFilterMult: 1024.0, isSoft: false, samples: null },
-        { name: "static",           expression: 0.625, basePitch: 96,  pitchFilterMult: 1024.0, isSoft: false, samples: null },
-        { name: "retro clang",      expression: 1.0,   basePitch: 69,  pitchFilterMult: 1024.0, isSoft: false, samples: null },
-        { name: "chime",            expression: 2,     basePitch: 69,  pitchFilterMult: 1.0,    isSoft: true,  samples: null },
-        { name: "harsh",            expression: 10,    basePitch: 69,  pitchFilterMult: 1.0,    isSoft: true,  samples: null },
-        { name: "trill",            expression: 1.0,   basePitch: 69,  pitchFilterMult: 1024.0, isSoft: true,  samples: null },
-        { name: "detuned periodic", expression: 0.3,   basePitch: 69,  pitchFilterMult: 1024.0, isSoft: false, samples: null },
-        { name: "snare",            expression: 1.0,   basePitch: 69,  pitchFilterMult: 1024.0, isSoft: false, samples: null },
+        { name: "retro",            expression: 0.25,  basePitch: 69,    pitchFilterMult: 1024.0, isSoft: false, samples: null },
+        { name: "white",            expression: 1.0,   basePitch: 69,    pitchFilterMult: 8.0,    isSoft: true,  samples: null },
+        { name: "clang",            expression: 0.4,   basePitch: 69,    pitchFilterMult: 1024.0, isSoft: false, samples: null },
+        { name: "buzz",             expression: 0.3,   basePitch: 69,    pitchFilterMult: 1024.0, isSoft: false, samples: null },
+        { name: "hollow",           expression: 1.5,   basePitch: 96,    pitchFilterMult: 1.0,    isSoft: true,  samples: null },
+        { name: "shine",            expression: 0.755, basePitch: 69,    pitchFilterMult: 1024.0, isSoft: false, samples: null },
+        { name: "deep",             expression: 1.5,   basePitch: 120,   pitchFilterMult: 1024.0, isSoft: true,  samples: null },
+        { name: "cutter",           expression: 0.005, basePitch: 96,    pitchFilterMult: 1024.0, isSoft: false, samples: null },
+        { name: "metallic",         expression: 1.0,   basePitch: 96,    pitchFilterMult: 1024.0, isSoft: false, samples: null },
+        { name: "static",           expression: 0.625, basePitch: 96,    pitchFilterMult: 1024.0, isSoft: false, samples: null },
+        { name: "retro clang",      expression: 1.0,   basePitch: 69,    pitchFilterMult: 1024.0, isSoft: false, samples: null },
+        { name: "chime",            expression: 2,     basePitch: 69,    pitchFilterMult: 1.0,    isSoft: true,  samples: null },
+        { name: "harsh",            expression: 10,    basePitch: 69,    pitchFilterMult: 1.0,    isSoft: true,  samples: null },
+        { name: "trill",            expression: 1.0,   basePitch: 69,    pitchFilterMult: 1024.0, isSoft: true,  samples: null },
+        { name: "detuned periodic", expression: 0.3,   basePitch: 69,    pitchFilterMult: 1024.0, isSoft: false, samples: null },
+        { name: "snare",            expression: 1.0,   basePitch: 69,    pitchFilterMult: 1024.0, isSoft: false, samples: null },
+        { name: "1-bit white",      expression: 0.5,   basePitch: 74.41, pitchFilterMult: 1024.0, isSoft: false, samples: null },
+        { name: "1-bit metallic",   expression: 0.5,   basePitch: 86.41, pitchFilterMult: 1024.0, isSoft: false, samples: null },
+        { name: "crackling",        expression: 0.9,   basePitch: 69,    pitchFilterMult: 1024.0, isSoft: false, samples: null },
+        { name: "pink",             expression: 1.0,   basePitch: 69,    pitchFilterMult: 8.0,    isSoft: true,  samples: null },
+        { name: "brownian",         expression: 1.0,   basePitch: 69,    pitchFilterMult: 8.0,    isSoft: true,  samples: null },
+        { name: "perlin",           expression: 1.0,   basePitch: 105,   pitchFilterMult: 1.0,    isSoft: true,  samples: null },
+        { name: "fractal",          expression: 1.0,   basePitch: 116,   pitchFilterMult: 1.0,    isSoft: true,  samples: null },
+        { name: "vinyl crackle",    expression: 0.25,  basePitch: 96,    pitchFilterMult: 1024.0, isSoft: false, samples: null },
+        { name: "noise square",     expression: 1.0,   basePitch: 69,    pitchFilterMult: 1024.0, isSoft: true,  samples: null },
     ]);
 
     public static readonly filterFreqStep:             number = 1.0 / 4.0;
@@ -1200,7 +1213,7 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
                 wave[i] = Math.random() * 2.0 - 1.0;
             }
         } else if (index == 2) {
-            // The "clang" noise wave is based on a similar noise wave in the modded beepbox made by DAzombieRE.
+            // The "clang" noise wave is based on a similar noise wave in the Modded BeepBox made by DAzombieRE.
             let drumBuffer: number = 1;
             for (let i: number = 0; i < Config.chipNoiseLength; i++) {
                 wave[i] = (drumBuffer & 1) * 2.0 - 1.0;
@@ -1211,7 +1224,7 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
                 drumBuffer = newBuffer;
             }
         } else if (index == 3) {
-            // The "buzz" noise wave is based on a similar noise wave in the modded beepbox made by DAzombieRE.
+            // The "buzz" noise wave is based on a similar noise wave in the Modded BeepBox made by DAzombieRE.
             let drumBuffer: number = 1;
             for (let i: number = 0; i < Config.chipNoiseLength; i++) {
                 wave[i] = (drumBuffer & 1) * 2.0 - 1.0;
@@ -1228,7 +1241,7 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
             inverseRealFourierTransform!(wave, Config.chipNoiseLength);
             scaleElementsByFactor!(wave, 1.0 / Math.sqrt(Config.chipNoiseLength));
         } else if (index == 5) {
-            // The "shine" noise type from Modbox!
+            // The "shine" noise type from ModBox.
             var drumBuffer = 1;
             for (var i = 0; i < Config.chipNoiseLength; i++) {
                 wave[i] = (drumBuffer & 1) * 2.0 - 1.0;
@@ -1239,13 +1252,13 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
                 drumBuffer = newBuffer;
             }
         } else if (index == 6) {
-            // The "deep" noise type from Modbox!
+            // The "deep" noise type from ModBox.
             drawNoiseSpectrum(wave, Config.chipNoiseLength, 1, 10, 1, 1, 0);
             drawNoiseSpectrum(wave, Config.chipNoiseLength, 20, 14, -2, -2, 0);
             inverseRealFourierTransform!(wave, Config.chipNoiseLength);
             scaleElementsByFactor!(wave, 1.0 / Math.sqrt(Config.chipNoiseLength));
         } else if (index == 7) {
-            // The "cutter" noise type from Modbox!
+            // The "cutter" noise type from ModBox.
             var drumBuffer = 1;
             for (var i = 0; i < Config.chipNoiseLength; i++) {
                 wave[i] = (drumBuffer & 1) * 4.0 * (Math.random() * 14 + 1) - 8.0;
@@ -1256,9 +1269,9 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
                 drumBuffer = newBuffer;
             }
         } else if (index == 8) {
-            // The "metallic" noise type from Modbox!
+            // The "metallic" noise type from ModBox.
             var drumBuffer = 1;
-            for (var i = 0; i < 32768; i++) {
+            for (var i = 0; i < Config.chipNoiseLength; i++) {
                 wave[i] = (drumBuffer & 1) / 2.0 - 0.5;
                 var newBuffer = drumBuffer >> 1;
                 if (((drumBuffer + newBuffer) & 1) == 1) {
@@ -1267,7 +1280,7 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
                 drumBuffer = newBuffer;
             }
         } else if (index == 9) {
-            // The "static" noise type from Goldbox!
+            // The "static" noise type from GoldBox.
             let drumBuffer: number = 1;
             for (let i: number = 0; i < Config.chipNoiseLength; i++) {
                 wave[i] = (drumBuffer & 1) * 2.0 - 1.1;
@@ -1280,7 +1293,7 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
         } else if (index == 10) {
             // The "retro clang" noise type from Zefbox.
             let drumBuffer: number = 1;
-            for (let i: number = 0; i < 32768; i++) {
+            for (let i: number = 0; i < Config.chipNoiseLength; i++) {
                 wave[i] = (drumBuffer & 1) * 2.0 - 3.0;
                 let newBuffer: number = drumBuffer >> 1;
                 if (((drumBuffer + newBuffer) & 1) == 1) {
@@ -1291,7 +1304,7 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
         } else if (index == 11) {
             // The "chime" noise type from Zefbox.
             let drumBuffer: number = 1;
-            for (let i: number = 0; i < 32768; i++) {
+            for (let i: number = 0; i < Config.chipNoiseLength; i++) {
                 wave[i] = (drumBuffer & 1) * 2.0 - 1.0;
                 let newBuffer: number = drumBuffer >> 1;
                 if (((drumBuffer + newBuffer) & 1) == 1) {
@@ -1302,7 +1315,7 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
         } else if (index == 12) {
             // The "harsh" noise type from Zefbox.
             let drumBuffer: number = 1;
-            for (let i: number = 0; i < 32768; i++) {
+            for (let i: number = 0; i < Config.chipNoiseLength; i++) {
                 wave[i] = (drumBuffer & 1) * 4.0 / 11;
                 let newBuffer: number = drumBuffer >> 1;
                 if (((drumBuffer + newBuffer) & 1) == 1) {
@@ -1313,7 +1326,7 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
         } else if (index == 13) {
             // The "trill" noise type from Zefbox.
             let drumBuffer: number = 1;
-            for (let i: number = 0; i < 32768; i++) {
+            for (let i: number = 0; i < Config.chipNoiseLength; i++) {
                 wave[i] = (drumBuffer & 1) / 4.0 * Math.random();
                 let newBuffer: number = drumBuffer >> 2;
                 if (((drumBuffer + newBuffer) & 1) == 1) {
@@ -1322,9 +1335,9 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
                 drumBuffer = newBuffer;
             }
         } else if (index == 14) {
-            // The "detuned periodic" noise type from Modbox.
+            // The "detuned periodic" noise type from ModBox.
             let drumBuffer: number = 1;
-            for (let i: number = 0; i < 32767; i++) {
+            for (let i: number = 0; i < Config.chipNoiseLength-1; i++) {
                 wave[i] = (drumBuffer & 1) * 2.0 - 1.0;
                 let newBuffer: number = drumBuffer >> 2;
                 if (((drumBuffer + newBuffer) & 1) == 1) {
@@ -1333,9 +1346,102 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
                 drumBuffer = newBuffer;
             }
         } else if (index == 15) {
-            // The "snare" noise type from Modbox.
-            for (let i: number = 0; i < 32768; i++) {
+            // The "snare" noise type from ModBox.
+            for (let i: number = 0; i < Config.chipNoiseLength; i++) {
                 wave[i] = Math.random() * 2.0 - 1.0;
+            }
+        } else if (index == 16) {
+            // "1-Bit White" from UltraBox.
+            for (let i = 0; i < Config.chipNoiseLength; i++) {
+                wave[i] = Math.round(Math.random());
+            }
+        } else if (index == 17) {
+            // "1-Bit Metallic" from UltraBox.
+            var drumBuffer = 1;
+            for (var i = 0; i < Config.chipNoiseLength; i++) {
+                wave[i] = Math.round((drumBuffer & 1));
+                var newBuffer = drumBuffer >> 1;
+                if (((drumBuffer + newBuffer) & 1) == 1) {
+                    newBuffer -= 10 << 2;
+                }
+                drumBuffer = newBuffer;
+            }
+        } else if (index == 18) {
+            // "Crackling" from UltraBox.
+            for (let i = 0; i < Config.chipNoiseLength; i++) {
+                var ultraboxnewchipnoiserand = Math.random();
+                wave[i] = Math.pow(ultraboxnewchipnoiserand, Math.clz32(ultraboxnewchipnoiserand));
+            }
+        } else if (index == 19) {
+            // "Pink" noise from UltraBox (noise.js).
+            var b0 = 0, b1 = 0, b2 = 0, b3, b4, b5, b6;
+            b0 = b1 = b2 = b3 = b4 = b5 = b6 = 0.0;
+            
+            for (let i = 0; i < Config.chipNoiseLength; i++) {
+                var white = Math.random() * 2 - 1;
+                b0 = 0.99886 * b0 + white * 0.0555179;
+                b1 = 0.99332 * b1 + white * 0.0750759;
+                b2 = 0.96900 * b2 + white * 0.1538520;
+                b3 = 0.86650 * b3 + white * 0.3104856;
+                b4 = 0.55000 * b4 + white * 0.5329522;
+                b5 = -0.7616 * b5 - white * 0.0168980;
+                wave[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+                wave[i] *= 0.44;
+                b6 = white * 0.115926;
+                // from https://github.com/zacharydenton/noise.js, MIT license soooo
+            }
+        } else if (index == 20) {
+            // "Brownian" noise from UltraBox (noise.js).
+            var lastOut = 0.0;
+            
+            for (let i = 0; i < Config.chipNoiseLength; i++) {
+                var white = Math.random() * 2 - 1;
+                wave[i] = (lastOut + (0.02 * white)) / 1.02;
+                lastOut = wave[i];
+                wave[i] *= 14;
+                // this is also from noise.js
+            }
+        } else if (index == 21) {
+            // "Perlin Noise", a smooth variant of white noise.
+            // https://gpfault.net/posts/perlin-sound.txt.html
+            const freq: number = 440;
+            for (let i: number = 0; i < Config.chipNoiseLength; i++) {
+                const x1: number = (i / Config.chipNoiseLength) * freq;
+                wave[i] = perlinNoise(x1);
+            }
+        } else if (index == 22) {
+            // "Fractal Noise", a modified variant of perlin noise.
+            // https://gpfault.net/posts/perlin-sound.txt.html
+            const f1: number = 110;
+            const f2: number = 220;
+            const f3: number = 440;
+            for (let i: number = 0; i < Config.chipNoiseLength; i++) {
+                const x1: number = (i / Config.chipNoiseLength) * f1;
+                const x2: number = (i / Config.chipNoiseLength) * f2;
+                const x3: number = (i / Config.chipNoiseLength) * f3;
+                const n1: number = perlinNoise(x1);
+                const n2: number = perlinNoise(x2);
+                const n3: number = perlinNoise(x3);
+                const combined: number = (0.5 * n1 + 0.3 * n2 + 0.2 * n3);
+                wave[i] = combined;
+            }
+        } else if (index == 23) {
+            // "Vinyl Crackle", based off of the noisy sound they make.
+            for (let i: number = 0; i < Config.chipNoiseLength; i++) {
+                const v1: number = Math.random() * 2 - 1;
+                const v2: number = Math.random() * 0.25 - 0.125;
+                const bias: number = 170;
+                const biased: number = v1 > 0 ? Math.pow(v1, bias) : -Math.pow(-v1, bias);
+                const x1: number = clamp(-3, 3 + 1, biased * 4);
+                const final: number = x1 + v2;
+                wave[i] = final;
+            }
+        } else if (index == 24) {
+            // "Noise Square", a noise formation shaped like a square wave.
+            for (let i: number = 0; i < Config.chipNoiseLength; i++) {
+                const square: number = mod(Math.round(i/32 + 0.5), 2);
+                const noise: number = Math.random();
+                wave[i] = noise * square;
             }
         } else {
             throw new Error("Unrecognized drum index: " + index);
@@ -1375,6 +1481,26 @@ export function drawNoiseSpectrum(wave: Float32Array, waveLength: number, lowOct
     }
 
     return combinedAmplitude;
+}
+function perlinNoiseCurve(t: number): number {
+    return t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
+}
+const perlinNoiseGradientRandom: number[] = [];
+for (let i: number = 0; i < 440; i++) {
+    perlinNoiseGradientRandom[i] = i === 0 || i === 440 ? 0.0 : Math.random();
+}
+function perlinNoiseGradient(p: number): number {
+    return perlinNoiseGradientRandom[Math.floor(p) % perlinNoiseGradientRandom.length] > 0.5 ? 1.0 : -1.0;
+}
+function perlinNoise(p: number): number {
+    const p0: number = Math.floor(p);
+    const p1: number = p0 + 1.0;
+    const t: number = p - p0;
+    const fade_t: number = perlinNoiseCurve(t);
+    const g0: number = perlinNoiseGradient(p0);
+    const g1: number = perlinNoiseGradient(p1);
+    
+    return (1.0 - fade_t) * g0 * (p - p0) + fade_t * g1 * (p - p1);
 }
 
 function generateSineWave(): Float32Array {

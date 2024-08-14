@@ -1148,11 +1148,14 @@ export class SongEditor {
     private readonly _reverbRow: HTMLDivElement = div({ class: "selectRow" }, span({ style: "font-size: x-small;", class: "tip", onclick: () => this._openPrompt("reverb") }, span(_.reverbLabel)), this._reverbSlider.container);
     private readonly _echoSustainSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.echoSustainRange - 1, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeEchoSustain(this._doc, oldValue, newValue), false);
     private readonly _echoSustainRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("echoSustain") }, span(_.echoLabel)), this._echoSustainSlider.container);
-    private readonly _echoDelaySlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.echoDelayRange - 1, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeEchoDelay(this._doc, oldValue, newValue), false);
-    // Issue#59 - Add input boxes to various speed/delay sliders for more accurate inputs.
-    private readonly _echoDelayBeatMarkers: HTMLDivElement[] = [div({ class: "pitchShiftMarker", style: { color: ColorConfig.uiWidgetBackground, left: "23%" } }), div({ class: "pitchShiftMarker", style: { color: ColorConfig.uiWidgetBackground, left: "49%" } }), div({ class: "pitchShiftMarker", style: { color: ColorConfig.uiWidgetBackground, left: "74%" } }), div({ class: "pitchShiftMarker", style: { color: ColorConfig.uiWidgetBackground, left: "100%" } })];
+    private readonly _echoDelaySlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: /*Config.echoDelaySliderNumbers.length - 2*/ Config.echoDelayRange - 1, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeEchoDelay(this._doc, oldValue, newValue), false);
+    private readonly _echoDelayInputBox: HTMLInputElement = input({ style: "width: 4em; font-size: 80%; ", id: "echoDelayInputBox", type: "number", step: Config.echoDelayIntervals, min: "0", max: Config.echoDelayMax, value: "0" });
+    private readonly _echoDelayBeatMarkers: HTMLDivElement[] = [div({ class: "pitchShiftMarker", style: { color: ColorConfig.uiWidgetBackground, left: "24%" } }), div({ class: "pitchShiftMarker", style: { color: ColorConfig.uiWidgetBackground, left: "49%" } }), div({ class: "pitchShiftMarker", style: { color: ColorConfig.uiWidgetBackground, left: "74.5%" } }), div({ class: "pitchShiftMarker", style: { color: ColorConfig.uiWidgetBackground, left: "100%" } })];
     private readonly _echoDelayBeatMarkerContainer: HTMLDivElement = div({ style: "display: flex; position: relative;" }, this._echoDelaySlider.container, div({ class: "pitchShiftMarkerContainer" }, this._echoDelayBeatMarkers));
-    private readonly _echoDelayRow: HTMLDivElement = div({ class: "selectRow" }, span({ /*style: "font-size: x-small;",*/ class: "tip", onclick: () => this._openPrompt("echoDelay") }, span(_.echoDelayLabel)), this._echoDelayBeatMarkerContainer);
+    private readonly _echoDelayRow: HTMLDivElement = div({ class: "selectRow" }, div({},
+        span({ class: "tip", onclick: () => this._openPrompt("echoDelay") }, span(_.echoDelayLabel)), 
+        div({ style: "color: " + ColorConfig.secondaryText + "; margin-top: -3px;" }, this._echoDelayInputBox),
+    ), this._echoDelayBeatMarkerContainer);
     private readonly _rhythmSelect: HTMLSelectElement = buildOptions(select(), [
         _.rhythmBy3Label,
         _.rhythmBy4Label,
@@ -1238,7 +1241,16 @@ export class SongEditor {
         _.noise13Label,
         _.noise14Label,
         _.noise15Label,
-        _.noise16Label
+        _.noise16Label,
+        _.noise17Label,
+        _.noise18Label,
+        _.noise19Label,
+        _.noise20Label,
+        _.noise21Label,
+        _.noise22Label,
+        _.noise23Label,
+        _.noise24Label,
+        _.noise25Label
     ]);
     private readonly _chipWaveSelectRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("chipWave") }, span(_.waveLabel)), div({ class: "selectContainer" }, this._chipWaveSelect));
     private readonly _chipNoiseSelectRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("chipNoise") }, span(_.noiseLabel)), div({ class: "selectContainer" }, this._chipNoiseSelect));
@@ -2391,6 +2403,7 @@ export class SongEditor {
 
         this._instrumentVolumeSliderInputBox.addEventListener("input", () => { this._doc.record(new ChangeVolume(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].volume, Math.min(25.0, Math.max(-25.0, Math.round(+this._instrumentVolumeSliderInputBox.value))))) });
         this._panSliderInputBox.addEventListener("input", () => { this._doc.record(new ChangePan(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].pan, Math.min(100.0, Math.max(0.0, Math.round(+this._panSliderInputBox.value))))) });
+        this._echoDelayInputBox.addEventListener("input", () => { this._doc.record(new ChangeEchoDelay(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].echoDelay, Math.min(Config.echoDelayMax, Math.max(0.0, +this._echoDelayInputBox.value))))});
         this._pwmSliderInputBox.addEventListener("input", () => { this._doc.record(new ChangePulseWidth(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].pulseWidth, Math.min(Config.pulseWidthRange, Math.max(1.0, Math.round(+this._pwmSliderInputBox.value))))) });
         this._detuneSliderInputBox.addEventListener("input", () => { this._doc.record(new ChangeDetune(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].detune, Math.min(Config.detuneMax - Config.detuneCenter, Math.max(Config.detuneMin - Config.detuneCenter, Math.round(+this._detuneSliderInputBox.value))))) });
         //this._noiseSeedInputBox.addEventListener("input", () => { this._doc.record(new ChangeNoiseSeed(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].noiseSeed, Math.min(0, Math.max(Config.maxAmountOfRandomSeeds, Math.round(+this._noiseSeedInputBox.value))))) });
@@ -3493,7 +3506,6 @@ export class SongEditor {
                 this._echoSustainSlider.updateValue(instrument.echoSustain);
                 this._echoDelayRow.style.display = "";
                 this._echoDelaySlider.updateValue(instrument.echoDelay);
-                this._echoDelaySlider.input.title = (Math.round((instrument.echoDelay + 1) * Config.echoDelayStepTicks / (Config.ticksPerPart * Config.partsPerBeat) * 1000) / 1000) + _.beatsLabel;
             } else {
                 this._echoSustainRow.style.display = "none";
                 this._echoDelayRow.style.display = "none";
@@ -3553,6 +3565,8 @@ export class SongEditor {
             setSelectedValue(this._vibratoTypeSelect, instrument.vibratoType);
             setSelectedValue(this._chordSelect, instrument.chord);
             this._panSliderInputBox.value = instrument.pan + "";
+            this._echoDelaySlider.input.title = Config.echoDelaySliderNumbers[instrument.echoDelay+1] + _.beatsLabel;
+            this._echoDelayInputBox.value = instrument.echoDelay + "";
             this._pwmSliderInputBox.value = instrument.pulseWidth + "";
             this._detuneSliderInputBox.value = (instrument.detune - Config.detuneCenter) + "";
             this._instrumentVolumeSlider.updateValue(instrument.volume);
@@ -4596,6 +4610,7 @@ export class SongEditor {
 
         // Defer to actively editing other input boxes.
         if   ( document.activeElement == this._panSliderInputBox 
+            || document.activeElement == this._echoDelayInputBox 
             || document.activeElement == this._pwmSliderInputBox 
             || document.activeElement == this._detuneSliderInputBox 
             //|| document.activeElement == this._noiseSeedInputBox 

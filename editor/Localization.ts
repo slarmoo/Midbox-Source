@@ -235,6 +235,15 @@ export class Localization {
     public static noise14Label: string = "trill";
     public static noise15Label: string = "detuned periodic";
     public static noise16Label: string = "snare";
+    public static noise17Label: string = "1-bit white"; // Needs translation
+    public static noise18Label: string = "1-bit metallic"; // Needs translation
+    public static noise19Label: string = "crackling"; // Needs translation
+    public static noise20Label: string = "pink"; // Needs translation
+    public static noise21Label: string = "brownian"; // Needs translation
+    public static noise22Label: string = "perlin"; // Needs translation
+    public static noise23Label: string = "fractal"; // Needs translation
+    public static noise24Label: string = "vinyl crackle"; // Needs translation
+    public static noise25Label: string = "noise square"; // Needs translation
     public static copyLabel: string = "Copy";
     public static pasteLabel: string = "Paste";
     public static randomLabel: string = "Randomize ▾";
