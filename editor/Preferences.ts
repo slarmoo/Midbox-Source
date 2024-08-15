@@ -34,6 +34,7 @@ export class Preferences {
 	public metronomeCountIn: boolean;
 	public metronomeWhileRecording: boolean;
 	public showOscilloscope: boolean;
+	public showEnvReorderButtons: boolean;
 
 	// Random Generation Setup
 		public chipWaveOnRandomization: boolean;
@@ -99,6 +100,7 @@ export class Preferences {
 		this.metronomeCountIn = window.localStorage.getItem("metronomeCountIn") != "false";
 		this.metronomeWhileRecording = window.localStorage.getItem("metronomeWhileRecording") != "false";
 		this.showOscilloscope = window.localStorage.getItem("showOscilloscope") != "false";
+		this.showEnvReorderButtons = window.localStorage.getItem("showEnvReorderButtons") != "false";
 		this.keyboardLayout = window.localStorage.getItem("keyboardLayout") || "wickiHayden";
 		this.bassOffset = (+(<any>window.localStorage.getItem("bassOffset"))) || 0;
 		this.layout = window.localStorage.getItem("layout") || "small";
@@ -184,6 +186,7 @@ export class Preferences {
 		window.localStorage.setItem("metronomeCountIn", this.metronomeCountIn ? "true" : "false");
 		window.localStorage.setItem("metronomeWhileRecording", this.metronomeWhileRecording ? "true" : "false");
 		window.localStorage.setItem("showOscilloscope", this.showOscilloscope ? "true" : "false");
+		window.localStorage.setItem("showEnvReorderButtons", this.showEnvReorderButtons ? "true" : "false");
 		window.localStorage.setItem("keyboardLayout", this.keyboardLayout);
 		window.localStorage.setItem("bassOffset", String(this.bassOffset));
 		window.localStorage.setItem("layout", this.layout);

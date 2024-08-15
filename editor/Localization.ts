@@ -86,6 +86,13 @@ export class Localization {
     public static trapezoidRatioLabel = "‣ Ratio:"; // needs translation
     public static firstSineSpeedLabel = "‣ S1 Spd:";
     public static secondSineSpeedLabel = "‣ S2 Spd:";
+    public static addEnvelopeLabel = "Add Envelope"; // needs translation
+    public static addCopiedEnvelopeLabel = "Add Copied Envelope"; // needs translation
+    public static moveUpLabel = "Move Envelope Up"; // needs translation
+    public static moveDownLabel = "Move Envelope Down"; // needs translation
+    public static removeEnvelopeLabel = "Remove Envelope"; // needs translation
+    public static randomizeEnvelopeLabel = "Randomize Envelope"; // needs translation
+    public static pitchEnvAutoBoundLabel = "Set Pitch Start/End to Highest/Lowest Notes"; // needs translation
     public static wavetableSpeedLabel: string = "Spd:";
     public static interpolateWavesLabel: string = "Interpolate:";
     public static resetCyclePerNoteLabel: string = "Cycle per Note:";
@@ -296,6 +303,7 @@ export class Localization {
     public static displayURLInBrowserLabel: string = "Display Song Data in URL";
     public static showPlaybackBarLabel: string = "Show Playback Volume Bar";
     public static showOscilloscopeLabel: string = "Show Oscilloscope";
+    public static showEnvReorderButtonsLabel: string = "Show Envelope Reorder Buttons";
     public static setLanguageLabel: string = "　Set Language...";
     public static setLayoutLabel: string = "　Set Layout...";
     public static setThemeLabel: string = "　Set Theme...";

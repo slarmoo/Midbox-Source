@@ -4,7 +4,7 @@ import {InstrumentType, Config, DropdownID} from "../synth/SynthConfig";
 import {Instrument, EnvelopeComputer} from "../synth/synth";
 import {ColorConfig} from "./ColorConfig";
 import {SongDocument} from "./SongDocument";
-import {ChangeSetEnvelopeTarget, ChangeSetEnvelopeType, ChangeRemoveEnvelope, ChangeEnvelopeOrder, ChangePerEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeLowerBound, ChangeUpperBound, ChangeStairsStepAmount, ChangeEnvelopeDelay, ChangePitchEnvelopeStart, ChangePitchEnvelopeEnd, ChangePitchAmplify, ChangePitchBounce, ChangeEnvelopePosition, ChangeMeasurementType, ChangePasteEnvelope} from "./changes";
+import {ChangeSetEnvelopeTarget, ChangeSetEnvelopeType, ChangeRemoveEnvelope, ChangeEnvelopeOrder, ChangePerEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeLowerBound, ChangeUpperBound, ChangeStairsStepAmount, ChangeEnvelopeDelay, ChangePitchEnvelopeStart, ChangePitchEnvelopeEnd, ChangePitchAmplify, ChangePitchBounce, ChangeEnvelopePosition, ChangeMeasurementType, ChangePasteEnvelope, RandomEnvelope} from "./changes";
 import {HTML, SVG} from "imperative-html/dist/esm/elements-strict";
 import {Localization as _} from "./Localization";
 import {clamp, remap} from "./UsefulCodingStuff";
@@ -226,9 +226,10 @@ export class EnvelopeEditor {
 	private readonly _measurementTypeRows: HTMLElement[] = [];
 	private readonly _envelopeCopyButtons: HTMLButtonElement[] = [];
 	private readonly _envelopePasteButtons: HTMLButtonElement[] = [];
+	private readonly _randomEnvelopeButtons: HTMLButtonElement[] = [];
 	private readonly _envelopeMoveUpButtons: HTMLButtonElement[] = [];
 	private readonly _envelopeMoveDownButtons: HTMLButtonElement[] = [];
-	private readonly _envelopeButtonContainers: HTMLElement[] = [];
+	private readonly _pitchEnvAutoBoundButtons: HTMLButtonElement[] = [];
 	private readonly _envelopeDropdownGroups: HTMLElement[] = [];
 	private readonly _envelopeDropdowns: HTMLButtonElement[] = [];
 	private readonly _targetSelects: HTMLSelectElement[] = [];
@@ -670,33 +671,44 @@ export class EnvelopeEditor {
 			const measureInBeatsButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "no-underline", onclick: () => this._switchMeasurementType(true, envelopeIndex) }, span(_.measureInBeatsLabel));
     		const measureInSecondsButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "last-button no-underline", onclick: () => this._switchMeasurementType(false, envelopeIndex) }, span(_.measureInSecondsLabel));
     		const measurementTypeRow: HTMLElement = div({ class: "selectRow", style: "padding-top: 4px; margin-bottom: -3px;" }, span({ style: "font-size: small;", class: "tip", onclick: () => this._openPrompt("envelopeDelayPhaseMeasurement") }, span(_.delayPhaseMeasurementLabel)), div({ class: "instrument-bar" }, measureInBeatsButton, measureInSecondsButton));
-			const envelopeCopyButton: HTMLButtonElement = button({style: "flex: 3; margin-right: 0.3em;", onclick: () => this._copyEnvelopeSettings(envelopeIndex)}, 
+			const envelopeCopyButton: HTMLButtonElement = button({class: "envelope-button", title: _.copyLabel, style: "flex: 3;", onclick: () => this._copyEnvelopeSettings(envelopeIndex)}, 
 				// Copy icon:
-				SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 20%; top: 37%; margin-top: -0.75em; pointer-events: none;", width: "2em", height: "2em", viewBox: "-5 -21 26 26" }, [
+				SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 4%; top: 40%; margin-top: -0.75em; pointer-events: none;", width: "2em", height: "2em", viewBox: "-5 -21 26 26" }, [
 					SVG.path({ d: "M 0 -15 L 1 -15 L 1 0 L 13 0 L 13 1 L 0 1 L 0 -15 z M 2 -1 L 2 -17 L 10 -17 L 14 -13 L 14 -1 z M 3 -2 L 13 -2 L 13 -12 L 9 -12 L 9 -16 L 3 -16 z", fill: "currentColor" }),
 				]),
 			);
-			const envelopePasteButton: HTMLButtonElement = button({style: "flex: 3; margin-left: 0.3em; margin-right: 0.3em;", onclick: () => this._pasteEnvelopeSettings(envelopeIndex)}, 
+			const envelopePasteButton: HTMLButtonElement = button({class: "envelope-button", title: _.pasteLabel, style: "flex: 3;", onclick: () => this._pasteEnvelopeSettings(envelopeIndex)}, 
 				// Paste icon:
-				SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 18%; top: 37%; margin-top: -0.75em; pointer-events: none;", width: "2em", height: "2em", viewBox: "0 0 26 26" }, [
+				SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 2%; top: 38%; margin-top: -0.75em; pointer-events: none;", width: "2em", height: "2em", viewBox: "0 0 26 26" }, [
 					SVG.path({ d: "M 8 18 L 6 18 L 6 5 L 17 5 L 17 7 M 9 8 L 16 8 L 20 12 L 20 22 L 9 22 z", stroke: "currentColor", fill: "none" }),
-					SVG.path({ d: "M 9 3 L 14 3 L 14 6 L 9 6 L 9 3 z M 16 8 L 20 12 L 16 12 L 16 8 z", fill: "currentColor", }),
+					SVG.path({ d: "M 9 3 L 14 3 L 14 6 L 9 6 L 9 3 z M 16 8 L 20 12 L 16 12 L 16 8 z", fill: "currentColor" }),
 				]),
 			);
-			const envelopeMoveUpButton: HTMLButtonElement = button({style: "flex: 3; margin-left: 0.3em; margin-right: 0.3em;"}, 
+			const randomEnvelopeButton: HTMLButtonElement = button({class: "envelope-button", title: _.randomizeEnvelopeLabel, style: "flex: 3;", onclick: () => this._randomizeEnvelope(envelopeIndex)}, 
+				// Dice icon:
+				SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 5px; top: 21%; pointer-events: none;", width: "16", height: "16", viewBox: "0 0 16 16"}, [
+					SVG.path({ d: "M13 1a2 2 0 012 2v10a2 2 0 01-2 2H3a2 2 0 01-2-2V3a2 2 0 012-2zM3 0a3 3 0 00-3 3v10a3 3 0 003 3h10a3 3 0 003-3V3a3 3 0 00-3-3zM5.5 4a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0m8 0a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0m0 8a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0m-8 0a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0m4-4a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0", fill: "currentColor"}),
+				]),
+			);
+			const envelopeMoveUpButton: HTMLButtonElement = button({class: "envelope-button", title: _.moveUpLabel, style: "flex: 3;"}, 
 				// Up-arrow icon:
-				SVG.svg({ style: "flex-shrink: 0; position: absolute; left: -6%; top: 40%; margin-top: -0.75em; pointer-events: none;", width: "2.4em", height: "2.4em", viewBox: "0 0 3 9" }, [
+				SVG.svg({ style: "flex-shrink: 0; position: absolute; left: -43%; top: 40%; margin-top: -0.75em; pointer-events: none;", width: "2.4em", height: "2.4em", viewBox: "0 0 3 9" }, [
 					SVG.path({ d: "M 2 3 L 4 1 L 6 3 L 4.5 3 L 4.5 6.5 L 3.5 6.5 L 3.5 3 L 2 3 z", fill: "currentColor" }),
 				]),
 			);
-			const envelopeMoveDownButton: HTMLButtonElement = button({style: "flex: 3; margin-left: 0.3em;"}, 
+			const envelopeMoveDownButton: HTMLButtonElement = button({class: "envelope-button", title: _.moveDownLabel, style: "flex: 3;"}, 
 				// Down-arrow icon:
-				SVG.svg({ style: "flex-shrink: 0; position: absolute; left: -6%; top: 35%; margin-top: -0.75em; pointer-events: none;", width: "2.4em", height: "2.4em", viewBox: "0 0 3 9" }, [
+				SVG.svg({ style: "flex-shrink: 0; position: absolute; left: -45%; top: 35%; margin-top: -0.75em; pointer-events: none;", width: "2.4em", height: "2.4em", viewBox: "0 0 3 9" }, [
 					SVG.path({ d: "M 6 5 L 4 7 L 2 5 L 3.5 5 L 3.5 1.5 L 4.5 1.5 L 4.5 5 L 6 5 z", fill: "currentColor"}),
 				]),
 			);
-			const envelopeButtonContainer: HTMLElement = div({ class: "selectRow", style: "padding-top: 1px; margin-bottom: 2px; display: flex;"}, envelopeCopyButton, envelopePasteButton, envelopeMoveUpButton, envelopeMoveDownButton);
-			const envelopeDropdownGroup: HTMLElement = div({class: "editor-controls", style: "display: none;"}, envelopeButtonContainer, plotterTimeRangeRow, envelopePlotterRow, pitchStartGroup, pitchEndGroup, extraPitchSettingRow, perEnvelopeSpeedRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, stairsStepAmountRow, measurementTypeRow, envelopeDelayRow, envelopePhaseRow);
+			const pitchEnvAutoBoundButton: HTMLButtonElement = button({class: "envelope-button", title: _.pitchEnvAutoBoundLabel, style: "flex: 3;", onclick: () => this._doc.selection.pitchEnvAutoBind(envelopeIndex, instrument)}, 
+				// Horizontal extension icon:
+				SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 6px; top: 21%; pointer-events: none;", width: "3.5em", height: "3.5em", viewBox: "6 6 24 24"}, [
+					SVG.path({ d: "M 6 6 L 14 6 L 14 7 L 6 7 L 6 6 M 6 14 L 14 14 L 14 13 L 6 13 L 6 14 M 10 7 L 8.5 8.5 L 9.4 8.5 L 9.4 11.5 L 8.4 11.5 L 10 13 L 11.5 11.5 L 10.6 11.5 L 10.6 8.5 L 11.5 8.5 L 10 7", fill: "currentColor"}),
+				]),
+			);
+			const envelopeDropdownGroup: HTMLElement = div({class: "editor-controls", style: "display: none;"}, plotterTimeRangeRow, envelopePlotterRow, pitchStartGroup, pitchEndGroup, extraPitchSettingRow, perEnvelopeSpeedRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, stairsStepAmountRow, measurementTypeRow, envelopeDelayRow, envelopePhaseRow);
 			const envelopeDropdown: HTMLButtonElement = button({style: "margin-left: 0.6em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.PerEnvelope, envelopeIndex)}, "▼");
 
 			const targetSelect: HTMLSelectElement = select();
@@ -716,14 +728,24 @@ export class EnvelopeEditor {
 				envelopeSelect.appendChild(option({value: envelope}, Config.envelopes[envelope].name));
 			} 
 			
-			const deleteButton: HTMLButtonElement = button({type: "button", class: "delete-envelope"});
-			
-			const row: HTMLDivElement = div(div({class: "envelope-row"},
-				div({style: "width: 0; flex: 0.2; margin-top: 3px;"}, envelopeDropdown),
-				div({class: "selectContainer", style: "width: 0; flex: 0.8;"}, targetSelect),
-				div({class: "selectContainer", style: "width: 0; flex: 0.7;"}, envelopeSelect),
-				deleteButton,
-			), envelopeDropdownGroup);
+			const deleteButton: HTMLButtonElement = button({type: "button", class: "delete-envelope", title: _.removeEnvelopeLabel});
+
+			const row: HTMLDivElement = div(
+				div({style: "width: 0; position: absolute; margin-top: 22px;"}, envelopeDropdown),
+				div({class: "envelope-row", style: "width: 90%; margin-left: 10%; margin-bottom: -2px;"},
+					div({style: "width: 0; flex: 1; margin-right: -4px;"}, envelopeMoveUpButton),
+					div({style: "width: 0; flex: 1; margin-right: -4px;"}, envelopeCopyButton),
+					div({class: "selectContainer", style: "width: 0; flex: 3;"}, targetSelect),
+					div({style: "width: 0; flex: 1; margin-right: -4px;"}, deleteButton),
+				), 
+				div({class: "envelope-row", style: "width: 90%; margin-left: 10%;"},
+					div({style: "width: 0; flex: 1; margin-right: -4px;"}, envelopeMoveDownButton),
+					div({style: "width: 0; flex: 1; margin-right: -4px;"}, envelopePasteButton),
+					div({class: "selectContainer", style: "width: 0; flex: 3;"}, envelopeSelect),
+					div({style: "position: absolute; margin-top: 0px; margin-left: 119px;"}, pitchEnvAutoBoundButton),
+					div({style: "width: 0; flex: 1; margin-right: -4px;"}, randomEnvelopeButton),
+				),
+			envelopeDropdownGroup);
 			
 			this.container.appendChild(row);
 			this._rows[envelopeIndex] = row;
@@ -768,9 +790,10 @@ export class EnvelopeEditor {
 			this._measurementTypeRows[envelopeIndex] = measurementTypeRow;
 			this._envelopeCopyButtons[envelopeIndex] = envelopeCopyButton;
 			this._envelopePasteButtons[envelopeIndex] = envelopePasteButton;
+			this._randomEnvelopeButtons[envelopeIndex] = randomEnvelopeButton;
 			this._envelopeMoveUpButtons[envelopeIndex] = envelopeMoveUpButton;
 			this._envelopeMoveDownButtons[envelopeIndex] = envelopeMoveDownButton;
-			this._envelopeButtonContainers[envelopeIndex] = envelopeButtonContainer;
+			this._pitchEnvAutoBoundButtons[envelopeIndex] = pitchEnvAutoBoundButton;
 			this._envelopeDropdownGroups[envelopeIndex] = envelopeDropdownGroup;
 			this._envelopeDropdowns[envelopeIndex] = envelopeDropdown;
 			this._targetSelects[envelopeIndex] = targetSelect;
@@ -844,13 +867,23 @@ export class EnvelopeEditor {
 				this._measureInBeatButtons[envelopeIndex].classList.add("deactivated");
 				this._measureInSecondButtons[envelopeIndex].classList.remove("deactivated");
 			}
+			this._envelopeMoveUpButtons[envelopeIndex].disabled = !(this._doc.prefs.showEnvReorderButtons);
+			this._envelopeMoveDownButtons[envelopeIndex].disabled = !(this._doc.prefs.showEnvReorderButtons);
+			this._pitchEnvAutoBoundButtons[envelopeIndex].disabled = !(instEnv.envelope == Config.envelopes.dictionary["pitch"].index);
 			this._targetSelects[envelopeIndex].value = String(instrument.envelopes[envelopeIndex].target + instrument.envelopes[envelopeIndex].index * Config.instrumentAutomationTargets.length);
 			this._envelopeSelects[envelopeIndex].selectedIndex = instrument.envelopes[envelopeIndex].envelope;
+			this._targetSelects[envelopeIndex].style.minWidth = this._doc.prefs.showEnvReorderButtons ? "" : "116px";
+			this._targetSelects[envelopeIndex].style.marginLeft = this._doc.prefs.showEnvReorderButtons ? "" : "-27px";
+			this._envelopeCopyButtons[envelopeIndex].style.marginLeft = this._doc.prefs.showEnvReorderButtons ? "" : "-27px";
+			this._envelopeSelects[envelopeIndex].style.minWidth = (this._doc.prefs.showEnvReorderButtons || instEnv.envelope == Config.envelopes.dictionary["pitch"].index) ? "" : "116px";
+			this._envelopeSelects[envelopeIndex].style.maxWidth = (instEnv.envelope == Config.envelopes.dictionary["pitch"].index) ? this._doc.prefs.showEnvReorderButtons ? "61px" : "88px" : "";
+			this._envelopeSelects[envelopeIndex].style.marginLeft = this._doc.prefs.showEnvReorderButtons ? "" : "-27px";
+			this._envelopePasteButtons[envelopeIndex].style.marginLeft = this._doc.prefs.showEnvReorderButtons ? "" : "-27px";
 			
 			if ( // Special case on envelope plotters
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["none"].index ||
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["note size"].index ||
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["pitch"].index
+				instEnv.envelope == Config.envelopes.dictionary["none"].index ||
+				instEnv.envelope == Config.envelopes.dictionary["note size"].index ||
+				instEnv.envelope == Config.envelopes.dictionary["pitch"].index
 			) {
 				this._envelopePlotterRows[envelopeIndex].style.display = "none";
 				this._plotterTimeRangeRows[envelopeIndex].style.display = "none";
@@ -860,9 +893,9 @@ export class EnvelopeEditor {
 			}
 
 			if ( // Special case on IES
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["none"].index ||
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["note size"].index ||
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["pitch"].index
+				instEnv.envelope == Config.envelopes.dictionary["none"].index ||
+				instEnv.envelope == Config.envelopes.dictionary["note size"].index ||
+				instEnv.envelope == Config.envelopes.dictionary["pitch"].index
 			) {
 				this._perEnvelopeSpeedRows[envelopeIndex].style.display = "none";
 			} else {
@@ -871,8 +904,8 @@ export class EnvelopeEditor {
 
 			// Special case on discrete toggles.
 			if (
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["none"].index ||
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["pitch"].index
+				instEnv.envelope == Config.envelopes.dictionary["none"].index ||
+				instEnv.envelope == Config.envelopes.dictionary["pitch"].index
 			) {
 				this._discreteEnvelopeRows[envelopeIndex].style.display = "none";
 			} else { 
@@ -880,7 +913,7 @@ export class EnvelopeEditor {
 			}
 
 			if ( // Special case on lower/upper boundaries.
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["none"].index
+				instEnv.envelope == Config.envelopes.dictionary["none"].index
 			) {
 				this._lowerBoundRows[envelopeIndex].style.display = "none";
 				this._upperBoundRows[envelopeIndex].style.display = "none";
@@ -890,8 +923,8 @@ export class EnvelopeEditor {
 			}
 
 			if ( // Special case on step amount.
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["stairs"].index ||
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["looped stairs"].index 
+				instEnv.envelope == Config.envelopes.dictionary["stairs"].index ||
+				instEnv.envelope == Config.envelopes.dictionary["looped stairs"].index 
 			) {
 				this._stairsStepAmountRows[envelopeIndex].style.display = "";
 			} else {
@@ -899,9 +932,9 @@ export class EnvelopeEditor {
 			}
 
 			if ( // Special case on delay and phase.
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["none"].index ||
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["note size"].index ||
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["pitch"].index
+				instEnv.envelope == Config.envelopes.dictionary["none"].index ||
+				instEnv.envelope == Config.envelopes.dictionary["note size"].index ||
+				instEnv.envelope == Config.envelopes.dictionary["pitch"].index
 			) {
 				this._measurementTypeRows[envelopeIndex].style.display = "none";
 				this._envelopeDelayRows[envelopeIndex].style.display = "none";
@@ -913,7 +946,7 @@ export class EnvelopeEditor {
 			}
 
 			if ( // Pitch settings are special-cased to the pitch envelope.
-				instrument.envelopes[envelopeIndex].envelope == Config.envelopes.dictionary["pitch"].index
+				instEnv.envelope == Config.envelopes.dictionary["pitch"].index
 			) {
 				this._pitchStartGroups[envelopeIndex].style.display = "";
 				this._pitchEndGroups[envelopeIndex].style.display = "";
@@ -948,6 +981,11 @@ export class EnvelopeEditor {
 		let instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
 		const storedEnvelope: any = JSON.parse(String(window.localStorage.getItem("envelopeCopy")));
 		this._doc.record(new ChangePasteEnvelope(this._doc, instrument, instrument.envelopes[pasteIndex], storedEnvelope));
+	}
+
+	private _randomizeEnvelope(envelopeIndex: number): void {
+		let instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
+		this._doc.record(new RandomEnvelope(this._doc, envelopeIndex, instrument));
 	}
 
 	private _toggleDropdownMenu(dropdown: DropdownID, submenu: number = 0): void {

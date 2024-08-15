@@ -1,11 +1,11 @@
 // Copyright (c) 2012-2022 John Nesky and contributing authors, distributed under the MIT license, see accompanying the LICENSE.md file.
 
 import { Dictionary, Config } from "../synth/SynthConfig";
-import { Note, Pattern } from "../synth/synth";
+import { Instrument, Note, Pattern } from "../synth/synth";
 import { SongDocument } from "./SongDocument";
 import { ChangeGroup } from "./Change";
 import { ColorConfig } from "./ColorConfig";
-import { ChangeTrackSelection, ChangeChannelBar, ChangeAddChannel, ChangeRemoveChannel, ChangeChannelOrder, ChangeDuplicateSelectedReusedPatterns, ChangeNoteAdded, ChangeNoteTruncate, ChangePatternNumbers, ChangePatternSelection, ChangeInsertBars, ChangeDeleteBars, ChangeEnsurePatternExists, ChangeNoteLength, ChangePaste, ChangeSetPatternInstruments, ChangeViewInstrument, ChangeModChannel, ChangeModInstrument, ChangeModSetting, ChangeModFilter, ChangePatternsPerChannel, ChangePatternRhythm, ChangePatternScale, ChangeTranspose, ChangeRhythm, comparePatternNotes, unionOfUsedNotes, generateScaleMap, discardInvalidPatternInstruments, patternsContainSameInstruments, ChangePreset, pickRandomPresetValue, ChangeRandomGeneratedInstrument, } from "./changes";
+import { ChangeTrackSelection, ChangeChannelBar, ChangeAddChannel, ChangeRemoveChannel, ChangeChannelOrder, ChangeDuplicateSelectedReusedPatterns, ChangeNoteAdded, ChangeNoteTruncate, ChangePatternNumbers, ChangePatternSelection, ChangeInsertBars, ChangeDeleteBars, ChangeEnsurePatternExists, ChangeNoteLength, ChangePaste, ChangeSetPatternInstruments, ChangeViewInstrument, ChangeModChannel, ChangeModInstrument, ChangeModSetting, ChangeModFilter, ChangePatternsPerChannel, ChangePatternRhythm, ChangePatternScale, ChangeTranspose, ChangeRhythm, comparePatternNotes, unionOfUsedNotes, generateScaleMap, discardInvalidPatternInstruments, patternsContainSameInstruments, ChangePreset, pickRandomPresetValue, ChangeRandomGeneratedInstrument, ChangePitchEnvelopeStart, ChangePitchEnvelopeEnd, } from "./changes";
 
 interface PatternCopy {
     instruments: number[];
@@ -636,6 +636,36 @@ export class Selection {
 
     public duplicatePatterns(): void {
         this._doc.record(new ChangeDuplicateSelectedReusedPatterns(this._doc, this.boxSelectionBar, this.boxSelectionWidth, this.boxSelectionChannel, this.boxSelectionHeight));
+    }
+
+    public pitchEnvAutoBind(envelopeIndex: number, instrument: Instrument): void {
+        const channelIndex: number = this.boxSelectionChannel;
+        const barIndex: number = this.boxSelectionBar;
+        const selectionWidth: number = this.boxSelectionWidth;
+        const isNoise: boolean = this._doc.song.getChannelIsNoise(this._doc.channel);
+        let highestNote: number = 0;
+        let lowestNote: number = 96;
+        if (isNoise) lowestNote = 12;
+        for (let bar = barIndex; bar < barIndex + selectionWidth; bar++) {
+            const patternNumber: number = this._doc.song.channels[channelIndex].bars[bar];
+            if (patternNumber != 0) {
+                const pattern: Pattern = this._doc.song.channels[channelIndex].patterns[patternNumber - 1];
+                for (const note of pattern.notes) {
+                    if (this.patternSelectionActive && (note.end <= this.patternSelectionStart || note.start >= this.patternSelectionEnd)) continue;
+                    for (const pitch of note.pitches) {
+                        lowestNote = Math.min(lowestNote, pitch);
+                        highestNote = Math.max(highestNote, pitch);
+                    }
+                }
+            }
+        }
+        if (lowestNote > highestNote) {
+            lowestNote = instrument.envelopes[envelopeIndex].pitchStart;
+            highestNote = instrument.envelopes[envelopeIndex].pitchEnd;
+        }
+        
+        this._doc.record(new ChangePitchEnvelopeStart(this._doc, envelopeIndex, instrument.envelopes[envelopeIndex].pitchStart, lowestNote));
+        this._doc.record(new ChangePitchEnvelopeEnd(this._doc, envelopeIndex, instrument.envelopes[envelopeIndex].pitchEnd, highestNote));
     }
 
     public muteChannels(allChannels: boolean): void {

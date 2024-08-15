@@ -1106,6 +1106,7 @@ export class SongEditor {
         option({ value: "displayBrowserUrl" }, (_.displayURLInBrowserLabel)),
         option({ value: "displayVolumeBar" }, (_.showPlaybackBarLabel)),
         option({ value: "showOscilloscope" }, (_.showOscilloscopeLabel)),
+        option({ value: "showEnvReorderButtons" }, (_.showEnvReorderButtonsLabel)),
         option({ value: "language" }, (_.setLanguageLabel)),
         option({ value: "layout" }, (_.setLayoutLabel)),
         option({ value: "colorTheme" }, (_.setThemeLabel)),
@@ -1671,7 +1672,14 @@ export class SongEditor {
         "Customize Instrument",
     );
     */
-    private readonly _addEnvelopeButton: HTMLButtonElement = button({ type: "button", class: "add-envelope" });
+    private readonly _addEnvelopeButton: HTMLButtonElement = button({ type: "button", class: "add-envelope", title: _.addEnvelopeLabel});
+    private readonly _addPasteEnvelopeButton: HTMLButtonElement = button({ type: "button", class: "envelope-button", title: _.addCopiedEnvelopeLabel, style: "margin-right: 2px;" },
+        SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 2%; top: 38%; margin-top: -0.75em; pointer-events: none;", width: "2em", height: "2em", viewBox: "0 0 26 26" }, [
+            SVG.path({ d: "M 8 18 L 6 18 L 6 5 L 17 5 L 17 7 M 9 8 L 16 8 L 20 12 L 20 16 L 14 16 L 14 22 L 9 22 z", stroke: "currentColor", fill: "none" }),
+            SVG.path({ d: "M 9 3 L 14 3 L 14 6 L 9 6 L 9 3 z M 16 8 L 20 12 L 16 12 L 16 8 z", fill: "currentColor" }),
+            SVG.path({ d: "M 15 19 L 15 20 L 17 20 L 17 22 L 18 22 L 18 20 L 20 20 L 20 19 L 18 19 L 18 17 L 17 17 L 17 19 L 15 19 z", fill: "currentColor" }),
+        ]),
+    );
     private readonly _customInstrumentSettingsGroup: HTMLDivElement = div({ class: "editor-controls" },
         this._panSliderRow,
         this._panDropdownGroup,
@@ -1743,6 +1751,7 @@ export class SongEditor {
         div({ style: `padding: 2px 0; margin-left: 2em; display: flex; align-items: center;` },
             span({ style: `flex-grow: 1; text-align: center;` }, span({ class: "tip", onclick: () => this._openPrompt("envelopes") }, span(_.envelopesLabel))),
             this._envelopeDropdown,
+            this._addPasteEnvelopeButton,
             this._addEnvelopeButton,
         ),
         this._envelopeDropdownGroup,
@@ -2112,7 +2121,7 @@ export class SongEditor {
 				span({ class: "tip", style: "height:1em; font-size: small; white-space: nowrap;", onclick: () => this._openPrompt("plotterTimeRange") }, _.timeRangeLabel),
 				div({ style: "color: " + ColorConfig.secondaryText + "; margin-top: -3px;" }, plotterTimeRangeInputBox),
 			));
-            const envelopeSpeedSlider: SliderNoParse = new SliderNoParse(input({ style: "margin: 0;", type: "range", min: Config.perEnvelopeSpeedMin, max: Config.perEnvelopeSpeedMax, value: "1", step: "0.25" }), this._doc, (oldValue: number, newValue: number) => new ChangeDrumsetEnvelopeSpeed(this._doc, i, oldValue, newValue), false);
+            const envelopeSpeedSlider: SliderNoParse = new SliderNoParse(input({ style: "margin: 0;", type: "range", min: Config.perEnvelopeSpeedMin, max: Config.perEnvelopeSpeedMax, value: "1", step: "0.25" }), this._doc, (oldValue: number, newValue: number, forceUpdate: boolean = false) => new ChangeDrumsetEnvelopeSpeed(this._doc, i, oldValue, newValue, forceUpdate), false);
             const envelopeSpeedInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "drumsetPerEnvelopeSpeedInputBox", type: "number", step: "0.001", min: Config.perEnvelopeSpeedMin, max: Config.perEnvelopeSpeedMax, value: "1"});
 			const envelopeSpeedRow: HTMLDivElement = div({class: "selectRow dropFader"}, div({},
 				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("perEnvelopeSpeed")}, span(_.perEnvelopeSpeedLabel)),
@@ -2122,31 +2131,31 @@ export class SongEditor {
 			const discreteEnvelopeRow: HTMLDivElement = div({class: "selectRow dropFader"}, div({},
 				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("discreteEnvelope")}, span(_.discreteEnvelopeLabel))
 			), discreteEnvelopeToggle);
-            const lowerBoundSlider: SliderNoParse = new SliderNoParse(input({ style: "margin: 0;", type: "range", min: Config.lowerBoundMin, max: Config.lowerBoundMax, value: "0", step: "0.25" }), this._doc, (oldValue: number, newValue: number) => new ChangeDrumsetLowerBound(this._doc, i, oldValue, newValue), false);
+            const lowerBoundSlider: SliderNoParse = new SliderNoParse(input({ style: "margin: 0;", type: "range", min: Config.lowerBoundMin, max: Config.lowerBoundMax, value: "0", step: "0.25" }), this._doc, (oldValue: number, newValue: number, forceUpdate: boolean = false) => new ChangeDrumsetLowerBound(this._doc, i, oldValue, newValue, forceUpdate), false);
             const lowerBoundInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "drumsetLowerBoundInputBox", type: "number", step: "0.001", min: Config.lowerBoundMin, max: Config.lowerBoundMax, value: "0"});
 			const lowerBoundRow: HTMLDivElement = div({class: "selectRow dropFader"}, div({},
 				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeBounds")}, span(_.lowerBoundLabel)),
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, lowerBoundInputBox),
 			), lowerBoundSlider.container);
-            const upperBoundSlider: SliderNoParse = new SliderNoParse(input({ style: "margin: 0;", type: "range", min: Config.upperBoundMin, max: Config.upperBoundMax, value: "1", step: "0.25" }), this._doc, (oldValue: number, newValue: number) => new ChangeDrumsetUpperBound(this._doc, i, oldValue, newValue), false);
+            const upperBoundSlider: SliderNoParse = new SliderNoParse(input({ style: "margin: 0;", type: "range", min: Config.upperBoundMin, max: Config.upperBoundMax, value: "1", step: "0.25" }), this._doc, (oldValue: number, newValue: number, forceUpdate: boolean = false) => new ChangeDrumsetUpperBound(this._doc, i, oldValue, newValue, forceUpdate), false);
             const upperBoundInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "drumsetUpperBoundInputBox", type: "number", step: "0.001", min: Config.upperBoundMin, max: Config.upperBoundMax, value: "1"});
 			const upperBoundRow: HTMLDivElement = div({class: "selectRow dropFader"}, div({},
 				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeBounds")}, span(_.upperBoundLabel)),
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, upperBoundInputBox),
 			), upperBoundSlider.container);
-            const stepAmountSlider: SliderNoParse = new SliderNoParse(input({ style: "margin: 0;", type: "range", min: "0", max: Config.stairsStepAmountMax, value: "4", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeDrumsetStairsStepAmount(this._doc, i, oldValue, newValue), false);
-            const stepAmountInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "drumsetStairsStepAmountInputBox", type: "number", step: "1", min: "0", max: Config.stairsStepAmountMax, value: "4"});
+            const stepAmountSlider: SliderNoParse = new SliderNoParse(input({ style: "margin: 0;", type: "range", min: "1", max: Config.stairsStepAmountMax, value: "4", step: "1" }), this._doc, (oldValue: number, newValue: number, forceUpdate: boolean = false) => new ChangeDrumsetStairsStepAmount(this._doc, i, oldValue, newValue, forceUpdate), false);
+            const stepAmountInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "drumsetStairsStepAmountInputBox", type: "number", step: "1", min: "1", max: Config.stairsStepAmountMax, value: "4"});
 			const stepAmountRow: HTMLDivElement = div({class: "selectRow dropFader"}, div({},
 				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("stepAmount")}, span(_.stairsStepAmountLabel)),
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, stepAmountInputBox),
 			), stepAmountSlider.container);
-            const envelopeDelaySlider: SliderNoParse = new SliderNoParse(input({ style: "margin: 0;", type: "range", min: "0", max: Config.envelopeDelayMax, value: "0", step: "0.5" }), this._doc, (oldValue: number, newValue: number) => new ChangeDrumsetEnvelopeDelay(this._doc, i, oldValue, newValue), false);
+            const envelopeDelaySlider: SliderNoParse = new SliderNoParse(input({ style: "margin: 0;", type: "range", min: "0", max: Config.envelopeDelayMax, value: "0", step: "0.5" }), this._doc, (oldValue: number, newValue: number, forceUpdate: boolean = false) => new ChangeDrumsetEnvelopeDelay(this._doc, i, oldValue, newValue, forceUpdate), false);
             const envelopeDelayInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "drumsetEnvelopeDelayInputBox", type: "number", step: "0.01", min: "0", max: Config.envelopeDelayMax, value: "0"});
 			const envelopeDelayRow: HTMLDivElement = div({class: "selectRow dropFader"}, div({},
 				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeDelay")}, span(_.envelopeDelayLabel)),
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, envelopeDelayInputBox),
 			), envelopeDelaySlider.container);
-            const envelopePhaseSlider: SliderNoParse = new SliderNoParse(input({ style: "margin: 0;", type: "range", min: "0", max: Config.envelopePhaseMax, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeDrumsetEnvelopePosition(this._doc, i, oldValue, newValue), false);
+            const envelopePhaseSlider: SliderNoParse = new SliderNoParse(input({ style: "margin: 0;", type: "range", min: "0", max: Config.envelopePhaseMax, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number, forceUpdate: boolean = false) => new ChangeDrumsetEnvelopePosition(this._doc, i, oldValue, newValue, forceUpdate), false);
             const envelopePhaseInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "drumsetEnvelopePhaseInputBox", type: "number", step: "0.01", min: "0", max: Config.envelopePhaseMax, value: "0"});
 			const envelopePhaseRow: HTMLDivElement = div({class: "selectRow dropFader"}, div({},
 				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopePhase")}, span(_.envelopeStartingPointLabel)),
@@ -2187,14 +2196,26 @@ export class SongEditor {
                 this._doc.record(new ChangeDrumsetEnvelope(this._doc, i, envelopeSelect.selectedIndex));
             });
 
-            envelopeSpeedInputBox.addEventListener("input", () => { this._doc.record(new ChangeDrumsetEnvelopeSpeed(this._doc, i, instrument.drumsetEnvelopes[i].envelopeSpeed, Math.min(Config.perEnvelopeSpeedMax, Math.max(Config.perEnvelopeSpeedMin, +envelopeSpeedInputBox.value))))});
-            discreteEnvelopeToggle.addEventListener("input", () => { this._doc.record(new ChangeDrumsetDiscreteEnvelope(this._doc, i, discreteEnvelopeToggle.checked))});
-            lowerBoundInputBox.addEventListener("input", () => { this._doc.record(new ChangeDrumsetLowerBound(this._doc, i, instrument.drumsetEnvelopes[i].lowerBound, Math.min(Config.lowerBoundMax, Math.max(Config.lowerBoundMin, +lowerBoundInputBox.value))))});
-            upperBoundInputBox.addEventListener("input", () => { this._doc.record(new ChangeDrumsetUpperBound(this._doc, i, instrument.drumsetEnvelopes[i].upperBound, Math.min(Config.upperBoundMax, Math.max(Config.upperBoundMin, +upperBoundInputBox.value))))});
-            stepAmountInputBox.addEventListener("input", () => { this._doc.record(new ChangeDrumsetStairsStepAmount(this._doc, i, instrument.drumsetEnvelopes[i].stepAmount, Math.min(Config.stairsStepAmountMax, Math.max(0, +stepAmountInputBox.value))))});
-            envelopeDelayInputBox.addEventListener("input", () => { this._doc.record(new ChangeDrumsetEnvelopeDelay(this._doc, i, instrument.drumsetEnvelopes[i].delay, Math.min(Config.envelopeDelayMax, Math.max(0, +envelopeDelayInputBox.value))))});
-            envelopePhaseInputBox.addEventListener("input", () => { this._doc.record(new ChangeDrumsetEnvelopePosition(this._doc, i, instrument.drumsetEnvelopes[i].phase, Math.min(Config.envelopePhaseMax, Math.max(0, +envelopePhaseInputBox.value))))});
+            let lastChange: Change | null = null;
+            function pseudoChange(change: Change): void {
+                lastChange = change;
+            }
+
+            envelopeSpeedInputBox.addEventListener("input", () => { pseudoChange(new ChangeDrumsetEnvelopeSpeed(this._doc, i, instrument.drumsetEnvelopes[i].envelopeSpeed, Math.min(Config.perEnvelopeSpeedMax, Math.max(Config.perEnvelopeSpeedMin, +envelopeSpeedInputBox.value))))});
+            discreteEnvelopeToggle.addEventListener("input", () => { pseudoChange(new ChangeDrumsetDiscreteEnvelope(this._doc, i, discreteEnvelopeToggle.checked))});
+            lowerBoundInputBox.addEventListener("input", () => { pseudoChange(new ChangeDrumsetLowerBound(this._doc, i, instrument.drumsetEnvelopes[i].lowerBound, Math.min(Config.lowerBoundMax, Math.max(Config.lowerBoundMin, +lowerBoundInputBox.value))))});
+            upperBoundInputBox.addEventListener("input", () => { pseudoChange(new ChangeDrumsetUpperBound(this._doc, i, instrument.drumsetEnvelopes[i].upperBound, Math.min(Config.upperBoundMax, Math.max(Config.upperBoundMin, +upperBoundInputBox.value))))});
+            stepAmountInputBox.addEventListener("input", () => { pseudoChange(new ChangeDrumsetStairsStepAmount(this._doc, i, instrument.drumsetEnvelopes[i].stepAmount, Math.min(Config.stairsStepAmountMax, Math.max(1, +stepAmountInputBox.value))))});
+            envelopeDelayInputBox.addEventListener("input", () => { pseudoChange(new ChangeDrumsetEnvelopeDelay(this._doc, i, instrument.drumsetEnvelopes[i].delay, Math.min(Config.envelopeDelayMax, Math.max(0, +envelopeDelayInputBox.value))))});
+            envelopePhaseInputBox.addEventListener("input", () => { pseudoChange(new ChangeDrumsetEnvelopePosition(this._doc, i, instrument.drumsetEnvelopes[i].phase, Math.min(Config.envelopePhaseMax, Math.max(0, +envelopePhaseInputBox.value))))});
             plotterTimeRangeInputBox.addEventListener("input", () => { this._changeDrumsetTimeRange(i, envelopePlotter.range, +(plotterTimeRangeInputBox.value))});
+            envelopeSpeedInputBox.addEventListener("change", () => { if (lastChange != null) this._doc.record(lastChange)});
+            discreteEnvelopeToggle.addEventListener("change", () => { if (lastChange != null) this._doc.record(lastChange)});
+            lowerBoundInputBox.addEventListener("change", () => { if (lastChange != null) this._doc.record(lastChange)});
+            upperBoundInputBox.addEventListener("change", () => { if (lastChange != null) this._doc.record(lastChange)});
+            stepAmountInputBox.addEventListener("change", () => { if (lastChange != null) this._doc.record(lastChange)});
+            envelopeDelayInputBox.addEventListener("change", () => { if (lastChange != null) this._doc.record(lastChange)});
+            envelopePhaseInputBox.addEventListener("change", () => { if (lastChange != null) this._doc.record(lastChange)});
 
             this._drumsetSpectrumEditors[i] = spectrumEditor;
             this._drumsetEnvelopeSelects[i] = envelopeSelect;
@@ -2393,6 +2414,7 @@ export class SongEditor {
         this._harmonicsEditor.container.addEventListener("mousedown", this.refocusStage);
         this._tempoStepper.addEventListener("keydown", this._tempoStepperCaptureNumberKeys, false);
         this._addEnvelopeButton.addEventListener("click", this._addNewEnvelope);
+        this._addPasteEnvelopeButton.addEventListener("click", this._addCopiedEnvelope);
         this._patternArea.addEventListener("contextmenu", this._disableCtrlContextMenu);
         this._trackArea.addEventListener("contextmenu", this._disableCtrlContextMenu);
         this.mainLayer.addEventListener("keydown", this._whenKeyPressed);
@@ -2968,6 +2990,7 @@ export class SongEditor {
             (prefs.displayBrowserUrl ? "✓ " : "　") + (_.displayURLInBrowserLabel),
             (prefs.displayVolumeBar ? "✓ " : "　") + (_.showPlaybackBarLabel),
             (prefs.showOscilloscope ? "✓ " : "　") + (_.showOscilloscopeLabel),
+            (prefs.showEnvReorderButtons ? "✓ " : "　") + (_.showEnvReorderButtonsLabel),
             (_.setLanguageLabel),
             (_.setLayoutLabel),
             (_.setThemeLabel),
@@ -4242,6 +4265,7 @@ export class SongEditor {
         this._percussionBox.checked = instrument.percussion ? true : false;
         this._songDetuneEffectedBox.checked = instrument.songDetuneEffected ? true : false;
         this._addEnvelopeButton.disabled = (instrument.envelopeCount >= Config.maxEnvelopeCount);
+        this._addPasteEnvelopeButton.disabled = (instrument.envelopeCount >= Config.maxEnvelopeCount);
 
         this._volumeSlider.updateValue(prefs.volume);
         this._oscilloscopeScaleSlider.updateValue(prefs.oscilloscopeScale);
@@ -5771,6 +5795,14 @@ export class SongEditor {
         this._doc.addedEnvelope = true;
     }
 
+    private _addCopiedEnvelope = (): void => {
+        let instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
+		const storedEnvelope: any = JSON.parse(String(window.localStorage.getItem("envelopeCopy")));
+		this._doc.record(new ChangeAddEnvelope(this._doc, storedEnvelope, instrument.envelopes[instrument.envelopeCount]));
+        this.refocusStage();
+        this._doc.addedEnvelope = true;
+    }
+
     private _zoomIn = (): void => {
         this._doc.prefs.visibleOctaves = Math.max(1, this._doc.prefs.visibleOctaves - 1);
         this._doc.prefs.save();
@@ -5937,6 +5969,9 @@ export class SongEditor {
                 break;
             case "showOscilloscope":
                 this._doc.prefs.showOscilloscope = !this._doc.prefs.showOscilloscope;
+                break;
+            case "showEnvReorderButtons":
+                this._doc.prefs.showEnvReorderButtons = !this._doc.prefs.showEnvReorderButtons;
                 break;
             case "language":
                 this._openPrompt("language");

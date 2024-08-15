@@ -587,6 +587,15 @@ document.head.appendChild(HTML.style({ type: "text/css" }, `
 	visibility: hidden;
 }
 
+.beepboxEditor .envelope-button {
+	width: var(--button-size);
+	flex-shrink: 0;
+	flex-grow: 0;
+}
+.beepboxEditor .envelope-button:disabled {
+	visibility: hidden;
+}
+
 .beepboxEditor .menu.file::before {
 	content: "";
 	flex-shrink: 0;

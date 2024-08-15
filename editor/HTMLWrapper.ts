@@ -81,7 +81,7 @@ export class SliderNoParse {
 	private _oldValue: number = 0;
 	public container: HTMLSpanElement;
 
-	constructor(public readonly input: HTMLInputElement, private readonly _doc: SongDocument, private readonly _getChange: ((oldValue: number, newValue: number) => Change) | null, midTick: boolean) {
+	constructor(public readonly input: HTMLInputElement, private readonly _doc: SongDocument, private readonly _getChange: ((oldValue: number, newValue: number, forceUpdate: boolean) => Change) | null, midTick: boolean) {
 		// A container is created around the input to allow for spec-compliant pseudo css classes (e.g ::before and ::after, which must be added to containers, not the input itself)
 		this.container = (midTick) ? span({ class: "midTick", style: "position: sticky; width: 61.5%;" }, input) : span({ style: "position: sticky;" }, input);
 		input.addEventListener("input", this._whenInput);
@@ -97,7 +97,7 @@ export class SliderNoParse {
 		const continuingProspectiveChange: boolean = this._doc.lastChangeWas(this._change);
 		if (!continuingProspectiveChange) this._oldValue = this._value;
 		if (this._getChange != null) {
-			this._change = this._getChange(this._oldValue, Number(this.input.value));
+			this._change = this._getChange(this._oldValue, Number(this.input.value), true);
 			this._doc.setProspectiveChange(this._change);
 		}
 	};

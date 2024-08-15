@@ -1,6 +1,6 @@
 // Copyright (c) 2012-2022 John Nesky and contributing authors, distributed under the MIT license, see accompanying the LICENSE.md file.
 
-import { Algorithm, Dictionary, FilterType, SustainType, InstrumentType, EffectType, AutomationTarget, Config, effectsIncludeDistortion, effectsIncludeBitcrusher } from "../synth/SynthConfig";
+import { Algorithm, Dictionary, FilterType, SustainType, InstrumentType, EffectType, AutomationTarget, Config, effectsIncludeDistortion, effectsIncludeBitcrusher, effectsIncludeChorus, effectsIncludeDetune, effectsIncludeNoteFilter, effectsIncludePitchShift, effectsIncludeReshaper, effectsIncludeReverb, effectsIncludeVibrato } from "../synth/SynthConfig";
 import { NotePin, Note, makeNotePin, Pattern, FilterSettings, FilterControlPoint, SpectrumWave, HarmonicsWave, Instrument, Channel, Song, Synth, convertChipWaveToCustomChip, EnvelopeSettings, DrumsetEnvelopeSettings } from "../synth/synth";
 import { Preset, PresetCategory, EditorConfig } from "./EditorConfig";
 import { Change, ChangeGroup, ChangeSequence, UndoableChange } from "./Change";
@@ -2549,10 +2549,10 @@ export class ChangePerEnvelopeSpeed extends Change {
 }
 
 export class ChangeDrumsetEnvelopeSpeed extends Change {
-    constructor(doc: SongDocument, drumIndex: number, oldValue: number, newValue: number) {
+    constructor(doc: SongDocument, drumIndex: number, oldValue: number, newValue: number, forceUpdate: boolean = false) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        if (oldValue != newValue) {
+        if (forceUpdate || oldValue != newValue) {
             instrument.drumsetEnvelopes[drumIndex].envelopeSpeed = newValue;
             instrument.preset = instrument.type;
             doc.notifier.changed();
@@ -2603,10 +2603,10 @@ export class ChangeLowerBound extends Change {
 }
 
 export class ChangeDrumsetLowerBound extends Change {
-    constructor(doc: SongDocument, drumIndex: number, oldValue: number, newValue: number) {
+    constructor(doc: SongDocument, drumIndex: number, oldValue: number, newValue: number, forceUpdate: boolean = false) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        if (oldValue != newValue) {
+        if (forceUpdate || oldValue != newValue) {
             instrument.drumsetEnvelopes[drumIndex].lowerBound = newValue;
             instrument.preset = instrument.type;
             doc.notifier.changed();
@@ -2629,10 +2629,10 @@ export class ChangeUpperBound extends Change {
 }
 
 export class ChangeDrumsetUpperBound extends Change {
-    constructor(doc: SongDocument, drumIndex: number, oldValue: number, newValue: number) {
+    constructor(doc: SongDocument, drumIndex: number, oldValue: number, newValue: number, forceUpdate: boolean = false) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        if (oldValue != newValue) {
+        if (forceUpdate || oldValue != newValue) {
             instrument.drumsetEnvelopes[drumIndex].upperBound = newValue;
             instrument.preset = instrument.type;
             doc.notifier.changed();
@@ -2655,10 +2655,10 @@ export class ChangeStairsStepAmount extends Change {
 }
 
 export class ChangeDrumsetStairsStepAmount extends Change {
-    constructor(doc: SongDocument, drumIndex: number, oldValue: number, newValue: number) {
+    constructor(doc: SongDocument, drumIndex: number, oldValue: number, newValue: number, forceUpdate: boolean = false) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        if (oldValue != newValue) {
+        if (forceUpdate || oldValue != newValue) {
             instrument.drumsetEnvelopes[drumIndex].stepAmount = newValue;
             instrument.preset = instrument.type;
             doc.notifier.changed();
@@ -2681,10 +2681,10 @@ export class ChangeEnvelopeDelay extends Change {
 }
 
 export class ChangeDrumsetEnvelopeDelay extends Change {
-    constructor(doc: SongDocument, drumIndex: number, oldValue: number, newValue: number) {
+    constructor(doc: SongDocument, drumIndex: number, oldValue: number, newValue: number, forceUpdate: boolean = false) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        if (oldValue != newValue) {
+        if (forceUpdate || oldValue != newValue) {
             instrument.drumsetEnvelopes[drumIndex].delay = newValue;
             instrument.preset = instrument.type;
             doc.notifier.changed();
@@ -2767,10 +2767,10 @@ export class ChangeEnvelopePosition extends Change {
 }
 
 export class ChangeDrumsetEnvelopePosition extends Change {
-    constructor(doc: SongDocument, drumIndex: number, oldValue: number, newValue: number) {
+    constructor(doc: SongDocument, drumIndex: number, oldValue: number, newValue: number, forceUpdate: boolean = false) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        if (oldValue != newValue) {
+        if (forceUpdate || oldValue != newValue) {
             instrument.drumsetEnvelopes[drumIndex].phase = newValue;
             instrument.preset = instrument.type;
             doc.notifier.changed();
@@ -5676,11 +5676,93 @@ export class ChangeNoiseSeed extends Change {
 }*/
 
 export class ChangeAddEnvelope extends Change {
-    constructor(doc: SongDocument) {
+    constructor(doc: SongDocument, storedEnvelope?: any, envelopeSettings?: EnvelopeSettings) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
         let drumPitchEnvBoolean: boolean = instrument.isNoiseInstrument;
         instrument.addEnvelope(0, 0, 0, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
+        if (storedEnvelope && envelopeSettings) {
+            envelopeSettings.fromJsonObject(storedEnvelope, instrument);
+        }
+        instrument.preset = instrument.type;
+        doc.notifier.changed();
+        this._didSomething();
+    }
+}
+
+export class RandomEnvelope extends Change {
+    constructor(doc: SongDocument, envelopeIndex: number, instrument: Instrument) {
+        super();
+        const instEnv = instrument.envelopes[envelopeIndex];
+        const randomSpeed: number[] = [0.125, 0.25, 0.333, 0.5, 0.5, 0.667, 0.75, 1, 1, 1, 1, 1.333, 1.5, 1.75, 2, 2, 3, 4, 4, 6, 8, 10, 12, 14, 16];
+        const randomLowerBounds: number[] = [0, 0, 0, 0, 0, 0, 0, 0.5, 1,   1, 0.5, 2];
+        const randomUpperBounds: number[] = [1, 1, 1, 1, 1, 1, 0.5, 0, 0, 0.5,   1, 0];
+        const randomStepAmounts: number[] = [2, 2, 3, 4, 4, 4, 6, 8, 12, 16];
+        let sameRandomNumber: number = Math.floor(Math.random() * randomLowerBounds.length);
+        // Push target indices into an array. Note volume is by default always a target so start with 1.
+        const availableTargets: number[] = [1];
+        if (instrument.type == InstrumentType.pwm || instrument.type == InstrumentType.supersaw) availableTargets.push(2);
+        if (instrument.type == InstrumentType.pickedString) availableTargets.push(3);
+        if (instrument.type != InstrumentType.drumset && instrument.type != InstrumentType.fm && instrument.type != InstrumentType.advfm && instrument.type != InstrumentType.supersaw) availableTargets.push(4);
+        let pwmPossible: boolean = false;
+        if (instrument.type == InstrumentType.fm || instrument.type == InstrumentType.advfm) {
+            availableTargets.push(5, 6, 7);
+            for (let i = 0; i < Config.operatorCount+2; i++) {
+                if (instrument.operators[i].waveform == Config.operatorWaves.dictionary["pulse width"].index) pwmPossible = true;
+            }
+            if (pwmPossible) availableTargets.push(16);
+        }
+        if (instrument.type == InstrumentType.supersaw) availableTargets.push(13, 14, 15);
+        if (effectsIncludePitchShift(instrument.effects)) availableTargets.push(8);
+        if (effectsIncludeDetune(instrument.effects)) availableTargets.push(9);
+        if (effectsIncludeVibrato(instrument.effects)) availableTargets.push(10);
+        if (effectsIncludeNoteFilter(instrument.effects)) availableTargets.push(11, 12);
+        if (effectsIncludeDistortion(instrument.effects)) availableTargets.push(17);
+        if (effectsIncludeBitcrusher(instrument.effects)) availableTargets.push(18, 19);
+        if (effectsIncludeChorus(instrument.effects)) availableTargets.push(20);
+        if (effectsIncludeReverb(instrument.effects)) availableTargets.push(21);
+        if (effectsIncludeReshaper(instrument.effects)) availableTargets.push(22);
+        // Variable to dynamically change the random number depending on the rolled envelope.
+        let randomIndex: number[] = [];
+        // Declare this random number early so it can be used for randomIndex.
+        let randomTarget: number = availableTargets[Math.floor(Math.random() * availableTargets.length)];
+        if (randomTarget == 5 || randomTarget == 6) {
+            if (instrument.type == InstrumentType.fm) randomIndex = [0, 1, 2, 3];
+            else if (instrument.type == InstrumentType.advfm) randomIndex = [0, 1, 2, 3, 4, 5];
+        } else if (randomTarget == 16) {
+            for (let i = 0; i < Config.operatorCount+2; i++) {
+                if (instrument.operators[i].waveform == Config.operatorWaves.dictionary["pulse width"].index) randomIndex.push(i);
+            }
+        } else if (randomTarget == 12) {
+            for (let i = 0; i < instrument.noteFilter.controlPointCount; i++) {
+                randomIndex.push(i);
+            }
+        }
+        // Set early for making sure special-case settings aren't stored in envelopes that can't use them.
+        let randomEnvelope: number = Math.floor(Math.random() * (Config.envelopes.length - 1) + 1);
+        instEnv.target = randomTarget;
+        if (randomTarget == 5 || randomTarget == 6 || randomTarget == 12 || randomTarget == 16) instEnv.index = randomIndex[Math.floor(Math.random() * randomIndex.length)];
+        else instEnv.index = 0;
+        instEnv.envelope = randomEnvelope;
+        instEnv.envelopeSpeed = randomSpeed[Math.floor(Math.random() * randomSpeed.length)];
+        instEnv.lowerBound = randomLowerBounds[sameRandomNumber];
+        instEnv.upperBound = randomUpperBounds[sameRandomNumber];
+        if (randomEnvelope == Config.envelopes.dictionary["stairs"].index || randomEnvelope == Config.envelopes.dictionary["looped stairs"].index) {
+            instEnv.stepAmount = randomStepAmounts[Math.floor(Math.random() * randomStepAmounts.length)];
+        } else {
+            instEnv.stepAmount = 4;
+        }
+        if (randomEnvelope == Config.envelopes.dictionary["pitch"].index) {
+            instEnv.pitchStart = Math.floor(Math.random() * (instrument.isNoiseInstrument ? Config.drumCount : Config.maxPitch));
+            instEnv.pitchEnd = Math.floor(Math.random() * (instrument.isNoiseInstrument ? Config.drumCount : Config.maxPitch));
+            instEnv.pitchAmplify = Math.round(Math.random() * 4) == 4 ? true : false;
+            if (!instEnv.pitchAmplify) instEnv.pitchBounce = Math.round(Math.random() * 3) == 3 ? true : false;
+        } else {
+            instEnv.pitchStart = instrument.isNoiseInstrument ? 1 : 0;
+            instEnv.pitchEnd = instrument.isNoiseInstrument ? Config.drumCount : Config.maxPitch;
+            instEnv.pitchAmplify = false;
+            instEnv.pitchBounce = false;
+        }
         instrument.preset = instrument.type;
         doc.notifier.changed();
         this._didSomething();
