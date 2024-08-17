@@ -66,7 +66,6 @@ export const enum EnvelopeType {
     loopStairs,
     pitch,
     LFO, // to later replace tremolo
-    dogebox2Blip,
     dogebox2Clap,
     dogebox2Spike,
 }
@@ -684,9 +683,8 @@ export class Config {
         { name: "modbox blip",    type: EnvelopeType.modboxBlip,    speed:  4   },
         { name: "modbox click",   type: EnvelopeType.modboxClick,   speed:  5   },
         { name: "modbox bow",     type: EnvelopeType.modboxBow,     speed:  90  },
-      //{ name: "dogebox2 blip",  type: EnvelopeType.dogebox2Blip,  speed:  16  },
-      //{ name: "dogebox2 clap",  type: EnvelopeType.dogebox2Clap,  speed:  64  },
-      //{ name: "dogebox2 spike", type: EnvelopeType.dogebox2Spike, speed:  8   },
+        { name: "dogebox2 clap",  type: EnvelopeType.dogebox2Clap,  speed:  64  },
+        { name: "dogebox2 spike", type: EnvelopeType.dogebox2Spike, speed:  8   },
         { name: "wibble",         type: EnvelopeType.wibble,        speed:  12  },
         { name: "linear",         type: EnvelopeType.linear,        speed:  32  },
         { name: "rise",           type: EnvelopeType.rise,          speed:  32  },
@@ -703,15 +701,14 @@ export class Config {
         { name: "twang",          type: EnvelopeType.twang,         speed:  8   },
         { name: "swell",          type: EnvelopeType.swell,         speed:  8   },
         { name: "tremolo",        type: EnvelopeType.tremolo,       speed:  2   },
-      //{ name: "LFO",            type: EnvelopeType.LFO,           speed:  2   },
+        { name: "LFO",            type: EnvelopeType.LFO,           speed:  2   },
         { name: "decay",          type: EnvelopeType.decay,         speed:  2   },
         { name: "modbox trill",   type: EnvelopeType.modboxTrill,   speed:  4   },
         { name: "modbox blip",    type: EnvelopeType.modboxBlip,    speed:  4   },
         { name: "modbox click",   type: EnvelopeType.modboxClick,   speed:  5   },
         { name: "modbox bow",     type: EnvelopeType.modboxBow,     speed:  90  },
-      //{ name: "dogebox2 blip",  type: EnvelopeType.dogebox2Blip,  speed:  16  },
-      //{ name: "dogebox2 clap",  type: EnvelopeType.dogebox2Clap,  speed:  64  },
-      //{ name: "dogebox2 spike", type: EnvelopeType.dogebox2Spike, speed:  8   },
+        { name: "dogebox2 clap",  type: EnvelopeType.dogebox2Clap,  speed:  16  },
+        { name: "dogebox2 spike", type: EnvelopeType.dogebox2Spike, speed:  2   },
         { name: "wibble",         type: EnvelopeType.wibble,        speed:  12  },
         { name: "linear",         type: EnvelopeType.linear,        speed:  32  },
         { name: "rise",           type: EnvelopeType.rise,          speed:  32  },
@@ -721,15 +718,24 @@ export class Config {
         { name: "looped stairs",  type: EnvelopeType.loopStairs,    speed: -1  },
     ]);
 
-    public static readonly perEnvelopeSpeedMin: number = 0;
-    public static readonly perEnvelopeSpeedMax: number = 16;
-    public static readonly lowerBoundMin: number = 0;
-    public static readonly lowerBoundMax: number = 8;
-    public static readonly upperBoundMin: number = 0;
-    public static readonly upperBoundMax: number = 8;
-    public static readonly stairsStepAmountMax: number = 64;
-    public static readonly envelopeDelayMax: number = 32;
-    public static readonly envelopePhaseMax: number = this.envelopeDelayMax * 2;
+    public static readonly perEnvelopeSpeedMin:       number = 0;
+    public static readonly perEnvelopeSpeedMax:       number = 16;
+    public static readonly lowerBoundMin:             number = 0;
+    public static readonly lowerBoundMax:             number = 8;
+    public static readonly upperBoundMin:             number = 0;
+    public static readonly upperBoundMax:             number = 8;
+    public static readonly stairsStepAmountMax:       number = 64;
+    public static readonly envelopeDelayMax:          number = 32;
+    public static readonly envelopePhaseMax:          number = this.envelopeDelayMax * 2;
+    public static readonly clapMirrorsMax:            number = 32;
+    public static readonly LFOShapeAmount:            number = 7 - 1;
+    public static readonly LFOAccelerationMin:        number = 0.25;
+    public static readonly LFOAccelerationMax:        number = 4;
+    public static readonly LFOTrapezoidRatioMin:      number = 0.5;
+    public static readonly LFOTrapezoidRatioMax:      number = 4;
+    public static readonly customLFOGridMaxWidth:     number = 6; // Temporary
+    public static readonly customLFOGridHeight:       number = 4; // Temporary
+    public static readonly transitioningDefaultShape: number = 0;
 
     public static readonly feedbacks: DictionaryArray<Feedback> = toNameMap([
         { name: "1⟲",         indices: [[1], [],  [],  [] ]},

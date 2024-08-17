@@ -543,6 +543,13 @@ export class TipPrompt implements Prompt {
 					p("Stair-based envelopes change values in 'steps', and using this option allows you to configure how many steps the envelope has."),
 				);
 			} break;
+			case "mirrorAmount": {
+				message = div(
+					h2("Amount of Mirrors"),
+					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously. This setting in specific is unique to Dogebox2's clap envelope."),
+					p("The 'clap' envelope is similar to twang or decay, but it loops around multiple times at the start. These loops are referred to as mirrors, and this setting changes how many loops- or mirrors- the envelope has."),
+				);
+			} break;
 			case "envelopeDelay": {
 				message = div(
 					h2("Envelope Delay"),
@@ -587,30 +594,47 @@ export class TipPrompt implements Prompt {
 			} break;
 			case "LFOEnvelope": {
 				message = div(
-					h2("LFO Envelope Type"),
-					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously. These settings apply specifically to the more-unique envelope type, LFO."),
-					p("The LFO envelope type is the upgrade to the previous tremolo envelope. An LFO is an envelope that continously loops a shape, and with this particular setting, you can change the shape of the LFO."),
+					h2("LFO Envelope Type: Shape"),
+					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously. These settings are specifically for the LFO envelope type."),
+					p("The LFO envelope type is the upgrade to the tremolo envelope type you may be familiar with from other BeepMods. LFOs are a type of envelope that continously loop a shape, and with this particular setting, you can change the shape of the LFO."),
 				);
 			} break;
-			case "LFOLoops": {
+			case "LFOAcceleration": {
 				message = div(
-					h2("LFO Envelope Type"),
-					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously. These settings apply specifically to the more-unique envelope type, LFO."),
-					p("The LFO envelope type is an envelope that continously loops a shape, and with this particular setting, you can toggle whether the LFO loops or not. Some LFO shapes may not have this."),
+					h2("LFO Envelope Type: Acceleration"),
+					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously. These settings are specifically for the LFO envelope type."),
+					p("This setting makes the LFO increase or decrease speed over time. When toggled, an input will appear where you can set the multiplier of the acceleration: Set it under 1 if you want the speed to decrease over time, or above 1 if you want the speed to increase over time."),
+				);
+			} break;
+			case "LFOLoopOnce": {
+				message = div(
+					h2("LFO Envelope Type: Loop Once?"),
+					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously. These settings are specifically for the LFO envelope type."),
+					p("This setting toggles whether the LFO continously loops its shape or if it only plays once."),
+				);
+			} break;
+			case "LFOIgnorance": {
+				message = div(
+					h2("LFO Envelope Type: Ignorance"),
+					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously. These settings are specifically for the LFO envelope type."),
+					p("By default, the LFO envelope will restart at the beginning of each note. If you wish to remove this behavior and make the envelope constant, enabling this toggle will ignore the note bounds, hence the toggle name, and the only time the note will continue to interact with when the LFO plays is if the envelope has 'delay'."),
 				);
 			} break;
 			case "LFOTrapezoidRatio": {
 				message = div(
-					h2("Trapezoid LFO Ratio"),
-					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously. These settings apply specifically to the more-unique envelope type, LFO."),
-					p("This LFO shape mimicks the appearence of a trapezoid, going up and down in increments and slopes. This setting changes the ratio of the trapezoid-shape, from nearly a triangle to a pulse."),
+					h2("Trapezoid Ratio"),
+					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously. This setting is only for the trapezoid LFO shape."),
+					p("This LFO shape mimicks the appearence of a trapezoid, going up and down in increments and slopes. This setting changes the ratio of the trapezoid's slopes, causing the shape to transform from a triangle at the lowest and a sloped-pulse at the highest."),
 				);
 			} break;
-			case "LFODoubleSine": {
+			case "customEnvelopeShape": {
 				message = div(
-					h2("Double Sine LFO"),
-					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously. These settings apply specifically to the more-unique envelope type, LFO."),
-					p("This LFO shape is shaped like a sine, with another sine being drawn using the previous sine. These two settings individually control the speed of both sines."),
+					h2("LFO Envelope Type: Custom LFO"),
+					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously. This setting is only for the custom LFO shape."),
+					p("The LFO envelope type has a special shape which has a basic system for creating your own envelopes. Two new settings are dedicated to this shape; The custom LFO grid, and the transitioning buttons."),
+					p("The custom LFO grid allows you to draw an envelope in steps. Drag the colored boxes around the grid and look at the envelope graph to see how each point in the grid interacts with the LFO's shape!"),
+					p("Once you have played with the grid, try the 'transitioning' buttons below the grid canvas. These buttons change how the LFO grid point above the button transitions to the next grid point. The icons on the button represent the current shape of the transition, and are by default curved, but they can be changed to be linear, instant, or even have the grid point be ignored."),
+					p("Play with these settings and see what you can make!")
 				);
 			} break;
 			case "usedInstrument": {

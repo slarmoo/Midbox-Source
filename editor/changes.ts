@@ -810,7 +810,6 @@ export class ChangeRandomGeneratedInstrument extends Change {
 
         const isNoise: boolean = doc.song.getChannelIsNoise(channelIdx);
         const instrument: Instrument = doc.song.channels[channelIdx].instruments[instrumentIdx];
-        let drumPitchEnvBoolean: boolean = instrument.isNoiseInstrument;
         instrument.effects = 1 << EffectType.panning; // disable all existing effects except panning, which should always be on.
         instrument.aliases = false;
         instrument.envelopeCount = 0;
@@ -906,7 +905,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "decelerate", weight: 2},
                         { item: "stairs", weight: 2},
                         { item: "looped stairs", weight: 2},
-                    ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
+                    ])].index);
                 }
             }
             if (Math.random() < 0.1) {
@@ -943,7 +942,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "decelerate", weight: 2},
                         { item: "stairs", weight: 2},
                         { item: "looped stairs", weight: 2},
-                ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
+                ])].index);
             } else {
                 instrument.noteFilter = instrument.noteFilter;
             }
@@ -969,7 +968,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "decelerate", weight: 2},
                         { item: "stairs", weight: 2},
                         { item: "looped stairs", weight: 2},
-                ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
+                ])].index);
             }
             if (Math.random() < 0.15) {
                 instrument.effects |= 1 << EffectType.bitcrusher;
@@ -994,7 +993,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "decelerate", weight: 2},
                     { item: "stairs", weight: 2},
                     { item: "looped stairs", weight: 2},
-                ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
+                ])].index);
                 if (Math.random() < 0.25) instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["freqCrusher"].index, 0, Config.envelopes.dictionary[selectWeightedRandom([
                     { item: "note size", weight: 2},
                     { item: "punch", weight: 2 },
@@ -1014,7 +1013,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "decelerate", weight: 2},
                     { item: "stairs", weight: 2},
                     { item: "looped stairs", weight: 2},
-                ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
+                ])].index);
             }
             if (Math.random() < 0.15) {
                 instrument.effects |= 1 << EffectType.chorus;
@@ -1038,7 +1037,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "decelerate", weight: 2},
                     { item: "stairs", weight: 2},
                     { item: "looped stairs", weight: 2},
-                ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
+                ])].index);
             }
             if (Math.random() < 0.1) {
                 instrument.echoSustain = selectCurvedDistribution(0, Config.echoSustainRange - 1, Config.echoSustainRange >> 1, 2);
@@ -1069,7 +1068,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "decelerate", weight: 2},
                     { item: "stairs", weight: 2},
                     { item: "looped stairs", weight: 2},
-                ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
+                ])].index);
             }
 
             if (type == InstrumentType.noise || type == InstrumentType.spectrum) {
@@ -1109,7 +1108,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "decelerate", weight: 2},
                         { item: "stairs", weight: 2},
                         { item: "looped stairs", weight: 2},
-                    ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
+                    ])].index);
                 }
             }
 
@@ -1301,7 +1300,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "decelerate", weight: 2},
                         { item: "stairs", weight: 2},
                         { item: "looped stairs", weight: 2},
-                    ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
+                    ])].index);
                 }
             }
             if (Math.random() < 0.25) {
@@ -1336,7 +1335,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "decelerate", weight: 2},
                     { item: "stairs", weight: 2},
                     { item: "looped stairs", weight: 2},
-                ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
+                ])].index);
             }
             if (Math.random() < 0.12) {
                 instrument.effects |= 1 << EffectType.bitcrusher;
@@ -1361,7 +1360,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "decelerate", weight: 2},
                     { item: "stairs", weight: 2},
                     { item: "looped stairs", weight: 2},
-                ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
+                ])].index);
                 if (Math.random() < 0.18) instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["freqCrusher"].index, 0, Config.envelopes.dictionary[selectWeightedRandom([
                     { item: "note size", weight: 2},
                     { item: "punch", weight: 2 },
@@ -1381,7 +1380,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "decelerate", weight: 2},
                     { item: "stairs", weight: 2},
                     { item: "looped stairs", weight: 2},
-                ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
+                ])].index);
             }
             if (effectsIncludeDistortion(instrument.effects) && Math.random() < 0.8 && (doc.prefs.noteFilterOnRandomization)) {
                 instrument.effects |= 1 << EffectType.noteFilter;
@@ -1414,7 +1413,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "linear", weight: 2},
                     { item: "rise", weight: 2},
                     { item: "looped stairs", weight: 2},
-                ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
+                ])].index);
             } else if (Math.random() < 0.5 && (doc.prefs.noteFilterOnRandomization)) {
                 instrument.effects |= 1 << EffectType.noteFilter;
                 applyFilterPoints(instrument.noteFilter, [
@@ -1439,7 +1438,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "decelerate", weight: 2},
                         { item: "stairs", weight: 2},
                         { item: "looped stairs", weight: 2},
-                ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
+                ])].index);
             } else {
                 instrument.noteFilter = instrument.noteFilter;
             }
@@ -1465,7 +1464,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "decelerate", weight: 2},
                     { item: "stairs", weight: 2},
                     { item: "looped stairs", weight: 2},
-                ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
+                ])].index);
             }
             if (Math.random() < 0.12) {
                 instrument.echoSustain = selectCurvedDistribution(0, Config.echoSustainRange - 1, Config.echoSustainRange >> 1, 2);
@@ -1496,7 +1495,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "decelerate", weight: 2},
                     { item: "stairs", weight: 2},
                     { item: "looped stairs", weight: 2},
-                ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
+                ])].index);
             }
 
             function normalize(harmonics: number[]): void {
@@ -1534,7 +1533,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "decelerate", weight: 2},
                         { item: "stairs", weight: 2},
                         { item: "looped stairs", weight: 2},
-                        ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
+                        ])].index);
                     }
                 } break;
                 case InstrumentType.supersaw: {
@@ -1562,7 +1561,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "decelerate", weight: 2},
                                 { item: "stairs", weight: 2},
                                 { item: "looped stairs", weight: 2},
-                        ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
+                        ])].index);
                     }
                     if (instrument.envelopeCount < Config.maxEnvelopeCount && Math.random() < 0.3) {
                         instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["supersawDynamism"].index, 0, Config.envelopes.dictionary[selectWeightedRandom([
@@ -1582,7 +1581,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "decelerate", weight: 2},
                                 { item: "stairs", weight: 2},
                                 { item: "looped stairs", weight: 2},
-                        ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
+                        ])].index);
                     }
                     if (instrument.envelopeCount < Config.maxEnvelopeCount && Math.random() < 0.3) {
                         instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["supersawShape"].index, 0, Config.envelopes.dictionary[selectWeightedRandom([
@@ -1603,7 +1602,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "decelerate", weight: 2},
                                 { item: "stairs", weight: 2},
                                 { item: "looped stairs", weight: 2},
-                        ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
+                        ])].index);
                     }
                     if (instrument.envelopeCount < Config.maxEnvelopeCount && Math.random() < 0.3) {
                         instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["supersawSpread"].index, 0, Config.envelopes.dictionary[selectWeightedRandom([
@@ -1623,7 +1622,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "decelerate", weight: 2},
                                 { item: "stairs", weight: 2},
                                 { item: "looped stairs", weight: 2},
-                        ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
+                        ])].index);
                     }
                 } break;
                 case InstrumentType.pickedString:
@@ -1771,7 +1770,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "decelerate", weight: 2},
                                 { item: "stairs", weight: 2},
                                 { item: "looped stairs", weight: 2},
-                            ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
+                            ])].index);
                             instrument.operators[i].waveform = Config.operatorWaves.dictionary[selectWeightedRandom([
                                 { item: "sine", weight: 3 },
                                 { item: "triangle", weight: 3 },
@@ -1840,7 +1839,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "decelerate", weight: 2},
                                 { item: "stairs", weight: 2},
                                 { item: "looped stairs", weight: 2},
-                            ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
+                            ])].index);
                         }
                     }
                     instrument.feedbackAmplitude = (Math.pow(Math.random(), 3) * Config.operatorAmplitudeMax) | 0;
@@ -1863,7 +1862,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "decelerate", weight: 2},
                                 { item: "stairs", weight: 2},
                                 { item: "looped stairs", weight: 2},
-                        ])].index, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
+                        ])].index);
                     }
                 } break;
                 case InstrumentType.customChipWave: {
@@ -2798,6 +2797,32 @@ export class ChangeDrumsetMeasurementType extends Change {
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
         if (oldValue != newValue) {
             instrument.drumsetEnvelopes[drumIndex].measurementType = newValue;
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
+export class ChangeClapMirrorAmount extends Change {
+    constructor(doc: SongDocument, envelopeIndex: number, oldValue: number, newValue: number) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        if (oldValue != newValue) {
+            instrument.envelopes[envelopeIndex].mirrorAmount = newValue;
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
+export class ChangeDrumsetClapMirrorAmount extends Change {
+    constructor(doc: SongDocument, drumIndex: number, oldValue: number, newValue: number, forceUpdate: boolean = false) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        if (forceUpdate || oldValue != newValue) {
+            instrument.drumsetEnvelopes[drumIndex].mirrorAmount = newValue;
             instrument.preset = instrument.type;
             doc.notifier.changed();
             this._didSomething();
@@ -5679,8 +5704,7 @@ export class ChangeAddEnvelope extends Change {
     constructor(doc: SongDocument, storedEnvelope?: any, envelopeSettings?: EnvelopeSettings) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        let drumPitchEnvBoolean: boolean = instrument.isNoiseInstrument;
-        instrument.addEnvelope(0, 0, 0, 1, false, 0, 1, 4, 0, drumPitchEnvBoolean ? 1 : 0, drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, false, false, 0, true);
+        instrument.addEnvelope(0, 0, 0);
         if (storedEnvelope && envelopeSettings) {
             envelopeSettings.fromJsonObject(storedEnvelope, instrument);
         }
@@ -5698,6 +5722,7 @@ export class RandomEnvelope extends Change {
         const randomLowerBounds: number[] = [0, 0, 0, 0, 0, 0, 0, 0.5, 1,   1, 0.5, 2];
         const randomUpperBounds: number[] = [1, 1, 1, 1, 1, 1, 0.5, 0, 0, 0.5,   1, 0];
         const randomStepAmounts: number[] = [2, 2, 3, 4, 4, 4, 6, 8, 12, 16];
+        const randomMirrorAmounts: number[] = [2, 3, 3, 4, 5, 5, 5, 5, 7, 9, 12, 16, 20];
         let sameRandomNumber: number = Math.floor(Math.random() * randomLowerBounds.length);
         // Push target indices into an array. Note volume is by default always a target so start with 1.
         const availableTargets: number[] = [1];
@@ -5763,6 +5788,11 @@ export class RandomEnvelope extends Change {
             instEnv.pitchAmplify = false;
             instEnv.pitchBounce = false;
         }
+        if (randomEnvelope == Config.envelopes.dictionary["dogebox2 clap"].index) {
+            instEnv.mirrorAmount = randomMirrorAmounts[Math.floor(Math.random() * randomMirrorAmounts.length)];
+        } else {
+            instEnv.mirrorAmount = 5;
+        }
         instrument.preset = instrument.type;
         doc.notifier.changed();
         this._didSomething();
@@ -5775,21 +5805,25 @@ export class ChangeRemoveEnvelope extends Change {
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
         instrument.envelopeCount--;
         for (let i: number = index; i < instrument.envelopeCount; i++) {
-            instrument.envelopes[i].target = instrument.envelopes[i + 1].target;
-            instrument.envelopes[i].index = instrument.envelopes[i + 1].index;
-            instrument.envelopes[i].envelope = instrument.envelopes[i + 1].envelope;
-            instrument.envelopes[i].envelopeSpeed = instrument.envelopes[i + 1].envelopeSpeed;
-            instrument.envelopes[i].discrete = instrument.envelopes[i + 1].discrete;
-            instrument.envelopes[i].lowerBound = instrument.envelopes[i + 1].lowerBound;
-            instrument.envelopes[i].upperBound = instrument.envelopes[i + 1].upperBound;
-            instrument.envelopes[i].stepAmount = instrument.envelopes[i + 1].stepAmount;
-            instrument.envelopes[i].delay = instrument.envelopes[i + 1].delay;
-            instrument.envelopes[i].pitchStart = instrument.envelopes[i + 1].pitchStart;
-            instrument.envelopes[i].pitchEnd = instrument.envelopes[i + 1].pitchEnd;
-            instrument.envelopes[i].pitchAmplify = instrument.envelopes[i + 1].pitchAmplify;
-            instrument.envelopes[i].pitchBounce = instrument.envelopes[i + 1].pitchBounce;
-            instrument.envelopes[i].phase = instrument.envelopes[i + 1].phase;
-            instrument.envelopes[i].measurementType = instrument.envelopes[i + 1].measurementType;
+            const instEnv = instrument.envelopes[i];
+            const nextEnv = instrument.envelopes[i + 1];
+            instEnv.target = nextEnv.target;
+            instEnv.index = nextEnv.index;
+            instEnv.envelope = nextEnv.envelope;
+            instEnv.envelopeSpeed = nextEnv.envelopeSpeed;
+            instEnv.discrete = nextEnv.discrete;
+            instEnv.lowerBound = nextEnv.lowerBound;
+            instEnv.upperBound = nextEnv.upperBound;
+            instEnv.stepAmount = nextEnv.stepAmount;
+            instEnv.delay = nextEnv.delay;
+            instEnv.pitchStart = nextEnv.pitchStart;
+            instEnv.pitchEnd = nextEnv.pitchEnd;
+            instEnv.pitchAmplify = nextEnv.pitchAmplify;
+            instEnv.pitchBounce = nextEnv.pitchBounce;
+            instEnv.phase = nextEnv.phase;
+            instEnv.measurementType = nextEnv.measurementType;
+            instEnv.mirrorAmount = nextEnv.mirrorAmount;
+            instEnv.LFOSettings = nextEnv.LFOSettings;
         }
         // TODO: Shift any envelopes that were targeting other envelope indices after the removed one.
         instrument.preset = instrument.type;
@@ -5832,116 +5866,139 @@ export class ChangeEnvelopeOrder extends Change {
     constructor(doc: SongDocument, index: number, moveWhere: boolean) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        let env1Target = instrument.envelopes[index].target;
-        let env1Index = instrument.envelopes[index].index;
-        let env1Envelope = instrument.envelopes[index].envelope;
-        let env1Speed = instrument.envelopes[index].envelopeSpeed;
-        let env1Discrete = instrument.envelopes[index].discrete;
-        let env1LowerBound = instrument.envelopes[index].lowerBound;
-        let env1UpperBound = instrument.envelopes[index].upperBound;
-        let env1StepAmount = instrument.envelopes[index].stepAmount;
-        let env1Delay = instrument.envelopes[index].delay;
-        let env1PitchStart = instrument.envelopes[index].pitchStart;
-        let env1PitchEnd = instrument.envelopes[index].pitchEnd;
-        let env1PitchAmplify = instrument.envelopes[index].pitchAmplify;
-        let env1PitchBounce = instrument.envelopes[index].pitchBounce;
-        let env1Phase = instrument.envelopes[index].phase;
-        let env1MeasurementType = instrument.envelopes[index].measurementType;
+        const instEnv = instrument.envelopes[index];
         // moveWhere:  True = Up, False = Down
         let idxUp = mod(index - 1, instrument.envelopeCount);
         let idxDown = mod(index + 1, instrument.envelopeCount);
+        const envAbove = instrument.envelopes[idxUp];
+        const envBelow = instrument.envelopes[idxDown];
+
+        let env1Target = instEnv.target;
+        let env1Index = instEnv.index;
+        let env1Envelope = instEnv.envelope;
+        let env1Speed = instEnv.envelopeSpeed;
+        let env1Discrete = instEnv.discrete;
+        let env1LowerBound = instEnv.lowerBound;
+        let env1UpperBound = instEnv.upperBound;
+        let env1StepAmount = instEnv.stepAmount;
+        let env1Delay = instEnv.delay;
+        let env1PitchStart = instEnv.pitchStart;
+        let env1PitchEnd = instEnv.pitchEnd;
+        let env1PitchAmplify = instEnv.pitchAmplify;
+        let env1PitchBounce = instEnv.pitchBounce;
+        let env1Phase = instEnv.phase;
+        let env1MeasurementType = instEnv.measurementType;
+        let env1MirrorAmount = instEnv.mirrorAmount;
+        let env1LFOSettings = instEnv.LFOSettings;
+
         if (moveWhere) {
-            let env2Target = instrument.envelopes[idxUp].target;
-            let env2Index = instrument.envelopes[idxUp].index;
-            let env2Envelope = instrument.envelopes[idxUp].envelope;
-            let env2Speed = instrument.envelopes[idxUp].envelopeSpeed;
-            let env2Discrete = instrument.envelopes[idxUp].discrete;
-            let env2LowerBound = instrument.envelopes[idxUp].lowerBound;
-            let env2UpperBound = instrument.envelopes[idxUp].upperBound;
-            let env2StepAmount = instrument.envelopes[idxUp].stepAmount;
-            let env2Delay = instrument.envelopes[idxUp].delay;
-            let env2PitchStart = instrument.envelopes[idxUp].pitchStart;
-            let env2PitchEnd = instrument.envelopes[idxUp].pitchEnd;
-            let env2PitchAmplify = instrument.envelopes[idxUp].pitchAmplify;
-            let env2PitchBounce = instrument.envelopes[idxUp].pitchBounce;
-            let env2Phase = instrument.envelopes[idxUp].phase;
-            let env2MeasurementType = instrument.envelopes[idxUp].measurementType;
-            instrument.envelopes[idxUp].target = env1Target;
-            instrument.envelopes[idxUp].index = env1Index;
-            instrument.envelopes[idxUp].envelope = env1Envelope;
-            instrument.envelopes[idxUp].envelopeSpeed = env1Speed;
-            instrument.envelopes[idxUp].discrete = env1Discrete;
-            instrument.envelopes[idxUp].lowerBound = env1LowerBound;
-            instrument.envelopes[idxUp].upperBound = env1UpperBound;
-            instrument.envelopes[idxUp].stepAmount = env1StepAmount;
-            instrument.envelopes[idxUp].delay = env1Delay;
-            instrument.envelopes[idxUp].pitchStart = env1PitchStart;
-            instrument.envelopes[idxUp].pitchEnd = env1PitchEnd;
-            instrument.envelopes[idxUp].pitchAmplify = env1PitchAmplify;
-            instrument.envelopes[idxUp].pitchBounce = env1PitchBounce;
-            instrument.envelopes[idxUp].phase = env1Phase;
-            instrument.envelopes[idxUp].measurementType = env1MeasurementType;
-            instrument.envelopes[index].target = env2Target;
-            instrument.envelopes[index].index = env2Index;
-            instrument.envelopes[index].envelope = env2Envelope;
-            instrument.envelopes[index].envelopeSpeed = env2Speed;
-            instrument.envelopes[index].discrete = env2Discrete;
-            instrument.envelopes[index].lowerBound = env2LowerBound;
-            instrument.envelopes[index].upperBound = env2UpperBound;
-            instrument.envelopes[index].stepAmount = env2StepAmount;
-            instrument.envelopes[index].delay = env2Delay;
-            instrument.envelopes[index].pitchStart = env2PitchStart;
-            instrument.envelopes[index].pitchEnd = env2PitchEnd;
-            instrument.envelopes[index].pitchAmplify = env2PitchAmplify;
-            instrument.envelopes[index].pitchBounce = env2PitchBounce;
-            instrument.envelopes[index].phase = env2Phase;
-            instrument.envelopes[index].measurementType = env2MeasurementType;
+            let env2Target = envAbove.target;
+            let env2Index = envAbove.index;
+            let env2Envelope = envAbove.envelope;
+            let env2Speed = envAbove.envelopeSpeed;
+            let env2Discrete = envAbove.discrete;
+            let env2LowerBound = envAbove.lowerBound;
+            let env2UpperBound = envAbove.upperBound;
+            let env2StepAmount = envAbove.stepAmount;
+            let env2Delay = envAbove.delay;
+            let env2PitchStart = envAbove.pitchStart;
+            let env2PitchEnd = envAbove.pitchEnd;
+            let env2PitchAmplify = envAbove.pitchAmplify;
+            let env2PitchBounce = envAbove.pitchBounce;
+            let env2Phase = envAbove.phase;
+            let env2MeasurementType = envAbove.measurementType;
+            let env2MirrorAmount = envAbove.mirrorAmount;
+            let env2LFOSettings = envAbove.LFOSettings;
+
+            envAbove.target = env1Target;
+            envAbove.index = env1Index;
+            envAbove.envelope = env1Envelope;
+            envAbove.envelopeSpeed = env1Speed;
+            envAbove.discrete = env1Discrete;
+            envAbove.lowerBound = env1LowerBound;
+            envAbove.upperBound = env1UpperBound;
+            envAbove.stepAmount = env1StepAmount;
+            envAbove.delay = env1Delay;
+            envAbove.pitchStart = env1PitchStart;
+            envAbove.pitchEnd = env1PitchEnd;
+            envAbove.pitchAmplify = env1PitchAmplify;
+            envAbove.pitchBounce = env1PitchBounce;
+            envAbove.phase = env1Phase;
+            envAbove.measurementType = env1MeasurementType;
+            envAbove.mirrorAmount = env1MirrorAmount;
+            envAbove.LFOSettings = env1LFOSettings;
+
+            instEnv.target = env2Target;
+            instEnv.index = env2Index;
+            instEnv.envelope = env2Envelope;
+            instEnv.envelopeSpeed = env2Speed;
+            instEnv.discrete = env2Discrete;
+            instEnv.lowerBound = env2LowerBound;
+            instEnv.upperBound = env2UpperBound;
+            instEnv.stepAmount = env2StepAmount;
+            instEnv.delay = env2Delay;
+            instEnv.pitchStart = env2PitchStart;
+            instEnv.pitchEnd = env2PitchEnd;
+            instEnv.pitchAmplify = env2PitchAmplify;
+            instEnv.pitchBounce = env2PitchBounce;
+            instEnv.phase = env2Phase;
+            instEnv.measurementType = env2MeasurementType;
+            instEnv.mirrorAmount = env2MirrorAmount;
+            instEnv.LFOSettings = env2LFOSettings;
         } else {
-            let env2Target = instrument.envelopes[idxDown].target;
-            let env2Index = instrument.envelopes[idxDown].index;
-            let env2Envelope = instrument.envelopes[idxDown].envelope;
-            let env2Speed = instrument.envelopes[idxDown].envelopeSpeed;
-            let env2Discrete = instrument.envelopes[idxDown].discrete;
-            let env2LowerBound = instrument.envelopes[idxDown].lowerBound;
-            let env2UpperBound = instrument.envelopes[idxDown].upperBound;
-            let env2StepAmount = instrument.envelopes[idxDown].stepAmount;
-            let env2Delay = instrument.envelopes[idxDown].delay;
-            let env2PitchStart = instrument.envelopes[idxDown].pitchStart;
-            let env2PitchEnd = instrument.envelopes[idxDown].pitchEnd;
-            let env2PitchAmplify = instrument.envelopes[idxDown].pitchAmplify;
-            let env2PitchBounce = instrument.envelopes[idxDown].pitchBounce;
-            let env2Phase = instrument.envelopes[idxDown].phase;
-            let env2MeasurementType = instrument.envelopes[idxDown].measurementType;
-            instrument.envelopes[idxDown].target = env1Target;
-            instrument.envelopes[idxDown].index = env1Index;
-            instrument.envelopes[idxDown].envelope = env1Envelope;
-            instrument.envelopes[idxDown].envelopeSpeed = env1Speed;
-            instrument.envelopes[idxDown].discrete = env1Discrete;
-            instrument.envelopes[idxDown].lowerBound = env1LowerBound;
-            instrument.envelopes[idxDown].upperBound = env1UpperBound;
-            instrument.envelopes[idxDown].stepAmount = env1StepAmount;
-            instrument.envelopes[idxDown].delay = env1Delay;
-            instrument.envelopes[idxDown].pitchStart = env1PitchStart;
-            instrument.envelopes[idxDown].pitchEnd = env1PitchEnd;
-            instrument.envelopes[idxDown].pitchAmplify = env1PitchAmplify;
-            instrument.envelopes[idxDown].pitchBounce = env1PitchBounce;
-            instrument.envelopes[idxDown].phase = env1Phase;
-            instrument.envelopes[idxDown].measurementType = env1MeasurementType;
-            instrument.envelopes[index].target = env2Target;
-            instrument.envelopes[index].index = env2Index;
-            instrument.envelopes[index].envelope = env2Envelope;
-            instrument.envelopes[index].envelopeSpeed = env2Speed;
-            instrument.envelopes[index].discrete = env2Discrete;
-            instrument.envelopes[index].lowerBound = env2LowerBound;
-            instrument.envelopes[index].upperBound = env2UpperBound;
-            instrument.envelopes[index].stepAmount = env2StepAmount;
-            instrument.envelopes[index].delay = env2Delay;
-            instrument.envelopes[index].pitchStart = env2PitchStart;
-            instrument.envelopes[index].pitchEnd = env2PitchEnd;
-            instrument.envelopes[index].pitchAmplify = env2PitchAmplify;
-            instrument.envelopes[index].pitchBounce = env2PitchBounce;
-            instrument.envelopes[index].phase = env2Phase;
-            instrument.envelopes[index].measurementType = env2MeasurementType;
+            let env2Target = envBelow.target;
+            let env2Index = envBelow.index;
+            let env2Envelope = envBelow.envelope;
+            let env2Speed = envBelow.envelopeSpeed;
+            let env2Discrete = envBelow.discrete;
+            let env2LowerBound = envBelow.lowerBound;
+            let env2UpperBound = envBelow.upperBound;
+            let env2StepAmount = envBelow.stepAmount;
+            let env2Delay = envBelow.delay;
+            let env2PitchStart = envBelow.pitchStart;
+            let env2PitchEnd = envBelow.pitchEnd;
+            let env2PitchAmplify = envBelow.pitchAmplify;
+            let env2PitchBounce = envBelow.pitchBounce;
+            let env2Phase = envBelow.phase;
+            let env2MeasurementType = envBelow.measurementType;
+            let env2MirrorAmount = envBelow.mirrorAmount;
+            let env2LFOSettings = envBelow.LFOSettings;
+
+            envBelow.target = env1Target;
+            envBelow.index = env1Index;
+            envBelow.envelope = env1Envelope;
+            envBelow.envelopeSpeed = env1Speed;
+            envBelow.discrete = env1Discrete;
+            envBelow.lowerBound = env1LowerBound;
+            envBelow.upperBound = env1UpperBound;
+            envBelow.stepAmount = env1StepAmount;
+            envBelow.delay = env1Delay;
+            envBelow.pitchStart = env1PitchStart;
+            envBelow.pitchEnd = env1PitchEnd;
+            envBelow.pitchAmplify = env1PitchAmplify;
+            envBelow.pitchBounce = env1PitchBounce;
+            envBelow.phase = env1Phase;
+            envBelow.measurementType = env1MeasurementType;
+            envBelow.mirrorAmount = env1MirrorAmount;
+            envBelow.LFOSettings = env1LFOSettings;
+
+            instEnv.target = env2Target;
+            instEnv.index = env2Index;
+            instEnv.envelope = env2Envelope;
+            instEnv.envelopeSpeed = env2Speed;
+            instEnv.discrete = env2Discrete;
+            instEnv.lowerBound = env2LowerBound;
+            instEnv.upperBound = env2UpperBound;
+            instEnv.stepAmount = env2StepAmount;
+            instEnv.delay = env2Delay;
+            instEnv.pitchStart = env2PitchStart;
+            instEnv.pitchEnd = env2PitchEnd;
+            instEnv.pitchAmplify = env2PitchAmplify;
+            instEnv.pitchBounce = env2PitchBounce;
+            instEnv.phase = env2Phase;
+            instEnv.measurementType = env2MeasurementType;
+            instEnv.mirrorAmount = env2MirrorAmount;
+            instEnv.LFOSettings = env2LFOSettings;
         }
         
         doc.notifier.changed();
@@ -5953,75 +6010,98 @@ export class ChangeDrumsetEnvelopeOrder extends Change {
     constructor(doc: SongDocument, index: number, moveWhere: boolean) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        let env1Envelope = instrument.drumsetEnvelopes[index].envelope;
-        let env1Speed = instrument.drumsetEnvelopes[index].envelopeSpeed;
-        let env1Discrete = instrument.drumsetEnvelopes[index].discrete;
-        let env1LowerBound = instrument.drumsetEnvelopes[index].lowerBound;
-        let env1UpperBound = instrument.drumsetEnvelopes[index].upperBound;
-        let env1StepAmount = instrument.drumsetEnvelopes[index].stepAmount;
-        let env1Delay = instrument.drumsetEnvelopes[index].delay;
-        let env1Phase = instrument.drumsetEnvelopes[index].phase;
-        let env1MeasurementType = instrument.drumsetEnvelopes[index].measurementType;
+        const drumEnv = instrument.drumsetEnvelopes[index];
         // This is flipped because the drum order is flipped.
         // moveWhere:  False = Up, True = Down
         let idxUp = mod(index - 1, Config.drumCount);
         let idxDown = mod(index + 1, Config.drumCount);
+        const envAbove = instrument.drumsetEnvelopes[idxUp];
+        const envBelow = instrument.drumsetEnvelopes[idxDown];
+
+        let env1Envelope = drumEnv.envelope;
+        let env1Speed = drumEnv.envelopeSpeed;
+        let env1Discrete = drumEnv.discrete;
+        let env1LowerBound = drumEnv.lowerBound;
+        let env1UpperBound = drumEnv.upperBound;
+        let env1StepAmount = drumEnv.stepAmount;
+        let env1Delay = drumEnv.delay;
+        let env1Phase = drumEnv.phase;
+        let env1MeasurementType = drumEnv.measurementType;
+        let env1MirrorAmount = drumEnv.mirrorAmount;
+        let env1LFOSettings = drumEnv.LFOSettings;
+
         if (moveWhere) {
-            let env2Envelope = instrument.drumsetEnvelopes[idxUp].envelope;
-            let env2Speed = instrument.drumsetEnvelopes[idxUp].envelopeSpeed;
-            let env2Discrete = instrument.drumsetEnvelopes[idxUp].discrete;
-            let env2LowerBound = instrument.drumsetEnvelopes[idxUp].lowerBound;
-            let env2UpperBound = instrument.drumsetEnvelopes[idxUp].upperBound;
-            let env2StepAmount = instrument.drumsetEnvelopes[idxUp].stepAmount;
-            let env2Delay = instrument.drumsetEnvelopes[idxUp].delay;
-            let env2Phase = instrument.drumsetEnvelopes[idxUp].phase;
-            let env2MeasurementType = instrument.drumsetEnvelopes[idxUp].measurementType;
-            instrument.drumsetEnvelopes[idxUp].envelope = env1Envelope;
-            instrument.drumsetEnvelopes[idxUp].envelopeSpeed = env1Speed;
-            instrument.drumsetEnvelopes[idxUp].discrete = env1Discrete;
-            instrument.drumsetEnvelopes[idxUp].lowerBound = env1LowerBound;
-            instrument.drumsetEnvelopes[idxUp].upperBound = env1UpperBound;
-            instrument.drumsetEnvelopes[idxUp].stepAmount = env1StepAmount;
-            instrument.drumsetEnvelopes[idxUp].delay = env1Delay;
-            instrument.drumsetEnvelopes[idxUp].phase = env1Phase;
-            instrument.drumsetEnvelopes[idxUp].measurementType = env1MeasurementType;
-            instrument.drumsetEnvelopes[index].envelope = env2Envelope;
-            instrument.drumsetEnvelopes[index].envelopeSpeed = env2Speed;
-            instrument.drumsetEnvelopes[index].discrete = env2Discrete;
-            instrument.drumsetEnvelopes[index].lowerBound = env2LowerBound;
-            instrument.drumsetEnvelopes[index].upperBound = env2UpperBound;
-            instrument.drumsetEnvelopes[index].stepAmount = env2StepAmount;
-            instrument.drumsetEnvelopes[index].delay = env2Delay;
-            instrument.drumsetEnvelopes[index].phase = env2Phase;
-            instrument.drumsetEnvelopes[index].measurementType = env2MeasurementType;
+            let env2Envelope = envAbove.envelope;
+            let env2Speed = envAbove.envelopeSpeed;
+            let env2Discrete = envAbove.discrete;
+            let env2LowerBound = envAbove.lowerBound;
+            let env2UpperBound = envAbove.upperBound;
+            let env2StepAmount = envAbove.stepAmount;
+            let env2Delay = envAbove.delay;
+            let env2Phase = envAbove.phase;
+            let env2MeasurementType = envAbove.measurementType;
+            let env2MirrorAmount = envAbove.mirrorAmount;
+            let env2LFOSettings = envAbove.LFOSettings;
+
+            envAbove.envelope = env1Envelope;
+            envAbove.envelopeSpeed = env1Speed;
+            envAbove.discrete = env1Discrete;
+            envAbove.lowerBound = env1LowerBound;
+            envAbove.upperBound = env1UpperBound;
+            envAbove.stepAmount = env1StepAmount;
+            envAbove.delay = env1Delay;
+            envAbove.phase = env1Phase;
+            envAbove.measurementType = env1MeasurementType;
+            envAbove.mirrorAmount = env1MirrorAmount;
+            envAbove.LFOSettings = env1LFOSettings;
+
+            drumEnv.envelope = env2Envelope;
+            drumEnv.envelopeSpeed = env2Speed;
+            drumEnv.discrete = env2Discrete;
+            drumEnv.lowerBound = env2LowerBound;
+            drumEnv.upperBound = env2UpperBound;
+            drumEnv.stepAmount = env2StepAmount;
+            drumEnv.delay = env2Delay;
+            drumEnv.phase = env2Phase;
+            drumEnv.measurementType = env2MeasurementType;
+            drumEnv.mirrorAmount = env2MirrorAmount;
+            drumEnv.LFOSettings = env2LFOSettings;
         } else {
-            let env2Envelope = instrument.drumsetEnvelopes[idxDown].envelope;
-            let env2Speed = instrument.drumsetEnvelopes[idxDown].envelopeSpeed;
-            let env2Discrete = instrument.drumsetEnvelopes[idxDown].discrete;
-            let env2LowerBound = instrument.drumsetEnvelopes[idxDown].lowerBound;
-            let env2UpperBound = instrument.drumsetEnvelopes[idxDown].upperBound;
-            let env2StepAmount = instrument.drumsetEnvelopes[idxDown].stepAmount;
-            let env2Delay = instrument.drumsetEnvelopes[idxDown].delay;
-            let env2Phase = instrument.drumsetEnvelopes[idxDown].phase;
-            let env2MeasurementType = instrument.drumsetEnvelopes[idxDown].measurementType;
-            instrument.drumsetEnvelopes[idxDown].envelope = env1Envelope;
-            instrument.drumsetEnvelopes[idxDown].envelopeSpeed = env1Speed;
-            instrument.drumsetEnvelopes[idxDown].discrete = env1Discrete;
-            instrument.drumsetEnvelopes[idxDown].lowerBound = env1LowerBound;
-            instrument.drumsetEnvelopes[idxDown].upperBound = env1UpperBound;
-            instrument.drumsetEnvelopes[idxDown].stepAmount = env1StepAmount;
-            instrument.drumsetEnvelopes[idxDown].delay = env1Delay;
-            instrument.drumsetEnvelopes[idxDown].phase = env1Phase;
-            instrument.drumsetEnvelopes[idxDown].measurementType = env1MeasurementType;
-            instrument.drumsetEnvelopes[index].envelope = env2Envelope;
-            instrument.drumsetEnvelopes[index].envelopeSpeed = env2Speed;
-            instrument.drumsetEnvelopes[index].discrete = env2Discrete;
-            instrument.drumsetEnvelopes[index].lowerBound = env2LowerBound;
-            instrument.drumsetEnvelopes[index].upperBound = env2UpperBound;
-            instrument.drumsetEnvelopes[index].stepAmount = env2StepAmount;
-            instrument.drumsetEnvelopes[index].delay = env2Delay;
-            instrument.drumsetEnvelopes[index].phase = env2Phase;
-            instrument.drumsetEnvelopes[index].measurementType = env2MeasurementType;
+            let env2Envelope = envBelow.envelope;
+            let env2Speed = envBelow.envelopeSpeed;
+            let env2Discrete = envBelow.discrete;
+            let env2LowerBound = envBelow.lowerBound;
+            let env2UpperBound = envBelow.upperBound;
+            let env2StepAmount = envBelow.stepAmount;
+            let env2Delay = envBelow.delay;
+            let env2Phase = envBelow.phase;
+            let env2MeasurementType = envBelow.measurementType;
+            let env2MirrorAmount = envBelow.mirrorAmount;
+            let env2LFOSettings = envBelow.LFOSettings;
+
+            envBelow.envelope = env1Envelope;
+            envBelow.envelopeSpeed = env1Speed;
+            envBelow.discrete = env1Discrete;
+            envBelow.lowerBound = env1LowerBound;
+            envBelow.upperBound = env1UpperBound;
+            envBelow.stepAmount = env1StepAmount;
+            envBelow.delay = env1Delay;
+            envBelow.phase = env1Phase;
+            envBelow.measurementType = env1MeasurementType;
+            envBelow.mirrorAmount = env1MirrorAmount;
+            envBelow.LFOSettings = env1LFOSettings;
+
+            drumEnv.envelope = env2Envelope;
+            drumEnv.envelopeSpeed = env2Speed;
+            drumEnv.discrete = env2Discrete;
+            drumEnv.lowerBound = env2LowerBound;
+            drumEnv.upperBound = env2UpperBound;
+            drumEnv.stepAmount = env2StepAmount;
+            drumEnv.delay = env2Delay;
+            drumEnv.phase = env2Phase;
+            drumEnv.measurementType = env2MeasurementType;
+            drumEnv.mirrorAmount = env2MirrorAmount;
+            drumEnv.LFOSettings = env2LFOSettings;
         }
         
         doc.notifier.changed();

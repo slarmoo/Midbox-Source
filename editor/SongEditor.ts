@@ -48,7 +48,7 @@ import { ThemePrompt } from "./ThemePrompt";
 import { TipPrompt } from "./TipPrompt";
 import { LanguagePrompt } from "./LanguagePrompt";
 import { Localization as _ } from "./Localization";
-import { ChangeTempo, ChangeKeyOctave, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangeSupersawDynamism, ChangeSupersawSpread, ChangeSupersawShape, ChangeWavetableSpeed, ChangeWaveInterpolation, ChangeCyclePerNote, ChangeOneShotCycle, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeCustomAlgorithmOrFeedback, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, Change6OpFeedbackType, Change6OpAlgorithm, ChangeChipWave, ChangeNoiseWave, /*ChangeNoiseSeedRandomization, ChangeNoiseSeed,*/ ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeUnisonVoices, ChangeUnisonSpread, ChangeUnisonOffset, ChangeUnisonExpression, ChangeUnisonSign, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeReshapeAmount, ChangeReshapeShift, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeLowerWavefold, ChangeUpperWavefold, ChangeAddEnvelope, ChangeEnvelopeSpeed, ChangeDrumsetEnvelopeSpeed, ChangeDrumsetDiscreteEnvelope, ChangeDrumsetLowerBound, ChangeDrumsetUpperBound, ChangeDrumsetStairsStepAmount, ChangeDrumsetEnvelopeDelay, ChangeDrumsetEnvelopePosition, ChangeDrumsetMeasurementType, ChangePasteDrumsetEnvelope, ChangeDrumsetEnvelopeOrder, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeWavetableCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeArpeggioPattern, ChangeClicklessTransition, ChangeContinueThruPattern, ChangeAliasing, ChangePercussion, ChangeSDAffected, ChangeSOAffected, ChangeStrumSpeed, ChangeSlideSpeed, ChangeSongSubtitle, ChangeSetPatternInstruments, ChangeHoldingModRecording } from "./changes";
+import { ChangeTempo, ChangeKeyOctave, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangeSupersawDynamism, ChangeSupersawSpread, ChangeSupersawShape, ChangeWavetableSpeed, ChangeWaveInterpolation, ChangeCyclePerNote, ChangeOneShotCycle, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeCustomAlgorithmOrFeedback, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, Change6OpFeedbackType, Change6OpAlgorithm, ChangeChipWave, ChangeNoiseWave, /*ChangeNoiseSeedRandomization, ChangeNoiseSeed,*/ ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeUnisonVoices, ChangeUnisonSpread, ChangeUnisonOffset, ChangeUnisonExpression, ChangeUnisonSign, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeReshapeAmount, ChangeReshapeShift, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeLowerWavefold, ChangeUpperWavefold, ChangeAddEnvelope, ChangeEnvelopeSpeed, ChangeDrumsetEnvelopeSpeed, ChangeDrumsetDiscreteEnvelope, ChangeDrumsetLowerBound, ChangeDrumsetUpperBound, ChangeDrumsetStairsStepAmount, ChangeDrumsetEnvelopeDelay, ChangeDrumsetEnvelopePosition, ChangeDrumsetMeasurementType, ChangeDrumsetClapMirrorAmount, ChangePasteDrumsetEnvelope, ChangeDrumsetEnvelopeOrder, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeWavetableCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeArpeggioPattern, ChangeClicklessTransition, ChangeContinueThruPattern, ChangeAliasing, ChangePercussion, ChangeSDAffected, ChangeSOAffected, ChangeStrumSpeed, ChangeSlideSpeed, ChangeSongSubtitle, ChangeSetPatternInstruments, ChangeHoldingModRecording } from "./changes";
 import { oscilloscopeCanvas } from "../global/Oscilloscope";
 import { TrackEditor } from "./TrackEditor";
 import { clamp } from "./UsefulCodingStuff";
@@ -1967,6 +1967,9 @@ export class SongEditor {
     private readonly _drumsetMeasureInSecondButtons: HTMLButtonElement[] = [];
 	private readonly _drumsetMeasureInBeatButtons: HTMLButtonElement[] = [];
 	private readonly _drumsetMeasurementTypeRows: HTMLDivElement[] = [];
+    private readonly _drumsetMirrorAmountSliders: SliderNoParse[] = [];
+    private readonly _drumsetMirrorAmountInputBoxes: HTMLInputElement[] = [];
+    private readonly _drumsetMirrorAmountRows: HTMLDivElement[] = [];
     private readonly _drumsetCopyEnvelopeButtons: HTMLButtonElement[] = [];
     private readonly _drumsetPasteEnvelopeButtons: HTMLButtonElement[] = [];
     private readonly _drumsetMoveUpEnvelopeButtons: HTMLButtonElement[] = [];
@@ -2164,6 +2167,12 @@ export class SongEditor {
             const measureInBeatsButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "no-underline", onclick: () => this._switchDrumsetMeasurementType(true, i) }, span(_.measureInBeatsLabel));
     		const measureInSecondsButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "last-button no-underline", onclick: () => this._switchDrumsetMeasurementType(false, i) }, span(_.measureInSecondsLabel));
     		const measurementTypeRow: HTMLDivElement = div({ class: "selectRow", style: "padding-top: 4px; margin-bottom: -3px;" }, span({ style: "font-size: small;", class: "tip", onclick: () => this._openPrompt("envelopeDelayPhaseMeasurement") }, span(_.delayPhaseMeasurementLabel)), div({ class: "instrument-bar" }, measureInBeatsButton, measureInSecondsButton));
+            const mirrorAmountSlider: SliderNoParse = new SliderNoParse(input({ style: "margin: 0;", type: "range", min: "1", max: Config.clapMirrorsMax, value: "5", step: "1" }), this._doc, (oldValue: number, newValue: number, forceUpdate: boolean = false) => new ChangeDrumsetClapMirrorAmount(this._doc, i, oldValue, newValue, forceUpdate), false);
+            const mirrorAmountInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "drumsetClapMirrorAmountInputBox", type: "number", step: "1", min: "1", max: Config.clapMirrorsMax, value: "5"});
+			const mirrorAmountRow: HTMLDivElement = div({class: "selectRow dropFader"}, div({},
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("mirrorAmount")}, span(_.clapMirrorAmountLabel)),
+				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, mirrorAmountInputBox),
+			), mirrorAmountSlider.container);
             const envelopeCopyButton: HTMLButtonElement = button({style: "flex: 3; margin-right: 0.3em;", onclick: () => this._copyDrumsetEnvelopeSettings(i)}, 
 				// Copy icon:
 				SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 20%; top: 37%; margin-top: -0.75em; pointer-events: none;", width: "2em", height: "2em", viewBox: "-5 -21 26 26" }, [
@@ -2190,7 +2199,7 @@ export class SongEditor {
 				]),
 			);
 			const envelopeButtonContainer: HTMLDivElement = div({ class: "selectRow", style: "padding-top: 1px; margin-bottom: 2px; display: flex;"}, envelopeCopyButton, envelopePasteButton, envelopeMoveUpButton, envelopeMoveDownButton);
-            const drumsetEnvelopeDropdownGroup: HTMLDivElement = div({class: "editor-controls", style: "display: none;"}, envelopeButtonContainer, plotterTimeRangeRow, envelopePlotterRow, envelopeSpeedRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, stepAmountRow, measurementTypeRow, envelopeDelayRow, envelopePhaseRow);
+            const drumsetEnvelopeDropdownGroup: HTMLDivElement = div({class: "editor-controls", style: "display: none;"}, envelopeButtonContainer, plotterTimeRangeRow, envelopePlotterRow, envelopeSpeedRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, stepAmountRow, mirrorAmountRow, measurementTypeRow, envelopeDelayRow, envelopePhaseRow);
             const drumsetEnvelopeDropdown: HTMLButtonElement = button({ style: "margin-left: 0.6em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.DrumsetEnv, i) }, "▼");
             envelopeSelect.addEventListener("change", () => {
                 this._doc.record(new ChangeDrumsetEnvelope(this._doc, i, envelopeSelect.selectedIndex));
@@ -2206,6 +2215,7 @@ export class SongEditor {
             lowerBoundInputBox.addEventListener("input", () => { pseudoChange(new ChangeDrumsetLowerBound(this._doc, i, instrument.drumsetEnvelopes[i].lowerBound, Math.min(Config.lowerBoundMax, Math.max(Config.lowerBoundMin, +lowerBoundInputBox.value))))});
             upperBoundInputBox.addEventListener("input", () => { pseudoChange(new ChangeDrumsetUpperBound(this._doc, i, instrument.drumsetEnvelopes[i].upperBound, Math.min(Config.upperBoundMax, Math.max(Config.upperBoundMin, +upperBoundInputBox.value))))});
             stepAmountInputBox.addEventListener("input", () => { pseudoChange(new ChangeDrumsetStairsStepAmount(this._doc, i, instrument.drumsetEnvelopes[i].stepAmount, Math.min(Config.stairsStepAmountMax, Math.max(1, +stepAmountInputBox.value))))});
+            mirrorAmountInputBox.addEventListener("input", () => { pseudoChange(new ChangeDrumsetClapMirrorAmount(this._doc, i, instrument.drumsetEnvelopes[i].mirrorAmount, Math.min(Config.clapMirrorsMax, Math.max(1, +mirrorAmountInputBox.value))))});
             envelopeDelayInputBox.addEventListener("input", () => { pseudoChange(new ChangeDrumsetEnvelopeDelay(this._doc, i, instrument.drumsetEnvelopes[i].delay, Math.min(Config.envelopeDelayMax, Math.max(0, +envelopeDelayInputBox.value))))});
             envelopePhaseInputBox.addEventListener("input", () => { pseudoChange(new ChangeDrumsetEnvelopePosition(this._doc, i, instrument.drumsetEnvelopes[i].phase, Math.min(Config.envelopePhaseMax, Math.max(0, +envelopePhaseInputBox.value))))});
             plotterTimeRangeInputBox.addEventListener("input", () => { this._changeDrumsetTimeRange(i, envelopePlotter.range, +(plotterTimeRangeInputBox.value))});
@@ -2214,6 +2224,7 @@ export class SongEditor {
             lowerBoundInputBox.addEventListener("change", () => { if (lastChange != null) this._doc.record(lastChange)});
             upperBoundInputBox.addEventListener("change", () => { if (lastChange != null) this._doc.record(lastChange)});
             stepAmountInputBox.addEventListener("change", () => { if (lastChange != null) this._doc.record(lastChange)});
+            mirrorAmountInputBox.addEventListener("change", () => { if (lastChange != null) this._doc.record(lastChange)});
             envelopeDelayInputBox.addEventListener("change", () => { if (lastChange != null) this._doc.record(lastChange)});
             envelopePhaseInputBox.addEventListener("change", () => { if (lastChange != null) this._doc.record(lastChange)});
 
@@ -2247,6 +2258,9 @@ export class SongEditor {
             this._drumsetMeasureInSecondButtons[i] = measureInSecondsButton;
             this._drumsetMeasureInBeatButtons[i] = measureInBeatsButton;
             this._drumsetMeasurementTypeRows[i] = measurementTypeRow;
+            this._drumsetMirrorAmountSliders[i] = mirrorAmountSlider;
+            this._drumsetMirrorAmountInputBoxes[i] = mirrorAmountInputBox;
+            this._drumsetMirrorAmountRows[i] = mirrorAmountRow;
             this._drumsetCopyEnvelopeButtons[i] = envelopeCopyButton;
             this._drumsetPasteEnvelopeButtons[i] = envelopePasteButton;
             this._drumsetMoveUpEnvelopeButtons[i] = envelopeMoveUpButton;
@@ -3181,6 +3195,8 @@ export class SongEditor {
                         this._drumsetMeasureInBeatButtons[i].classList.add("deactivated");
                         this._drumsetMeasureInSecondButtons[i].classList.remove("deactivated");
                     }
+                    this._drumsetMirrorAmountSliders[i].updateValue(instrument.drumsetEnvelopes[i].mirrorAmount);
+                    this._drumsetMirrorAmountInputBoxes[i].value = String(clamp(0, Config.clapMirrorsMax+1, instrument.drumsetEnvelopes[i].mirrorAmount));
 
                     if (
                         instrument.drumsetEnvelopes[i].envelope == Config.drumsetEnvelopes.dictionary["none"].index ||
@@ -3223,6 +3239,13 @@ export class SongEditor {
                         this._drumsetStepAmountRows[i].style.display = "";
                     } else {
                         this._drumsetStepAmountRows[i].style.display = "none";
+                    }
+                    if (
+                        instrument.drumsetEnvelopes[i].envelope == Config.drumsetEnvelopes.dictionary["dogebox2 clap"].index 
+                    ) {
+                        this._drumsetMirrorAmountRows[i].style.display = "";
+                    } else {
+                        this._drumsetMirrorAmountRows[i].style.display = "none";
                     }
                     if (
                         instrument.drumsetEnvelopes[i].envelope == Config.drumsetEnvelopes.dictionary["none"].index ||

@@ -4,7 +4,7 @@ import {InstrumentType, Config, DropdownID} from "../synth/SynthConfig";
 import {Instrument, EnvelopeComputer} from "../synth/synth";
 import {ColorConfig} from "./ColorConfig";
 import {SongDocument} from "./SongDocument";
-import {ChangeSetEnvelopeTarget, ChangeSetEnvelopeType, ChangeRemoveEnvelope, ChangeEnvelopeOrder, ChangePerEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeLowerBound, ChangeUpperBound, ChangeStairsStepAmount, ChangeEnvelopeDelay, ChangePitchEnvelopeStart, ChangePitchEnvelopeEnd, ChangePitchAmplify, ChangePitchBounce, ChangeEnvelopePosition, ChangeMeasurementType, ChangePasteEnvelope, RandomEnvelope} from "./changes";
+import {ChangeSetEnvelopeTarget, ChangeSetEnvelopeType, ChangeRemoveEnvelope, ChangeEnvelopeOrder, ChangePerEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeLowerBound, ChangeUpperBound, ChangeStairsStepAmount, ChangeEnvelopeDelay, ChangePitchEnvelopeStart, ChangePitchEnvelopeEnd, ChangePitchAmplify, ChangePitchBounce, ChangeEnvelopePosition, ChangeMeasurementType, ChangeClapMirrorAmount, ChangePasteEnvelope, RandomEnvelope} from "./changes";
 import {HTML, SVG} from "imperative-html/dist/esm/elements-strict";
 import {Localization as _} from "./Localization";
 import {clamp, remap} from "./UsefulCodingStuff";
@@ -37,6 +37,7 @@ export class EnvelopeLineGraph {
 		let upperBound: number = instEnv.upperBound;
 		let stepAmount: number = instEnv.stepAmount;
 		let delay: number = instEnv.delay;
+		let mirrorAmount: number = instEnv.mirrorAmount;
 		const beatsPerTick: number = 1.0 / (Config.ticksPerPart * Config.partsPerBeat);
 		const beatsPerMinute: number = this._doc.song != null ? this._doc.song.getBeatsPerMinute() : 0;
         const beatsPerSecond: number = beatsPerMinute / 60.0;
@@ -65,7 +66,7 @@ export class EnvelopeLineGraph {
 			const beatNote: number = (x * timeRangeInBeats) * speed;
 			const noteSize: number = (1 - x) * Config.noteSizeMax;
 			const pitch: number = 1;
-			let value = EnvelopeComputer.computeEnvelope(envelope, seconds, beats, beatNote, noteSize, lowerBound, upperBound, stepAmount, delayInBeats, delayInSeconds, 0, 0, pitch);
+			let value = EnvelopeComputer.computeEnvelope(envelope, seconds, beats, beatNote, noteSize, lowerBound, upperBound, stepAmount, delayInBeats, delayInSeconds, 0, 0, pitch, mirrorAmount);
 			envelopeGraph.push(value);
 			maxValue = Math.max(value, maxValue);
         	minValue = Math.min(value, minValue);
@@ -224,6 +225,9 @@ export class EnvelopeEditor {
 	private readonly _measureInSecondButtons: HTMLButtonElement[] = [];
 	private readonly _measureInBeatButtons: HTMLButtonElement[] = [];
 	private readonly _measurementTypeRows: HTMLElement[] = [];
+	private readonly _clapMirrorAmountSliders: HTMLInputElement[] = [];
+	private readonly _clapMirrorAmountInputBoxes: HTMLInputElement[] = [];
+	private readonly _clapMirrorAmountRows: HTMLElement[] = [];
 	private readonly _envelopeCopyButtons: HTMLButtonElement[] = [];
 	private readonly _envelopePasteButtons: HTMLButtonElement[] = [];
 	private readonly _randomEnvelopeButtons: HTMLButtonElement[] = [];
@@ -352,6 +356,15 @@ export class EnvelopeEditor {
 			this._envelopePhaseInputBoxes[envelopePhaseSliderIndex].value = this._envelopePhaseSliders[envelopePhaseSliderIndex].value;
 			this._lastChange = new ChangeEnvelopePosition(this._doc, envelopePhaseSliderIndex, instrument.envelopes[envelopePhaseSliderIndex].phase, +(this._envelopePhaseSliders[envelopePhaseSliderIndex].value));
 		}
+		const clapMirrorAmountInputBoxIndex = this._clapMirrorAmountInputBoxes.indexOf(<any> event.target);
+		const clapMirrorAmountSliderIndex = this._clapMirrorAmountSliders.indexOf(<any> event.target);
+		if (clapMirrorAmountInputBoxIndex != -1) {
+			this._lastChange = new ChangeClapMirrorAmount(this._doc, clapMirrorAmountInputBoxIndex, instrument.envelopes[clapMirrorAmountInputBoxIndex].mirrorAmount, +(this._clapMirrorAmountInputBoxes[clapMirrorAmountInputBoxIndex].value));
+		}
+		if (clapMirrorAmountSliderIndex != -1) {
+			this._clapMirrorAmountInputBoxes[clapMirrorAmountSliderIndex].value = this._clapMirrorAmountSliders[clapMirrorAmountSliderIndex].value;
+			this._lastChange = new ChangeClapMirrorAmount(this._doc, clapMirrorAmountSliderIndex, instrument.envelopes[clapMirrorAmountSliderIndex].mirrorAmount, +(this._clapMirrorAmountSliders[clapMirrorAmountSliderIndex].value));
+		}
 	};
 
 	private _onChange = (event: Event): void => {
@@ -477,6 +490,20 @@ export class EnvelopeEditor {
 				this._lastChange = null;
 			}
 		}
+		const clapMirrorAmountInputBoxIndex = this._clapMirrorAmountInputBoxes.indexOf(<any> event.target);
+		const clapMirrorAmountSliderIndex = this._clapMirrorAmountSliders.indexOf(<any> event.target);
+		if (clapMirrorAmountInputBoxIndex != -1) {
+			if (this._lastChange != null) {
+				this._doc.record(this._lastChange);
+				this._lastChange = null;
+			}
+		}
+		if (clapMirrorAmountSliderIndex != -1) {
+			if (this._lastChange != null) {
+				this._doc.record(this._lastChange);
+				this._lastChange = null;
+			}
+		}
 	}
 
 	private _changeTimeRange(envelopeIndex: number, oldValue: number, newValue: number): void {
@@ -544,6 +571,10 @@ export class EnvelopeEditor {
 		}
 		const envelopePhaseInputBoxIndex: number = this._envelopePhaseInputBoxes.indexOf(<any>event.target);
 		if (envelopePhaseInputBoxIndex != -1) {
+			event.stopPropagation();
+		}
+		const clapMirrorAmountInputBoxIndex: number = this._clapMirrorAmountInputBoxes.indexOf(<any> event.target);
+		if (clapMirrorAmountInputBoxIndex != -1) {
 			event.stopPropagation();
 		}
 	}
@@ -671,6 +702,12 @@ export class EnvelopeEditor {
 			const measureInBeatsButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "no-underline", onclick: () => this._switchMeasurementType(true, envelopeIndex) }, span(_.measureInBeatsLabel));
     		const measureInSecondsButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "last-button no-underline", onclick: () => this._switchMeasurementType(false, envelopeIndex) }, span(_.measureInSecondsLabel));
     		const measurementTypeRow: HTMLElement = div({ class: "selectRow", style: "padding-top: 4px; margin-bottom: -3px;" }, span({ style: "font-size: small;", class: "tip", onclick: () => this._openPrompt("envelopeDelayPhaseMeasurement") }, span(_.delayPhaseMeasurementLabel)), div({ class: "instrument-bar" }, measureInBeatsButton, measureInSecondsButton));
+			const clapMirrorAmountSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: 1, max: Config.clapMirrorsMax, value: "5", step: "1"});
+			const clapMirrorAmountInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "clapMirrorAmountInputBox", type: "number", step: "1", min: 1, max: Config.clapMirrorsMax, value: "5"});
+			const clapMirrorAmountRow: HTMLElement = div({class: "selectRow dropFader"}, div({},
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("mirrorAmount")}, span(_.clapMirrorAmountLabel)),
+				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, clapMirrorAmountInputBox),
+			), clapMirrorAmountSlider);
 			const envelopeCopyButton: HTMLButtonElement = button({class: "envelope-button", title: _.copyLabel, style: "flex: 3;", onclick: () => this._copyEnvelopeSettings(envelopeIndex)}, 
 				// Copy icon:
 				SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 4%; top: 40%; margin-top: -0.75em; pointer-events: none;", width: "2em", height: "2em", viewBox: "-5 -21 26 26" }, [
@@ -708,7 +745,7 @@ export class EnvelopeEditor {
 					SVG.path({ d: "M 6 6 L 14 6 L 14 7 L 6 7 L 6 6 M 6 14 L 14 14 L 14 13 L 6 13 L 6 14 M 10 7 L 8.5 8.5 L 9.4 8.5 L 9.4 11.5 L 8.4 11.5 L 10 13 L 11.5 11.5 L 10.6 11.5 L 10.6 8.5 L 11.5 8.5 L 10 7", fill: "currentColor"}),
 				]),
 			);
-			const envelopeDropdownGroup: HTMLElement = div({class: "editor-controls", style: "display: none;"}, plotterTimeRangeRow, envelopePlotterRow, pitchStartGroup, pitchEndGroup, extraPitchSettingRow, perEnvelopeSpeedRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, stairsStepAmountRow, measurementTypeRow, envelopeDelayRow, envelopePhaseRow);
+			const envelopeDropdownGroup: HTMLElement = div({class: "editor-controls", style: "display: none;"}, plotterTimeRangeRow, envelopePlotterRow, pitchStartGroup, pitchEndGroup, extraPitchSettingRow, perEnvelopeSpeedRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, stairsStepAmountRow, clapMirrorAmountRow, measurementTypeRow, envelopeDelayRow, envelopePhaseRow);
 			const envelopeDropdown: HTMLButtonElement = button({style: "margin-left: 0.6em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.PerEnvelope, envelopeIndex)}, "▼");
 
 			const targetSelect: HTMLSelectElement = select();
@@ -788,6 +825,9 @@ export class EnvelopeEditor {
 			this._measureInBeatButtons[envelopeIndex] = measureInBeatsButton;
 			this._measureInSecondButtons[envelopeIndex] = measureInSecondsButton;
 			this._measurementTypeRows[envelopeIndex] = measurementTypeRow;
+			this._clapMirrorAmountSliders[envelopeIndex] = clapMirrorAmountSlider;
+			this._clapMirrorAmountInputBoxes[envelopeIndex] = clapMirrorAmountInputBox;
+			this._clapMirrorAmountRows[envelopeIndex] = clapMirrorAmountRow;
 			this._envelopeCopyButtons[envelopeIndex] = envelopeCopyButton;
 			this._envelopePasteButtons[envelopeIndex] = envelopePasteButton;
 			this._randomEnvelopeButtons[envelopeIndex] = randomEnvelopeButton;
@@ -867,6 +907,8 @@ export class EnvelopeEditor {
 				this._measureInBeatButtons[envelopeIndex].classList.add("deactivated");
 				this._measureInSecondButtons[envelopeIndex].classList.remove("deactivated");
 			}
+			this._clapMirrorAmountSliders[envelopeIndex].value = String(clamp(1, Config.clapMirrorsMax+1, instEnv.mirrorAmount));
+			this._clapMirrorAmountInputBoxes[envelopeIndex].value = String(clamp(1, Config.clapMirrorsMax+1, instEnv.mirrorAmount));
 			this._envelopeMoveUpButtons[envelopeIndex].disabled = !(this._doc.prefs.showEnvReorderButtons);
 			this._envelopeMoveDownButtons[envelopeIndex].disabled = !(this._doc.prefs.showEnvReorderButtons);
 			this._pitchEnvAutoBoundButtons[envelopeIndex].disabled = !(instEnv.envelope == Config.envelopes.dictionary["pitch"].index);
@@ -929,6 +971,14 @@ export class EnvelopeEditor {
 				this._stairsStepAmountRows[envelopeIndex].style.display = "";
 			} else {
 				this._stairsStepAmountRows[envelopeIndex].style.display = "none";
+			}
+
+			if ( // Special case on mirror amount.
+				instEnv.envelope == Config.envelopes.dictionary["dogebox2 clap"].index
+			) {
+				this._clapMirrorAmountRows[envelopeIndex].style.display = "";
+			} else {
+				this._clapMirrorAmountRows[envelopeIndex].style.display = "none";
 			}
 
 			if ( // Special case on delay and phase.

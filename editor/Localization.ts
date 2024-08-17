@@ -72,6 +72,7 @@ export class Localization {
     public static lowerBoundLabel: string = "‣ Lwr Bnd:";
     public static upperBoundLabel: string = "‣ Upr Bnd:";
     public static stairsStepAmountLabel: string = "‣ Steps:";
+    public static clapMirrorAmountLabel: string = "‣ Mirrors:";
     public static envelopeDelayLabel: string = "‣ Delay:";
     public static delayPhaseMeasurementLabel: string = "‣ Measure:"; // needs translation
     public static measureInSecondsLabel: string = "Seconds"; // needs translation
