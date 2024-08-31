@@ -4,13 +4,20 @@ import {InstrumentType, Config, DropdownID} from "../synth/SynthConfig";
 import {Instrument, EnvelopeComputer} from "../synth/synth";
 import {ColorConfig} from "./ColorConfig";
 import {SongDocument} from "./SongDocument";
-import {ChangeSetEnvelopeTarget, ChangeSetEnvelopeType, ChangeRemoveEnvelope, ChangeEnvelopeOrder, ChangePerEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeLowerBound, ChangeUpperBound, ChangeStairsStepAmount, ChangeEnvelopeDelay, ChangePitchEnvelopeStart, ChangePitchEnvelopeEnd, ChangePitchAmplify, ChangePitchBounce, ChangeEnvelopePosition, ChangeMeasurementType, ChangeClapMirrorAmount, ChangePasteEnvelope, RandomEnvelope} from "./changes";
+import {ChangeSetEnvelopeTarget, ChangeSetEnvelopeType, ChangeRemoveEnvelope, ChangeEnvelopeOrder, ChangePerEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeLowerBound, ChangeUpperBound, ChangeStairsStepAmount, ChangeEnvelopeDelay, ChangePitchEnvelopeStart, ChangePitchEnvelopeEnd, ChangePitchAmplify, ChangePitchBounce, ChangeEnvelopePosition, ChangeMeasurementType, ChangeClapMirrorAmount, ChangeLFOEnvelopeShape, ChangeEnvelopeAccelerationEnabled, ChangeEnvelopeLooping, ChangeEnvelopeIgnorance, ChangeEnvelopeAcceleration, ChangeLFOEnvelopePulseWidth, ChangeLFOEnvelopeTrapezoidRatio, ChangePasteEnvelope, RandomEnvelope} from "./changes";
 import {HTML, SVG} from "imperative-html/dist/esm/elements-strict";
 import {Localization as _} from "./Localization";
 import {clamp, remap} from "./UsefulCodingStuff";
 import {Change} from "./Change";
 
 const {div, span, canvas, option, input, button, select} = HTML;
+
+function buildOptions(menu: HTMLSelectElement, items: ReadonlyArray<string | number>): HTMLSelectElement {
+    for (let index: number = 0; index < items.length; index++) {
+        menu.appendChild(option({ value: index }, items[index]));
+    }
+    return menu;
+}
 
 export class EnvelopeLineGraph {
 	public range: number = 4;
@@ -66,7 +73,7 @@ export class EnvelopeLineGraph {
 			const beatNote: number = (x * timeRangeInBeats) * speed;
 			const noteSize: number = (1 - x) * Config.noteSizeMax;
 			const pitch: number = 1;
-			let value = EnvelopeComputer.computeEnvelope(envelope, seconds, beats, beatNote, noteSize, lowerBound, upperBound, stepAmount, delayInBeats, delayInSeconds, 0, 0, pitch, mirrorAmount);
+			let value = EnvelopeComputer.computeEnvelope(envelope, seconds, beats, beatNote, noteSize, lowerBound, upperBound, stepAmount, delayInBeats, delayInSeconds, 0, 0, pitch, mirrorAmount, instEnv.LFOSettings.LFOShape, instEnv.LFOSettings.LFOAcceleration, instEnv.LFOSettings.LFOLoopOnce, instEnv.LFOSettings.LFOIgnorance, instEnv.LFOSettings.LFOPulseWidth * 5, instEnv.LFOSettings.LFOTrapezoidRatio);
 			envelopeGraph.push(value);
 			maxValue = Math.max(value, maxValue);
         	minValue = Math.min(value, minValue);
@@ -234,6 +241,19 @@ export class EnvelopeEditor {
 	private readonly _envelopeMoveUpButtons: HTMLButtonElement[] = [];
 	private readonly _envelopeMoveDownButtons: HTMLButtonElement[] = [];
 	private readonly _pitchEnvAutoBoundButtons: HTMLButtonElement[] = [];
+	private readonly _LFOShapeSelects: HTMLSelectElement[] = [];
+	private readonly _LFOShapeRows: HTMLElement[] = [];
+	private readonly _LFOEnableAccelerationToggles: HTMLInputElement[] = [];
+	private readonly _LFOLoopOnceToggles: HTMLInputElement[] = [];
+	private readonly _LFOIgnoranceToggles: HTMLInputElement[] = [];
+	private readonly _LFORadioButtonRows: HTMLElement[] = [];
+	private readonly _LFOAccelerationSliders: HTMLInputElement[] = [];
+	private readonly _LFOAccelerationInputBoxes: HTMLInputElement[] = [];
+	private readonly _LFOAccelerationRows: HTMLElement[] = [];
+	private readonly _LFOPulseWidthSliders: HTMLInputElement[] = [];
+	private readonly _LFOPulseWidthRows: HTMLElement[] = [];
+	private readonly _LFOTrapezoidRatioSliders: HTMLInputElement[] = [];
+	private readonly _LFOTrapezoidRatioRows: HTMLElement[] = [];
 	private readonly _envelopeDropdownGroups: HTMLElement[] = [];
 	private readonly _envelopeDropdowns: HTMLButtonElement[] = [];
 	private readonly _targetSelects: HTMLSelectElement[] = [];
@@ -365,9 +385,40 @@ export class EnvelopeEditor {
 			this._clapMirrorAmountInputBoxes[clapMirrorAmountSliderIndex].value = this._clapMirrorAmountSliders[clapMirrorAmountSliderIndex].value;
 			this._lastChange = new ChangeClapMirrorAmount(this._doc, clapMirrorAmountSliderIndex, instrument.envelopes[clapMirrorAmountSliderIndex].mirrorAmount, +(this._clapMirrorAmountSliders[clapMirrorAmountSliderIndex].value));
 		}
+		const LFOEnableAccelerationToggleIndex = this._LFOEnableAccelerationToggles.indexOf(<any> event.target);
+		const LFOLoopOnceToggleIndex = this._LFOLoopOnceToggles.indexOf(<any> event.target);
+		const LFOIgnoranceToggleIndex = this._LFOIgnoranceToggles.indexOf(<any> event.target);
+		if (LFOEnableAccelerationToggleIndex != -1) {
+			this._doc.record(new ChangeEnvelopeAccelerationEnabled(this._doc, LFOEnableAccelerationToggleIndex, this._LFOEnableAccelerationToggles[LFOEnableAccelerationToggleIndex].checked));
+		}
+		if (LFOLoopOnceToggleIndex != -1) {
+			this._doc.record(new ChangeEnvelopeLooping(this._doc, LFOLoopOnceToggleIndex, this._LFOLoopOnceToggles[LFOLoopOnceToggleIndex].checked));
+		}
+		if (LFOIgnoranceToggleIndex != -1) {
+			this._doc.record(new ChangeEnvelopeIgnorance(this._doc, LFOIgnoranceToggleIndex, this._LFOIgnoranceToggles[LFOIgnoranceToggleIndex].checked));
+		}
+		const LFOAccelerationInputBoxIndex = this._LFOAccelerationInputBoxes.indexOf(<any> event.target);
+		const LFOAccelerationSliderIndex = this._LFOAccelerationSliders.indexOf(<any> event.target);
+		if (LFOAccelerationInputBoxIndex != -1) {
+			this._lastChange = new ChangeEnvelopeAcceleration(this._doc, LFOAccelerationInputBoxIndex, instrument.envelopes[LFOAccelerationInputBoxIndex].phase, +(this._LFOAccelerationInputBoxes[LFOAccelerationInputBoxIndex].value));
+		}
+		if (LFOAccelerationSliderIndex != -1) {
+			this._LFOAccelerationInputBoxes[LFOAccelerationSliderIndex].value = this._LFOAccelerationSliders[LFOAccelerationSliderIndex].value;
+			this._lastChange = new ChangeEnvelopeAcceleration(this._doc, LFOAccelerationSliderIndex, instrument.envelopes[LFOAccelerationSliderIndex].phase, +(this._LFOAccelerationSliders[LFOAccelerationSliderIndex].value));
+		}
+		const LFOPulseWidthSliderIndex = this._LFOPulseWidthSliders.indexOf(<any> event.target);
+		if (LFOPulseWidthSliderIndex != -1) {
+			this._lastChange = new ChangeLFOEnvelopePulseWidth(this._doc, LFOPulseWidthSliderIndex, instrument.envelopes[LFOPulseWidthSliderIndex].phase, +(this._LFOPulseWidthSliders[LFOPulseWidthSliderIndex].value));
+		}
+		const LFOTrapezoidRatioSliderIndex = this._LFOTrapezoidRatioSliders.indexOf(<any> event.target);
+		if (LFOTrapezoidRatioSliderIndex != -1) {
+			this._lastChange = new ChangeLFOEnvelopeTrapezoidRatio(this._doc, LFOTrapezoidRatioSliderIndex, instrument.envelopes[LFOTrapezoidRatioSliderIndex].phase, +(this._LFOTrapezoidRatioSliders[LFOTrapezoidRatioSliderIndex].value));
+		}
 	};
 
 	private _onChange = (event: Event): void => {
+		const instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
+
 		const targetSelectIndex: number = this._targetSelects.indexOf(<any> event.target);
 		const envelopeSelectIndex: number = this._envelopeSelects.indexOf(<any> event.target);
 		if (targetSelectIndex != -1) {
@@ -504,6 +555,38 @@ export class EnvelopeEditor {
 				this._lastChange = null;
 			}
 		}
+		const LFOShapeSelectIndex = this._LFOShapeSelects.indexOf(<any> event.target);
+		if (LFOShapeSelectIndex != -1) {
+			this._doc.record(new ChangeLFOEnvelopeShape(this._doc, LFOShapeSelectIndex, instrument.envelopes[LFOShapeSelectIndex].LFOSettings.LFOShape, this._LFOShapeSelects[LFOShapeSelectIndex].selectedIndex));
+		}
+		const LFOAccelerationInputBoxIndex = this._LFOAccelerationInputBoxes.indexOf(<any> event.target);
+		const LFOAccelerationSliderIndex = this._LFOAccelerationSliders.indexOf(<any> event.target);
+		if (LFOAccelerationInputBoxIndex != -1) {
+			if (this._lastChange != null) {
+				this._doc.record(this._lastChange);
+				this._lastChange = null;
+			}
+		}
+		if (LFOAccelerationSliderIndex != -1) {
+			if (this._lastChange != null) {
+				this._doc.record(this._lastChange);
+				this._lastChange = null;
+			}
+		}
+		const LFOPulseWidthSliderIndex = this._LFOPulseWidthSliders.indexOf(<any> event.target);
+		if (LFOPulseWidthSliderIndex != -1) {
+			if (this._lastChange != null) {
+				this._doc.record(this._lastChange);
+				this._lastChange = null;
+			}
+		}
+		const LFOTrapezoidRatioSliderIndex = this._LFOTrapezoidRatioSliders.indexOf(<any> event.target);
+		if (LFOTrapezoidRatioSliderIndex != -1) {
+			if (this._lastChange != null) {
+				this._doc.record(this._lastChange);
+				this._lastChange = null;
+			}
+		}
 	}
 
 	private _changeTimeRange(envelopeIndex: number, oldValue: number, newValue: number): void {
@@ -575,6 +658,10 @@ export class EnvelopeEditor {
 		}
 		const clapMirrorAmountInputBoxIndex: number = this._clapMirrorAmountInputBoxes.indexOf(<any> event.target);
 		if (clapMirrorAmountInputBoxIndex != -1) {
+			event.stopPropagation();
+		}
+		const LFOAccelerationInputBoxIndex: number = this._LFOAccelerationInputBoxes.indexOf(<any> event.target);
+		if (LFOAccelerationInputBoxIndex != -1) {
 			event.stopPropagation();
 		}
 	}
@@ -708,6 +795,42 @@ export class EnvelopeEditor {
 				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("mirrorAmount")}, span(_.clapMirrorAmountLabel)),
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, clapMirrorAmountInputBox),
 			), clapMirrorAmountSlider);
+			const LFOShapeSelect: HTMLSelectElement = buildOptions(select(), [
+				_.LFOShape1Label,
+				_.LFOShape2Label,
+				_.LFOShape3Label,
+				_.LFOShape4Label,
+				_.LFOShape5Label,
+				_.LFOShape6Label,
+			]);
+			const LFOShapeRow: HTMLElement = div({class: "selectRow"}, span({ class: "tip", onclick: () => this._openPrompt("LFOShape") }, span(_.LFOShapeLabel)), div({ class: "selectContainer" }, LFOShapeSelect));
+			const LFOEnableAccelerationToggle: HTMLInputElement = input({style: "width: 3em; padding: 0;", type: "checkbox"});
+			const LFOLoopOnceToggle: HTMLInputElement = input({style: "width: 3em; padding: 0;", type: "checkbox"});
+			const LFOIgnoranceToggle: HTMLInputElement = input({style: "width: 3em; padding: 0;", type: "checkbox"});
+			const LFORadioButtonsRow: HTMLElement = div({}, div({class: "", style: "display: flex; flex-direction: row; justify-content: space-evenly;"},
+				div({style: "display: flex; flex-direction: column; gap: 5px; text-align: center;"},
+					span({class: "tip", style: "font-size: 10.5px; height: 1em; width: 5em;", onclick: () => this._openPrompt("LFOAcceleration")}, span(_.LFOEnableAccelerationLabel)),
+					div({style: ""}, LFOEnableAccelerationToggle),
+				),
+				div({style: "display: flex; flex-direction: column; gap: 5px; text-align: center;"},
+					span({class: "tip", style: "font-size: 10.5px; height: 1em; width: 5em;", onclick: () => this._openPrompt("LFOLoopOnce")}, span(_.LFOLoopsLabel)),
+					div({style: ""}, LFOLoopOnceToggle),
+				),
+				div({style: "display: flex; flex-direction: column; gap: 5px; text-align: center;"},
+					span({class: "tip", style: "font-size: 10.5px; height: 1em; width: 5em;", onclick: () => this._openPrompt("LFOIgnorance")}, span(_.LFOIgnorantLabel)),
+					div({style: ""}, LFOIgnoranceToggle),
+				),
+			));
+			const LFOAccelerationSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: Config.LFOAccelerationMin, max: Config.LFOAccelerationMax, value: "1", step: "0.25"});
+			const LFOAccelerationInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "LFOAccelerationInputBox", type: "number", step: "0.01", min: Config.LFOAccelerationMin, max: Config.LFOAccelerationMax, value: "1"});
+			const LFOAccelerationRow: HTMLElement = div({class: "selectRow dropFader"}, div({},
+				span({class: "tip", style: "height: 1em; font-size: 11px;", onclick: () => this._openPrompt("LFOAcceleration")}, span(_.LFOAccelerationLabel)),
+				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, LFOAccelerationInputBox),
+			), LFOAccelerationSlider);
+			const LFOPulseWidthSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: 0, max: "20", value: "4", step: "1"});
+			const LFOPulseWidthRow: HTMLElement = div({class: "selectRow dropFader"}, span({ class: "tip", onclick: () => this._openPrompt("LFOPulseWidth") }, span(_.LFOPulseWidthLabel)), LFOPulseWidthSlider);
+			const LFOTrapezoidRatioSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: Config.LFOTrapezoidRatioMin, max: Config.LFOTrapezoidRatioMax, value: "1", step: "0.1"});
+			const LFOTrapezoidRatioRow: HTMLElement = div({class: "selectRow dropFader"}, span({ class: "tip", onclick: () => this._openPrompt("LFOTrapezoidRatio") }, span(_.LFOTrapezoidRatioLabel)), LFOTrapezoidRatioSlider);
 			const envelopeCopyButton: HTMLButtonElement = button({class: "envelope-button", title: _.copyLabel, style: "flex: 3;", onclick: () => this._copyEnvelopeSettings(envelopeIndex)}, 
 				// Copy icon:
 				SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 4%; top: 40%; margin-top: -0.75em; pointer-events: none;", width: "2em", height: "2em", viewBox: "-5 -21 26 26" }, [
@@ -745,7 +868,7 @@ export class EnvelopeEditor {
 					SVG.path({ d: "M 6 6 L 14 6 L 14 7 L 6 7 L 6 6 M 6 14 L 14 14 L 14 13 L 6 13 L 6 14 M 10 7 L 8.5 8.5 L 9.4 8.5 L 9.4 11.5 L 8.4 11.5 L 10 13 L 11.5 11.5 L 10.6 11.5 L 10.6 8.5 L 11.5 8.5 L 10 7", fill: "currentColor"}),
 				]),
 			);
-			const envelopeDropdownGroup: HTMLElement = div({class: "editor-controls", style: "display: none;"}, plotterTimeRangeRow, envelopePlotterRow, pitchStartGroup, pitchEndGroup, extraPitchSettingRow, perEnvelopeSpeedRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, stairsStepAmountRow, clapMirrorAmountRow, measurementTypeRow, envelopeDelayRow, envelopePhaseRow);
+			const envelopeDropdownGroup: HTMLElement = div({class: "editor-controls", style: "display: none;"}, plotterTimeRangeRow, envelopePlotterRow, pitchStartGroup, pitchEndGroup, extraPitchSettingRow, LFOShapeRow, LFORadioButtonsRow, LFOAccelerationRow, LFOPulseWidthRow, LFOTrapezoidRatioRow, stairsStepAmountRow, perEnvelopeSpeedRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, clapMirrorAmountRow, measurementTypeRow, envelopeDelayRow, envelopePhaseRow);
 			const envelopeDropdown: HTMLButtonElement = button({style: "margin-left: 0.6em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.PerEnvelope, envelopeIndex)}, "▼");
 
 			const targetSelect: HTMLSelectElement = select();
@@ -834,6 +957,19 @@ export class EnvelopeEditor {
 			this._envelopeMoveUpButtons[envelopeIndex] = envelopeMoveUpButton;
 			this._envelopeMoveDownButtons[envelopeIndex] = envelopeMoveDownButton;
 			this._pitchEnvAutoBoundButtons[envelopeIndex] = pitchEnvAutoBoundButton;
+			this._LFOShapeSelects[envelopeIndex] = LFOShapeSelect;
+			this._LFOShapeRows[envelopeIndex] = LFOShapeRow;
+			this._LFOEnableAccelerationToggles[envelopeIndex] = LFOEnableAccelerationToggle;
+			this._LFOLoopOnceToggles[envelopeIndex] = LFOLoopOnceToggle;
+			this._LFOIgnoranceToggles[envelopeIndex] = LFOIgnoranceToggle;
+			this._LFORadioButtonRows[envelopeIndex] = LFORadioButtonsRow;
+			this._LFOAccelerationSliders[envelopeIndex] = LFOAccelerationSlider;
+			this._LFOAccelerationInputBoxes[envelopeIndex] = LFOAccelerationInputBox;
+			this._LFOAccelerationRows[envelopeIndex] = LFOAccelerationRow;
+			this._LFOPulseWidthSliders[envelopeIndex] = LFOPulseWidthSlider;
+			this._LFOPulseWidthRows[envelopeIndex] = LFOPulseWidthRow;
+			this._LFOTrapezoidRatioSliders[envelopeIndex] = LFOTrapezoidRatioSlider;
+			this._LFOTrapezoidRatioRows[envelopeIndex] = LFOTrapezoidRatioRow;
 			this._envelopeDropdownGroups[envelopeIndex] = envelopeDropdownGroup;
 			this._envelopeDropdowns[envelopeIndex] = envelopeDropdown;
 			this._targetSelects[envelopeIndex] = targetSelect;
@@ -909,11 +1045,19 @@ export class EnvelopeEditor {
 			}
 			this._clapMirrorAmountSliders[envelopeIndex].value = String(clamp(1, Config.clapMirrorsMax+1, instEnv.mirrorAmount));
 			this._clapMirrorAmountInputBoxes[envelopeIndex].value = String(clamp(1, Config.clapMirrorsMax+1, instEnv.mirrorAmount));
+			this._LFOShapeSelects[envelopeIndex].selectedIndex = instEnv.LFOSettings.LFOShape;
+			this._LFOEnableAccelerationToggles[envelopeIndex].checked = instEnv.LFOSettings.LFOAllowAccelerate ? true : false;
+			this._LFOLoopOnceToggles[envelopeIndex].checked = instEnv.LFOSettings.LFOLoopOnce ? true : false;
+			this._LFOIgnoranceToggles[envelopeIndex].checked = instEnv.LFOSettings.LFOIgnorance ? true : false;
+			this._LFOAccelerationSliders[envelopeIndex].value = String(clamp(Config.LFOAccelerationMin, Config.LFOAccelerationMax+1, instEnv.LFOSettings.LFOAcceleration));
+			this._LFOAccelerationInputBoxes[envelopeIndex].value = String(clamp(Config.LFOAccelerationMin, Config.LFOAccelerationMax+1, instEnv.LFOSettings.LFOAcceleration));
+			this._LFOPulseWidthSliders[envelopeIndex].value = String(clamp(0, 21, instEnv.LFOSettings.LFOPulseWidth));
+			this._LFOTrapezoidRatioSliders[envelopeIndex].value = String(clamp(Config.LFOTrapezoidRatioMin, Config.LFOTrapezoidRatioMax+1, instEnv.LFOSettings.LFOTrapezoidRatio));
 			this._envelopeMoveUpButtons[envelopeIndex].disabled = !(this._doc.prefs.showEnvReorderButtons);
 			this._envelopeMoveDownButtons[envelopeIndex].disabled = !(this._doc.prefs.showEnvReorderButtons);
 			this._pitchEnvAutoBoundButtons[envelopeIndex].disabled = !(instEnv.envelope == Config.envelopes.dictionary["pitch"].index);
-			this._targetSelects[envelopeIndex].value = String(instrument.envelopes[envelopeIndex].target + instrument.envelopes[envelopeIndex].index * Config.instrumentAutomationTargets.length);
-			this._envelopeSelects[envelopeIndex].selectedIndex = instrument.envelopes[envelopeIndex].envelope;
+			this._targetSelects[envelopeIndex].value = String(instEnv.target + instEnv.index * Config.instrumentAutomationTargets.length);
+			this._envelopeSelects[envelopeIndex].selectedIndex = instEnv.envelope;
 			this._targetSelects[envelopeIndex].style.minWidth = this._doc.prefs.showEnvReorderButtons ? "" : "116px";
 			this._targetSelects[envelopeIndex].style.marginLeft = this._doc.prefs.showEnvReorderButtons ? "" : "-27px";
 			this._envelopeCopyButtons[envelopeIndex].style.marginLeft = this._doc.prefs.showEnvReorderButtons ? "" : "-27px";
@@ -1005,6 +1149,44 @@ export class EnvelopeEditor {
 				this._pitchStartGroups[envelopeIndex].style.display = "none";
 				this._pitchEndGroups[envelopeIndex].style.display = "none";
 				this._extraPitchSettingRows[envelopeIndex].style.display = "none";
+			}
+
+			if ( // LFO settings are special-cased to the LFO envelope.
+				instEnv.envelope == Config.envelopes.dictionary["LFO"].index
+			) {
+				this._LFOShapeRows[envelopeIndex].style.display = "";
+				this._LFORadioButtonRows[envelopeIndex].style.display = "";
+				// Acceleration rows are only viewable when their radio button is selected.
+				if (instEnv.LFOSettings.LFOAllowAccelerate) {
+					this._LFOAccelerationRows[envelopeIndex].style.display = "";
+				} else {
+					this._LFOAccelerationRows[envelopeIndex].style.display = "none";
+				}
+				// Pulse width is special-cased to the "pulses" LFO shape.
+				if (instEnv.LFOSettings.LFOShape == 2) { 
+					this._LFOPulseWidthRows[envelopeIndex].style.display = "";
+				} else {
+					this._LFOPulseWidthRows[envelopeIndex].style.display = "none";
+				}
+				// Trapezoid ratio is special-cased to the "trapezoid" LFO shape.
+				if (instEnv.LFOSettings.LFOShape == 4) { 
+					this._LFOTrapezoidRatioRows[envelopeIndex].style.display = "";
+				} else {
+					this._LFOTrapezoidRatioRows[envelopeIndex].style.display = "none";
+				}
+				// Step amount is special-cased to the "stairs" LFO shape.
+				if (instEnv.LFOSettings.LFOShape == 5) { 
+					this._stairsStepAmountRows[envelopeIndex].style.display = "";
+				} else {
+					this._stairsStepAmountRows[envelopeIndex].style.display = "none";
+				}
+			} else {
+				this._LFOShapeRows[envelopeIndex].style.display = "none";
+				this._LFORadioButtonRows[envelopeIndex].style.display = "none";
+				this._LFOAccelerationRows[envelopeIndex].style.display = "none";
+				this._LFOPulseWidthRows[envelopeIndex].style.display = "none";
+				this._LFOTrapezoidRatioRows[envelopeIndex].style.display = "none";
+				this._stairsStepAmountRows[envelopeIndex].style.display = "none";
 			}
 		}
 		

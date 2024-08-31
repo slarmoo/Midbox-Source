@@ -55,7 +55,7 @@ function encodeUnisonSettings(buffer: number[], v: number, s: number, o: number,
     buffer.push(base64IntToCharCode[cleanI % 63], base64IntToCharCode[Math.floor(cleanI / 63)]);
 }
 
-function encodeEnvelopeSettings(buffer: number[], s: number, d: boolean, lb: number, ub: number, sa: number, dl: number, ps: number, pe: number, peA: boolean, peB: boolean, ph: number, mt: boolean, mi: number, sh: number, acBool: boolean, acNum: number, lo: boolean, ig: boolean, r: number, grid: number[], ts: number[]): void {
+function encodeEnvelopeSettings(buffer: number[], s: number, d: boolean, lb: number, ub: number, sa: number, dl: number, ps: number, pe: number, peA: boolean, peB: boolean, ph: number, mt: boolean, mi: number, sh: number, acBool: boolean, acNum: number, lo: boolean, ig: boolean, r: number, grid: number[], ts: number[], w: number): void {
     // IES (Speed)
     let cleanS = Math.round(Math.abs(s) * 1000);
     let cleanSDivided = Math.floor(cleanS / 63);
@@ -125,18 +125,21 @@ function encodeEnvelopeSettings(buffer: number[], s: number, d: boolean, lb: num
     // LFO Trapezoid Ratio
     buffer.push(base64IntToCharCode[r]);
 
-    // LFO Custom Grid
-    for (let i = 0; i < Config.customLFOGridMaxWidth; i++) {
+    // Custom Envelope Grid
+    for (let i = 0; i < Config.customEnvGridMaxWidth; i++) {
         buffer.push(base64IntToCharCode[grid[i]]);
     }
 
-    // LFO Grid Point Transitioning
-    for (let i = 0; i < Config.customLFOGridMaxWidth; i++) {
+    // Custom Envelope Grid Point Transitioning
+    for (let i = 0; i < Config.customEnvGridMaxWidth; i++) {
         buffer.push(base64IntToCharCode[ts[i]]);
     }
+
+    // LFO Pulse Width
+    buffer.push(base64IntToCharCode[w]);
 }
 
-function encodeDrumEnvelopeSettings(buffer: number[], s: number, d: boolean, lb: number, ub: number, sa: number, dl: number, ph: number, mt: boolean, mi: number, sh: number, acBool: boolean, acNum: number, lo: boolean, ig: boolean, r: number, grid: number[], ts: number[]): void {
+function encodeDrumEnvelopeSettings(buffer: number[], s: number, d: boolean, lb: number, ub: number, sa: number, dl: number, ph: number, mt: boolean, mi: number, sh: number, acBool: boolean, acNum: number, lo: boolean, ig: boolean, r: number, grid: number[], ts: number[], w: number): void {
     // IES (Speed)
     let cleanS = Math.round(Math.abs(s) * 1000);
     let cleanSDivided = Math.floor(cleanS / 63);
@@ -194,15 +197,18 @@ function encodeDrumEnvelopeSettings(buffer: number[], s: number, d: boolean, lb:
     // LFO Trapezoid Ratio
     buffer.push(base64IntToCharCode[r]);
 
-    // LFO Custom Grid
-    for (let i = 0; i < Config.customLFOGridMaxWidth; i++) {
+    // Custom Envelope Grid
+    for (let i = 0; i < Config.customEnvGridMaxWidth; i++) {
         buffer.push(base64IntToCharCode[grid[i]]);
     }
 
-    // LFO Grid Point Transitioning
-    for (let i = 0; i < Config.customLFOGridMaxWidth; i++) {
+    // Custom Envelope Grid Point Transitioning
+    for (let i = 0; i < Config.customEnvGridMaxWidth; i++) {
         buffer.push(base64IntToCharCode[ts[i]]);
     }
+
+    // LFO Pulse Width
+    buffer.push(base64IntToCharCode[w]);
 }
 
 function convertChipWaveToCustomChip(chipWaveIntegral: Float32Array): [Float32Array, Float32Array] {
@@ -1415,36 +1421,21 @@ class LFOSettings {
     public LFOAcceleration: number = 1;
     public LFOLoopOnce: boolean = false;
     public LFOIgnorance: boolean = false;
+    public LFOPulseWidth: number = Config.LFOPulseWidthDefault;
     public LFOTrapezoidRatio: number = 1;
-    public customLFOGrid: number[] = []; // ?
-    public LFOGridTransitioning: number[] = [];
 
     constructor() {
         this.reset();
     }
 
     reset(): void {
-        let swap: boolean = false;
         this.LFOShape = 0;
         this.LFOAllowAccelerate = false;
         this.LFOAcceleration = 1;
         this.LFOLoopOnce = false;
         this.LFOIgnorance = false;
+        this.LFOPulseWidth = Config.LFOPulseWidthDefault;
         this.LFOTrapezoidRatio = 1;
-        this.customLFOGrid = [];
-        for (let i = 0; i < Config.customLFOGridMaxWidth; i++) {
-            if (swap) {
-                this.customLFOGrid.push(1);
-                swap = false;
-            } else {
-                this.customLFOGrid.push(0);
-                swap = true;
-            }
-        }
-        this.LFOGridTransitioning = [];
-        for (let i = 0; i < Config.customLFOGridMaxWidth; i++) {
-            this.LFOGridTransitioning.push(Config.transitioningDefaultShape);
-        }
     }
 
     public toJsonObject(envelopeObject: any): Object {
@@ -1460,12 +1451,8 @@ class LFOSettings {
         if (this.LFOIgnorance != false && !this.LFOLoopOnce && !this.LFOAllowAccelerate) 
             envelopeObject["LFOIgnorance"] = this.LFOIgnorance;
         // Continue
+        if (this.LFOPulseWidth != Config.LFOPulseWidthDefault) envelopeObject["LFOPulseWidth"] = this.LFOPulseWidth;
         if (this.LFOTrapezoidRatio != 1) envelopeObject["LFOTrapezoidRatio"] = this.LFOTrapezoidRatio;
-        // Custom LFO is the final shape in the list.
-        if (this.LFOShape == Config.LFOShapeAmount) {
-            envelopeObject["customLFOGrid"] = this.customLFOGrid;
-            envelopeObject["LFOGridTransitioning"] = this.LFOGridTransitioning;
-        }
         return envelopeObject;
     }
 
@@ -1506,35 +1493,16 @@ class LFOSettings {
                 this.LFOIgnorance = false;
             }
 
+            if (envelopeObject["LFOPulseWidth"] != undefined) {
+                this.LFOPulseWidth = clamp(0, 21, envelopeObject["LFOPulseWidth"]);
+            } else {
+                this.LFOPulseWidth = Config.LFOPulseWidthDefault;
+            }
+
             if (envelopeObject["LFOTrapezoidRatio"] != undefined) {
                 this.LFOTrapezoidRatio = clamp(Config.LFOTrapezoidRatioMin, Config.LFOTrapezoidRatioMax+1, envelopeObject["LFOTrapezoidRatio"]);
             } else {
                 this.LFOTrapezoidRatio = 1;
-            }
-
-            if (envelopeObject["customLFOGrid"] != undefined) {
-                this.customLFOGrid = envelopeObject["LFOTrapezoidRatio"];
-            } else {
-                let swap: boolean = false;
-                this.customLFOGrid = [];
-                for (let i = 0; i < Config.customLFOGridMaxWidth; i++) {
-                    if (swap) {
-                        this.customLFOGrid.push(1);
-                        swap = false;
-                    } else {
-                        this.customLFOGrid.push(0);
-                        swap = true;
-                    }
-                }
-            }
-
-            if (envelopeObject["LFOGridTransitioning"] != undefined) {
-                this.LFOGridTransitioning = envelopeObject["LFOGridTransitioning"];
-            } else {
-                this.LFOGridTransitioning = [];
-                for (let i = 0; i < Config.customLFOGridMaxWidth; i++) {
-                    this.LFOGridTransitioning.push(Config.transitioningDefaultShape);
-                }
             }
         }
     }
@@ -1557,32 +1525,67 @@ export class EnvelopeSettings {
     public phase: number = 0;
     public measurementType: boolean = true;
     public mirrorAmount: number = 5;
-    public LFOSettings: LFOSettings = new LFOSettings;
+    public LFOSettings: LFOSettings = new LFOSettings();
+    public customEnvelopeGrid: number[] = [];
+    public pointConnections: number[] = [];
 
     constructor(instrument: Instrument) {
-        this.reset(instrument);
+        this.reset(instrument, false);
     }
 
-    reset(instrument: Instrument): void {
+    reset(instrument: Instrument, resetCustomEnvelopeOnly: boolean): void {
         let drumPitchEnvBoolean: boolean = instrument.isNoiseInstrument;
+        let swap: boolean = false;
 
-        this.target = 0;
-        this.index = 0;
-        this.envelope = 0;
-        this.envelopeSpeed = 1;
-        this.discrete = false;
-        this.lowerBound = 0;
-        this.upperBound = 1;
-        this.stepAmount = 4;
-        this.delay = 0;
-        this.pitchStart = drumPitchEnvBoolean ? 1 : 0;
-        this.pitchEnd = drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch;
-        this.pitchAmplify = false;
-        this.pitchBounce = false;
-        this.phase = 0;
-        this.measurementType = true;
-        this.mirrorAmount = 5;
-        this.LFOSettings.reset();
+        if (!resetCustomEnvelopeOnly) {
+            this.target = 0;
+            this.index = 0;
+            this.envelope = 0;
+            this.envelopeSpeed = 1;
+            this.discrete = false;
+            this.lowerBound = 0;
+            this.upperBound = 1;
+            this.stepAmount = 4;
+            this.delay = 0;
+            this.pitchStart = drumPitchEnvBoolean ? 1 : 0;
+            this.pitchEnd = drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch;
+            this.pitchAmplify = false;
+            this.pitchBounce = false;
+            this.phase = 0;
+            this.measurementType = true;
+            this.mirrorAmount = 5;
+            this.LFOSettings.reset();
+            this.customEnvelopeGrid = [];
+            for (let i = 0; i < Config.customEnvGridMaxWidth; i++) {
+                if (swap) {
+                    this.customEnvelopeGrid.push(1);
+                    swap = false;
+                } else {
+                    this.customEnvelopeGrid.push(0);
+                    swap = true;
+                }
+            }
+            this.pointConnections = [];
+            for (let i = 0; i < Config.customEnvGridMaxWidth; i++) {
+                this.pointConnections.push(Config.gridPointDefaultConnection);
+            }
+        } else {
+            // For addEnvelope() which may only want to provide the defaults for the 'basic custom' envelope settings.
+            this.customEnvelopeGrid = [];
+            for (let i = 0; i < Config.customEnvGridMaxWidth; i++) {
+                if (swap) {
+                    this.customEnvelopeGrid.push(1);
+                    swap = false;
+                } else {
+                    this.customEnvelopeGrid.push(0);
+                    swap = true;
+                }
+            }
+            this.pointConnections = [];
+            for (let i = 0; i < Config.customEnvGridMaxWidth; i++) {
+                this.pointConnections.push(Config.gridPointDefaultConnection);
+            }
+        }
     }
 
     public toJsonObject(instrument: Instrument): Object {
@@ -1613,11 +1616,15 @@ export class EnvelopeSettings {
         if (this.mirrorAmount != 5) envelopeObject["mirrorAmount"] = this.mirrorAmount;
         if (Config.instrumentAutomationTargets[this.target].maxCount > 1) envelopeObject["index"] = this.index;
         if (this.envelope == Config.envelopes.dictionary["LFO"].index) this.LFOSettings.toJsonObject(envelopeObject);
+        if (this.envelope == Config.envelopes.dictionary["custom (basic)"].index) {
+            envelopeObject["customEnvelopeGrid"] = this.customEnvelopeGrid;
+            envelopeObject["pointConnections"] = this.pointConnections;
+        }
         return envelopeObject;
     }
 
     public fromJsonObject(envelopeObject: any, instrument: Instrument): void {
-        this.reset(instrument);
+        this.reset(instrument, false);
 
         let drumPitchEnvBoolean: boolean = instrument.isNoiseInstrument;
         let defaultIt: boolean = true;
@@ -1732,6 +1739,31 @@ export class EnvelopeSettings {
             defaultIt = true;
             this.LFOSettings.fromJsonObject(envelopeObject, defaultIt);
         }
+
+        if (envelopeObject["customEnvelopeGrid"] != undefined) {
+            this.customEnvelopeGrid = envelopeObject["customEnvelopeGrid"];
+        } else {
+            let swap: boolean = false;
+            this.customEnvelopeGrid = [];
+            for (let i = 0; i < Config.customEnvGridMaxWidth; i++) {
+                if (swap) {
+                    this.customEnvelopeGrid.push(1);
+                    swap = false;
+                } else {
+                    this.customEnvelopeGrid.push(0);
+                    swap = true;
+                }
+            }
+        }
+
+        if (envelopeObject["pointConnections"] != undefined) {
+            this.pointConnections = envelopeObject["pointConnections"];
+        } else {
+            this.pointConnections = [];
+            for (let i = 0; i < Config.customEnvGridMaxWidth; i++) {
+                this.pointConnections.push(Config.gridPointDefaultConnection);
+            }
+        }
     }
 }
 
@@ -1746,13 +1778,17 @@ export class DrumsetEnvelopeSettings {
     public phase: number = 0;
     public measurementType: boolean = true;
     public mirrorAmount: number = 5;
-    public LFOSettings: LFOSettings = new LFOSettings;
+    public LFOSettings: LFOSettings = new LFOSettings();
+    public customEnvelopeGrid: number[] = [];
+    public pointConnections: number[] = [];
 
     constructor() {
         this.reset();
     }
 
     reset(): void {
+        let swap: boolean = false;
+
         this.envelope = Config.drumsetEnvelopes.dictionary["twang"].index;
         this.envelopeSpeed = 2;
         this.discrete = false;
@@ -1764,6 +1800,20 @@ export class DrumsetEnvelopeSettings {
         this.measurementType = true;
         this.mirrorAmount = 5;
         this.LFOSettings.reset();
+        this.customEnvelopeGrid = [];
+        for (let i = 0; i < Config.customEnvGridMaxWidth; i++) {
+            if (swap) {
+                this.customEnvelopeGrid.push(1);
+                swap = false;
+            } else {
+                this.customEnvelopeGrid.push(0);
+                swap = true;
+            }
+        }
+        this.pointConnections = [];
+        for (let i = 0; i < Config.customEnvGridMaxWidth; i++) {
+            this.pointConnections.push(Config.gridPointDefaultConnection);
+        }
     }
 
     public toJsonObject(): Object {
@@ -1781,6 +1831,10 @@ export class DrumsetEnvelopeSettings {
         if (this.measurementType != false) drumsetEnvelopeObject["measurementType"] = this.measurementType;
         if (this.mirrorAmount != 5) drumsetEnvelopeObject["mirrorAmount"] = this.mirrorAmount;
         if (this.envelope == Config.envelopes.dictionary["LFO"].index) this.LFOSettings.toJsonObject(drumsetEnvelopeObject);
+        if (this.envelope == Config.envelopes.dictionary["custom (basic)"].index) {
+            drumsetEnvelopeObject["customEnvelopeGrid"] = this.customEnvelopeGrid;
+            drumsetEnvelopeObject["pointConnections"] = this.pointConnections;
+        }
         return drumsetEnvelopeObject;
     }
 
@@ -1860,6 +1914,31 @@ export class DrumsetEnvelopeSettings {
         } else {
             defaultIt = true;
             this.LFOSettings.fromJsonObject(drumsetEnvelopeObject, defaultIt);
+        }
+
+        if (drumsetEnvelopeObject["customEnvelopeGrid"] != undefined) {
+            this.customEnvelopeGrid = drumsetEnvelopeObject["customEnvelopeGrid"];
+        } else {
+            let swap: boolean = false;
+            this.customEnvelopeGrid = [];
+            for (let i = 0; i < Config.customEnvGridMaxWidth; i++) {
+                if (swap) {
+                    this.customEnvelopeGrid.push(1);
+                    swap = false;
+                } else {
+                    this.customEnvelopeGrid.push(0);
+                    swap = true;
+                }
+            }
+        }
+
+        if (drumsetEnvelopeObject["pointConnections"] != undefined) {
+            this.pointConnections = drumsetEnvelopeObject["pointConnections"];
+        } else {
+            this.pointConnections = [];
+            for (let i = 0; i < Config.customEnvGridMaxWidth; i++) {
+                this.pointConnections.push(Config.gridPointDefaultConnection);
+            }
         }
     }
 }
@@ -4039,7 +4118,7 @@ export class Instrument {
         return 440.0 * Math.pow(2.0, (pitch - 69.0) / 12.0);
     }
 
-    public addEnvelope(target: number, index: number, envelope: number, envelopeSpeed: number = 1, discrete: boolean = false, lowerBound: number = 0, upperBound: number = 1, stepAmount: number = 4, delay: number = 0, pitchStart: number = this.isNoiseInstrument ? 1 : 0, pitchEnd: number = this.isNoiseInstrument ? Config.drumCount : Config.maxPitch, pitchAmplify: boolean = false, pitchBounce: boolean = false, phase: number = 0, measurementType: boolean = true, mirrorAmount: number = 5, LFOSettings: any[] = [0, false, 1, false, false, 1, undefined, undefined]): void {
+    public addEnvelope(target: number, index: number, envelope: number, envelopeSpeed: number = 1, discrete: boolean = false, lowerBound: number = 0, upperBound: number = 1, stepAmount: number = 4, delay: number = 0, pitchStart: number = this.isNoiseInstrument ? 1 : 0, pitchEnd: number = this.isNoiseInstrument ? Config.drumCount : Config.maxPitch, pitchAmplify: boolean = false, pitchBounce: boolean = false, phase: number = 0, measurementType: boolean = true, mirrorAmount: number = 5, LFOSetting: LFOSettings = new LFOSettings(), customEnvelopeGrid: number[] | null = null, pointConnections: number[] | null = null): void {
         let makeEmpty: boolean = false;
         if (!this.supportsEnvelopeTarget(target, index)) makeEmpty = true;
         if (this.envelopeCount >= Config.maxEnvelopeCount) throw new Error();
@@ -4061,14 +4140,19 @@ export class Instrument {
         envelopeSettings.phase = phase;
         envelopeSettings.measurementType = measurementType;
         envelopeSettings.mirrorAmount = mirrorAmount;
-        envelopeSettings.LFOSettings.LFOShape = LFOSettings[0];
-        envelopeSettings.LFOSettings.LFOAllowAccelerate = LFOSettings[1];
-        envelopeSettings.LFOSettings.LFOAcceleration = LFOSettings[2];
-        envelopeSettings.LFOSettings.LFOLoopOnce = LFOSettings[3];
-        envelopeSettings.LFOSettings.LFOIgnorance = LFOSettings[4];
-        envelopeSettings.LFOSettings.LFOTrapezoidRatio = LFOSettings[5];
-        envelopeSettings.LFOSettings.customLFOGrid = LFOSettings[6];
-        envelopeSettings.LFOSettings.LFOGridTransitioning = LFOSettings[7];
+        envelopeSettings.LFOSettings.LFOShape = LFOSetting.LFOShape;
+        envelopeSettings.LFOSettings.LFOAllowAccelerate = LFOSetting.LFOAllowAccelerate;
+        envelopeSettings.LFOSettings.LFOAcceleration = LFOSetting.LFOAcceleration;
+        envelopeSettings.LFOSettings.LFOLoopOnce = LFOSetting.LFOLoopOnce;
+        envelopeSettings.LFOSettings.LFOIgnorance = LFOSetting.LFOIgnorance;
+        envelopeSettings.LFOSettings.LFOPulseWidth = LFOSetting.LFOPulseWidth;
+        envelopeSettings.LFOSettings.LFOTrapezoidRatio = LFOSetting.LFOTrapezoidRatio;
+        // Only default custom envelope settings if one of these settings are null.
+        if (customEnvelopeGrid == null || pointConnections == null) envelopeSettings.reset(this, true); 
+        else {
+            envelopeSettings.customEnvelopeGrid = customEnvelopeGrid;
+            envelopeSettings.pointConnections = pointConnections;
+        }
         this.envelopeCount++;
     }
 
@@ -4710,7 +4794,7 @@ export class Song {
                     for (let j: number = 0; j < Config.drumCount; j++) {
                         let drumsetEnv = instrument.drumsetEnvelopes[j];
                         buffer.push(base64IntToCharCode[drumsetEnv.envelope >> 6], base64IntToCharCode[drumsetEnv.envelope & 0x3f]);
-                        encodeDrumEnvelopeSettings(buffer, drumsetEnv.envelopeSpeed, drumsetEnv.discrete, drumsetEnv.lowerBound, drumsetEnv.upperBound, drumsetEnv.stepAmount, drumsetEnv.delay, drumsetEnv.phase, drumsetEnv.measurementType, drumsetEnv.mirrorAmount, drumsetEnv.LFOSettings.LFOShape, drumsetEnv.LFOSettings.LFOAllowAccelerate, drumsetEnv.LFOSettings.LFOAcceleration, drumsetEnv.LFOSettings.LFOLoopOnce, drumsetEnv.LFOSettings.LFOLoopOnce, drumsetEnv.LFOSettings.LFOTrapezoidRatio, drumsetEnv.LFOSettings.customLFOGrid, drumsetEnv.LFOSettings.LFOGridTransitioning);
+                        encodeDrumEnvelopeSettings(buffer, drumsetEnv.envelopeSpeed, drumsetEnv.discrete, drumsetEnv.lowerBound, drumsetEnv.upperBound, drumsetEnv.stepAmount, drumsetEnv.delay, drumsetEnv.phase, drumsetEnv.measurementType, drumsetEnv.mirrorAmount, drumsetEnv.LFOSettings.LFOShape, drumsetEnv.LFOSettings.LFOAllowAccelerate, drumsetEnv.LFOSettings.LFOAcceleration, drumsetEnv.LFOSettings.LFOLoopOnce, drumsetEnv.LFOSettings.LFOIgnorance, drumsetEnv.LFOSettings.LFOTrapezoidRatio, drumsetEnv.customEnvelopeGrid, drumsetEnv.pointConnections, drumsetEnv.LFOSettings.LFOPulseWidth);
                     }
 
                     buffer.push(SongTagCode.spectrum);
@@ -4771,7 +4855,7 @@ export class Song {
                     buffer.push(base64IntToCharCode[idx.envelope >> 6], base64IntToCharCode[idx.envelope & 0x3F]);
                     // Other per-envelope settings have already been done in a function way above, so call that here.
                     // Discrete was also moved. It goes here.
-                    encodeEnvelopeSettings(buffer, idx.envelopeSpeed, idx.discrete, idx.lowerBound, idx.upperBound, idx.stepAmount, idx.delay, idx.pitchStart, idx.pitchEnd, idx.pitchAmplify, idx.pitchBounce, idx.phase, idx.measurementType, idx.mirrorAmount, idx.LFOSettings.LFOShape, idx.LFOSettings.LFOAllowAccelerate, idx.LFOSettings.LFOAcceleration, idx.LFOSettings.LFOLoopOnce, idx.LFOSettings.LFOLoopOnce, idx.LFOSettings.LFOTrapezoidRatio, idx.LFOSettings.customLFOGrid, idx.LFOSettings.LFOGridTransitioning);
+                    encodeEnvelopeSettings(buffer, idx.envelopeSpeed, idx.discrete, idx.lowerBound, idx.upperBound, idx.stepAmount, idx.delay, idx.pitchStart, idx.pitchEnd, idx.pitchAmplify, idx.pitchBounce, idx.phase, idx.measurementType, idx.mirrorAmount, idx.LFOSettings.LFOShape, idx.LFOSettings.LFOAllowAccelerate, idx.LFOSettings.LFOAcceleration, idx.LFOSettings.LFOLoopOnce, idx.LFOSettings.LFOIgnorance, idx.LFOSettings.LFOTrapezoidRatio, idx.customEnvelopeGrid, idx.pointConnections, idx.LFOSettings.LFOPulseWidth);
                 }
             }
         }
@@ -5560,10 +5644,11 @@ export class Song {
                         drumsetEnv.LFOSettings.LFOLoopOnce = (base64CharCodeToInt[compressed.charCodeAt(charIndex++)]) ? true : false;
                         drumsetEnv.LFOSettings.LFOIgnorance = (base64CharCodeToInt[compressed.charCodeAt(charIndex++)]) ? true : false;
                         drumsetEnv.LFOSettings.LFOTrapezoidRatio = clamp(Config.LFOTrapezoidRatioMin, Config.LFOTrapezoidRatioMax+1, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
-                        for (let i = 0; i < Config.customLFOGridMaxWidth; i++) {
-                            drumsetEnv.LFOSettings.customLFOGrid[i] = clamp(0, Config.customLFOGridHeight, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
-                            drumsetEnv.LFOSettings.LFOGridTransitioning[i] = clamp(0, Config.customLFOGridHeight, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
+                        for (let i = 0; i < Config.customEnvGridMaxWidth; i++) {
+                            drumsetEnv.customEnvelopeGrid[i] = clamp(0, Config.customEnvGridHeight, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
+                            drumsetEnv.pointConnections[i] = clamp(0, Config.pointConnectionAmount, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                         }
+                        drumsetEnv.LFOSettings.LFOPulseWidth = clamp(0, 21, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                     }
                 }
             } break;
@@ -6303,13 +6388,22 @@ export class Song {
                         const LFOLoopOnce: boolean = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] ? true : false;
                         const LFOIgnorance: boolean = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] ? true : false;
                         const LFOTrapezoidRatio: number = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
-                        const customLFOGrid: number[] = [];
-                        const LFOGridTransitioning: number[] = [];
-                        for (let i = 0; i < Config.customLFOGridMaxWidth; i++) {
-                            customLFOGrid[i] = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
-                            LFOGridTransitioning[i] = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
+                        const LFOSettingBundle: LFOSettings = new LFOSettings();
+                        LFOSettingBundle.LFOShape = LFOShape;
+                        LFOSettingBundle.LFOAllowAccelerate = LFOAllowAccelerate;
+                        LFOSettingBundle.LFOAcceleration = LFOAcceleration / 1000;
+                        LFOSettingBundle.LFOLoopOnce = LFOLoopOnce;
+                        LFOSettingBundle.LFOIgnorance = LFOIgnorance;
+                        LFOSettingBundle.LFOTrapezoidRatio = LFOTrapezoidRatio;
+                        const customEnvelopeGrid: number[] = [];
+                        const pointConnections: number[] = [];
+                        for (let i = 0; i < Config.customEnvGridMaxWidth; i++) {
+                            customEnvelopeGrid[i] = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
+                            pointConnections[i] = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
                         }
-                        instrument.addEnvelope(target, index, envelope, envSpeed/1000, discrete, lowerBound/1000, upperBound/1000, stepAmount/1000, delay/1000, pitchStart/1000, pitchEnd/1000, pitchAmplify, pitchBounce, phase/1000, measurementType, mirrorAmount, [LFOShape, LFOAllowAccelerate, LFOAcceleration/1000, LFOLoopOnce, LFOIgnorance, LFOTrapezoidRatio, customLFOGrid, LFOGridTransitioning]);
+                        const LFOPulseWidth: number = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
+                        LFOSettingBundle.LFOPulseWidth = LFOPulseWidth;
+                        instrument.addEnvelope(target, index, envelope, envSpeed/1000, discrete, lowerBound/1000, upperBound/1000, stepAmount/1000, delay/1000, pitchStart/1000, pitchEnd/1000, pitchAmplify, pitchBounce, phase/1000, measurementType, mirrorAmount, LFOSettingBundle, customEnvelopeGrid, pointConnections);
                     }
                 }
             } break;
@@ -6472,7 +6566,7 @@ export class Song {
                                 } break;
                                 case 29: {
                                     // Sentinel value, used to indicate the new pulse width operator format.
-                                    // See also the comment in toBase64String.
+                                    // See also: The comment in toBase64String().
                                     instrument.operators[o].pulseWidth = clamp(0, (Config.pulseWidthRange * 2 - 1) + 1, (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] << 6) + base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                                     instrument.operators[o].pulseWidthDecimalOffset = clamp(0, 99 + 1, (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] << 6) + base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                                 } break;
@@ -7833,6 +7927,12 @@ export class EnvelopeComputer {
             let phaseSeconds: number = 0;
             let pitch: number = 1;
             let mirrorAmount: number = 5;
+            let LFOShape: number = 0;
+            let LFOAcceleration: number = 1;
+            let LFOLoopOnce: boolean = false;
+            let LFOIgnorance: boolean = false;
+            let LFOPulseWidth: number = Config.LFOPulseWidthDefault;
+            let LFOTrapezoidRatio: number = 1;
             if (envelopeIndex == instrument.envelopeCount) {
                 if (usedNoteSize) break;
                 // Special case: if no other envelopes used note size, default to applying it to note volume.
@@ -7864,30 +7964,36 @@ export class EnvelopeComputer {
                 }
                 if (tone) pitch = Synth.notePitchToEnvelopeValue(instrument, envelopeIndex, tone, instrumentState);
                 mirrorAmount = envelopeSettings.mirrorAmount;
+                LFOShape = envelopeSettings.LFOSettings.LFOShape;
+                if (envelopeSettings.LFOSettings.LFOAllowAccelerate) LFOAcceleration = envelopeSettings.LFOSettings.LFOAcceleration;
+                LFOLoopOnce = envelopeSettings.LFOSettings.LFOLoopOnce;
+                LFOIgnorance = envelopeSettings.LFOSettings.LFOIgnorance;
+                LFOPulseWidth = envelopeSettings.LFOSettings.LFOPulseWidth * 5;
+                LFOTrapezoidRatio = envelopeSettings.LFOSettings.LFOTrapezoidRatio;
                 
                 if (envelope.type == EnvelopeType.noteSize) usedNoteSize = true;
             }
             if (automationTarget.computeIndex != null) {
                 const computeIndex: number = automationTarget.computeIndex + targetIndex;
-                let envelopeStart: number = EnvelopeComputer.computeEnvelope(envelope, this.noteSecondsStart[envelopeIndex], beatTimeStart[envelopeIndex], beatNoteTimeStart[envelopeIndex], noteSizeStart, lowerBound, upperBound, stepAmount, delayBeats, delaySeconds, phaseBeats, phaseSeconds, pitch, mirrorAmount);
+                let envelopeStart: number = EnvelopeComputer.computeEnvelope(envelope, this.noteSecondsStart[envelopeIndex], beatTimeStart[envelopeIndex], beatNoteTimeStart[envelopeIndex], noteSizeStart, lowerBound, upperBound, stepAmount, delayBeats, delaySeconds, phaseBeats, phaseSeconds, pitch, mirrorAmount, LFOShape, LFOAcceleration, LFOLoopOnce, LFOIgnorance, LFOPulseWidth, LFOTrapezoidRatio);
 
                 if (prevSlideStart) {
-                    const other: number = EnvelopeComputer.computeEnvelope(envelope, this.prevNoteSecondsStart[envelopeIndex], beatTimeStart[envelopeIndex], beatNoteTimeStart[envelopeIndex], prevNoteSize, lowerBound, upperBound, stepAmount, delayBeats, delaySeconds, phaseBeats, phaseSeconds, pitch, mirrorAmount);
+                    const other: number = EnvelopeComputer.computeEnvelope(envelope, this.prevNoteSecondsStart[envelopeIndex], beatTimeStart[envelopeIndex], beatNoteTimeStart[envelopeIndex], prevNoteSize, lowerBound, upperBound, stepAmount, delayBeats, delaySeconds, phaseBeats, phaseSeconds, pitch, mirrorAmount, LFOShape, LFOAcceleration, LFOLoopOnce, LFOIgnorance, LFOPulseWidth, LFOTrapezoidRatio);
                     envelopeStart += (other - envelopeStart) * prevSlideRatioStart;
                 }
                 if (nextSlideStart) {
-                    const other: number = EnvelopeComputer.computeEnvelope(envelope, 0.0, beatTimeStart[envelopeIndex], 0.0, nextNoteSize, lowerBound, upperBound, stepAmount, delayBeats, delaySeconds, phaseBeats, phaseSeconds, pitch, mirrorAmount);
+                    const other: number = EnvelopeComputer.computeEnvelope(envelope, 0.0, beatTimeStart[envelopeIndex], 0.0, nextNoteSize, lowerBound, upperBound, stepAmount, delayBeats, delaySeconds, phaseBeats, phaseSeconds, pitch, mirrorAmount, LFOShape, LFOAcceleration, LFOLoopOnce, LFOIgnorance, LFOPulseWidth, LFOTrapezoidRatio);
                     envelopeStart += (other - envelopeStart) * nextSlideRatioStart;
                 }
                 let envelopeEnd: number = envelopeStart;
                 if (discrete == false) {
-                    envelopeEnd = EnvelopeComputer.computeEnvelope(envelope, this.noteSecondsEnd[envelopeIndex], beatTimeEnd[envelopeIndex], beatNoteTimeEnd[envelopeIndex], noteSizeEnd, lowerBound, upperBound, stepAmount, delayBeats, delaySeconds, phaseBeats, phaseSeconds, pitch, mirrorAmount);
+                    envelopeEnd = EnvelopeComputer.computeEnvelope(envelope, this.noteSecondsEnd[envelopeIndex], beatTimeEnd[envelopeIndex], beatNoteTimeEnd[envelopeIndex], noteSizeEnd, lowerBound, upperBound, stepAmount, delayBeats, delaySeconds, phaseBeats, phaseSeconds, pitch, mirrorAmount, LFOShape, LFOAcceleration, LFOLoopOnce, LFOIgnorance, LFOPulseWidth, LFOTrapezoidRatio);
                     if (prevSlideEnd) {
-                        const other: number = EnvelopeComputer.computeEnvelope(envelope, this.prevNoteSecondsEnd[envelopeIndex], beatNoteTimeEnd[envelopeIndex], beatTimeEnd[envelopeIndex], prevNoteSize, lowerBound, upperBound, stepAmount, delayBeats, delaySeconds, phaseBeats, phaseSeconds, pitch, mirrorAmount);
+                        const other: number = EnvelopeComputer.computeEnvelope(envelope, this.prevNoteSecondsEnd[envelopeIndex], beatNoteTimeEnd[envelopeIndex], beatTimeEnd[envelopeIndex], prevNoteSize, lowerBound, upperBound, stepAmount, delayBeats, delaySeconds, phaseBeats, phaseSeconds, pitch, mirrorAmount, LFOShape, LFOAcceleration, LFOLoopOnce, LFOIgnorance, LFOPulseWidth, LFOTrapezoidRatio);
                         envelopeEnd += (other - envelopeEnd) * prevSlideRatioEnd;
                     }
                     if (nextSlideEnd) {
-                        const other: number = EnvelopeComputer.computeEnvelope(envelope, 0.0, beatTimeEnd[envelopeIndex], 0.0, nextNoteSize, lowerBound, upperBound, stepAmount, delayBeats, delaySeconds, phaseBeats, phaseSeconds, pitch, mirrorAmount);
+                        const other: number = EnvelopeComputer.computeEnvelope(envelope, 0.0, beatTimeEnd[envelopeIndex], 0.0, nextNoteSize, lowerBound, upperBound, stepAmount, delayBeats, delaySeconds, phaseBeats, phaseSeconds, pitch, mirrorAmount, LFOShape, LFOAcceleration, LFOLoopOnce, LFOIgnorance, LFOPulseWidth, LFOTrapezoidRatio);
                         envelopeEnd += (other - envelopeEnd) * nextSlideRatioEnd;
                     }
                 }
@@ -7918,6 +8024,14 @@ export class EnvelopeComputer {
                 let phaseBeats: number = 0;
                 let phaseSeconds: number = 0;
                 let mirrorAmount: number = envelopeSettings.mirrorAmount;
+                let LFOShape: number = envelopeSettings.LFOSettings.LFOShape;
+                let LFOAcceleration: number;
+                if (envelopeSettings.LFOSettings.LFOAllowAccelerate) LFOAcceleration = envelopeSettings.LFOSettings.LFOAcceleration;
+                else LFOAcceleration = 1;
+                let LFOLoopOnce: boolean = envelopeSettings.LFOSettings.LFOLoopOnce;
+                let LFOIgnorance: boolean = envelopeSettings.LFOSettings.LFOIgnorance;
+                let LFOPulseWidth: number = envelopeSettings.LFOSettings.LFOPulseWidth * 5;
+                let LFOTrapezoidRatio: number = envelopeSettings.LFOSettings.LFOTrapezoidRatio;
                 // Delay is unaffected by IES (individual envelope speed). 
                 let envSpeed = envelopeSettings.envelopeSpeed;
                 if (measureInBeats) {
@@ -7932,25 +8046,25 @@ export class EnvelopeComputer {
                     phaseBeats = phaseSeconds / secondsPerTick * beatsPerTick;
                 }
 
-                let drumsetFilterEnvelopeStart: number = EnvelopeComputer.computeEnvelope(envelope, this.drumsetNoteSecondsStart[drumIndex], drumsetBeatTimeStart[drumIndex], drumsetBeatNoteTimeStart[drumIndex], noteSizeStart, lowerBound, upperBound, stepAmount, delayBeats, delaySeconds, phaseBeats, phaseSeconds, 0, mirrorAmount);
+                let drumsetFilterEnvelopeStart: number = EnvelopeComputer.computeEnvelope(envelope, this.drumsetNoteSecondsStart[drumIndex], drumsetBeatTimeStart[drumIndex], drumsetBeatNoteTimeStart[drumIndex], noteSizeStart, lowerBound, upperBound, stepAmount, delayBeats, delaySeconds, phaseBeats, phaseSeconds, 0, mirrorAmount, LFOShape, LFOAcceleration, LFOLoopOnce, LFOIgnorance, LFOPulseWidth, LFOTrapezoidRatio);
 
                 if (prevSlideStart) {
-                    const other: number = EnvelopeComputer.computeEnvelope(envelope, this.drumsetPrevNoteSecondsStart[drumIndex], drumsetBeatTimeStart[drumIndex], drumsetBeatNoteTimeStart[drumIndex], prevNoteSize, lowerBound, upperBound, stepAmount, delayBeats, delaySeconds, phaseBeats, phaseSeconds, 0, mirrorAmount);
+                    const other: number = EnvelopeComputer.computeEnvelope(envelope, this.drumsetPrevNoteSecondsStart[drumIndex], drumsetBeatTimeStart[drumIndex], drumsetBeatNoteTimeStart[drumIndex], prevNoteSize, lowerBound, upperBound, stepAmount, delayBeats, delaySeconds, phaseBeats, phaseSeconds, 0, mirrorAmount, LFOShape, LFOAcceleration, LFOLoopOnce, LFOIgnorance, LFOPulseWidth, LFOTrapezoidRatio);
                     drumsetFilterEnvelopeStart += (other - drumsetFilterEnvelopeStart) * prevSlideRatioStart;
                 }
                 if (nextSlideStart) {
-                    const other: number = EnvelopeComputer.computeEnvelope(envelope, 0.0, drumsetBeatTimeStart[drumIndex], 0.0, nextNoteSize, lowerBound, upperBound, stepAmount, delayBeats, delaySeconds, phaseBeats, phaseSeconds, 0, mirrorAmount);
+                    const other: number = EnvelopeComputer.computeEnvelope(envelope, 0.0, drumsetBeatTimeStart[drumIndex], 0.0, nextNoteSize, lowerBound, upperBound, stepAmount, delayBeats, delaySeconds, phaseBeats, phaseSeconds, 0, mirrorAmount, LFOShape, LFOAcceleration, LFOLoopOnce, LFOIgnorance, LFOPulseWidth, LFOTrapezoidRatio);
                     drumsetFilterEnvelopeStart += (other - drumsetFilterEnvelopeStart) * nextSlideRatioStart;
                 }
                 let drumsetFilterEnvelopeEnd: number = drumsetFilterEnvelopeStart;
                 if (discrete == false) {
-                    drumsetFilterEnvelopeEnd = EnvelopeComputer.computeEnvelope(envelope, this.drumsetNoteSecondsEnd[drumIndex], drumsetBeatTimeEnd[drumIndex], drumsetBeatNoteTimeEnd[drumIndex], noteSizeEnd, lowerBound, upperBound, stepAmount, delayBeats, delaySeconds, phaseBeats, phaseSeconds, 0, mirrorAmount);
+                    drumsetFilterEnvelopeEnd = EnvelopeComputer.computeEnvelope(envelope, this.drumsetNoteSecondsEnd[drumIndex], drumsetBeatTimeEnd[drumIndex], drumsetBeatNoteTimeEnd[drumIndex], noteSizeEnd, lowerBound, upperBound, stepAmount, delayBeats, delaySeconds, phaseBeats, phaseSeconds, 0, mirrorAmount, LFOShape, LFOAcceleration, LFOLoopOnce, LFOIgnorance, LFOPulseWidth, LFOTrapezoidRatio);
                     if (prevSlideEnd) {
-                        const other: number = EnvelopeComputer.computeEnvelope(envelope, this.drumsetPrevNoteSecondsEnd[drumIndex], drumsetBeatNoteTimeEnd[drumIndex], drumsetBeatTimeEnd[drumIndex], prevNoteSize, lowerBound, upperBound, stepAmount, delayBeats, delaySeconds, phaseBeats, phaseSeconds, 0, mirrorAmount);
+                        const other: number = EnvelopeComputer.computeEnvelope(envelope, this.drumsetPrevNoteSecondsEnd[drumIndex], drumsetBeatNoteTimeEnd[drumIndex], drumsetBeatTimeEnd[drumIndex], prevNoteSize, lowerBound, upperBound, stepAmount, delayBeats, delaySeconds, phaseBeats, phaseSeconds, 0, mirrorAmount, LFOShape, LFOAcceleration, LFOLoopOnce, LFOIgnorance, LFOPulseWidth, LFOTrapezoidRatio);
                         drumsetFilterEnvelopeEnd += (other - drumsetFilterEnvelopeEnd) * prevSlideRatioEnd;
                     }
                     if (nextSlideEnd) {
-                        const other: number = EnvelopeComputer.computeEnvelope(envelope, 0.0, drumsetBeatTimeEnd[drumIndex], 0.0, nextNoteSize, lowerBound, upperBound, stepAmount, delayBeats, delaySeconds, phaseBeats, phaseSeconds, 0, mirrorAmount);
+                        const other: number = EnvelopeComputer.computeEnvelope(envelope, 0.0, drumsetBeatTimeEnd[drumIndex], 0.0, nextNoteSize, lowerBound, upperBound, stepAmount, delayBeats, delaySeconds, phaseBeats, phaseSeconds, 0, mirrorAmount, LFOShape, LFOAcceleration, LFOLoopOnce, LFOIgnorance, LFOPulseWidth, LFOTrapezoidRatio);
                         drumsetFilterEnvelopeEnd += (other - drumsetFilterEnvelopeEnd) * nextSlideRatioEnd;
                     }
                 }
@@ -8000,7 +8114,7 @@ export class EnvelopeComputer {
         this._modifiedDrumsetEnvelopeCount = 0;
     }
 
-    public static computeEnvelope(envelope: Envelope, time: number, beats: number, beatNote: number, noteSize: number, lowerBound: number, upperBound: number, stepAmount: number, delayBeats: number, delaySeconds: number, phaseBeats: number, phaseSeconds: number, pitch: number, mirrorAmount: number): number {
+    public static computeEnvelope(envelope: Envelope, time: number, beats: number, beatNote: number, noteSize: number, lowerBound: number, upperBound: number, stepAmount: number, delayBeats: number, delaySeconds: number, phaseBeats: number, phaseSeconds: number, pitch: number, mirrorAmount: number, LFOShape: number, LFOAcceleration: number, LFOLoopOnce: boolean, LFOIgnorance: boolean, LFOPulseWidth: number, LFOTrapezoidRatio: number): number {
         // This is where each envelope's equations are computed as well as the settings that change their properties.
         switch (envelope.type) {
             case EnvelopeType.noteSize: return Synth.noteSizeToVolumeMult(noteSize) * (upperBound - lowerBound) + lowerBound;
@@ -8117,8 +8231,6 @@ export class EnvelopeComputer {
                 else return (0.5 - Math.sin(((time + 3) / 8) ** -1.3 * (400 / envelope.speed)) * 0.5) * (upperBound - lowerBound) + lowerBound;
             }
             case EnvelopeType.stairs: {
-                // https://en.wikipedia.org/wiki/Smoothstep
-                // Shows this whole equation for making stair-like stuff.
                 const timeLeft: number = -beatNote + delayBeats;
                 beatNote = Math.max(0, beatNote - delayBeats + phaseBeats);
                 const scale: number = envelope.speed;
@@ -8171,6 +8283,105 @@ export class EnvelopeComputer {
                 time = Math.max(0, time - delaySeconds + phaseSeconds);
                 if (timeLeft > 0) return lowerBound;
                 return (Math.max(0, Math.min(1, 1.0 - Math.abs((time)*envelope.speed - 0.5) * 2))) * (upperBound - lowerBound) + lowerBound;
+            }
+            // Back to Midbox envelopes.
+            // The LFO envelope type is a compilation of repeating shapes.
+            case EnvelopeType.LFO: {
+                // Case 1, sine.
+                if (LFOShape == 0) {
+                    const timeLeft: number = -beatNote + delayBeats;
+                    if (LFOIgnorance) {
+                        beats = LFOLoopOnce ? Math.max(0, Math.min(0.5, beats - delayBeats + phaseBeats)) : Math.max(0, beats - delayBeats + phaseBeats);
+                    } else {
+                        beatNote = LFOLoopOnce ? Math.max(0, Math.min(0.5, beatNote - delayBeats + phaseBeats)) : Math.max(0, beatNote - delayBeats + phaseBeats);
+                    }
+                    if (timeLeft > 0) return lowerBound;
+                    else return (0.5 - Math.cos((LFOIgnorance ? beats : (Math.pow(beatNote + 1, LFOAcceleration) - 1)) * 2.0 * Math.PI * envelope.speed) * 0.5) * (upperBound - lowerBound) + lowerBound;
+                } else 
+                // Case 2, triangle.
+                if (LFOShape == 1) {
+                    const timeLeft: number = -beatNote + delayBeats;
+                    if (LFOIgnorance) {
+                        beats = LFOLoopOnce ? Math.max(0, Math.min(0.5, beats - delayBeats + phaseBeats)) : Math.max(0, beats - delayBeats + phaseBeats);
+                    } else {
+                        beatNote = LFOLoopOnce ? Math.max(0, Math.min(0.5, beatNote - delayBeats + phaseBeats)) : Math.max(0, beatNote - delayBeats + phaseBeats);
+                    }
+                    if (timeLeft > 0) return lowerBound;
+                    else return (Math.abs(Math.asin(Math.sin((LFOIgnorance ? beats : (Math.pow(beatNote + 1, LFOAcceleration) - 1)) * Math.PI * envelope.speed))) * 0.6366) * (upperBound - lowerBound) + lowerBound;
+                } else
+                // Case 3, pulses.
+                if (LFOShape == 2) {
+                    const timeLeft: number = -beatNote + delayBeats;
+                    if (LFOIgnorance) {
+                        beats = LFOLoopOnce ? Math.max(0, Math.min(0.5, beats - delayBeats + phaseBeats)) : Math.max(0, beats - delayBeats + phaseBeats);
+                    } else {
+                        beatNote = LFOLoopOnce ? Math.max(0, Math.min(0.5, beatNote - delayBeats + phaseBeats)) : Math.max(0, beatNote - delayBeats + phaseBeats);
+                    }
+                    let p1: number = mod((LFOIgnorance ? -beats : (Math.pow(-beatNote + 1, LFOAcceleration) - 1)) * envelope.speed, 1);
+                    let p2: number = mod(((LFOIgnorance ? -beats : (Math.pow(-beatNote + 1, LFOAcceleration) - 1)) * envelope.speed) + (LFOPulseWidth / 100), 1) - (LFOPulseWidth / 100);
+                    if (timeLeft > 0) return 1 * (upperBound - lowerBound) + lowerBound;
+                    else return (p1 - p2) * (upperBound - lowerBound) + lowerBound;
+                } else
+                // Case 4, sawtooth.
+                if (LFOShape == 3) {
+                    const timeLeft: number = -beatNote + delayBeats;
+                    if (LFOIgnorance) {
+                        beats = LFOLoopOnce ? Math.max(0, Math.min(0.5, beats - delayBeats + phaseBeats)) : Math.max(0, beats - delayBeats + phaseBeats);
+                    } else {
+                        beatNote = LFOLoopOnce ? Math.max(0, Math.min(0.5, beatNote - delayBeats + phaseBeats)) : Math.max(0, beatNote - delayBeats + phaseBeats);
+                    }
+                    if (timeLeft > 0) return lowerBound;
+                    else return (mod((LFOIgnorance ? beats : (Math.pow(beatNote + 1, LFOAcceleration) - 1)) * envelope.speed, 1)) * (upperBound - lowerBound) + lowerBound;
+                } else
+                // Case 5, trapezoid.
+                if (LFOShape == 4) {
+                    const timeLeft: number = -beatNote + delayBeats;
+                    if (LFOIgnorance) {
+                        beats = LFOLoopOnce ? Math.max(0, Math.min(0.5, beats - delayBeats + phaseBeats)) : Math.max(0, beats - delayBeats + phaseBeats);
+                    } else {
+                        beatNote = LFOLoopOnce ? Math.max(0, Math.min(0.5, beatNote - delayBeats + phaseBeats)) : Math.max(0, beatNote - delayBeats + phaseBeats);
+                    }
+                    if (timeLeft > 0) return lowerBound;
+                    else return (Math.max(-0.5, Math.min(0.5, (Math.asin(Math.sin(((LFOIgnorance ? beats : (Math.pow(beatNote + 1, LFOAcceleration) - 1)) * 4 - (0.25 / LFOTrapezoidRatio)) * Math.PI))) * 0.63662 * LFOTrapezoidRatio)) + 0.5) * (upperBound - lowerBound) + lowerBound;
+                } else
+                // Case 6, stairs. 
+                if (LFOShape == 5) {
+                    // https://en.wikipedia.org/wiki/Smoothstep
+                    // Shows this whole equation for making stair-like stuff.
+                    const timeLeft: number = -beatNote + delayBeats;
+                    if (LFOIgnorance) {
+                        beats = Math.max(0, beats - delayBeats + phaseBeats);
+                    } else {
+                        beatNote = Math.max(0, beatNote - delayBeats + phaseBeats);
+                    }
+                    const scale: number = -1;
+                    const offset: number = 1;
+                    const smoothness: number = 0.000001;
+                    const steps: number = stepAmount;
+                    let x: number;
+                    if (LFOLoopOnce) {
+                        x = (LFOIgnorance ? beats : (Math.pow(beatNote + 1, LFOAcceleration) - 1));
+                    } else {
+                        x = (LFOIgnorance ? beats : (Math.pow(beatNote + 1, LFOAcceleration) - 1)) % -1 * (0.5 / (-1 * (-1 / 2)));
+                    }
+                    const a: number = 0.5 - smoothness;
+                    const b: number = 0.5 + smoothness;
+                    const x1: number = x * steps - 0.5 + smoothness;
+                    const x1i: number = x1 | 0;
+                    let x2: number = ((x1 - x1i) - a) / (b - a);
+                    x2 = x2 > 1.0 ? 1.0 : x2 < 0.0 ? 0.0 : x2;
+                    const x3: number = x2 * x2 * (3.0 - 2.0 * x2) + x1i;
+                    if (timeLeft > 0) return 1 * (upperBound - lowerBound) + lowerBound;
+                    else return (Math.max(0, Math.min(1, ((x3 / steps) * scale + offset)))) * (upperBound - lowerBound) + lowerBound;
+                } else {
+                    // No shapes left.
+                    return 0;
+                }
+            }
+            // This envelope type is very special, you can create your own envelope with it!
+            // Very complex system of stuff needed to build it up though...
+            case EnvelopeType.basicCustom: {
+                return 1;
             }
             default: throw new Error("Unrecognized operator envelope type.");
         }

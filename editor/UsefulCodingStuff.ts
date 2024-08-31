@@ -7,7 +7,7 @@ export function mod(a: number, b: number): number {
 }
 
 // Sigma
-// That sideways M used in math that makes interesting staircase-like stuff.
+// Used in math to make staircase-like stuff.
 export function sigma(a: number, b: (i: number) => number, c: number): number {
     let result = 0;
     for (let i = c; i <= a; i++) {

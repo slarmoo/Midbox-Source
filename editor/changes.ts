@@ -2830,6 +2830,224 @@ export class ChangeDrumsetClapMirrorAmount extends Change {
     }
 }
 
+export class ChangeLFOEnvelopeShape extends Change {
+    constructor(doc: SongDocument, envelopeIndex: number, oldValue: number, newValue: number) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        if (oldValue != newValue) {
+            instrument.envelopes[envelopeIndex].LFOSettings.LFOShape = newValue;
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
+export class ChangeDrumsetLFOEnvelopeShape extends Change {
+    constructor(doc: SongDocument, drumIndex: number, oldValue: number, newValue: number) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        if (oldValue != newValue) {
+            instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOShape = newValue;
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
+export class ChangeEnvelopeAccelerationEnabled extends Change {
+    constructor(doc: SongDocument, envelopeIndex: number, newValue: boolean) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        const oldValue = instrument.envelopes[envelopeIndex].LFOSettings.LFOAllowAccelerate;
+        if (oldValue != newValue) {
+            instrument.envelopes[envelopeIndex].LFOSettings.LFOAllowAccelerate = newValue;
+            // Extra step: Toggle other LFO ratio settings to be off if this one is on.
+            if (instrument.envelopes[envelopeIndex].LFOSettings.LFOAllowAccelerate && (instrument.envelopes[envelopeIndex].LFOSettings.LFOLoopOnce || instrument.envelopes[envelopeIndex].LFOSettings.LFOIgnorance)) {
+                instrument.envelopes[envelopeIndex].LFOSettings.LFOLoopOnce = false;
+                instrument.envelopes[envelopeIndex].LFOSettings.LFOIgnorance = false;
+            }
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
+export class ChangeEnvelopeLooping extends Change {
+    constructor(doc: SongDocument, envelopeIndex: number, newValue: boolean) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        const oldValue = instrument.envelopes[envelopeIndex].LFOSettings.LFOLoopOnce;
+        if (oldValue != newValue) {
+            instrument.envelopes[envelopeIndex].LFOSettings.LFOLoopOnce = newValue;
+            // Extra step: Toggle other LFO ratio settings to be off if this one is on.
+            if (instrument.envelopes[envelopeIndex].LFOSettings.LFOLoopOnce && (instrument.envelopes[envelopeIndex].LFOSettings.LFOAllowAccelerate || instrument.envelopes[envelopeIndex].LFOSettings.LFOIgnorance)) {
+                instrument.envelopes[envelopeIndex].LFOSettings.LFOAllowAccelerate = false;
+                instrument.envelopes[envelopeIndex].LFOSettings.LFOIgnorance = false;
+            }
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
+export class ChangeEnvelopeIgnorance extends Change {
+    constructor(doc: SongDocument, envelopeIndex: number, newValue: boolean) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        const oldValue = instrument.envelopes[envelopeIndex].LFOSettings.LFOIgnorance;
+        if (oldValue != newValue) {
+            instrument.envelopes[envelopeIndex].LFOSettings.LFOIgnorance = newValue;
+            // Extra step: Toggle other LFO ratio settings to be off if this one is on.
+            if (instrument.envelopes[envelopeIndex].LFOSettings.LFOIgnorance && (instrument.envelopes[envelopeIndex].LFOSettings.LFOAllowAccelerate || instrument.envelopes[envelopeIndex].LFOSettings.LFOLoopOnce)) {
+                instrument.envelopes[envelopeIndex].LFOSettings.LFOAllowAccelerate = false;
+                instrument.envelopes[envelopeIndex].LFOSettings.LFOLoopOnce = false;
+            }
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
+export class ChangeDrumsetEnvelopeAccelerationEnabled extends Change {
+    constructor(doc: SongDocument, drumIndex: number, newValue: boolean) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        const oldValue = instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOAllowAccelerate;
+        if (oldValue != newValue) {
+            instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOAllowAccelerate = newValue;
+            // Extra step: Toggle other LFO ratio settings to be off if this one is on.
+            if (instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOAllowAccelerate && (instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOLoopOnce || instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOIgnorance)) {
+                instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOLoopOnce = false;
+                instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOIgnorance = false;
+            }
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
+export class ChangeDrumsetEnvelopeLooping extends Change {
+    constructor(doc: SongDocument, drumIndex: number, newValue: boolean) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        const oldValue = instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOLoopOnce;
+        if (oldValue != newValue) {
+            instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOLoopOnce = newValue;
+            // Extra step: Toggle other LFO ratio settings to be off if this one is on.
+            if (instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOLoopOnce && (instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOAllowAccelerate || instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOIgnorance)) {
+                instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOAllowAccelerate = false;
+                instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOIgnorance = false;
+            }
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
+export class ChangeDrumsetEnvelopeIgnorance extends Change {
+    constructor(doc: SongDocument, drumIndex: number, newValue: boolean) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        const oldValue = instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOIgnorance;
+        if (oldValue != newValue) {
+            instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOIgnorance = newValue;
+            // Extra step: Toggle other LFO ratio settings to be off if this one is on.
+            if (instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOIgnorance && (instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOAllowAccelerate || instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOLoopOnce)) {
+                instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOAllowAccelerate = false;
+                instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOLoopOnce = false;
+            }
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
+export class ChangeEnvelopeAcceleration extends Change {
+    constructor(doc: SongDocument, envelopeIndex: number, oldValue: number, newValue: number) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        if (oldValue != newValue) {
+            instrument.envelopes[envelopeIndex].LFOSettings.LFOAcceleration = newValue;
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
+export class ChangeDrumsetEnvelopeAcceleration extends Change {
+    constructor(doc: SongDocument, drumIndex: number, oldValue: number, newValue: number) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        if (oldValue != newValue) {
+            instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOAcceleration = newValue;
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
+export class ChangeLFOEnvelopePulseWidth extends Change {
+    constructor(doc: SongDocument, envelopeIndex: number, oldValue: number, newValue: number) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        if (oldValue != newValue) {
+            instrument.envelopes[envelopeIndex].LFOSettings.LFOPulseWidth = newValue;
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
+export class ChangeDrumsetLFOEnvelopePulseWidth extends Change {
+    constructor(doc: SongDocument, drumIndex: number, oldValue: number, newValue: number) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        if (oldValue != newValue) {
+            instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOPulseWidth = newValue;
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
+export class ChangeLFOEnvelopeTrapezoidRatio extends Change {
+    constructor(doc: SongDocument, envelopeIndex: number, oldValue: number, newValue: number) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        if (oldValue != newValue) {
+            instrument.envelopes[envelopeIndex].LFOSettings.LFOTrapezoidRatio = newValue;
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
+export class ChangeDrumsetLFOEnvelopeTrapezoidRatio extends Change {
+    constructor(doc: SongDocument, drumIndex: number, oldValue: number, newValue: number) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        if (oldValue != newValue) {
+            instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOTrapezoidRatio = newValue;
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
 export class ChangeVibratoSpeed extends Change {
     constructor(doc: SongDocument, oldValue: number, newValue: number) {
         super();

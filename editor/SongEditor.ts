@@ -1163,7 +1163,6 @@ export class SongEditor {
         _.rhythmBy6Label,
         _.rhythmBy8Label,
         _.rhythmBy24Label
-
     ]);
     private readonly _pitchedPresetSelect: HTMLSelectElement = buildPresetOptions(false, "pitchPresetSelect");
     private readonly _drumPresetSelect: HTMLSelectElement = buildPresetOptions(true, "drumPresetSelect");
@@ -3396,7 +3395,6 @@ export class SongEditor {
                 this._wavetableWaveButtonsContainer.style.display = "none";
                 this._customWaveDraw.style.display = "none";
             }
-            
 
             if (effectsIncludeTransition(instrument.effects)) {
                 this._transitionRow.style.display = "";
