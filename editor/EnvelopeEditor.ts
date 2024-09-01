@@ -73,7 +73,7 @@ export class EnvelopeLineGraph {
 			const beatNote: number = (x * timeRangeInBeats) * speed;
 			const noteSize: number = (1 - x) * Config.noteSizeMax;
 			const pitch: number = 1;
-			let value = EnvelopeComputer.computeEnvelope(envelope, seconds, beats, beatNote, noteSize, lowerBound, upperBound, stepAmount, delayInBeats, delayInSeconds, 0, 0, pitch, mirrorAmount, instEnv.LFOSettings.LFOShape, instEnv.LFOSettings.LFOAcceleration, instEnv.LFOSettings.LFOLoopOnce, instEnv.LFOSettings.LFOIgnorance, instEnv.LFOSettings.LFOPulseWidth * 5, instEnv.LFOSettings.LFOTrapezoidRatio);
+			let value = EnvelopeComputer.computeEnvelope(envelope, seconds, beats, beatNote, noteSize, lowerBound, upperBound, stepAmount, delayInBeats, delayInSeconds, 0, 0, pitch, mirrorAmount, instEnv.LFOSettings.LFOShape, instEnv.LFOSettings.LFOAllowAccelerate ? instEnv.LFOSettings.LFOAcceleration : 1, instEnv.LFOSettings.LFOLoopOnce, instEnv.LFOSettings.LFOIgnorance, instEnv.LFOSettings.LFOPulseWidth * 5, instEnv.LFOSettings.LFOTrapezoidRatio);
 			envelopeGraph.push(value);
 			maxValue = Math.max(value, maxValue);
         	minValue = Math.min(value, minValue);
@@ -1106,15 +1106,6 @@ export class EnvelopeEditor {
 			} else {
 				this._lowerBoundRows[envelopeIndex].style.display = "";
 				this._upperBoundRows[envelopeIndex].style.display = "";
-			}
-
-			if ( // Special case on step amount.
-				instEnv.envelope == Config.envelopes.dictionary["stairs"].index ||
-				instEnv.envelope == Config.envelopes.dictionary["looped stairs"].index 
-			) {
-				this._stairsStepAmountRows[envelopeIndex].style.display = "";
-			} else {
-				this._stairsStepAmountRows[envelopeIndex].style.display = "none";
 			}
 
 			if ( // Special case on mirror amount.

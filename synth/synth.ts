@@ -1667,19 +1667,6 @@ export class EnvelopeSettings {
             this.upperBound = 1;
         }
 
-        if (
-            this.envelope == Config.envelopes.dictionary["stairs"].index ||
-            this.envelope == Config.envelopes.dictionary["looped stairs"].index
-        ) {
-            if (envelopeObject["stepAmount"] != undefined) {
-                this.stepAmount = clamp(1, Config.stairsStepAmountMax+1, envelopeObject["stepAmount"]);
-            } else {
-                this.stepAmount = 4;
-            }
-        } else {
-            // Do nothing since this.reset() already sets the defaults.
-        }
-
         if (envelopeObject["delay"] != undefined) {
             this.delay = clamp(0, Config.envelopeDelayMax+1, envelopeObject["delay"]);
         } else {
@@ -1735,6 +1722,11 @@ export class EnvelopeSettings {
         if (this.envelope == Config.envelopes.dictionary["LFO"].index) {
             defaultIt = false;
             this.LFOSettings.fromJsonObject(envelopeObject, defaultIt);
+            if (envelopeObject["stepAmount"] != undefined) {
+                this.stepAmount = clamp(1, Config.stairsStepAmountMax+1, envelopeObject["stepAmount"]);
+            } else {
+                this.stepAmount = 4;
+            }
         } else {
             defaultIt = true;
             this.LFOSettings.fromJsonObject(envelopeObject, defaultIt);
@@ -1871,19 +1863,6 @@ export class DrumsetEnvelopeSettings {
             this.upperBound = 1;
         }
 
-        if (
-            this.envelope == Config.envelopes.dictionary["stairs"].index ||
-            this.envelope == Config.envelopes.dictionary["looped stairs"].index
-        ) {
-            if (drumsetEnvelopeObject["stepAmount"] != undefined) {
-                this.stepAmount = clamp(1, Config.stairsStepAmountMax+1, drumsetEnvelopeObject["stepAmount"]);
-            } else {
-                this.stepAmount = 4;
-            }
-        } else {
-            // Do nothing since this.reset() already sets the defaults.
-        }
-
         if (drumsetEnvelopeObject["delay"] != undefined) {
             this.delay = clamp(0, Config.envelopeDelayMax+1, drumsetEnvelopeObject["delay"]);
         } else {
@@ -1911,6 +1890,11 @@ export class DrumsetEnvelopeSettings {
         if (this.envelope == Config.envelopes.dictionary["LFO"].index) {
             defaultIt = false;
             this.LFOSettings.fromJsonObject(drumsetEnvelopeObject, defaultIt);
+            if (drumsetEnvelopeObject["stepAmount"] != undefined) {
+                this.stepAmount = clamp(1, Config.stairsStepAmountMax+1, drumsetEnvelopeObject["stepAmount"]);
+            } else {
+                this.stepAmount = 4;
+            }
         } else {
             defaultIt = true;
             this.LFOSettings.fromJsonObject(drumsetEnvelopeObject, defaultIt);
@@ -3167,114 +3151,114 @@ export class Instrument {
                         const rawEnvelopeName: string = drum["filterEnvelope"];
                         if (jsonFormat == "midbox") {
                             const oldNameToNewData = (<any>{
-                                "none":            {envelope: "none",          envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "note size":       {envelope: "note size",     envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "punch":           {envelope: "punch",         envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "flare 0":         {envelope: "flare",         envelopeSpeed: 8,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "flare 1":         {envelope: "flare",         envelopeSpeed: 4,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "flare 2":         {envelope: "flare",         envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "flare 3":         {envelope: "flare",         envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "flare 4":         {envelope: "flare",         envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "flare 5":         {envelope: "flare",         envelopeSpeed: 0.333, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "flare 6":         {envelope: "flare",         envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "twang 0":         {envelope: "twang",         envelopeSpeed: 8,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "twang 1":         {envelope: "twang",         envelopeSpeed: 4,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "twang 2":         {envelope: "twang",         envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "twang 3":         {envelope: "twang",         envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "twang 4":         {envelope: "twang",         envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "twang 5":         {envelope: "twang",         envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "twang 6":         {envelope: "twang",         envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "swell 0":         {envelope: "swell",         envelopeSpeed: 8,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "swell 1":         {envelope: "swell",         envelopeSpeed: 4,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "swell 2":         {envelope: "swell",         envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "swell 3":         {envelope: "swell",         envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "swell 4":         {envelope: "swell",         envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "swell 5":         {envelope: "swell",         envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "swell 6":         {envelope: "swell",         envelopeSpeed: 0.125, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "swell 7":         {envelope: "swell",         envelopeSpeed: 0.063, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "full tremolo 0":  {envelope: "tremolo",       envelopeSpeed: 4,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "full tremolo 1":  {envelope: "tremolo",       envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "full tremolo 2":  {envelope: "tremolo",       envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "full tremolo 3":  {envelope: "tremolo",       envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "full tremolo 4":  {envelope: "tremolo",       envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "full tremolo 5":  {envelope: "tremolo",       envelopeSpeed: 0.125, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "semi tremolo 0":  {envelope: "tremolo",       envelopeSpeed: 4,     lowerBound: 0.5,  stepAmount: 4,  phase: 0},
-                                "semi tremolo 1":  {envelope: "tremolo",       envelopeSpeed: 2,     lowerBound: 0.5,  stepAmount: 4,  phase: 0},
-                                "semi tremolo 2":  {envelope: "tremolo",       envelopeSpeed: 1,     lowerBound: 0.5,  stepAmount: 4,  phase: 0},
-                                "semi tremolo 3":  {envelope: "tremolo",       envelopeSpeed: 0.5,   lowerBound: 0.5,  stepAmount: 4,  phase: 0},
-                                "semi tremolo 4":  {envelope: "tremolo",       envelopeSpeed: 0.25,  lowerBound: 0.5,  stepAmount: 4,  phase: 0},
-                                "semi tremolo 5":  {envelope: "tremolo",       envelopeSpeed: 0.125, lowerBound: 0.5,  stepAmount: 4,  phase: 0},
-                                "mini tremolo 0":  {envelope: "tremolo",       envelopeSpeed: 4,     lowerBound: 0.75, stepAmount: 4,  phase: 0},
-                                "mini tremolo 1":  {envelope: "tremolo",       envelopeSpeed: 2,     lowerBound: 0.75, stepAmount: 4,  phase: 0},
-                                "mini tremolo 2":  {envelope: "tremolo",       envelopeSpeed: 1,     lowerBound: 0.75, stepAmount: 4,  phase: 0},
-                                "mini tremolo 3":  {envelope: "tremolo",       envelopeSpeed: 0.5,   lowerBound: 0.75, stepAmount: 4,  phase: 0},
-                                "mini tremolo 4":  {envelope: "tremolo",       envelopeSpeed: 0.25,  lowerBound: 0.75, stepAmount: 4,  phase: 0},
-                                "mini tremolo 5":  {envelope: "tremolo",       envelopeSpeed: 0.125, lowerBound: 0.75, stepAmount: 4,  phase: 0},
-                                "full tripolo 0":  {envelope: "tremolo",       envelopeSpeed: 6,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "full tripolo 1":  {envelope: "tremolo",       envelopeSpeed: 3,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "full tripolo 2":  {envelope: "tremolo",       envelopeSpeed: 1.5,   lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "full tripolo 3":  {envelope: "tremolo",       envelopeSpeed: 0.75,  lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "full tripolo 4":  {envelope: "tremolo",       envelopeSpeed: 0.375, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "full tripolo 5":  {envelope: "tremolo",       envelopeSpeed: 0.188, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "semi tripolo 0":  {envelope: "tremolo",       envelopeSpeed: 6,     lowerBound: 0.5,  stepAmount: 4,  phase: 0},
-                                "semi tripolo 1":  {envelope: "tremolo",       envelopeSpeed: 3,     lowerBound: 0.5,  stepAmount: 4,  phase: 0},
-                                "semi tripolo 2":  {envelope: "tremolo",       envelopeSpeed: 1.5,   lowerBound: 0.5,  stepAmount: 4,  phase: 0},
-                                "semi tripolo 3":  {envelope: "tremolo",       envelopeSpeed: 0.75,  lowerBound: 0.5,  stepAmount: 4,  phase: 0},
-                                "semi tripolo 4":  {envelope: "tremolo",       envelopeSpeed: 0.375, lowerBound: 0.5,  stepAmount: 4,  phase: 0},
-                                "semi tripolo 5":  {envelope: "tremolo",       envelopeSpeed: 0.188, lowerBound: 0.5,  stepAmount: 4,  phase: 0},
-                                "mini tripolo 0":  {envelope: "tremolo",       envelopeSpeed: 6,     lowerBound: 0.75, stepAmount: 4,  phase: 0},
-                                "mini tripolo 1":  {envelope: "tremolo",       envelopeSpeed: 3,     lowerBound: 0.75, stepAmount: 4,  phase: 0},
-                                "mini tripolo 2":  {envelope: "tremolo",       envelopeSpeed: 1.5,   lowerBound: 0.75, stepAmount: 4,  phase: 0},
-                                "mini tripolo 3":  {envelope: "tremolo",       envelopeSpeed: 0.75,  lowerBound: 0.75, stepAmount: 4,  phase: 0},
-                                "mini tripolo 4":  {envelope: "tremolo",       envelopeSpeed: 0.375, lowerBound: 0.75, stepAmount: 4,  phase: 0},
-                                "mini tripolo 5":  {envelope: "tremolo",       envelopeSpeed: 0.188, lowerBound: 0.75, stepAmount: 4,  phase: 0},
-                                "decay 0":         {envelope: "decay",         envelopeSpeed: 9,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "decay 1":         {envelope: "decay",         envelopeSpeed: 5,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "decay 2":         {envelope: "decay",         envelopeSpeed: 3.5,   lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "decay 3":         {envelope: "decay",         envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "decay 4":         {envelope: "decay",         envelopeSpeed: 0.75,  lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "decay 5":         {envelope: "decay",         envelopeSpeed: 0.375, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "modbox trill":    {envelope: "modbox trill",  envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "modbox blip":     {envelope: "modbox blip",   envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "modbox click":    {envelope: "modbox click",  envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "modbox bow":      {envelope: "modbox bow",    envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "wibble 0":        {envelope: "wibble",        envelopeSpeed: 8,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "wibble 1":        {envelope: "wibble",        envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "wibble 2":        {envelope: "wibble",        envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "wibble 3":        {envelope: "wibble",        envelopeSpeed: 0.333, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "wibble 4":        {envelope: "wibble",        envelopeSpeed: 0.083, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "linear 0":        {envelope: "linear",        envelopeSpeed: 8,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "linear 1":        {envelope: "linear",        envelopeSpeed: 4,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "linear 2":        {envelope: "linear",        envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "linear 3":        {envelope: "linear",        envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "linear 4":        {envelope: "linear",        envelopeSpeed: 0.063, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "linear 5":        {envelope: "linear",        envelopeSpeed: 0.016, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "rise 0":          {envelope: "rise",          envelopeSpeed: 8,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "rise 1":          {envelope: "rise",          envelopeSpeed: 4,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "rise 2":          {envelope: "rise",          envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "rise 3":          {envelope: "rise",          envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "rise 4":          {envelope: "rise",          envelopeSpeed: 0.063, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "rise 5":          {envelope: "rise",          envelopeSpeed: 0.016, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "jummbox blip 0":  {envelope: "jummbox blip",  envelopeSpeed: 2.828, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "jummbox blip 1":  {envelope: "jummbox blip",  envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "jummbox blip 2":  {envelope: "jummbox blip",  envelopeSpeed: 1.414, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "jummbox blip 3":  {envelope: "jummbox blip",  envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "jummbox blip 4":  {envelope: "jummbox blip",  envelopeSpeed: 0.707, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "jummbox blip 5":  {envelope: "jummbox blip",  envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "decelerate 0":    {envelope: "decelerate",    envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 2.25},
-                                "decelerate 1":    {envelope: "decelerate",    envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 4.5},
-                                "decelerate 2":    {envelope: "decelerate",    envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 8.75},
-                                "decelerate 3":    {envelope: "decelerate",    envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 17},
-                                "stairs 0":        {envelope: "stairs",        envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 2,  phase: 0},
-                                "stairs 1":        {envelope: "stairs",        envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "stairs 2":        {envelope: "stairs",        envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 8,  phase: 0},
-                                "stairs 3":        {envelope: "stairs",        envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 16, phase: 0},
-                                "stairs 4":        {envelope: "stairs",        envelopeSpeed: 0.125, lowerBound: 0,    stepAmount: 32, phase: 0},
-                                "looped stairs 0": {envelope: "looped stairs", envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 2,  phase: 0},
-                                "looped stairs 1": {envelope: "looped stairs", envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                                "looped stairs 2": {envelope: "looped stairs", envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 8,  phase: 0},
-                                "looped stairs 3": {envelope: "looped stairs", envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 16, phase: 0},
-                                "looped stairs 4": {envelope: "looped stairs", envelopeSpeed: 0.125, lowerBound: 0,    stepAmount: 32, phase: 0},
+                                "none":            {envelope: "none",          envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "note size":       {envelope: "note size",     envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "punch":           {envelope: "punch",         envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "flare 0":         {envelope: "flare",         envelopeSpeed: 8,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "flare 1":         {envelope: "flare",         envelopeSpeed: 4,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "flare 2":         {envelope: "flare",         envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "flare 3":         {envelope: "flare",         envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "flare 4":         {envelope: "flare",         envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "flare 5":         {envelope: "flare",         envelopeSpeed: 0.333, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "flare 6":         {envelope: "flare",         envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "twang 0":         {envelope: "twang",         envelopeSpeed: 8,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "twang 1":         {envelope: "twang",         envelopeSpeed: 4,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "twang 2":         {envelope: "twang",         envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "twang 3":         {envelope: "twang",         envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "twang 4":         {envelope: "twang",         envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "twang 5":         {envelope: "twang",         envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "twang 6":         {envelope: "twang",         envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "swell 0":         {envelope: "swell",         envelopeSpeed: 8,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "swell 1":         {envelope: "swell",         envelopeSpeed: 4,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "swell 2":         {envelope: "swell",         envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "swell 3":         {envelope: "swell",         envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "swell 4":         {envelope: "swell",         envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "swell 5":         {envelope: "swell",         envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "swell 6":         {envelope: "swell",         envelopeSpeed: 0.125, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "swell 7":         {envelope: "swell",         envelopeSpeed: 0.063, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "full tremolo 0":  {envelope: "LFO",           envelopeSpeed: 4,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "full tremolo 1":  {envelope: "LFO",           envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "full tremolo 2":  {envelope: "LFO",           envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "full tremolo 3":  {envelope: "LFO",           envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "full tremolo 4":  {envelope: "LFO",           envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "full tremolo 5":  {envelope: "LFO",           envelopeSpeed: 0.125, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "semi tremolo 0":  {envelope: "LFO",           envelopeSpeed: 4,     lowerBound: 0.5,  stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "semi tremolo 1":  {envelope: "LFO",           envelopeSpeed: 2,     lowerBound: 0.5,  stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "semi tremolo 2":  {envelope: "LFO",           envelopeSpeed: 1,     lowerBound: 0.5,  stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "semi tremolo 3":  {envelope: "LFO",           envelopeSpeed: 0.5,   lowerBound: 0.5,  stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "semi tremolo 4":  {envelope: "LFO",           envelopeSpeed: 0.25,  lowerBound: 0.5,  stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "semi tremolo 5":  {envelope: "LFO",           envelopeSpeed: 0.125, lowerBound: 0.5,  stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "mini tremolo 0":  {envelope: "LFO",           envelopeSpeed: 4,     lowerBound: 0.75, stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "mini tremolo 1":  {envelope: "LFO",           envelopeSpeed: 2,     lowerBound: 0.75, stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "mini tremolo 2":  {envelope: "LFO",           envelopeSpeed: 1,     lowerBound: 0.75, stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "mini tremolo 3":  {envelope: "LFO",           envelopeSpeed: 0.5,   lowerBound: 0.75, stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "mini tremolo 4":  {envelope: "LFO",           envelopeSpeed: 0.25,  lowerBound: 0.75, stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "mini tremolo 5":  {envelope: "LFO",           envelopeSpeed: 0.125, lowerBound: 0.75, stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "full tripolo 0":  {envelope: "LFO",           envelopeSpeed: 6,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "full tripolo 1":  {envelope: "LFO",           envelopeSpeed: 3,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "full tripolo 2":  {envelope: "LFO",           envelopeSpeed: 1.5,   lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "full tripolo 3":  {envelope: "LFO",           envelopeSpeed: 0.75,  lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "full tripolo 4":  {envelope: "LFO",           envelopeSpeed: 0.375, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "full tripolo 5":  {envelope: "LFO",           envelopeSpeed: 0.188, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "semi tripolo 0":  {envelope: "LFO",           envelopeSpeed: 6,     lowerBound: 0.5,  stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "semi tripolo 1":  {envelope: "LFO",           envelopeSpeed: 3,     lowerBound: 0.5,  stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "semi tripolo 2":  {envelope: "LFO",           envelopeSpeed: 1.5,   lowerBound: 0.5,  stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "semi tripolo 3":  {envelope: "LFO",           envelopeSpeed: 0.75,  lowerBound: 0.5,  stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "semi tripolo 4":  {envelope: "LFO",           envelopeSpeed: 0.375, lowerBound: 0.5,  stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "semi tripolo 5":  {envelope: "LFO",           envelopeSpeed: 0.188, lowerBound: 0.5,  stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "mini tripolo 0":  {envelope: "LFO",           envelopeSpeed: 6,     lowerBound: 0.75, stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "mini tripolo 1":  {envelope: "LFO",           envelopeSpeed: 3,     lowerBound: 0.75, stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "mini tripolo 2":  {envelope: "LFO",           envelopeSpeed: 1.5,   lowerBound: 0.75, stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "mini tripolo 3":  {envelope: "LFO",           envelopeSpeed: 0.75,  lowerBound: 0.75, stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "mini tripolo 4":  {envelope: "LFO",           envelopeSpeed: 0.375, lowerBound: 0.75, stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "mini tripolo 5":  {envelope: "LFO",           envelopeSpeed: 0.188, lowerBound: 0.75, stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "decay 0":         {envelope: "decay",         envelopeSpeed: 9,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "decay 1":         {envelope: "decay",         envelopeSpeed: 5,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "decay 2":         {envelope: "decay",         envelopeSpeed: 3.5,   lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "decay 3":         {envelope: "decay",         envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "decay 4":         {envelope: "decay",         envelopeSpeed: 0.75,  lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "decay 5":         {envelope: "decay",         envelopeSpeed: 0.375, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "modbox trill":    {envelope: "modbox trill",  envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "modbox blip":     {envelope: "modbox blip",   envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "modbox click":    {envelope: "modbox click",  envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "modbox bow":      {envelope: "modbox bow",    envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "wibble 0":        {envelope: "wibble",        envelopeSpeed: 8,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "wibble 1":        {envelope: "wibble",        envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "wibble 2":        {envelope: "wibble",        envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "wibble 3":        {envelope: "wibble",        envelopeSpeed: 0.333, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "wibble 4":        {envelope: "wibble",        envelopeSpeed: 0.083, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "linear 0":        {envelope: "linear",        envelopeSpeed: 8,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "linear 1":        {envelope: "linear",        envelopeSpeed: 4,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "linear 2":        {envelope: "linear",        envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "linear 3":        {envelope: "linear",        envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "linear 4":        {envelope: "linear",        envelopeSpeed: 0.063, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "linear 5":        {envelope: "linear",        envelopeSpeed: 0.016, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "rise 0":          {envelope: "rise",          envelopeSpeed: 8,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "rise 1":          {envelope: "rise",          envelopeSpeed: 4,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "rise 2":          {envelope: "rise",          envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "rise 3":          {envelope: "rise",          envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "rise 4":          {envelope: "rise",          envelopeSpeed: 0.063, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "rise 5":          {envelope: "rise",          envelopeSpeed: 0.016, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "jummbox blip 0":  {envelope: "jummbox blip",  envelopeSpeed: 2.828, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "jummbox blip 1":  {envelope: "jummbox blip",  envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "jummbox blip 2":  {envelope: "jummbox blip",  envelopeSpeed: 1.414, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "jummbox blip 3":  {envelope: "jummbox blip",  envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "jummbox blip 4":  {envelope: "jummbox blip",  envelopeSpeed: 0.707, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "jummbox blip 5":  {envelope: "jummbox blip",  envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "decelerate 0":    {envelope: "LFO",           envelopeSpeed: 16,    lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: true,  acceleration: 0.65},
+                                "decelerate 1":    {envelope: "LFO",           envelopeSpeed: 16,    lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: true,  acceleration: 0.6 },
+                                "decelerate 2":    {envelope: "LFO",           envelopeSpeed: 13,    lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: true,  acceleration: 0.62},
+                                "decelerate 3":    {envelope: "LFO",           envelopeSpeed: 11,    lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: true,  acceleration: 0.7 },
+                                "stairs 0":        {envelope: "LFO",           envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 2,  phase: 0,    LFOShape: 5, ignorance: false, loopOnce: true,  enableAcceleration: false, acceleration: 1   },
+                                "stairs 1":        {envelope: "LFO",           envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 5, ignorance: false, loopOnce: true,  enableAcceleration: false, acceleration: 1   },
+                                "stairs 2":        {envelope: "LFO",           envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 8,  phase: 0,    LFOShape: 5, ignorance: false, loopOnce: true,  enableAcceleration: false, acceleration: 1   },
+                                "stairs 3":        {envelope: "LFO",           envelopeSpeed: 0.125, lowerBound: 0,    stepAmount: 16, phase: 0,    LFOShape: 5, ignorance: false, loopOnce: true,  enableAcceleration: false, acceleration: 1   },
+                                "stairs 4":        {envelope: "LFO",           envelopeSpeed: 0.063, lowerBound: 0,    stepAmount: 32, phase: 0,    LFOShape: 5, ignorance: false, loopOnce: true,  enableAcceleration: false, acceleration: 1   },
+                                "looped stairs 0": {envelope: "LFO",           envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 2,  phase: 0,    LFOShape: 5, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "looped stairs 1": {envelope: "LFO",           envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 5, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "looped stairs 2": {envelope: "LFO",           envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 8,  phase: 0,    LFOShape: 5, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "looped stairs 3": {envelope: "LFO",           envelopeSpeed: 0.125, lowerBound: 0,    stepAmount: 16, phase: 0,    LFOShape: 5, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                                "looped stairs 4": {envelope: "LFO",           envelopeSpeed: 0.063, lowerBound: 0,    stepAmount: 32, phase: 0,    LFOShape: 5, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
                             });
                             if (oldNameToNewData[rawEnvelopeName] != undefined && Config.drumsetEnvelopes.dictionary[oldNameToNewData[rawEnvelopeName].envelope] != undefined) {
                                 if (oldNameToNewData[rawEnvelopeName].envelope != null && rawEnvelopeName != null) tempEnvelope.envelope = Config.drumsetEnvelopes.dictionary[oldNameToNewData[rawEnvelopeName].envelope].index;
@@ -3282,89 +3266,100 @@ export class Instrument {
                                 if (oldNameToNewData[rawEnvelopeName].lowerBound != null && rawEnvelopeName != null) tempEnvelope.lowerBound = oldNameToNewData[rawEnvelopeName].lowerBound;
                                 if (oldNameToNewData[rawEnvelopeName].stepAmount != null && rawEnvelopeName != null) tempEnvelope.stepAmount = oldNameToNewData[rawEnvelopeName].stepAmount;
                                 if (oldNameToNewData[rawEnvelopeName].phase != null && rawEnvelopeName != null) tempEnvelope.phase = oldNameToNewData[rawEnvelopeName].phase;
+                                if (oldNameToNewData[rawEnvelopeName].LFOShape != null && rawEnvelopeName != null) tempEnvelope.LFOSettings.LFOShape = oldNameToNewData[rawEnvelopeName].LFOShape;
+                                if (oldNameToNewData[rawEnvelopeName].ignorance != null && rawEnvelopeName != null) tempEnvelope.LFOSettings.LFOIgnorance = oldNameToNewData[rawEnvelopeName].ignorance;
+                                if (oldNameToNewData[rawEnvelopeName].loopOnce != null && rawEnvelopeName != null) tempEnvelope.LFOSettings.LFOLoopOnce = oldNameToNewData[rawEnvelopeName].loopOnce;
+                                if (oldNameToNewData[rawEnvelopeName].enableAcceleration != null && rawEnvelopeName != null) tempEnvelope.LFOSettings.LFOAllowAccelerate = oldNameToNewData[rawEnvelopeName].enableAcceleration;
+                                if (oldNameToNewData[rawEnvelopeName].acceleration != null && rawEnvelopeName != null) tempEnvelope.LFOSettings.LFOAcceleration = oldNameToNewData[rawEnvelopeName].acceleration;
                             }
                         } else {
                             // Midbox changes the names and values of various envelopes. Change them here.
                             // Note: NPA = Not Perfectly Accurate
                             const oldNameToNewData = (<any>{
                                 // BeepBox
-                                "none":            {envelope: "none",           envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    measurementType: true},
-                                "note size":       {envelope: "note size",      envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    measurementType: true},
-                                "punch":           {envelope: "punch",          envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    measurementType: true},
-                                "flare 1":         {envelope: "flare",          envelopeSpeed: 4,     lowerBound: 0,   delay: 0,    measurementType: true},
-                                "flare 2":         {envelope: "flare",          envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    measurementType: true},
-                                "flare 3":         {envelope: "flare",          envelopeSpeed: 0.25,  lowerBound: 0,   delay: 0,    measurementType: true},
-                                "twang 1":         {envelope: "twang",          envelopeSpeed: 4,     lowerBound: 0,   delay: 0,    measurementType: true},
-                                "twang 2":         {envelope: "twang",          envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    measurementType: true},
-                                "twang 3":         {envelope: "twang",          envelopeSpeed: 0.25,  lowerBound: 0,   delay: 0,    measurementType: true},
-                                "swell 1":         {envelope: "swell",          envelopeSpeed: 4,     lowerBound: 0,   delay: 0,    measurementType: true},
-                                "swell 2":         {envelope: "swell",          envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    measurementType: true},
-                                "swell 3":         {envelope: "swell",          envelopeSpeed: 0.25,  lowerBound: 0,   delay: 0,    measurementType: true},
-                                "tremolo1":        {envelope: "tremolo",        envelopeSpeed: 2,     lowerBound: 0,   delay: 0,    measurementType: true},
-                                "tremolo2":        {envelope: "tremolo",        envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    measurementType: true},
-                                "tremolo3":        {envelope: "tremolo",        envelopeSpeed: 0.5,   lowerBound: 0,   delay: 0,    measurementType: true},
-                                "tremolo4":        {envelope: "tremolo",        envelopeSpeed: 2,     lowerBound: 0.5, delay: 0,    measurementType: true},
-                                "tremolo5":        {envelope: "tremolo",        envelopeSpeed: 1,     lowerBound: 0.5, delay: 0,    measurementType: true},
-                                "tremolo6":        {envelope: "tremolo",        envelopeSpeed: 0.5,   lowerBound: 0.5, delay: 0,    measurementType: true},
-                                "decay 1":         {envelope: "decay",          envelopeSpeed: 5,     lowerBound: 0,   delay: 0,    measurementType: true},
-                                "decay 2":         {envelope: "decay",          envelopeSpeed: 3.5,   lowerBound: 0,   delay: 0,    measurementType: true},
-                                "decay 3":         {envelope: "decay",          envelopeSpeed: 2,     lowerBound: 0,   delay: 0,    measurementType: true},
+                                "none":            {envelope: "none",          envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "note size":       {envelope: "note size",     envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "punch":           {envelope: "punch",         envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "flare 1":         {envelope: "flare",         envelopeSpeed: 4,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "flare 2":         {envelope: "flare",         envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "flare 3":         {envelope: "flare",         envelopeSpeed: 0.25,  lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "twang 1":         {envelope: "twang",         envelopeSpeed: 4,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "twang 2":         {envelope: "twang",         envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "twang 3":         {envelope: "twang",         envelopeSpeed: 0.25,  lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "swell 1":         {envelope: "swell",         envelopeSpeed: 4,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "swell 2":         {envelope: "swell",         envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "swell 3":         {envelope: "swell",         envelopeSpeed: 0.25,  lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "tremolo1":        {envelope: "LFO",           envelopeSpeed: 2,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "tremolo2":        {envelope: "LFO",           envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "tremolo3":        {envelope: "LFO",           envelopeSpeed: 0.5,   lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "tremolo4":        {envelope: "LFO",           envelopeSpeed: 2,     lowerBound: 0.5, delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "tremolo5":        {envelope: "LFO",           envelopeSpeed: 1,     lowerBound: 0.5, delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "tremolo6":        {envelope: "LFO",           envelopeSpeed: 0.5,   lowerBound: 0.5, delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "decay 1":         {envelope: "decay",         envelopeSpeed: 5,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "decay 2":         {envelope: "decay",         envelopeSpeed: 3.5,   lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "decay 3":         {envelope: "decay",         envelopeSpeed: 2,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
                                 // JummBox
-                                "blip 1":          {envelope: "jummbox blip",   envelopeSpeed: 0.866, lowerBound: 0,   delay: 0,    measurementType: true},
-                                "blip 2":          {envelope: "jummbox blip",   envelopeSpeed: 1.414, lowerBound: 0,   delay: 0,    measurementType: true},
-                                "blip 3":          {envelope: "jummbox blip",   envelopeSpeed: 2,     lowerBound: 0,   delay: 0,    measurementType: true},
+                                "blip 1":          {envelope: "jummbox blip",  envelopeSpeed: 0.866, lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "blip 2":          {envelope: "jummbox blip",  envelopeSpeed: 1.414, lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "blip 3":          {envelope: "jummbox blip",  envelopeSpeed: 2,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
                                 // GoldBox
-                                "flare -1":        {envelope: "flare",          envelopeSpeed: 16,    lowerBound: 0,   delay: 0,    measurementType: true},
-                                "twang -1":        {envelope: "twang",          envelopeSpeed: 16,    lowerBound: 0,   delay: 0,    measurementType: true},
-                                "swell -1":        {envelope: "swell",          envelopeSpeed: 16,    lowerBound: 0,   delay: 0,    measurementType: true},
-                                "tremolo0":        {envelope: "tremolo",        envelopeSpeed: 4,     lowerBound: 0,   delay: 0,    measurementType: true},
-                                "decay -1":        {envelope: "decay",          envelopeSpeed: 16,    lowerBound: 0,   delay: 0,    measurementType: true}, // NPA, would need 20 envSpeed.
-                                "wibble-1":        {envelope: "wibble",         envelopeSpeed: 8,     lowerBound: 0,   delay: 0,    measurementType: true},
-                                "wibble 1":        {envelope: "wibble",         envelopeSpeed: 2,     lowerBound: 0,   delay: 0,    measurementType: true},
-                                "wibble 2":        {envelope: "wibble",         envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    measurementType: true},
-                                "wibble 3":        {envelope: "wibble",         envelopeSpeed: 0.333, lowerBound: 0,   delay: 0,    measurementType: true},
-                                "linear-2":        {envelope: "linear",         envelopeSpeed: 8,     lowerBound: 0,   delay: 0,    measurementType: true},
-                                "linear-1":        {envelope: "linear",         envelopeSpeed: 4,     lowerBound: 0,   delay: 0,    measurementType: true},
-                                "linear 1":        {envelope: "linear",         envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    measurementType: true},
-                                "linear 2":        {envelope: "linear",         envelopeSpeed: 0.25,  lowerBound: 0,   delay: 0,    measurementType: true},
-                                "linear 3":        {envelope: "linear",         envelopeSpeed: 0.063, lowerBound: 0,   delay: 0,    measurementType: true},
-                                "rise -2":         {envelope: "rise",           envelopeSpeed: 8,     lowerBound: 0,   delay: 0,    measurementType: true},
-                                "rise -1":         {envelope: "rise",           envelopeSpeed: 4,     lowerBound: 0,   delay: 0,    measurementType: true},
-                                "rise 1":          {envelope: "rise",           envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    measurementType: true},
-                                "rise 2":          {envelope: "rise",           envelopeSpeed: 0.25,  lowerBound: 0,   delay: 0,    measurementType: true},
-                                "rise 3":          {envelope: "rise",           envelopeSpeed: 0.063, lowerBound: 0,   delay: 0,    measurementType: true},
+                                "flare -1":        {envelope: "flare",         envelopeSpeed: 16,    lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "twang -1":        {envelope: "twang",         envelopeSpeed: 16,    lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "swell -1":        {envelope: "swell",         envelopeSpeed: 16,    lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "tremolo0":        {envelope: "LFO",           envelopeSpeed: 4,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "decay -1":        {envelope: "decay",         envelopeSpeed: 16,    lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault}, // NPA, would need 20 envSpeed.
+                                "wibble-1":        {envelope: "wibble",        envelopeSpeed: 8,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "wibble 1":        {envelope: "wibble",        envelopeSpeed: 2,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "wibble 2":        {envelope: "wibble",        envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "wibble 3":        {envelope: "wibble",        envelopeSpeed: 0.333, lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "linear-2":        {envelope: "linear",        envelopeSpeed: 8,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "linear-1":        {envelope: "linear",        envelopeSpeed: 4,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "linear 1":        {envelope: "linear",        envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "linear 2":        {envelope: "linear",        envelopeSpeed: 0.25,  lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "linear 3":        {envelope: "linear",        envelopeSpeed: 0.063, lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "rise -2":         {envelope: "rise",          envelopeSpeed: 8,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "rise -1":         {envelope: "rise",          envelopeSpeed: 4,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "rise 1":          {envelope: "rise",          envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "rise 2":          {envelope: "rise",          envelopeSpeed: 0.25,  lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "rise 3":          {envelope: "rise",          envelopeSpeed: 0.063, lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
                                 // UltraBox, Sandbox, and TodBox
                                 // UltraBox flute is just wibble. ModBox flute is a different story though, as that 
                                 // is not replicatable in Midbox.
-                                "flute 1":         {envelope: "wibble",         envelopeSpeed: 1.333, lowerBound: 0,   delay: 0,    measurementType: true},
-                                "flute 2":         {envelope: "wibble",         envelopeSpeed: 0.666, lowerBound: 0,   delay: 0,    measurementType: true},
-                                "flute 3":         {envelope: "wibble",         envelopeSpeed: 0.333, lowerBound: 0,   delay: 0,    measurementType: true},
-                                "tripolo1":        {envelope: "tremolo",        envelopeSpeed: 4.5,   lowerBound: 0,   delay: 0,    measurementType: true},
-                                "tripolo2":        {envelope: "tremolo",        envelopeSpeed: 3,     lowerBound: 0,   delay: 0,    measurementType: true},
-                                "tripolo3":        {envelope: "tremolo",        envelopeSpeed: 1.5,   lowerBound: 0,   delay: 0,    measurementType: true},
-                                "tripolo4":        {envelope: "tremolo",        envelopeSpeed: 4.5,   lowerBound: 0.5, delay: 0,    measurementType: true},
-                                "tripolo5":        {envelope: "tremolo",        envelopeSpeed: 3,     lowerBound: 0.5, delay: 0,    measurementType: true},
-                                "tripolo6":        {envelope: "tremolo",        envelopeSpeed: 1.5,   lowerBound: 0.5, delay: 0,    measurementType: true},
-                                "pentolo1":        {envelope: "tremolo",        envelopeSpeed: 5,     lowerBound: 0,   delay: 0,    measurementType: true},
-                                "pentolo2":        {envelope: "tremolo",        envelopeSpeed: 2.5,   lowerBound: 0,   delay: 0,    measurementType: true},
-                                "pentolo3":        {envelope: "tremolo",        envelopeSpeed: 1.25,  lowerBound: 0,   delay: 0,    measurementType: true},
-                                "pentolo4":        {envelope: "tremolo",        envelopeSpeed: 5,     lowerBound: 0.5, delay: 0,    measurementType: true},
-                                "pentolo5":        {envelope: "tremolo",        envelopeSpeed: 2.5,   lowerBound: 0.5, delay: 0,    measurementType: true},
-                                "pentolo6":        {envelope: "tremolo",        envelopeSpeed: 1.25,  lowerBound: 0.5, delay: 0,    measurementType: true},
-                                "flutter 1":       {envelope: "tremolo",        envelopeSpeed: 7,     lowerBound: 0,   delay: 0,    measurementType: true},
-                                "flutter 2":       {envelope: "tremolo",        envelopeSpeed: 5.5,   lowerBound: 0.5, delay: 0,    measurementType: true},
-                                "water-y flutter": {envelope: "tremolo",        envelopeSpeed: 4.5,   lowerBound: 0,   delay: 0,    measurementType: true},
+                                "flute 1":         {envelope: "wibble",        envelopeSpeed: 1.333, lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "flute 2":         {envelope: "wibble",        envelopeSpeed: 0.666, lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "flute 3":         {envelope: "wibble",        envelopeSpeed: 0.333, lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "tripolo1":        {envelope: "LFO",           envelopeSpeed: 4.5,   lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "tripolo2":        {envelope: "LFO",           envelopeSpeed: 3,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "tripolo3":        {envelope: "LFO",           envelopeSpeed: 1.5,   lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "tripolo4":        {envelope: "LFO",           envelopeSpeed: 4.5,   lowerBound: 0.5, delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "tripolo5":        {envelope: "LFO",           envelopeSpeed: 3,     lowerBound: 0.5, delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "tripolo6":        {envelope: "LFO",           envelopeSpeed: 1.5,   lowerBound: 0.5, delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "pentolo1":        {envelope: "LFO",           envelopeSpeed: 5,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "pentolo2":        {envelope: "LFO",           envelopeSpeed: 2.5,   lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "pentolo3":        {envelope: "LFO",           envelopeSpeed: 1.25,  lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "pentolo4":        {envelope: "LFO",           envelopeSpeed: 5,     lowerBound: 0.5, delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "pentolo5":        {envelope: "LFO",           envelopeSpeed: 2.5,   lowerBound: 0.5, delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "pentolo6":        {envelope: "LFO",           envelopeSpeed: 1.25,  lowerBound: 0.5, delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "flutter 1":       {envelope: "LFO",           envelopeSpeed: 7,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "flutter 2":       {envelope: "LFO",           envelopeSpeed: 5.5,   lowerBound: 0.5, delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "water-y flutter": {envelope: "LFO",           envelopeSpeed: 4.5,   lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
                                 // Slarmoo's Box
-                                // Midbox does not allow the pitch envelope type in drumset envelopes.
-                                "pitch":           {envelope: "none",           envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    measurementType: true},
+                                // Pitch envelopes aren't supported in the drumset.
+                                "pitch":           {envelope: "none",         envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
                                 // Dogebox2
-                                // Account for Spike's short delay time from SynthConfig envelope.speed.
-                                "spike 1":         {envelope: "dogebox2 spike", envelopeSpeed: 4,     lowerBound: 0,   delay: 0.14, measurementType: false},
-                                "spike 2":         {envelope: "dogebox2 spike", envelopeSpeed: 1,     lowerBound: 0,   delay: 0.08, measurementType: false},
-                                "spike 3":         {envelope: "dogebox2 spike", envelopeSpeed: 0.25,  lowerBound: 0,   delay: 0.04, measurementType: false},
-                                "clap 1":          {envelope: "dogebox2 clap",  envelopeSpeed: 2,     lowerBound: 0,   delay: 0,    measurementType: true},
-                                "clap 2":          {envelope: "dogebox2 clap",  envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    measurementType: true},
-                                "clap 3":          {envelope: "dogebox2 clap",  envelopeSpeed: 0.5,   lowerBound: 0,   delay: 0,    measurementType: true},
+                                // Account for Spike's short delay time.
+                                "spike 1":         {envelope: "LFO",           envelopeSpeed: 6,     lowerBound: 0,   delay: 0.14, phase: 0,    measurementType: false, LFOShape: 1, ignorance: false, loopOnce: true,  pulseWidth: Config.LFOPulseWidthDefault},
+                                "spike 2":         {envelope: "LFO",           envelopeSpeed: 1.5,   lowerBound: 0,   delay: 0.08, phase: 0,    measurementType: false, LFOShape: 1, ignorance: false, loopOnce: true,  pulseWidth: Config.LFOPulseWidthDefault},
+                                "spike 3":         {envelope: "LFO",           envelopeSpeed: 0.4,   lowerBound: 0,   delay: 0.04, phase: 0,    measurementType: false, LFOShape: 1, ignorance: false, loopOnce: true,  pulseWidth: Config.LFOPulseWidthDefault},
+                                "clap 1":          {envelope: "dogebox2 clap", envelopeSpeed: 2,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "clap 2":          {envelope: "dogebox2 clap", envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "clap 3":          {envelope: "dogebox2 clap", envelopeSpeed: 0.5,   lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                                "blippy 1":        {envelope: "LFO",           envelopeSpeed: 16,    lowerBound: 0,   delay: 0,    phase: 0.25, measurementType: true,  LFOShape: 2, ignorance: true,  loopOnce: false, pulseWidth: 9                          },
+                                "blippy 2":        {envelope: "LFO",           envelopeSpeed: 8,     lowerBound: 0,   delay: 0,    phase: 0.25, measurementType: true,  LFOShape: 2, ignorance: true,  loopOnce: false, pulseWidth: 9                          },
+                                "blippy 3":        {envelope: "LFO",           envelopeSpeed: 4,     lowerBound: 0,   delay: 0,    phase: 0.25, measurementType: true,  LFOShape: 2, ignorance: true,  loopOnce: false, pulseWidth: 9                          },
+                                "blippy 4":        {envelope: "LFO",           envelopeSpeed: 2,     lowerBound: 0,   delay: 0,    phase: 0.25, measurementType: true,  LFOShape: 2, ignorance: true,  loopOnce: false, pulseWidth: 9                          },
+                                "blippy 5":        {envelope: "LFO",           envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    phase: 0.25, measurementType: true,  LFOShape: 2, ignorance: true,  loopOnce: false, pulseWidth: 9                          },
+                                "blippy 6":        {envelope: "LFO",           envelopeSpeed: 0.5,   lowerBound: 0,   delay: 0,    phase: 0.25, measurementType: true,  LFOShape: 2, ignorance: true,  loopOnce: false, pulseWidth: 9                          },
                             });
     
                             if (oldNameToNewData[rawEnvelopeName] != undefined && Config.drumsetEnvelopes.dictionary[oldNameToNewData[rawEnvelopeName].envelope] != undefined) {
@@ -3372,7 +3367,12 @@ export class Instrument {
                                 if (oldNameToNewData[rawEnvelopeName].envelopeSpeed != null && rawEnvelopeName != null) tempEnvelope.envelopeSpeed = oldNameToNewData[rawEnvelopeName].envelopeSpeed;
                                 if (oldNameToNewData[rawEnvelopeName].lowerBound != null && rawEnvelopeName != null) tempEnvelope.lowerBound = oldNameToNewData[rawEnvelopeName].lowerBound;
                                 if (oldNameToNewData[rawEnvelopeName].delay != null && rawEnvelopeName != null) tempEnvelope.delay = oldNameToNewData[rawEnvelopeName].delay;
+                                if (oldNameToNewData[rawEnvelopeName].phase != null && rawEnvelopeName != null) tempEnvelope.phase = oldNameToNewData[rawEnvelopeName].phase;
                                 if (oldNameToNewData[rawEnvelopeName].measurementType != null && rawEnvelopeName != null) tempEnvelope.measurementType = oldNameToNewData[rawEnvelopeName].measurementType;
+                                if (oldNameToNewData[rawEnvelopeName].LFOShape != null && rawEnvelopeName != null) tempEnvelope.LFOSettings.LFOShape = oldNameToNewData[rawEnvelopeName].LFOShape;
+                                if (oldNameToNewData[rawEnvelopeName].ignorance != null && rawEnvelopeName != null) tempEnvelope.LFOSettings.LFOIgnorance = oldNameToNewData[rawEnvelopeName].ignorance;
+                                if (oldNameToNewData[rawEnvelopeName].loopOnce != null && rawEnvelopeName != null) tempEnvelope.LFOSettings.LFOLoopOnce = oldNameToNewData[rawEnvelopeName].loopOnce;
+                                if (oldNameToNewData[rawEnvelopeName].pulseWidth != null && rawEnvelopeName != null) tempEnvelope.LFOSettings.LFOPulseWidth = oldNameToNewData[rawEnvelopeName].pulseWidth;
                             }
                         }
                         this.drumsetEnvelopes[j] = tempEnvelope;
@@ -3833,6 +3833,7 @@ export class Instrument {
                     if (jsonFormat == "midbox") {
                         /* Default Envelope Table
                         Used as the center point for grabbing all other speed values from other speed numbers.
+                        Do note that this only applies to before the envelope speed-numbering removal.
                         None/Note Size/Punch | stay the same
                         Flare 3
                         Twang 3
@@ -3848,114 +3849,114 @@ export class Instrument {
                         Stairs 1
                         Looped Stairs 1*/
                         const oldNameToNewData = (<any>{
-                            "none":            {envelope: "none",          envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "note size":       {envelope: "note size",     envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "punch":           {envelope: "punch",         envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "flare 0":         {envelope: "flare",         envelopeSpeed: 8,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "flare 1":         {envelope: "flare",         envelopeSpeed: 4,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "flare 2":         {envelope: "flare",         envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "flare 3":         {envelope: "flare",         envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "flare 4":         {envelope: "flare",         envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "flare 5":         {envelope: "flare",         envelopeSpeed: 0.333, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "flare 6":         {envelope: "flare",         envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "twang 0":         {envelope: "twang",         envelopeSpeed: 8,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "twang 1":         {envelope: "twang",         envelopeSpeed: 4,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "twang 2":         {envelope: "twang",         envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "twang 3":         {envelope: "twang",         envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "twang 4":         {envelope: "twang",         envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "twang 5":         {envelope: "twang",         envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "twang 6":         {envelope: "twang",         envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "swell 0":         {envelope: "swell",         envelopeSpeed: 8,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "swell 1":         {envelope: "swell",         envelopeSpeed: 4,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "swell 2":         {envelope: "swell",         envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "swell 3":         {envelope: "swell",         envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "swell 4":         {envelope: "swell",         envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "swell 5":         {envelope: "swell",         envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "swell 6":         {envelope: "swell",         envelopeSpeed: 0.125, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "swell 7":         {envelope: "swell",         envelopeSpeed: 0.063, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "full tremolo 0":  {envelope: "tremolo",       envelopeSpeed: 4,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "full tremolo 1":  {envelope: "tremolo",       envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "full tremolo 2":  {envelope: "tremolo",       envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "full tremolo 3":  {envelope: "tremolo",       envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "full tremolo 4":  {envelope: "tremolo",       envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "full tremolo 5":  {envelope: "tremolo",       envelopeSpeed: 0.125, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "semi tremolo 0":  {envelope: "tremolo",       envelopeSpeed: 4,     lowerBound: 0.5,  stepAmount: 4,  phase: 0},
-                            "semi tremolo 1":  {envelope: "tremolo",       envelopeSpeed: 2,     lowerBound: 0.5,  stepAmount: 4,  phase: 0},
-                            "semi tremolo 2":  {envelope: "tremolo",       envelopeSpeed: 1,     lowerBound: 0.5,  stepAmount: 4,  phase: 0},
-                            "semi tremolo 3":  {envelope: "tremolo",       envelopeSpeed: 0.5,   lowerBound: 0.5,  stepAmount: 4,  phase: 0},
-                            "semi tremolo 4":  {envelope: "tremolo",       envelopeSpeed: 0.25,  lowerBound: 0.5,  stepAmount: 4,  phase: 0},
-                            "semi tremolo 5":  {envelope: "tremolo",       envelopeSpeed: 0.125, lowerBound: 0.5,  stepAmount: 4,  phase: 0},
-                            "mini tremolo 0":  {envelope: "tremolo",       envelopeSpeed: 4,     lowerBound: 0.75, stepAmount: 4,  phase: 0},
-                            "mini tremolo 1":  {envelope: "tremolo",       envelopeSpeed: 2,     lowerBound: 0.75, stepAmount: 4,  phase: 0},
-                            "mini tremolo 2":  {envelope: "tremolo",       envelopeSpeed: 1,     lowerBound: 0.75, stepAmount: 4,  phase: 0},
-                            "mini tremolo 3":  {envelope: "tremolo",       envelopeSpeed: 0.5,   lowerBound: 0.75, stepAmount: 4,  phase: 0},
-                            "mini tremolo 4":  {envelope: "tremolo",       envelopeSpeed: 0.25,  lowerBound: 0.75, stepAmount: 4,  phase: 0},
-                            "mini tremolo 5":  {envelope: "tremolo",       envelopeSpeed: 0.125, lowerBound: 0.75, stepAmount: 4,  phase: 0},
-                            "full tripolo 0":  {envelope: "tremolo",       envelopeSpeed: 6,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "full tripolo 1":  {envelope: "tremolo",       envelopeSpeed: 3,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "full tripolo 2":  {envelope: "tremolo",       envelopeSpeed: 1.5,   lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "full tripolo 3":  {envelope: "tremolo",       envelopeSpeed: 0.75,  lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "full tripolo 4":  {envelope: "tremolo",       envelopeSpeed: 0.375, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "full tripolo 5":  {envelope: "tremolo",       envelopeSpeed: 0.188, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "semi tripolo 0":  {envelope: "tremolo",       envelopeSpeed: 6,     lowerBound: 0.5,  stepAmount: 4,  phase: 0},
-                            "semi tripolo 1":  {envelope: "tremolo",       envelopeSpeed: 3,     lowerBound: 0.5,  stepAmount: 4,  phase: 0},
-                            "semi tripolo 2":  {envelope: "tremolo",       envelopeSpeed: 1.5,   lowerBound: 0.5,  stepAmount: 4,  phase: 0},
-                            "semi tripolo 3":  {envelope: "tremolo",       envelopeSpeed: 0.75,  lowerBound: 0.5,  stepAmount: 4,  phase: 0},
-                            "semi tripolo 4":  {envelope: "tremolo",       envelopeSpeed: 0.375, lowerBound: 0.5,  stepAmount: 4,  phase: 0},
-                            "semi tripolo 5":  {envelope: "tremolo",       envelopeSpeed: 0.188, lowerBound: 0.5,  stepAmount: 4,  phase: 0},
-                            "mini tripolo 0":  {envelope: "tremolo",       envelopeSpeed: 6,     lowerBound: 0.75, stepAmount: 4,  phase: 0},
-                            "mini tripolo 1":  {envelope: "tremolo",       envelopeSpeed: 3,     lowerBound: 0.75, stepAmount: 4,  phase: 0},
-                            "mini tripolo 2":  {envelope: "tremolo",       envelopeSpeed: 1.5,   lowerBound: 0.75, stepAmount: 4,  phase: 0},
-                            "mini tripolo 3":  {envelope: "tremolo",       envelopeSpeed: 0.75,  lowerBound: 0.75, stepAmount: 4,  phase: 0},
-                            "mini tripolo 4":  {envelope: "tremolo",       envelopeSpeed: 0.375, lowerBound: 0.75, stepAmount: 4,  phase: 0},
-                            "mini tripolo 5":  {envelope: "tremolo",       envelopeSpeed: 0.188, lowerBound: 0.75, stepAmount: 4,  phase: 0},
-                            "decay 0":         {envelope: "decay",         envelopeSpeed: 9,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "decay 1":         {envelope: "decay",         envelopeSpeed: 5,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "decay 2":         {envelope: "decay",         envelopeSpeed: 3.5,   lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "decay 3":         {envelope: "decay",         envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "decay 4":         {envelope: "decay",         envelopeSpeed: 0.75,  lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "decay 5":         {envelope: "decay",         envelopeSpeed: 0.375, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "modbox trill":    {envelope: "modbox trill",  envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "modbox blip":     {envelope: "modbox blip",   envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "modbox click":    {envelope: "modbox click",  envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "modbox bow":      {envelope: "modbox bow",    envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "wibble 0":        {envelope: "wibble",        envelopeSpeed: 8,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "wibble 1":        {envelope: "wibble",        envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "wibble 2":        {envelope: "wibble",        envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "wibble 3":        {envelope: "wibble",        envelopeSpeed: 0.333, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "wibble 4":        {envelope: "wibble",        envelopeSpeed: 0.083, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "linear 0":        {envelope: "linear",        envelopeSpeed: 8,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "linear 1":        {envelope: "linear",        envelopeSpeed: 4,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "linear 2":        {envelope: "linear",        envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "linear 3":        {envelope: "linear",        envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "linear 4":        {envelope: "linear",        envelopeSpeed: 0.063, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "linear 5":        {envelope: "linear",        envelopeSpeed: 0.016, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "rise 0":          {envelope: "rise",          envelopeSpeed: 8,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "rise 1":          {envelope: "rise",          envelopeSpeed: 4,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "rise 2":          {envelope: "rise",          envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "rise 3":          {envelope: "rise",          envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "rise 4":          {envelope: "rise",          envelopeSpeed: 0.063, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "rise 5":          {envelope: "rise",          envelopeSpeed: 0.016, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "jummbox blip 0":  {envelope: "jummbox blip",  envelopeSpeed: 2.828, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "jummbox blip 1":  {envelope: "jummbox blip",  envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "jummbox blip 2":  {envelope: "jummbox blip",  envelopeSpeed: 1.414, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "jummbox blip 3":  {envelope: "jummbox blip",  envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "jummbox blip 4":  {envelope: "jummbox blip",  envelopeSpeed: 0.707, lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "jummbox blip 5":  {envelope: "jummbox blip",  envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "decelerate 0":    {envelope: "decelerate",    envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 2.25},
-                            "decelerate 1":    {envelope: "decelerate",    envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 4.5},
-                            "decelerate 2":    {envelope: "decelerate",    envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 8.75},
-                            "decelerate 3":    {envelope: "decelerate",    envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 17},
-                            "stairs 0":        {envelope: "stairs",        envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 2,  phase: 0},
-                            "stairs 1":        {envelope: "stairs",        envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "stairs 2":        {envelope: "stairs",        envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 8,  phase: 0},
-                            "stairs 3":        {envelope: "stairs",        envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 16, phase: 0},
-                            "stairs 4":        {envelope: "stairs",        envelopeSpeed: 0.125, lowerBound: 0,    stepAmount: 32, phase: 0},
-                            "looped stairs 0": {envelope: "looped stairs", envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 2,  phase: 0},
-                            "looped stairs 1": {envelope: "looped stairs", envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0},
-                            "looped stairs 2": {envelope: "looped stairs", envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 8,  phase: 0},
-                            "looped stairs 3": {envelope: "looped stairs", envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 16, phase: 0},
-                            "looped stairs 4": {envelope: "looped stairs", envelopeSpeed: 0.125, lowerBound: 0,    stepAmount: 32, phase: 0},
+                            "none":            {envelope: "none",          envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "note size":       {envelope: "note size",     envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "punch":           {envelope: "punch",         envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "flare 0":         {envelope: "flare",         envelopeSpeed: 8,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "flare 1":         {envelope: "flare",         envelopeSpeed: 4,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "flare 2":         {envelope: "flare",         envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "flare 3":         {envelope: "flare",         envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "flare 4":         {envelope: "flare",         envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "flare 5":         {envelope: "flare",         envelopeSpeed: 0.333, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "flare 6":         {envelope: "flare",         envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "twang 0":         {envelope: "twang",         envelopeSpeed: 8,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "twang 1":         {envelope: "twang",         envelopeSpeed: 4,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "twang 2":         {envelope: "twang",         envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "twang 3":         {envelope: "twang",         envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "twang 4":         {envelope: "twang",         envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "twang 5":         {envelope: "twang",         envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "twang 6":         {envelope: "twang",         envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "swell 0":         {envelope: "swell",         envelopeSpeed: 8,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "swell 1":         {envelope: "swell",         envelopeSpeed: 4,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "swell 2":         {envelope: "swell",         envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "swell 3":         {envelope: "swell",         envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "swell 4":         {envelope: "swell",         envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "swell 5":         {envelope: "swell",         envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "swell 6":         {envelope: "swell",         envelopeSpeed: 0.125, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "swell 7":         {envelope: "swell",         envelopeSpeed: 0.063, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "full tremolo 0":  {envelope: "LFO",           envelopeSpeed: 4,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "full tremolo 1":  {envelope: "LFO",           envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "full tremolo 2":  {envelope: "LFO",           envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "full tremolo 3":  {envelope: "LFO",           envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "full tremolo 4":  {envelope: "LFO",           envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "full tremolo 5":  {envelope: "LFO",           envelopeSpeed: 0.125, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "semi tremolo 0":  {envelope: "LFO",           envelopeSpeed: 4,     lowerBound: 0.5,  stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "semi tremolo 1":  {envelope: "LFO",           envelopeSpeed: 2,     lowerBound: 0.5,  stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "semi tremolo 2":  {envelope: "LFO",           envelopeSpeed: 1,     lowerBound: 0.5,  stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "semi tremolo 3":  {envelope: "LFO",           envelopeSpeed: 0.5,   lowerBound: 0.5,  stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "semi tremolo 4":  {envelope: "LFO",           envelopeSpeed: 0.25,  lowerBound: 0.5,  stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "semi tremolo 5":  {envelope: "LFO",           envelopeSpeed: 0.125, lowerBound: 0.5,  stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "mini tremolo 0":  {envelope: "LFO",           envelopeSpeed: 4,     lowerBound: 0.75, stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "mini tremolo 1":  {envelope: "LFO",           envelopeSpeed: 2,     lowerBound: 0.75, stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "mini tremolo 2":  {envelope: "LFO",           envelopeSpeed: 1,     lowerBound: 0.75, stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "mini tremolo 3":  {envelope: "LFO",           envelopeSpeed: 0.5,   lowerBound: 0.75, stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "mini tremolo 4":  {envelope: "LFO",           envelopeSpeed: 0.25,  lowerBound: 0.75, stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "mini tremolo 5":  {envelope: "LFO",           envelopeSpeed: 0.125, lowerBound: 0.75, stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "full tripolo 0":  {envelope: "LFO",           envelopeSpeed: 6,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "full tripolo 1":  {envelope: "LFO",           envelopeSpeed: 3,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "full tripolo 2":  {envelope: "LFO",           envelopeSpeed: 1.5,   lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "full tripolo 3":  {envelope: "LFO",           envelopeSpeed: 0.75,  lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "full tripolo 4":  {envelope: "LFO",           envelopeSpeed: 0.375, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "full tripolo 5":  {envelope: "LFO",           envelopeSpeed: 0.188, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "semi tripolo 0":  {envelope: "LFO",           envelopeSpeed: 6,     lowerBound: 0.5,  stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "semi tripolo 1":  {envelope: "LFO",           envelopeSpeed: 3,     lowerBound: 0.5,  stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "semi tripolo 2":  {envelope: "LFO",           envelopeSpeed: 1.5,   lowerBound: 0.5,  stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "semi tripolo 3":  {envelope: "LFO",           envelopeSpeed: 0.75,  lowerBound: 0.5,  stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "semi tripolo 4":  {envelope: "LFO",           envelopeSpeed: 0.375, lowerBound: 0.5,  stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "semi tripolo 5":  {envelope: "LFO",           envelopeSpeed: 0.188, lowerBound: 0.5,  stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "mini tripolo 0":  {envelope: "LFO",           envelopeSpeed: 6,     lowerBound: 0.75, stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "mini tripolo 1":  {envelope: "LFO",           envelopeSpeed: 3,     lowerBound: 0.75, stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "mini tripolo 2":  {envelope: "LFO",           envelopeSpeed: 1.5,   lowerBound: 0.75, stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "mini tripolo 3":  {envelope: "LFO",           envelopeSpeed: 0.75,  lowerBound: 0.75, stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "mini tripolo 4":  {envelope: "LFO",           envelopeSpeed: 0.375, lowerBound: 0.75, stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "mini tripolo 5":  {envelope: "LFO",           envelopeSpeed: 0.188, lowerBound: 0.75, stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: true,  loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "decay 0":         {envelope: "decay",         envelopeSpeed: 9,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "decay 1":         {envelope: "decay",         envelopeSpeed: 5,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "decay 2":         {envelope: "decay",         envelopeSpeed: 3.5,   lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "decay 3":         {envelope: "decay",         envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "decay 4":         {envelope: "decay",         envelopeSpeed: 0.75,  lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "decay 5":         {envelope: "decay",         envelopeSpeed: 0.375, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "modbox trill":    {envelope: "modbox trill",  envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "modbox blip":     {envelope: "modbox blip",   envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "modbox click":    {envelope: "modbox click",  envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "modbox bow":      {envelope: "modbox bow",    envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "wibble 0":        {envelope: "wibble",        envelopeSpeed: 8,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "wibble 1":        {envelope: "wibble",        envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "wibble 2":        {envelope: "wibble",        envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "wibble 3":        {envelope: "wibble",        envelopeSpeed: 0.333, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "wibble 4":        {envelope: "wibble",        envelopeSpeed: 0.083, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "linear 0":        {envelope: "linear",        envelopeSpeed: 8,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "linear 1":        {envelope: "linear",        envelopeSpeed: 4,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "linear 2":        {envelope: "linear",        envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "linear 3":        {envelope: "linear",        envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "linear 4":        {envelope: "linear",        envelopeSpeed: 0.063, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "linear 5":        {envelope: "linear",        envelopeSpeed: 0.016, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "rise 0":          {envelope: "rise",          envelopeSpeed: 8,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "rise 1":          {envelope: "rise",          envelopeSpeed: 4,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "rise 2":          {envelope: "rise",          envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "rise 3":          {envelope: "rise",          envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "rise 4":          {envelope: "rise",          envelopeSpeed: 0.063, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "rise 5":          {envelope: "rise",          envelopeSpeed: 0.016, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "jummbox blip 0":  {envelope: "jummbox blip",  envelopeSpeed: 2.828, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "jummbox blip 1":  {envelope: "jummbox blip",  envelopeSpeed: 2,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "jummbox blip 2":  {envelope: "jummbox blip",  envelopeSpeed: 1.414, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "jummbox blip 3":  {envelope: "jummbox blip",  envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "jummbox blip 4":  {envelope: "jummbox blip",  envelopeSpeed: 0.707, lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "jummbox blip 5":  {envelope: "jummbox blip",  envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "decelerate 0":    {envelope: "LFO",           envelopeSpeed: 16,    lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: true,  acceleration: 0.65},
+                            "decelerate 1":    {envelope: "LFO",           envelopeSpeed: 16,    lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: true,  acceleration: 0.6 },
+                            "decelerate 2":    {envelope: "LFO",           envelopeSpeed: 13,    lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: true,  acceleration: 0.62},
+                            "decelerate 3":    {envelope: "LFO",           envelopeSpeed: 11,    lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 0, ignorance: false, loopOnce: false, enableAcceleration: true,  acceleration: 0.7 },
+                            "stairs 0":        {envelope: "LFO",           envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 2,  phase: 0,    LFOShape: 5, ignorance: false, loopOnce: true,  enableAcceleration: false, acceleration: 1   },
+                            "stairs 1":        {envelope: "LFO",           envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 5, ignorance: false, loopOnce: true,  enableAcceleration: false, acceleration: 1   },
+                            "stairs 2":        {envelope: "LFO",           envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 8,  phase: 0,    LFOShape: 5, ignorance: false, loopOnce: true,  enableAcceleration: false, acceleration: 1   },
+                            "stairs 3":        {envelope: "LFO",           envelopeSpeed: 0.125, lowerBound: 0,    stepAmount: 16, phase: 0,    LFOShape: 5, ignorance: false, loopOnce: true,  enableAcceleration: false, acceleration: 1   },
+                            "stairs 4":        {envelope: "LFO",           envelopeSpeed: 0.063, lowerBound: 0,    stepAmount: 32, phase: 0,    LFOShape: 5, ignorance: false, loopOnce: true,  enableAcceleration: false, acceleration: 1   },
+                            "looped stairs 0": {envelope: "LFO",           envelopeSpeed: 1,     lowerBound: 0,    stepAmount: 2,  phase: 0,    LFOShape: 5, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "looped stairs 1": {envelope: "LFO",           envelopeSpeed: 0.5,   lowerBound: 0,    stepAmount: 4,  phase: 0,    LFOShape: 5, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "looped stairs 2": {envelope: "LFO",           envelopeSpeed: 0.25,  lowerBound: 0,    stepAmount: 8,  phase: 0,    LFOShape: 5, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "looped stairs 3": {envelope: "LFO",           envelopeSpeed: 0.125, lowerBound: 0,    stepAmount: 16, phase: 0,    LFOShape: 5, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
+                            "looped stairs 4": {envelope: "LFO",           envelopeSpeed: 0.063, lowerBound: 0,    stepAmount: 32, phase: 0,    LFOShape: 5, ignorance: false, loopOnce: false, enableAcceleration: false, acceleration: 1   },
                         });
                         if (oldNameToNewData[rawEnvelopeName] != undefined && Config.envelopes.dictionary[oldNameToNewData[rawEnvelopeName].envelope] != undefined) {
                             if (oldNameToNewData[rawEnvelopeName].envelope != null && rawEnvelopeName != null) tempEnvelope.envelope = Config.envelopes.dictionary[oldNameToNewData[rawEnvelopeName].envelope].index;
@@ -3963,88 +3964,99 @@ export class Instrument {
                             if (oldNameToNewData[rawEnvelopeName].lowerBound != null && rawEnvelopeName != null) tempEnvelope.lowerBound = oldNameToNewData[rawEnvelopeName].lowerBound;
                             if (oldNameToNewData[rawEnvelopeName].stepAmount != null && rawEnvelopeName != null) tempEnvelope.stepAmount = oldNameToNewData[rawEnvelopeName].stepAmount;
                             if (oldNameToNewData[rawEnvelopeName].phase != null && rawEnvelopeName != null) tempEnvelope.phase = oldNameToNewData[rawEnvelopeName].phase;
+                            if (oldNameToNewData[rawEnvelopeName].LFOShape != null && rawEnvelopeName != null) tempEnvelope.LFOSettings.LFOShape = oldNameToNewData[rawEnvelopeName].LFOShape;
+                            if (oldNameToNewData[rawEnvelopeName].ignorance != null && rawEnvelopeName != null) tempEnvelope.LFOSettings.LFOIgnorance = oldNameToNewData[rawEnvelopeName].ignorance;
+                            if (oldNameToNewData[rawEnvelopeName].loopOnce != null && rawEnvelopeName != null) tempEnvelope.LFOSettings.LFOLoopOnce = oldNameToNewData[rawEnvelopeName].loopOnce;
+                            if (oldNameToNewData[rawEnvelopeName].enableAcceleration != null && rawEnvelopeName != null) tempEnvelope.LFOSettings.LFOAllowAccelerate = oldNameToNewData[rawEnvelopeName].enableAcceleration;
+                            if (oldNameToNewData[rawEnvelopeName].acceleration != null && rawEnvelopeName != null) tempEnvelope.LFOSettings.LFOAcceleration = oldNameToNewData[rawEnvelopeName].acceleration;
                         }
                     } else {
                         // Midbox changes the names and values of various envelopes. Change them here.
                         // Note: NPA = Not Perfectly Accurate
                         const oldNameToNewData = (<any>{
                             // BeepBox
-                            "none":            {envelope: "none",          envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    measurementType: true},
-                            "note size":       {envelope: "note size",     envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    measurementType: true},
-                            "punch":           {envelope: "punch",         envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    measurementType: true},
-                            "flare 1":         {envelope: "flare",         envelopeSpeed: 4,     lowerBound: 0,   delay: 0,    measurementType: true},
-                            "flare 2":         {envelope: "flare",         envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    measurementType: true},
-                            "flare 3":         {envelope: "flare",         envelopeSpeed: 0.25,  lowerBound: 0,   delay: 0,    measurementType: true},
-                            "twang 1":         {envelope: "twang",         envelopeSpeed: 4,     lowerBound: 0,   delay: 0,    measurementType: true},
-                            "twang 2":         {envelope: "twang",         envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    measurementType: true},
-                            "twang 3":         {envelope: "twang",         envelopeSpeed: 0.25,  lowerBound: 0,   delay: 0,    measurementType: true},
-                            "swell 1":         {envelope: "swell",         envelopeSpeed: 4,     lowerBound: 0,   delay: 0,    measurementType: true},
-                            "swell 2":         {envelope: "swell",         envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    measurementType: true},
-                            "swell 3":         {envelope: "swell",         envelopeSpeed: 0.25,  lowerBound: 0,   delay: 0,    measurementType: true},
-                            "tremolo1":        {envelope: "tremolo",       envelopeSpeed: 2,     lowerBound: 0,   delay: 0,    measurementType: true},
-                            "tremolo2":        {envelope: "tremolo",       envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    measurementType: true},
-                            "tremolo3":        {envelope: "tremolo",       envelopeSpeed: 0.5,   lowerBound: 0,   delay: 0,    measurementType: true},
-                            "tremolo4":        {envelope: "tremolo",       envelopeSpeed: 2,     lowerBound: 0.5, delay: 0,    measurementType: true},
-                            "tremolo5":        {envelope: "tremolo",       envelopeSpeed: 1,     lowerBound: 0.5, delay: 0,    measurementType: true},
-                            "tremolo6":        {envelope: "tremolo",       envelopeSpeed: 0.5,   lowerBound: 0.5, delay: 0,    measurementType: true},
-                            "decay 1":         {envelope: "decay",         envelopeSpeed: 5,     lowerBound: 0,   delay: 0,    measurementType: true},
-                            "decay 2":         {envelope: "decay",         envelopeSpeed: 3.5,   lowerBound: 0,   delay: 0,    measurementType: true},
-                            "decay 3":         {envelope: "decay",         envelopeSpeed: 2,     lowerBound: 0,   delay: 0,    measurementType: true},
+                            "none":            {envelope: "none",          envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "note size":       {envelope: "note size",     envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "punch":           {envelope: "punch",         envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "flare 1":         {envelope: "flare",         envelopeSpeed: 4,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "flare 2":         {envelope: "flare",         envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "flare 3":         {envelope: "flare",         envelopeSpeed: 0.25,  lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "twang 1":         {envelope: "twang",         envelopeSpeed: 4,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "twang 2":         {envelope: "twang",         envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "twang 3":         {envelope: "twang",         envelopeSpeed: 0.25,  lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "swell 1":         {envelope: "swell",         envelopeSpeed: 4,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "swell 2":         {envelope: "swell",         envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "swell 3":         {envelope: "swell",         envelopeSpeed: 0.25,  lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "tremolo1":        {envelope: "LFO",           envelopeSpeed: 2,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "tremolo2":        {envelope: "LFO",           envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "tremolo3":        {envelope: "LFO",           envelopeSpeed: 0.5,   lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "tremolo4":        {envelope: "LFO",           envelopeSpeed: 2,     lowerBound: 0.5, delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "tremolo5":        {envelope: "LFO",           envelopeSpeed: 1,     lowerBound: 0.5, delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "tremolo6":        {envelope: "LFO",           envelopeSpeed: 0.5,   lowerBound: 0.5, delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "decay 1":         {envelope: "decay",         envelopeSpeed: 5,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "decay 2":         {envelope: "decay",         envelopeSpeed: 3.5,   lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "decay 3":         {envelope: "decay",         envelopeSpeed: 2,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
                             // JummBox
-                            "blip 1":          {envelope: "jummbox blip",  envelopeSpeed: 0.866, lowerBound: 0,   delay: 0,    measurementType: true},
-                            "blip 2":          {envelope: "jummbox blip",  envelopeSpeed: 1.414, lowerBound: 0,   delay: 0,    measurementType: true},
-                            "blip 3":          {envelope: "jummbox blip",  envelopeSpeed: 2,     lowerBound: 0,   delay: 0,    measurementType: true},
+                            "blip 1":          {envelope: "jummbox blip",  envelopeSpeed: 0.866, lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "blip 2":          {envelope: "jummbox blip",  envelopeSpeed: 1.414, lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "blip 3":          {envelope: "jummbox blip",  envelopeSpeed: 2,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
                             // GoldBox
-                            "flare -1":        {envelope: "flare",         envelopeSpeed: 16,    lowerBound: 0,   delay: 0,    measurementType: true},
-                            "twang -1":        {envelope: "twang",         envelopeSpeed: 16,    lowerBound: 0,   delay: 0,    measurementType: true},
-                            "swell -1":        {envelope: "swell",         envelopeSpeed: 16,    lowerBound: 0,   delay: 0,    measurementType: true},
-                            "tremolo0":        {envelope: "tremolo",       envelopeSpeed: 4,     lowerBound: 0,   delay: 0,    measurementType: true},
-                            "decay -1":        {envelope: "decay",         envelopeSpeed: 16,    lowerBound: 0,   delay: 0,    measurementType: true}, // NPA, would need 20 envSpeed.
-                            "wibble-1":        {envelope: "wibble",        envelopeSpeed: 8,     lowerBound: 0,   delay: 0,    measurementType: true},
-                            "wibble 1":        {envelope: "wibble",        envelopeSpeed: 2,     lowerBound: 0,   delay: 0,    measurementType: true},
-                            "wibble 2":        {envelope: "wibble",        envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    measurementType: true},
-                            "wibble 3":        {envelope: "wibble",        envelopeSpeed: 0.333, lowerBound: 0,   delay: 0,    measurementType: true},
-                            "linear-2":        {envelope: "linear",        envelopeSpeed: 8,     lowerBound: 0,   delay: 0,    measurementType: true},
-                            "linear-1":        {envelope: "linear",        envelopeSpeed: 4,     lowerBound: 0,   delay: 0,    measurementType: true},
-                            "linear 1":        {envelope: "linear",        envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    measurementType: true},
-                            "linear 2":        {envelope: "linear",        envelopeSpeed: 0.25,  lowerBound: 0,   delay: 0,    measurementType: true},
-                            "linear 3":        {envelope: "linear",        envelopeSpeed: 0.063, lowerBound: 0,   delay: 0,    measurementType: true},
-                            "rise -2":         {envelope: "rise",          envelopeSpeed: 8,     lowerBound: 0,   delay: 0,    measurementType: true},
-                            "rise -1":         {envelope: "rise",          envelopeSpeed: 4,     lowerBound: 0,   delay: 0,    measurementType: true},
-                            "rise 1":          {envelope: "rise",          envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    measurementType: true},
-                            "rise 2":          {envelope: "rise",          envelopeSpeed: 0.25,  lowerBound: 0,   delay: 0,    measurementType: true},
-                            "rise 3":          {envelope: "rise",          envelopeSpeed: 0.063, lowerBound: 0,   delay: 0,    measurementType: true},
+                            "flare -1":        {envelope: "flare",         envelopeSpeed: 16,    lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "twang -1":        {envelope: "twang",         envelopeSpeed: 16,    lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "swell -1":        {envelope: "swell",         envelopeSpeed: 16,    lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "tremolo0":        {envelope: "LFO",           envelopeSpeed: 4,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "decay -1":        {envelope: "decay",         envelopeSpeed: 16,    lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault}, // NPA, would need 20 envSpeed.
+                            "wibble-1":        {envelope: "wibble",        envelopeSpeed: 8,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "wibble 1":        {envelope: "wibble",        envelopeSpeed: 2,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "wibble 2":        {envelope: "wibble",        envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "wibble 3":        {envelope: "wibble",        envelopeSpeed: 0.333, lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "linear-2":        {envelope: "linear",        envelopeSpeed: 8,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "linear-1":        {envelope: "linear",        envelopeSpeed: 4,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "linear 1":        {envelope: "linear",        envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "linear 2":        {envelope: "linear",        envelopeSpeed: 0.25,  lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "linear 3":        {envelope: "linear",        envelopeSpeed: 0.063, lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "rise -2":         {envelope: "rise",          envelopeSpeed: 8,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "rise -1":         {envelope: "rise",          envelopeSpeed: 4,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "rise 1":          {envelope: "rise",          envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "rise 2":          {envelope: "rise",          envelopeSpeed: 0.25,  lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "rise 3":          {envelope: "rise",          envelopeSpeed: 0.063, lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
                             // UltraBox, Sandbox, and TodBox
                             // UltraBox flute is just wibble. ModBox flute is a different story though, as that 
                             // is not replicatable in Midbox.
-                            "flute 1":         {envelope: "wibble",        envelopeSpeed: 1.333, lowerBound: 0,   delay: 0,    measurementType: true},
-                            "flute 2":         {envelope: "wibble",        envelopeSpeed: 0.666, lowerBound: 0,   delay: 0,    measurementType: true},
-                            "flute 3":         {envelope: "wibble",        envelopeSpeed: 0.333, lowerBound: 0,   delay: 0,    measurementType: true},
-                            "tripolo1":        {envelope: "tremolo",       envelopeSpeed: 4.5,   lowerBound: 0,   delay: 0,    measurementType: true},
-                            "tripolo2":        {envelope: "tremolo",       envelopeSpeed: 3,     lowerBound: 0,   delay: 0,    measurementType: true},
-                            "tripolo3":        {envelope: "tremolo",       envelopeSpeed: 1.5,   lowerBound: 0,   delay: 0,    measurementType: true},
-                            "tripolo4":        {envelope: "tremolo",       envelopeSpeed: 4.5,   lowerBound: 0.5, delay: 0,    measurementType: true},
-                            "tripolo5":        {envelope: "tremolo",       envelopeSpeed: 3,     lowerBound: 0.5, delay: 0,    measurementType: true},
-                            "tripolo6":        {envelope: "tremolo",       envelopeSpeed: 1.5,   lowerBound: 0.5, delay: 0,    measurementType: true},
-                            "pentolo1":        {envelope: "tremolo",       envelopeSpeed: 5,     lowerBound: 0,   delay: 0,    measurementType: true},
-                            "pentolo2":        {envelope: "tremolo",       envelopeSpeed: 2.5,   lowerBound: 0,   delay: 0,    measurementType: true},
-                            "pentolo3":        {envelope: "tremolo",       envelopeSpeed: 1.25,  lowerBound: 0,   delay: 0,    measurementType: true},
-                            "pentolo4":        {envelope: "tremolo",       envelopeSpeed: 5,     lowerBound: 0.5, delay: 0,    measurementType: true},
-                            "pentolo5":        {envelope: "tremolo",       envelopeSpeed: 2.5,   lowerBound: 0.5, delay: 0,    measurementType: true},
-                            "pentolo6":        {envelope: "tremolo",       envelopeSpeed: 1.25,  lowerBound: 0.5, delay: 0,    measurementType: true},
-                            "flutter 1":       {envelope: "tremolo",       envelopeSpeed: 7,     lowerBound: 0,   delay: 0,    measurementType: true},
-                            "flutter 2":       {envelope: "tremolo",       envelopeSpeed: 5.5,   lowerBound: 0.5, delay: 0,    measurementType: true},
-                            "water-y flutter": {envelope: "tremolo",       envelopeSpeed: 4.5,   lowerBound: 0,   delay: 0,    measurementType: true},
+                            "flute 1":         {envelope: "wibble",        envelopeSpeed: 1.333, lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "flute 2":         {envelope: "wibble",        envelopeSpeed: 0.666, lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "flute 3":         {envelope: "wibble",        envelopeSpeed: 0.333, lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "tripolo1":        {envelope: "LFO",           envelopeSpeed: 4.5,   lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "tripolo2":        {envelope: "LFO",           envelopeSpeed: 3,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "tripolo3":        {envelope: "LFO",           envelopeSpeed: 1.5,   lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "tripolo4":        {envelope: "LFO",           envelopeSpeed: 4.5,   lowerBound: 0.5, delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "tripolo5":        {envelope: "LFO",           envelopeSpeed: 3,     lowerBound: 0.5, delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "tripolo6":        {envelope: "LFO",           envelopeSpeed: 1.5,   lowerBound: 0.5, delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "pentolo1":        {envelope: "LFO",           envelopeSpeed: 5,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "pentolo2":        {envelope: "LFO",           envelopeSpeed: 2.5,   lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "pentolo3":        {envelope: "LFO",           envelopeSpeed: 1.25,  lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "pentolo4":        {envelope: "LFO",           envelopeSpeed: 5,     lowerBound: 0.5, delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "pentolo5":        {envelope: "LFO",           envelopeSpeed: 2.5,   lowerBound: 0.5, delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "pentolo6":        {envelope: "LFO",           envelopeSpeed: 1.25,  lowerBound: 0.5, delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "flutter 1":       {envelope: "LFO",           envelopeSpeed: 7,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "flutter 2":       {envelope: "LFO",           envelopeSpeed: 5.5,   lowerBound: 0.5, delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "water-y flutter": {envelope: "LFO",           envelopeSpeed: 4.5,   lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: true,  loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
                             // Slarmoo's Box
-                            "pitch":           {envelope: "pitch",         envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    measurementType: true},
+                            "pitch":           {envelope: "pitch",         envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
                             // Dogebox2
-                            // Account for Spike's short delay time from SynthConfig envelope.speed.
-                            "spike 1":         {envelope: "dogebox2 spike",envelopeSpeed: 4,     lowerBound: 0,   delay: 0.14, measurementType: false},
-                            "spike 2":         {envelope: "dogebox2 spike",envelopeSpeed: 1,     lowerBound: 0,   delay: 0.08, measurementType: false},
-                            "spike 3":         {envelope: "dogebox2 spike",envelopeSpeed: 0.25,  lowerBound: 0,   delay: 0.04, measurementType: false},
-                            "clap 1":          {envelope: "dogebox2 clap", envelopeSpeed: 2,     lowerBound: 0,   delay: 0,    measurementType: true},
-                            "clap 2":          {envelope: "dogebox2 clap", envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    measurementType: true},
-                            "clap 3":          {envelope: "dogebox2 clap", envelopeSpeed: 0.5,   lowerBound: 0,   delay: 0,    measurementType: true},
+                            // Account for Spike's short delay time.
+                            "spike 1":         {envelope: "LFO",           envelopeSpeed: 6,     lowerBound: 0,   delay: 0.14, phase: 0,    measurementType: false, LFOShape: 1, ignorance: false, loopOnce: true,  pulseWidth: Config.LFOPulseWidthDefault},
+                            "spike 2":         {envelope: "LFO",           envelopeSpeed: 1.5,   lowerBound: 0,   delay: 0.08, phase: 0,    measurementType: false, LFOShape: 1, ignorance: false, loopOnce: true,  pulseWidth: Config.LFOPulseWidthDefault},
+                            "spike 3":         {envelope: "LFO",           envelopeSpeed: 0.4,   lowerBound: 0,   delay: 0.04, phase: 0,    measurementType: false, LFOShape: 1, ignorance: false, loopOnce: true,  pulseWidth: Config.LFOPulseWidthDefault},
+                            "clap 1":          {envelope: "dogebox2 clap", envelopeSpeed: 2,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "clap 2":          {envelope: "dogebox2 clap", envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "clap 3":          {envelope: "dogebox2 clap", envelopeSpeed: 0.5,   lowerBound: 0,   delay: 0,    phase: 0,    measurementType: true,  LFOShape: 0, ignorance: false, loopOnce: false, pulseWidth: Config.LFOPulseWidthDefault},
+                            "blippy 1":        {envelope: "LFO",           envelopeSpeed: 16,    lowerBound: 0,   delay: 0,    phase: 0.25, measurementType: true,  LFOShape: 2, ignorance: true,  loopOnce: false, pulseWidth: 9                          },
+                            "blippy 2":        {envelope: "LFO",           envelopeSpeed: 8,     lowerBound: 0,   delay: 0,    phase: 0.25, measurementType: true,  LFOShape: 2, ignorance: true,  loopOnce: false, pulseWidth: 9                          },
+                            "blippy 3":        {envelope: "LFO",           envelopeSpeed: 4,     lowerBound: 0,   delay: 0,    phase: 0.25, measurementType: true,  LFOShape: 2, ignorance: true,  loopOnce: false, pulseWidth: 9                          },
+                            "blippy 4":        {envelope: "LFO",           envelopeSpeed: 2,     lowerBound: 0,   delay: 0,    phase: 0.25, measurementType: true,  LFOShape: 2, ignorance: true,  loopOnce: false, pulseWidth: 9                          },
+                            "blippy 5":        {envelope: "LFO",           envelopeSpeed: 1,     lowerBound: 0,   delay: 0,    phase: 0.25, measurementType: true,  LFOShape: 2, ignorance: true,  loopOnce: false, pulseWidth: 9                          },
+                            "blippy 6":        {envelope: "LFO",           envelopeSpeed: 0.5,   lowerBound: 0,   delay: 0,    phase: 0.25, measurementType: true,  LFOShape: 2, ignorance: true,  loopOnce: false, pulseWidth: 9                          },
                         });
 
                         // Slarmoo's Box pitch envelope support.
@@ -4064,7 +4076,12 @@ export class Instrument {
                             if (oldNameToNewData[rawEnvelopeName].envelopeSpeed != null && rawEnvelopeName != null) tempEnvelope.envelopeSpeed = oldNameToNewData[rawEnvelopeName].envelopeSpeed;
                             if (oldNameToNewData[rawEnvelopeName].lowerBound != null && rawEnvelopeName != null) tempEnvelope.lowerBound = oldNameToNewData[rawEnvelopeName].lowerBound;
                             if (oldNameToNewData[rawEnvelopeName].delay != null && rawEnvelopeName != null) tempEnvelope.delay = oldNameToNewData[rawEnvelopeName].delay;
+                            if (oldNameToNewData[rawEnvelopeName].phase != null && rawEnvelopeName != null) tempEnvelope.phase = oldNameToNewData[rawEnvelopeName].phase;
                             if (oldNameToNewData[rawEnvelopeName].measurementType != null && rawEnvelopeName != null) tempEnvelope.measurementType = oldNameToNewData[rawEnvelopeName].measurementType;
+                            if (oldNameToNewData[rawEnvelopeName].LFOShape != null && rawEnvelopeName != null) tempEnvelope.LFOSettings.LFOShape = oldNameToNewData[rawEnvelopeName].LFOShape;
+                            if (oldNameToNewData[rawEnvelopeName].ignorance != null && rawEnvelopeName != null) tempEnvelope.LFOSettings.LFOIgnorance = oldNameToNewData[rawEnvelopeName].ignorance;
+                            if (oldNameToNewData[rawEnvelopeName].loopOnce != null && rawEnvelopeName != null) tempEnvelope.LFOSettings.LFOLoopOnce = oldNameToNewData[rawEnvelopeName].loopOnce;
+                            if (oldNameToNewData[rawEnvelopeName].pulseWidth != null && rawEnvelopeName != null) tempEnvelope.LFOSettings.LFOPulseWidth = oldNameToNewData[rawEnvelopeName].pulseWidth;
                         }
 
                         // Slarmoo's Box / VoxBox inverse toggle support.
@@ -4078,7 +4095,7 @@ export class Instrument {
                             }
                         }
                     }
-                    this.addEnvelope(tempEnvelope.target, tempEnvelope.index, tempEnvelope.envelope, tempEnvelope.envelopeSpeed, false, tempEnvelope.lowerBound, tempEnvelope.upperBound, tempEnvelope.stepAmount, tempEnvelope.delay, tempEnvelope.pitchStart, tempEnvelope.pitchEnd, false, false, tempEnvelope.phase, tempEnvelope.measurementType);
+                    this.addEnvelope(tempEnvelope.target, tempEnvelope.index, tempEnvelope.envelope, tempEnvelope.envelopeSpeed, false, tempEnvelope.lowerBound, tempEnvelope.upperBound, tempEnvelope.stepAmount, tempEnvelope.delay, tempEnvelope.pitchStart, tempEnvelope.pitchEnd, false, false, tempEnvelope.phase, tempEnvelope.measurementType, 5, tempEnvelope.LFOSettings);
                 }
             }
 
@@ -7768,8 +7785,7 @@ export class EnvelopeComputer {
         this._modifiedDrumsetEnvelopeCount = 0;
     }
 
-    public computeEnvelopes(instrument: Instrument, currentPart: number, tickTimeStart: number[], tickTimeStartReal: number, secondsPerTick: number, tone: Tone | null, timeScale: number, instrumentState: InstrumentState): void {
-        let drumsetTickTimeStart = tickTimeStart;
+    public computeEnvelopes(instrument: Instrument, currentPart: number, tickTimeStart: number[], drumsetTickTimeStart: number[], tickTimeStartReal: number, secondsPerTick: number, tone: Tone | null, timeScale: number, instrumentState: InstrumentState): void {
         const secondsPerTickUnscaled: number = secondsPerTick;
         secondsPerTick *= timeScale;
         const transition: Transition = instrument.getTransition();
@@ -8072,9 +8088,7 @@ export class EnvelopeComputer {
                 this.drumsetEnvelopeStarts[drumIndex] *= drumsetFilterEnvelopeStart;
                 this.drumsetEnvelopeEnds[drumIndex] *= drumsetFilterEnvelopeEnd;
                 this._modifiedDrumsetEnvelopeIndices[this._modifiedDrumsetEnvelopeCount++] = drumIndex;
-
             }
-
         }
         this.noteSecondsStartUnscaled = noteSecondsStartUnscaled;
         this.noteSecondsEndUnscaled = noteSecondsEndUnscaled;
@@ -8130,12 +8144,6 @@ export class EnvelopeComputer {
                 time = Math.max(0, time - delaySeconds + phaseSeconds);
                 if (timeLeft > 0) return lowerBound;
                 else return (1 - 1 / (1.0 + time * envelope.speed)) * (upperBound - lowerBound) + lowerBound;
-            }
-            case EnvelopeType.tremolo: {
-                const timeLeft: number = -beatNote + delayBeats;
-                beats = Math.max(0, beats - delayBeats + phaseBeats);
-                if (timeLeft > 0) return lowerBound;
-                else return (0.5 - Math.cos(beats * 2.0 * Math.PI * envelope.speed) * 0.5) * (upperBound - lowerBound) + lowerBound;
             }
             case EnvelopeType.punch: {
                 const timeLeft: number = -time + delaySeconds;
@@ -8223,68 +8231,19 @@ export class EnvelopeComputer {
                 if (timeLeft > 0) return 1 * (upperBound - lowerBound) + lowerBound;
                 else return (1 * +(time < (0.25 / Math.sqrt(envelope.speed)))) * (upperBound - lowerBound) + lowerBound;
             }
-            // 3 Midbox-unique envelopes.
-            case EnvelopeType.decelerate: {
-                const timeLeft: number = -time + delaySeconds;
-                time = Math.max(0, time - delaySeconds + phaseSeconds);
-                if (timeLeft > 0) return 1 * (upperBound - lowerBound) + lowerBound;
-                else return (0.5 - Math.sin(((time + 3) / 8) ** -1.3 * (400 / envelope.speed)) * 0.5) * (upperBound - lowerBound) + lowerBound;
-            }
-            case EnvelopeType.stairs: {
-                const timeLeft: number = -beatNote + delayBeats;
-                beatNote = Math.max(0, beatNote - delayBeats + phaseBeats);
-                const scale: number = envelope.speed;
-                const offset: number = 1;
-                const smoothness: number = 0.000001;
-                const steps: number = stepAmount;
-                const x: number = beatNote;
-                const a: number = 0.5 - smoothness;
-                const b: number = 0.5 + smoothness;
-                const x1: number = x * steps - 0.5 + smoothness;
-                const x1i: number = x1 | 0;
-                let x2: number = ((x1 - x1i) - a) / (b - a);
-                x2 = x2 > 1.0 ? 1.0 : x2 < 0.0 ? 0.0 : x2;
-                const x3: number = x2 * x2 * (3.0 - 2.0 * x2) + x1i;
-                if (timeLeft > 0) return 1 * (upperBound - lowerBound) + lowerBound;
-                else return (Math.max(0, Math.min(1, ((x3 / steps) * scale + offset)))) * (upperBound - lowerBound) + lowerBound;
-            } 
-            case EnvelopeType.loopStairs: {
-                const timeLeft: number = -beatNote + delayBeats;
-                beatNote = Math.max(0, beatNote - delayBeats + phaseBeats);
-                const scale: number = envelope.speed;
-                const offset: number = 1;
-                const smoothness: number = 0.000001;
-                const steps: number = stepAmount;
-                const x: number = beatNote % envelope.speed * (((envelope.speed * -1) * 0.5) / (envelope.speed * (envelope.speed / 2)));
-                const a: number = 0.5 - smoothness;
-                const b: number = 0.5 + smoothness;
-                const x1: number = x * steps - 0.5 + smoothness;
-                const x1i: number = x1 | 0;
-                let x2: number = ((x1 - x1i) - a) / (b - a);
-                x2 = x2 > 1.0 ? 1.0 : x2 < 0.0 ? 0.0 : x2;
-                const x3: number = x2 * x2 * (3.0 - 2.0 * x2) + x1i;
-                if (timeLeft > 0) return 1 * (upperBound - lowerBound) + lowerBound;
-                else return (Math.max(0, Math.min(1, ((x3 / steps) * scale + offset)))) * (upperBound - lowerBound) + lowerBound;
-            } 
             // SlarmooBox's pitch envelope. 
             case EnvelopeType.pitch: {
                 // This is done similar to note size with a function at the bottom of the Synth class.
                 return pitch * (upperBound - lowerBound) + lowerBound;
             }
-            // Two Dogebox2 envelopes.
+            // Dogebox2's clap envelope.
             case EnvelopeType.dogebox2Clap: {
                 const timeLeft: number = -time + delaySeconds;
                 time = Math.max(0, time - delaySeconds + phaseSeconds);
                 if (timeLeft > 0) return 1 * (upperBound - lowerBound) + lowerBound;
                 return (((mirrorAmount)/(1+time*envelope.speed*5)) % 1) * (upperBound - lowerBound) + lowerBound;
             }
-            case EnvelopeType.dogebox2Spike: {
-                const timeLeft: number = -time + delaySeconds;
-                time = Math.max(0, time - delaySeconds + phaseSeconds);
-                if (timeLeft > 0) return lowerBound;
-                return (Math.max(0, Math.min(1, 1.0 - Math.abs((time)*envelope.speed - 0.5) * 2))) * (upperBound - lowerBound) + lowerBound;
-            }
-            // Back to Midbox envelopes.
+            // Midbox envelopes.
             // The LFO envelope type is a compilation of repeating shapes.
             case EnvelopeType.LFO: {
                 // Case 1, sine.
@@ -8360,9 +8319,9 @@ export class EnvelopeComputer {
                     const steps: number = stepAmount;
                     let x: number;
                     if (LFOLoopOnce) {
-                        x = (LFOIgnorance ? beats : (Math.pow(beatNote + 1, LFOAcceleration) - 1));
+                        x = (LFOIgnorance ? beats : (Math.pow(beatNote + 1, LFOAcceleration) - 1)) * 2;
                     } else {
-                        x = (LFOIgnorance ? beats : (Math.pow(beatNote + 1, LFOAcceleration) - 1)) % -1 * (0.5 / (-1 * (-1 / 2)));
+                        x = (LFOIgnorance ? beats : (Math.pow(beatNote + 1, LFOAcceleration) - 1)) * 2 % -1 * (0.5 / (-1 * (-1 / 2)));
                     }
                     const a: number = 0.5 - smoothness;
                     const b: number = 0.5 + smoothness;
@@ -8552,6 +8511,7 @@ export class InstrumentState {
     public vibratoTime: number = 0;
     public nextVibratoTime: number = 0;
     public envelopeTime: number[] = [];
+    public drumsetEnvelopeTime: number[] = [];
     public currentWave: number = 0;
 
     public eqFilterVolume: number = 1.0;
@@ -8767,6 +8727,7 @@ export class InstrumentState {
         this.nextVibratoTime = 0;
         this.arpTime = 0;
         for (let envelopeIndex: number = 0; envelopeIndex < Config.maxEnvelopeCount + 1; envelopeIndex++) this.envelopeTime[envelopeIndex] = 0;
+        for (let envelopeIndex: number = 0; envelopeIndex < Config.drumCount; envelopeIndex++) this.drumsetEnvelopeTime[envelopeIndex] = 0;
         this.envelopeComputer.reset();
         this.currentWave = 0.0;
 
@@ -8817,7 +8778,7 @@ export class InstrumentState {
                 useEnvelopeSpeed = (1 - (useEnvelopeSpeed % 1)) * Config.arpSpeedScale[Math.floor(useEnvelopeSpeed)] + (useEnvelopeSpeed % 1) * Config.arpSpeedScale[Math.ceil(useEnvelopeSpeed)];
             }
         }
-        this.envelopeComputer.computeEnvelopes(instrument, currentPart, this.envelopeTime, tickTimeStart, secondsPerTick, tone, useEnvelopeSpeed, this);
+        this.envelopeComputer.computeEnvelopes(instrument, currentPart, this.envelopeTime, this.drumsetEnvelopeTime, tickTimeStart, secondsPerTick, tone, useEnvelopeSpeed, this);
         
         const envelopeStarts: number[] = this.envelopeComputer.envelopeStarts;
         const envelopeEnds: number[] = this.envelopeComputer.envelopeEnds;
@@ -9423,6 +9384,7 @@ export class Synth {
                     instrumentState.vibratoTime = 0;
                     instrumentState.nextVibratoTime = 0;
                     for (let envelopeIndex: number = 0; envelopeIndex < Config.maxEnvelopeCount+1; envelopeIndex++) instrumentState.envelopeTime[envelopeIndex] = 0;
+                    for (let envelopeIndex: number = 0; envelopeIndex < Config.drumCount; envelopeIndex++) instrumentState.drumsetEnvelopeTime[envelopeIndex] = 0;
                     instrumentState.arpTime = 0;
                     instrumentState.currentWave = 0;
                     instrumentState.updateWaves(instrument, this.samplesPerSecond);
@@ -10724,6 +10686,21 @@ export class Synth {
                                 instrumentState.envelopeTime[envelopeIndex] += (Config.arpSpeedScale[useEnvelopeSpeed] * individualEnvSpeed);
                             }
                         }
+                        for (let envelopeIndex: number = 0; envelopeIndex < Config.drumCount; envelopeIndex++) {
+                            let useEnvelopeSpeed: number = instrument.envelopeSpeed;
+                            let individualEnvSpeed: number = instrument.drumsetEnvelopes[envelopeIndex].envelopeSpeed;
+                            if (this.isModActive(Config.modulators.dictionary["envelope speed"].index, channel, instrumentIdx)) {
+                                useEnvelopeSpeed = Math.max(0, Math.min(Config.arpSpeedScale.length-1, this.getModValue(Config.modulators.dictionary["envelope speed"].index, channel, instrumentIdx, false)));
+                                if (Number.isInteger(useEnvelopeSpeed)) {
+                                    instrumentState.drumsetEnvelopeTime[envelopeIndex] += (Config.arpSpeedScale[useEnvelopeSpeed] * individualEnvSpeed);
+                                } else {
+                                    // Linear interpolate envelope values
+                                    instrumentState.drumsetEnvelopeTime[envelopeIndex] += (((1 - (useEnvelopeSpeed % 1)) * Config.arpSpeedScale[Math.floor(useEnvelopeSpeed)] + (useEnvelopeSpeed % 1) * Config.arpSpeedScale[Math.ceil(useEnvelopeSpeed)]) * individualEnvSpeed);
+                                }
+                            } else {
+                                instrumentState.drumsetEnvelopeTime[envelopeIndex] += (Config.arpSpeedScale[useEnvelopeSpeed] * individualEnvSpeed);
+                            }
+                        }
                     }
                 }
 
@@ -10812,6 +10789,9 @@ export class Synth {
                     instrumentState.arpTime = (instrumentState.arpTime % (2520 * Config.ticksPerArpeggio)); // 2520 = LCM of 4, 5, 6, 7, 8, 9 (arp sizes)
                     for (let envelopeIndex: number = 0; envelopeIndex < instrument.envelopeCount; envelopeIndex++) {
                         instrumentState.envelopeTime[envelopeIndex] = (instrumentState.envelopeTime[envelopeIndex] % (Config.partsPerBeat * Config.ticksPerPart * this.song.beatsPerBar));
+                    }
+                    for (let envelopeIndex: number = 0; envelopeIndex < Config.drumCount; envelopeIndex++) {
+                        instrumentState.drumsetEnvelopeTime[envelopeIndex] = (instrumentState.drumsetEnvelopeTime[envelopeIndex] % (Config.partsPerBeat * Config.ticksPerPart * this.song.beatsPerBar));
                     }
                 }
             }
@@ -11761,7 +11741,7 @@ export class Synth {
                 useEnvelopeSpeed = (1 - (useEnvelopeSpeed % 1)) * Config.arpSpeedScale[Math.floor(useEnvelopeSpeed)] + (useEnvelopeSpeed % 1) * Config.arpSpeedScale[Math.ceil(useEnvelopeSpeed)];
             }
         }
-        envelopeComputer.computeEnvelopes(instrument, currentPart, instrumentState.envelopeTime, Config.ticksPerPart * partTimeStart, samplesPerTick / this.samplesPerSecond, tone, useEnvelopeSpeed, instrumentState);
+        envelopeComputer.computeEnvelopes(instrument, currentPart, instrumentState.envelopeTime, instrumentState.drumsetEnvelopeTime, Config.ticksPerPart * partTimeStart, samplesPerTick / this.samplesPerSecond, tone, useEnvelopeSpeed, instrumentState);
         const envelopeStarts: number[] = tone.envelopeComputer.envelopeStarts;
         const envelopeEnds: number[] = tone.envelopeComputer.envelopeEnds;
         instrument.noteFilter = tmpNoteFilter;
@@ -14550,7 +14530,7 @@ export class Synth {
         let amplify: boolean = instrument.envelopes[index].pitchAmplify;
         let bounce: boolean = instrument.envelopes[index].pitchBounce;
 
-        if (tone && instrumentState) {
+        if (tone && instrumentState && tone.pitchCount >= 1) {
             const chord = instrument.getChord()
             const arpeggiates = chord.arpeggiates;
             const arpeggio: number = Math.floor(instrumentState.arpTime / Config.ticksPerArpeggio); //calculate arpeggiation

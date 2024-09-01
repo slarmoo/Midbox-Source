@@ -51,7 +51,6 @@ export const enum EnvelopeType {
     flare,
     twang,
     swell,
-    tremolo, // Being replaced with LFO.
     decay,
     modboxBlip,
     modboxTrill,
@@ -61,13 +60,9 @@ export const enum EnvelopeType {
     linear,
     rise,
     jummboxBlip,
-    decelerate, // Being replaced with LFO.
-    stairs, // Being replaced with LFO.
-    loopStairs, // Being replaced with LFO.
     pitch,
     LFO,
     dogebox2Clap,
-    dogebox2Spike,
     basicCustom,
 }
 
@@ -677,7 +672,6 @@ export class Config {
         { name: "flare",          type: EnvelopeType.flare,         speed:  8   },
         { name: "twang",          type: EnvelopeType.twang,         speed:  8   },
         { name: "swell",          type: EnvelopeType.swell,         speed:  8   },
-        { name: "tremolo",        type: EnvelopeType.tremolo,       speed:  2   },
         { name: "LFO",            type: EnvelopeType.LFO,           speed:  2   },
         { name: "decay",          type: EnvelopeType.decay,         speed:  2   },
         { name: "modbox trill",   type: EnvelopeType.modboxTrill,   speed:  4   },
@@ -685,15 +679,11 @@ export class Config {
         { name: "modbox click",   type: EnvelopeType.modboxClick,   speed:  5   },
         { name: "modbox bow",     type: EnvelopeType.modboxBow,     speed:  90  },
         { name: "dogebox2 clap",  type: EnvelopeType.dogebox2Clap,  speed:  64  },
-        { name: "dogebox2 spike", type: EnvelopeType.dogebox2Spike, speed:  8   },
         { name: "wibble",         type: EnvelopeType.wibble,        speed:  12  },
         { name: "linear",         type: EnvelopeType.linear,        speed:  32  },
         { name: "rise",           type: EnvelopeType.rise,          speed:  32  },
         { name: "jummbox blip",   type: EnvelopeType.jummboxBlip,   speed:  8   },
-        { name: "decelerate",     type: EnvelopeType.decelerate,    speed:  1   },
-        { name: "stairs",         type: EnvelopeType.stairs,        speed: -1   },
-        { name: "looped stairs",  type: EnvelopeType.loopStairs,    speed: -1   },
-        { name: "custom (basic)", type: EnvelopeType.basicCustom,   speed:  2   },
+        { name: "custom (basic)", type: EnvelopeType.basicCustom,   speed:  1   },
     ]);
     public static readonly drumsetEnvelopes: DictionaryArray<DrumsetEnvelope> = toNameMap([
         { name: "none",           type: EnvelopeType.none,          speed:  0   },
@@ -702,23 +692,18 @@ export class Config {
         { name: "flare",          type: EnvelopeType.flare,         speed:  8   },
         { name: "twang",          type: EnvelopeType.twang,         speed:  8   },
         { name: "swell",          type: EnvelopeType.swell,         speed:  8   },
-        { name: "tremolo",        type: EnvelopeType.tremolo,       speed:  2   },
         { name: "LFO",            type: EnvelopeType.LFO,           speed:  2   },
         { name: "decay",          type: EnvelopeType.decay,         speed:  2   },
         { name: "modbox trill",   type: EnvelopeType.modboxTrill,   speed:  4   },
         { name: "modbox blip",    type: EnvelopeType.modboxBlip,    speed:  4   },
         { name: "modbox click",   type: EnvelopeType.modboxClick,   speed:  5   },
         { name: "modbox bow",     type: EnvelopeType.modboxBow,     speed:  90  },
-        { name: "dogebox2 clap",  type: EnvelopeType.dogebox2Clap,  speed:  16  },
-        { name: "dogebox2 spike", type: EnvelopeType.dogebox2Spike, speed:  2   },
+        { name: "dogebox2 clap",  type: EnvelopeType.dogebox2Clap,  speed:  64  },
         { name: "wibble",         type: EnvelopeType.wibble,        speed:  12  },
         { name: "linear",         type: EnvelopeType.linear,        speed:  32  },
         { name: "rise",           type: EnvelopeType.rise,          speed:  32  },
         { name: "jummbox blip",   type: EnvelopeType.jummboxBlip,   speed:  8   },
-        { name: "decelerate",     type: EnvelopeType.decelerate,    speed:  1   },
-        { name: "stairs",         type: EnvelopeType.stairs,        speed: -1   },
-        { name: "looped stairs",  type: EnvelopeType.loopStairs,    speed: -1   },
-        { name: "custom (basic)", type: EnvelopeType.basicCustom,   speed:  2   },
+        { name: "custom (basic)", type: EnvelopeType.basicCustom,   speed:  1   },
     ]);
 
     public static readonly perEnvelopeSpeedMin:        number = 0;
