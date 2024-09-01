@@ -2214,7 +2214,7 @@ export class SongEditor {
 			const LFOAccelerationSlider: SliderNoParse = new SliderNoParse(input({style: "margin: 0;", type: "range", min: Config.LFOAccelerationMin, max: Config.LFOAccelerationMax, value: "1", step: "0.25"}), this._doc, (oldValue: number, newValue: number, forceUpdate: boolean = false) => new ChangeDrumsetEnvelopeAcceleration(this._doc, i, oldValue, newValue, forceUpdate), false);
 			const LFOAccelerationInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "drumsetLFOAccelerationInputBox", type: "number", step: "0.01", min: Config.LFOAccelerationMin, max: Config.LFOAccelerationMax, value: "1"});
 			const LFOAccelerationRow: HTMLDivElement = div({class: "selectRow dropFader"}, div({},
-				span({class: "tip", style: "height: 1em; font-size: 11px;", onclick: () => this._openPrompt("LFOAcceleration")}, span(_.LFOAccelerationLabel)),
+				span({class: "tip", style: "height: 1em; font-size: 10.5px;", onclick: () => this._openPrompt("LFOAcceleration")}, span(_.LFOAccelerationLabel)),
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, LFOAccelerationInputBox),
 			), LFOAccelerationSlider.container);
 			const LFOPulseWidthSlider: SliderNoParse = new SliderNoParse(input({style: "margin: 0;", type: "range", min: 0, max: "20", value: "4", step: "1"}), this._doc, (oldValue: number, newValue: number, forceUpdate: boolean = false) => new ChangeDrumsetLFOEnvelopePulseWidth(this._doc, i, oldValue, newValue, forceUpdate), false);

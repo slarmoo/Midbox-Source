@@ -170,7 +170,7 @@ export class EnvelopeStartLine {
 		ctx.stroke();
 
 		// Draw a triangle mark at the top.
-		const triangleWidth: number = 16;
+		const triangleWidth: number = 12;
 		const halfTriangleWidth: number = triangleWidth / 2;
 		const triangleHeight: number = 14;
 		y = graphY + triangleHeight;
@@ -180,6 +180,65 @@ export class EnvelopeStartLine {
 		ctx.lineTo(x + halfTriangleWidth, y - triangleHeight);
 		ctx.lineTo(x, y);
 		ctx.fill();
+	}
+
+	public render() {
+		this._drawCanvas(0, 0, this.canvas.width, this.canvas.height);
+	}
+}
+
+export class BasicCustomGridCanvas {
+	constructor(public readonly canvas: HTMLCanvasElement, private readonly _doc: SongDocument, public index: number) {
+		this.render();
+    }
+
+	private _drawCanvas(graphX: number, graphY: number, graphWidth: number, graphHeight: number): void {
+		let instrument: Instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
+		instrument;
+
+		const pointIndexWidth: number = graphWidth / Config.customEnvGridMaxWidth;
+		const pointIndexHeight: number = graphHeight / Config.customEnvGridHeight;
+		const connectionsArea: number = graphHeight / 4.5;
+		let x: number = graphX;
+		let y: number = graphHeight;
+
+		var ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
+		ctx.clearRect(0, 0, graphWidth, graphHeight);
+
+		// Draw background.
+        ctx.fillRect(0, 0, graphX, graphY);
+
+		ctx.strokeStyle = ColorConfig.getComputed("--ui-widget-background");
+		ctx.fillStyle = ColorConfig.getComputed("--playhead");
+
+		// Draw many lines to resemble a grid.
+		ctx.beginPath();
+		ctx.lineWidth = 2;
+		// Start with vertical lines spanning the canvas width.
+		ctx.moveTo(x, y);
+		for (let i = 0; i < Config.customEnvGridMaxWidth-1; i++) {
+			x = x + pointIndexWidth;
+			ctx.moveTo(x, y - connectionsArea);
+			ctx.lineTo(x, 0);
+		}
+		// Then draw horizontal lines spanning the canvas height.
+		x = 0;
+		y = y - connectionsArea;
+		for (let i = 0; i < Config.customEnvGridHeight-1; i++) {
+			y = y - remap(pointIndexHeight, 0, graphHeight, 0, graphHeight - connectionsArea);
+			ctx.moveTo(0, y);
+			ctx.lineTo(graphWidth, y);
+		}
+		ctx.stroke();
+		ctx.closePath();
+		// Now we'll move down and draw a line seperating the point canvas and the area where the
+		// connections buttons go.
+		ctx.strokeStyle = ColorConfig.getComputed("--ui-widget-focus");
+		ctx.beginPath();
+		y = graphHeight - connectionsArea;
+		ctx.moveTo(0, y);
+		ctx.lineTo(graphWidth, y);
+		ctx.stroke();
 	}
 
 	public render() {
@@ -254,6 +313,10 @@ export class EnvelopeEditor {
 	private readonly _LFOPulseWidthRows: HTMLElement[] = [];
 	private readonly _LFOTrapezoidRatioSliders: HTMLInputElement[] = [];
 	private readonly _LFOTrapezoidRatioRows: HTMLElement[] = [];
+	private readonly _basicCustomEnvelopeGrids: BasicCustomGridCanvas[] = [];
+	private readonly _basicCustomGridRows: HTMLElement[] = [];
+	//private readonly _connectionButtons: HTMLButtonElement[] = [];
+	private readonly _connectionButtonRows: HTMLElement[] = [];
 	private readonly _envelopeDropdownGroups: HTMLElement[] = [];
 	private readonly _envelopeDropdowns: HTMLButtonElement[] = [];
 	private readonly _targetSelects: HTMLSelectElement[] = [];
@@ -712,11 +775,11 @@ export class EnvelopeEditor {
 		let drumPitchEnvBoolean: boolean = instrument.isNoiseInstrument;
 		
 		for (let envelopeIndex: number = this._rows.length; envelopeIndex < instrument.envelopeCount; envelopeIndex++) {
-			const envelopePlotter: EnvelopeLineGraph = new EnvelopeLineGraph(canvas({ width: 180, height: 80, style: `border: 2px solid ${ColorConfig.uiWidgetBackground}; width: 140px; height: 60px; margin-left: 24px;`, id: "EnvelopeLineGraph" }), this._doc, envelopeIndex, false);
-			const envelopeStartPlotLine: EnvelopeStartLine = new EnvelopeStartLine(canvas({ width: 180, height: 90, style: `width: 142px; height: 70px; top: -6px; right: -1px; position: relative; margin-left: 24px;`, id: "EnvelopeStartPlotLine" }), this._doc, envelopeIndex, false);
-			const envelopePlotterRow: HTMLElement = div({class: "selectRow dropFader", style: "margin-top: 18px; margin-bottom: 25px;"}, envelopePlotter.canvas, envelopeStartPlotLine.canvas);
-			const plotterTimeRangeInputBox: HTMLInputElement = input({style: "width: 13.1em; font-size: 80%; margin-left: 0px; vertical-align: middle;", id: "timeRangeInputBox", type: "number", step: "0.1", min: "0.1", max: "200", value: "4"});
-			const plotterTimeRangeRow: HTMLElement = div({ class: "selectRow dropFader", style: "margin-left: 25px; margin-bottom: 20px;" }, div({},
+			const envelopePlotter: EnvelopeLineGraph = new EnvelopeLineGraph(canvas({ width: 180, height: 80, style: `border: 2px solid ${ColorConfig.uiWidgetBackground}; width: 155px; height: 68px; margin-left: 15px;`, id: "EnvelopeLineGraph" }), this._doc, envelopeIndex, false);
+			const envelopeStartPlotLine: EnvelopeStartLine = new EnvelopeStartLine(canvas({ width: 180, height: 90, style: `width: 157px; height: 78px; top: -6px; right: -1px; position: relative; margin-left: 15px;`, id: "EnvelopeStartPlotLine" }), this._doc, envelopeIndex, false);
+			const envelopePlotterRow: HTMLElement = div({class: "selectRow dropFader", style: "margin-top: 22px; margin-bottom: 29px;"}, envelopePlotter.canvas, envelopeStartPlotLine.canvas);
+			const plotterTimeRangeInputBox: HTMLInputElement = input({style: "width: 14.5em; font-size: 80%; margin-left: 0px; vertical-align: middle;", id: "timeRangeInputBox", type: "number", step: "0.1", min: "0.1", max: "200", value: "4"});
+			const plotterTimeRangeRow: HTMLElement = div({ class: "selectRow dropFader", style: "margin-left: 16px; margin-bottom: 18px;" }, div({},
 				span({ class: "tip", style: "height:1em; font-size: small; white-space: nowrap;", onclick: () => this._openPrompt("plotterTimeRange") }, _.timeRangeLabel),
 				div({ style: "color: " + ColorConfig.secondaryText + "; margin-top: -3px;" }, plotterTimeRangeInputBox),
 			));
@@ -824,13 +887,25 @@ export class EnvelopeEditor {
 			const LFOAccelerationSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: Config.LFOAccelerationMin, max: Config.LFOAccelerationMax, value: "1", step: "0.25"});
 			const LFOAccelerationInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "LFOAccelerationInputBox", type: "number", step: "0.01", min: Config.LFOAccelerationMin, max: Config.LFOAccelerationMax, value: "1"});
 			const LFOAccelerationRow: HTMLElement = div({class: "selectRow dropFader"}, div({},
-				span({class: "tip", style: "height: 1em; font-size: 11px;", onclick: () => this._openPrompt("LFOAcceleration")}, span(_.LFOAccelerationLabel)),
+				span({class: "tip", style: "height: 1em; font-size: 10.5px;", onclick: () => this._openPrompt("LFOAcceleration")}, span(_.LFOAccelerationLabel)),
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, LFOAccelerationInputBox),
 			), LFOAccelerationSlider);
 			const LFOPulseWidthSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: 0, max: "20", value: "4", step: "1"});
 			const LFOPulseWidthRow: HTMLElement = div({class: "selectRow dropFader"}, span({ class: "tip", onclick: () => this._openPrompt("LFOPulseWidth") }, span(_.LFOPulseWidthLabel)), LFOPulseWidthSlider);
 			const LFOTrapezoidRatioSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: Config.LFOTrapezoidRatioMin, max: Config.LFOTrapezoidRatioMax, value: "1", step: "0.1"});
 			const LFOTrapezoidRatioRow: HTMLElement = div({class: "selectRow dropFader"}, span({ class: "tip", onclick: () => this._openPrompt("LFOTrapezoidRatio") }, span(_.LFOTrapezoidRatioLabel)), LFOTrapezoidRatioSlider);
+			const basicCustomEnvelopeGrid: BasicCustomGridCanvas = new BasicCustomGridCanvas(canvas({ width: 180, height: 100, style: `border: 2px solid ${ColorConfig.uiWidgetFocus}; width: 155px; height: 90px; margin-left: 15px;`, id: "BasicCustomGrid" }), this._doc, envelopeIndex);
+			const connectionButtonRow: HTMLDivElement = div({style: "margin-left: 19px; margin-top: 72px; width: 151px; display: flex; justify-content: space-around; gap: 4px;"});
+			for (let i = 0; i < Config.customEnvGridMaxWidth; i++) {
+				let connectionButton: HTMLButtonElement = button({style: "border-radius: 0px 0px 0px 0px; height: 15px; flex-grow: 2;", title: "Linear"},
+					// Rising line icon:
+					SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 4%; top: 40%; margin-top: -0.75em; pointer-events: none;", width: "2em", height: "2em", viewBox: "-2 -6 24 24" }, [
+						SVG.path({ d: "M1 10 10 1 9 0 0 9 1 10 z", fill: "currentColor" }),
+					]),
+				); 
+				connectionButtonRow.appendChild(connectionButton);
+			}
+			const basicCustomGridRow: HTMLElement = div({class: "selectRow dropFader", style: "margin-top: 28px; margin-bottom: 40px;"}, basicCustomEnvelopeGrid.canvas, connectionButtonRow);
 			const envelopeCopyButton: HTMLButtonElement = button({class: "envelope-button", title: _.copyLabel, style: "flex: 3;", onclick: () => this._copyEnvelopeSettings(envelopeIndex)}, 
 				// Copy icon:
 				SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 4%; top: 40%; margin-top: -0.75em; pointer-events: none;", width: "2em", height: "2em", viewBox: "-5 -21 26 26" }, [
@@ -868,7 +943,7 @@ export class EnvelopeEditor {
 					SVG.path({ d: "M 6 6 L 14 6 L 14 7 L 6 7 L 6 6 M 6 14 L 14 14 L 14 13 L 6 13 L 6 14 M 10 7 L 8.5 8.5 L 9.4 8.5 L 9.4 11.5 L 8.4 11.5 L 10 13 L 11.5 11.5 L 10.6 11.5 L 10.6 8.5 L 11.5 8.5 L 10 7", fill: "currentColor"}),
 				]),
 			);
-			const envelopeDropdownGroup: HTMLElement = div({class: "editor-controls", style: "display: none;"}, plotterTimeRangeRow, envelopePlotterRow, pitchStartGroup, pitchEndGroup, extraPitchSettingRow, LFOShapeRow, LFORadioButtonsRow, LFOAccelerationRow, LFOPulseWidthRow, LFOTrapezoidRatioRow, stairsStepAmountRow, perEnvelopeSpeedRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, clapMirrorAmountRow, measurementTypeRow, envelopeDelayRow, envelopePhaseRow);
+			const envelopeDropdownGroup: HTMLElement = div({class: "editor-controls", style: "display: none;"}, plotterTimeRangeRow, envelopePlotterRow, basicCustomGridRow, pitchStartGroup, pitchEndGroup, extraPitchSettingRow, LFOShapeRow, LFORadioButtonsRow, LFOAccelerationRow, LFOPulseWidthRow, LFOTrapezoidRatioRow, stairsStepAmountRow, perEnvelopeSpeedRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, clapMirrorAmountRow, measurementTypeRow, envelopeDelayRow, envelopePhaseRow);
 			const envelopeDropdown: HTMLButtonElement = button({style: "margin-left: 0.6em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.PerEnvelope, envelopeIndex)}, "▼");
 
 			const targetSelect: HTMLSelectElement = select();
@@ -970,6 +1045,10 @@ export class EnvelopeEditor {
 			this._LFOPulseWidthRows[envelopeIndex] = LFOPulseWidthRow;
 			this._LFOTrapezoidRatioSliders[envelopeIndex] = LFOTrapezoidRatioSlider;
 			this._LFOTrapezoidRatioRows[envelopeIndex] = LFOTrapezoidRatioRow;
+			this._basicCustomEnvelopeGrids[envelopeIndex] = basicCustomEnvelopeGrid;
+			this._basicCustomGridRows[envelopeIndex] = basicCustomGridRow;
+			//this._connectionButtons[envelopeIndex] = connectionButton;
+			this._connectionButtonRows[envelopeIndex] = connectionButtonRow;
 			this._envelopeDropdownGroups[envelopeIndex] = envelopeDropdownGroup;
 			this._envelopeDropdowns[envelopeIndex] = envelopeDropdown;
 			this._targetSelects[envelopeIndex] = targetSelect;
@@ -1005,6 +1084,9 @@ export class EnvelopeEditor {
 			const instEnv = instrument.envelopes[envelopeIndex];
 			this._envelopePlotters[envelopeIndex].render();
 			this._envelopeStartPlotterLines[envelopeIndex].render();
+			if (instEnv.envelope == Config.envelopes.dictionary["custom (basic)"].index) {
+				this._basicCustomEnvelopeGrids[envelopeIndex].render();
+			}
 			this._plotterTimeRangeInputBoxes[envelopeIndex].value = String(clamp(0.1, 201, this._envelopePlotters[envelopeIndex].range));
 			this._perEnvelopeSpeedSliders[envelopeIndex].value = String(clamp(Config.perEnvelopeSpeedMin, Config.perEnvelopeSpeedMax+1, instEnv.envelopeSpeed));
 			this._perEnvelopeSpeedInputBoxes[envelopeIndex].value = String(clamp(Config.perEnvelopeSpeedMin, Config.perEnvelopeSpeedMax+1, instEnv.envelopeSpeed));
@@ -1178,6 +1260,14 @@ export class EnvelopeEditor {
 				this._LFOPulseWidthRows[envelopeIndex].style.display = "none";
 				this._LFOTrapezoidRatioRows[envelopeIndex].style.display = "none";
 				this._stairsStepAmountRows[envelopeIndex].style.display = "none";
+			}
+
+			if ( // These UI elements are special cased to the basic custom envelope type.
+				instEnv.envelope == Config.envelopes.dictionary["custom (basic)"].index
+			) {
+				this._basicCustomGridRows[envelopeIndex].style.display = "";
+			} else {
+				this._basicCustomGridRows[envelopeIndex].style.display = "none";
 			}
 		}
 		

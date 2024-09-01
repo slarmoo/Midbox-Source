@@ -722,8 +722,8 @@ export class Config {
     public static readonly LFOPulseWidthDefault:       number = 4;
     public static readonly LFOTrapezoidRatioMin:       number = 0.5;
     public static readonly LFOTrapezoidRatioMax:       number = 4;
-    public static readonly customEnvGridMaxWidth:      number = 6; // Temporary
-    public static readonly customEnvGridHeight:        number = 4; // Temporary
+    public static readonly customEnvGridMaxWidth:      number = 8; // 12
+    public static readonly customEnvGridHeight:        number = 5; // 6
     public static readonly gridPointDefaultConnection: number = 0;
     public static readonly pointConnectionAmount:      number = 6 - 1;
 

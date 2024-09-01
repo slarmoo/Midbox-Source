@@ -8340,7 +8340,7 @@ export class EnvelopeComputer {
             // This envelope type is very special, you can create your own envelope with it!
             // Very complex system of stuff needed to build it up though...
             case EnvelopeType.basicCustom: {
-                return 1;
+                return Math.max(0, -beats+1);
             }
             default: throw new Error("Unrecognized operator envelope type.");
         }
@@ -11745,8 +11745,9 @@ export class Synth {
         const envelopeStarts: number[] = tone.envelopeComputer.envelopeStarts;
         const envelopeEnds: number[] = tone.envelopeComputer.envelopeEnds;
         instrument.noteFilter = tmpNoteFilter;
-        // const beatsPerTick: number = 1.0 / (Config.ticksPerPart * Config.partsPerBeat);
-        // const beatNoteTimeStart: number = beatsPerTick * envelopeComputer.noteTicksStart;
+        if (transition.continues && (tone.prevNote == null || tone.note == null)) {
+            instrumentState.envelopeComputer.reset();
+        }
 
         if (tone.note != null && transition.slides) {
             // Slide interval and chordExpression at the start and/or end of the note if necessary.

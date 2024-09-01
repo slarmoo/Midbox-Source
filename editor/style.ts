@@ -1473,35 +1473,35 @@ document.head.appendChild(HTML.style({ type: "text/css" }, `
 	line-height: 18px;
     height: 18px;
 	font-size: 70%;
-	border-radius: 0px 0px 0px 0px
+	border-radius: 0px 0px 0px 0px;
 }
 
 .beepboxEditor .wavetableButtonType2 {
 	line-height: 18px;
     height: 18px;
 	font-size: 70%;
-	border-radius: 6px 0px 0px 0px
+	border-radius: 6px 0px 0px 0px;
 }
 
 .beepboxEditor .wavetableButtonType3 {
 	line-height: 18px;
     height: 18px;
 	font-size: 70%;
-	border-radius: 0px 6px 0px 0px
+	border-radius: 0px 6px 0px 0px;
 }
 
 .beepboxEditor .wavetableButtonType4 {
 	line-height: 18px;
     height: 18px;
 	font-size: 70%;
-	border-radius: 0px 0px 0px 6px
+	border-radius: 0px 0px 0px 6px;
 }
 
 .beepboxEditor .wavetableButtonType5 {
 	line-height: 18px;
     height: 18px;
 	font-size: 70%;
-	border-radius: 0px 0px 6px 0px
+	border-radius: 0px 0px 6px 0px;
 }
 
 .beepboxEditor .wavetableButtonType1 span,

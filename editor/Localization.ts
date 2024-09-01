@@ -92,7 +92,7 @@ export class Localization {
     public static LFOEnableAccelerationLabel = "Accelerate:"; // needs translation
     public static LFOLoopsLabel = "Play Once:"; // needs translation
     public static LFOIgnorantLabel = "Ignorant:"; // needs translation
-    public static LFOAccelerationLabel = "Acceleration:"; // needs translation
+    public static LFOAccelerationLabel = "‣ Acceleration:"; // needs translation
     public static LFOPulseWidthLabel = "‣ Width:"; // needs translation
     public static LFOTrapezoidRatioLabel = "‣ Ratio:"; // needs translation
     public static firstSineSpeedLabel = "‣ S1 Spd:";
