@@ -4,6 +4,7 @@
 import { InstrumentType, EffectType, Config, getPulseWidthRatio, effectsIncludeTransition, effectsIncludeChord, effectsIncludePitchShift, effectsIncludeDetune, effectsIncludeVibrato, effectsIncludeNoteFilter, effectsIncludeDistortion, effectsIncludeReshaper, effectsIncludeBitcrusher, effectsIncludeWavefold, effectsIncludePanning, effectsIncludeChorus, effectsIncludeEcho, effectsIncludeReverb, effectsIncludePercussion, DropdownID } from "../synth/SynthConfig";
 import { BarScrollBar } from "./BarScrollBar";
 import { BeatsPerBarPrompt } from "./BeatsPerBarPrompt";
+import { BasicCustomEnvelopePrompt } from "./BasicCustomEnvelopePrompt";
 import { Change, ChangeGroup } from "./Change";
 import { ChannelSettingsPrompt } from "./ChannelSettingsPrompt";
 import { ColorConfig, ChannelColors } from "./ColorConfig";
@@ -2874,12 +2875,12 @@ export class SongEditor {
         }
     }
 
-    private _openPrompt(promptName: string): void {
+    private _openPrompt(promptName: string, extraStuff?: any): void {
         this._doc.openPrompt(promptName);
-        this._setPrompt(promptName);
+        this._setPrompt(promptName, extraStuff);
     }
 
-    private _setPrompt(promptName: string | null): void {
+    private _setPrompt(promptName: string | null, extraStuff?: any): void {
         if (this._currentPromptName == promptName) return;
         this._currentPromptName = promptName;
 
@@ -2944,6 +2945,10 @@ export class SongEditor {
                     break;
                 case "customNoteFilterSettings":
                     this.prompt = new CustomFilterPrompt(this._doc, this, true);
+                    break;
+                case "basicCustomEnvelopePrompt":
+                    // The "extra stuff" here is the envelope or drumset drum index.
+                    this.prompt = new BasicCustomEnvelopePrompt(this._doc, extraStuff);
                     break;
                 case "language":
                     this.prompt = new LanguagePrompt(this._doc);
@@ -3697,6 +3702,9 @@ export class SongEditor {
             if (this._openEnvelopeDropdown) this._envelopeDropdownGroup.style.display = "";
             else this._envelopeDropdownGroup.style.display = "none";
             this._envelopeEditor.render();
+            if (this.prompt instanceof BasicCustomEnvelopePrompt) {
+                this.prompt.basicCustomEnvelopeGrid.render();
+            }
 
             for (let chordIndex: number = 0; chordIndex < Config.chords.length; chordIndex++) {
                 let hidden: boolean = (!Config.instrumentTypeHasSpecialInterval[instrument.type] && Config.chords[chordIndex].customInterval);

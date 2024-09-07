@@ -8,7 +8,7 @@ import { ChangeBeatsPerBar } from "./changes";
 import { ColorConfig } from "./ColorConfig";
 import { Localization as _ } from "./Localization"
 
-	const {button, div, span, h2, input, br, select, option} = HTML;
+const {button, div, span, h2, input, br, select, option} = HTML;
 
 export class BeatsPerBarPrompt implements Prompt {
 	private readonly _beatsStepper: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "number", step: "1"});
@@ -50,7 +50,7 @@ export class BeatsPerBarPrompt implements Prompt {
 		}
 			
 		this._beatsStepper.select();
-			setTimeout(()=>this._beatsStepper.focus());
+		setTimeout(()=>this._beatsStepper.focus());
 			
 		this._okayButton.addEventListener("click", this._saveChanges);
 		this._cancelButton.addEventListener("click", this._close);
@@ -59,11 +59,11 @@ export class BeatsPerBarPrompt implements Prompt {
 		this.container.addEventListener("keydown", this._whenKeyPressed);
 	}
 		
-		private _close = (): void => { 
+	private _close = (): void => { 
 		this._doc.undo();
 	}
 		
-		public cleanUp = (): void => { 
+	public cleanUp = (): void => { 
 		this._okayButton.removeEventListener("click", this._saveChanges);
 		this._cancelButton.removeEventListener("click", this._close);
 		this._beatsStepper.removeEventListener("keypress", BeatsPerBarPrompt._validateKey);

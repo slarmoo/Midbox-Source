@@ -104,6 +104,7 @@ export class Localization {
     public static removeEnvelopeLabel = "Remove Envelope"; // needs translation
     public static randomizeEnvelopeLabel = "Randomize Envelope"; // needs translation
     public static pitchEnvAutoBoundLabel = "Set Pitch Start/End to Highest/Lowest Notes"; // needs translation
+    public static basicCustomPromptOpenLabel = "Edit \"Basic Custom\" Envelope"; // needs translation
     public static wavetableSpeedLabel: string = "Spd:";
     public static interpolateWavesLabel: string = "Interpolate:";
     public static resetCyclePerNoteLabel: string = "Cycle per Note:";
