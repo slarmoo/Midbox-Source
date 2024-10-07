@@ -716,16 +716,21 @@ export class Config {
     public static readonly envelopeDelayMax:           number = 32;
     public static readonly envelopePhaseMax:           number = this.envelopeDelayMax * 2;
     public static readonly clapMirrorsMax:             number = 32;
-    public static readonly LFOShapeAmount:             number = 6 - 1;
     public static readonly LFOAccelerationMin:         number = 0.25;
     public static readonly LFOAccelerationMax:         number = 4;
     public static readonly LFOPulseWidthDefault:       number = 4;
     public static readonly LFOTrapezoidRatioMin:       number = 0.5;
     public static readonly LFOTrapezoidRatioMax:       number = 4;
-    public static readonly customEnvGridMaxWidth:      number = 12; // 12
-    public static readonly customEnvGridHeight:        number = 6; // 6
+    public static readonly customEnvGridMinWidth:      number = 4;
+    public static readonly customEnvGridMaxWidth:      number = 32;
+    public static readonly customEnvGridDefaultWidth:  number = 12;
+    public static readonly customEnvGridMinHeight:     number = 2;
+    public static readonly customEnvGridMaxHeight:     number = 12;
+    public static readonly customEnvGridDefaultHeight: number = 6;
     public static readonly gridPointDefaultConnection: number = 0;
-    public static readonly pointConnectionAmount:      number = 6 - 1;
+    public static readonly gridPointDurationMin:       number = 0.01;
+    public static readonly gridPointDurationMax:       number = 16;
+    public static readonly gridPointDefaultDuration:   number = 1;
 
     public static readonly feedbacks: DictionaryArray<Feedback> = toNameMap([
         { name: "1⟲",         indices: [[1], [],  [],  [] ]},
@@ -923,7 +928,7 @@ export class Config {
         { name: "white noise", samples: generateWhiteNoise()      },
     ]);
 
-    // This one is not really needed.
+    // Kept for compatibility.
     public static readonly pwmOperatorWaves: DictionaryArray<OperatorWave> = toNameMap([
         { name: "1%",     samples: generateSquareWave(0.01)   },
         { name: "2.5%",   samples: generateSquareWave(0.025)  },
@@ -1395,7 +1400,7 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
                 wave[i] = (lastOut + (0.02 * white)) / 1.02;
                 lastOut = wave[i];
                 wave[i] *= 14;
-                // this is also from noise.js
+                // This is also from noise.js.
             }
         } else if (index == 21) {
             // "Perlin Noise", a smooth variant of white noise.

@@ -23,8 +23,8 @@ class BasicCustomGridCanvas {
 		instEnv;
         drumEnv;
 
-		const pointIndexWidth: number = graphWidth / Config.customEnvGridMaxWidth;
-		const pointIndexHeight: number = graphHeight / Config.customEnvGridHeight;
+		const pointIndexWidth: number = graphWidth / instEnv.basicCustomGridWidth;
+		const pointIndexHeight: number = graphHeight / instEnv.basicCustomGridHeight;
 		let x: number = graphX;
 		let y: number = graphHeight;
 
@@ -42,14 +42,14 @@ class BasicCustomGridCanvas {
 		ctx.lineWidth = 2;
 		// Start with vertical lines spanning the canvas width.
 		ctx.moveTo(x, y);
-		for (let i = 0; i < Config.customEnvGridMaxWidth-1; i++) {
+		for (let i = 0; i < instEnv.basicCustomGridWidth-1; i++) {
 			x = x + pointIndexWidth;
 			ctx.moveTo(x, y);
 			ctx.lineTo(x, 0);
 		}
 		// Then draw horizontal lines spanning the canvas height.
 		x = 0;
-		for (let i = 0; i < Config.customEnvGridHeight-1; i++) {
+		for (let i = 0; i < instEnv.basicCustomGridHeight-1; i++) {
 			y = y - pointIndexHeight;
 			ctx.moveTo(0, y);
 			ctx.lineTo(graphWidth, y);

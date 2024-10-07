@@ -1,7 +1,7 @@
 // Copyright (c) 2012-2022 John Nesky and contributing authors, distributed under the MIT license, see accompanying the LICENSE.md file.
 
 import { Algorithm, Dictionary, FilterType, SustainType, InstrumentType, EffectType, AutomationTarget, Config, effectsIncludeDistortion, effectsIncludeBitcrusher, effectsIncludeChorus, effectsIncludeDetune, effectsIncludeNoteFilter, effectsIncludePitchShift, effectsIncludeReshaper, effectsIncludeReverb, effectsIncludeVibrato } from "../synth/SynthConfig";
-import { NotePin, Note, makeNotePin, Pattern, FilterSettings, FilterControlPoint, SpectrumWave, HarmonicsWave, Instrument, Channel, Song, Synth, convertChipWaveToCustomChip, EnvelopeSettings, DrumsetEnvelopeSettings } from "../synth/synth";
+import { NotePin, Note, makeNotePin, Pattern, FilterSettings, FilterControlPoint, SpectrumWave, HarmonicsWave, Instrument, Channel, Song, Synth, convertChipWaveToCustomChip, EnvelopeSettings, DrumsetEnvelopeSettings, LFOShapes } from "../synth/synth";
 import { Preset, PresetCategory, EditorConfig } from "./EditorConfig";
 import { Change, ChangeGroup, ChangeSequence, UndoableChange } from "./Change";
 import { SongDocument } from "./SongDocument";
@@ -5939,7 +5939,7 @@ export class RandomEnvelope extends Change {
             instEnv.mirrorAmount = 5;
         }
         if (randomEnvelope == Config.envelopes.dictionary["LFO"].index) {
-            instEnv.LFOSettings.LFOShape = Math.floor(Math.random() * Config.LFOShapeAmount);
+            instEnv.LFOSettings.LFOShape = Math.floor(Math.random() * LFOShapes.length);
             if (instEnv.LFOSettings.LFOShape == 2) {
                 instEnv.LFOSettings.LFOPulseWidth = Math.floor(Math.random() * 20);
             } else {

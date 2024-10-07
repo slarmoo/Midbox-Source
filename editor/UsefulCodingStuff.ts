@@ -1,13 +1,21 @@
-// This file is for exporting functions and what not that may be of good use.
+// This file is for exporting functions to other files as tools that may be
+// helpful or reduce workload.
 
 // Modulo
-// Having this function around means I won't need to learn the convertion of standard mod(x, y) to (x % y + y) % y.
+// This function does the conversion work of (x % y + y) % y to mod(x, y).
 export function mod(a: number, b: number): number {
     return (a % b + b) % b;
 }
 
+// Bounce modulo. 
+// This function behaves similarly to mod() but with an additional bound, 
+// creating wavefold-like shapes rather than looping bits.
+export function bounceMod(x: number, a: number, b: number): number {
+    return Math.abs(mod(x - (b - a), 2 * (b - a)) - (b - a)) + a;
+}
+
 // Sigma
-// Used in math to make staircase-like stuff.
+// Used in calculus to represent an incremental sequence of repeated addition.
 export function sigma(a: number, b: (i: number) => number, c: number): number {
     let result = 0;
     for (let i = c; i <= a; i++) {
@@ -45,9 +53,11 @@ export function norm(a: number, b: number, c: number) {
 }
 
 // Remap
+// Takes a number (x) which lies in the number range [a-b] and remaps it to number range [c-d].
 export function remap(x: number, a: number, b: number, c: number, d: number) {
     return lerp(c, d, norm(a, b, x));
 }
+
 
 /* Basic Prompt Implementation, for easily getting started on prompts.
 
