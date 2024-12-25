@@ -536,13 +536,6 @@ export class TipPrompt implements Prompt {
 					p("Just remember: Both bounds being the same number means all envelope values will be the same, and the bounds being very high can result to loud/strange sound artifacts.")
 				);
 			} break;
-			case "stepAmount": {
-				message = div(
-					h2("Amount of Steps"),
-					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously. This setting in specific is unique to stair-based envelopes."),
-					p("Stair-based envelopes change values in 'steps', and using this option allows you to configure how many steps the envelope has."),
-				);
-			} break;
 			case "mirrorAmount": {
 				message = div(
 					h2("Amount of Mirrors"),
@@ -624,14 +617,21 @@ export class TipPrompt implements Prompt {
 				message = div(
 					h2("Pulse Width"),
 					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously. This setting is only for the pulse LFO shape."),
-					p("The pulse LFO shape mimicks the appearence of a pulse width, going up and down in instantaneously. This setting changes the width of this pulse."),
+					p("The pulse LFO shape mimics the appearance of a pulse width, going up and down in instantaneously. This setting changes the width of this pulse."),
 				);
 			} break;
 			case "LFOTrapezoidRatio": {
 				message = div(
 					h2("Trapezoid Ratio"),
 					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously. This setting is only for the trapezoid LFO shape."),
-					p("The trapezoid LFO shape mimicks the appearence of a trapezoid, going up and down in increments and slopes. This setting changes the ratio of the trapezoid's slopes, causing the shape to transform from a triangle at the lowest and a sloped-pulse at the highest."),
+					p("The trapezoid LFO shape mimics the appearance of a trapezoid, going up and down in increments and slopes. This setting changes the ratio of the trapezoid's slopes, causing the shape to transform from a triangle at the lowest and a sloped-pulse at the highest."),
+				);
+			} break;
+			case "LFOStepAmount": {
+				message = div(
+					h2("Amount of Steps"),
+					p("As you may have seen, there are more settings contained with each envelope's dropdown with various effects. These settings are applied per envelope rather than all of them simultaneously. This setting is only for the stairs LFO shape."),
+					p("The trapezoid LFO shape change values in 'steps', mimicing the appearance of stairs. Using this option allows you to configure how many steps the envelope has."),
 				);
 			} break;
 			case "basicCustomEnvelope": {

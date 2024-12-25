@@ -1,10 +1,10 @@
 // Copyright (c) 2012-2022 John Nesky and contributing authors, distributed under the MIT license, see accompanying the LICENSE.md file.
 
 import {InstrumentType, Config, DropdownID} from "../synth/SynthConfig";
-import {Instrument, EnvelopeComputer} from "../synth/synth";
+import {Instrument, EnvelopeComputer, LFOShapes} from "../synth/synth";
 import {ColorConfig} from "./ColorConfig";
 import {SongDocument} from "./SongDocument";
-import {ChangeSetEnvelopeTarget, ChangeSetEnvelopeType, ChangeRemoveEnvelope, ChangeEnvelopeOrder, ChangePerEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeLowerBound, ChangeUpperBound, ChangeStairsStepAmount, ChangeEnvelopeDelay, ChangePitchEnvelopeStart, ChangePitchEnvelopeEnd, ChangePitchAmplify, ChangePitchBounce, ChangeEnvelopePosition, ChangeMeasurementType, ChangeClapMirrorAmount, ChangeLFOEnvelopeShape, ChangeEnvelopeAccelerationEnabled, ChangeEnvelopeLooping, ChangeEnvelopeIgnorance, ChangeEnvelopeAcceleration, ChangeLFOEnvelopePulseWidth, ChangeLFOEnvelopeTrapezoidRatio, ChangePasteEnvelope, RandomEnvelope} from "./changes";
+import {ChangeSetEnvelopeTarget, ChangeSetEnvelopeType, ChangeRemoveEnvelope, ChangeEnvelopeOrder, ChangePerEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeLowerBound, ChangeUpperBound, ChangeEnvelopeDelay, ChangePitchEnvelopeStart, ChangePitchEnvelopeEnd, ChangePitchAmplify, ChangePitchBounce, ChangeEnvelopePosition, ChangeMeasurementType, ChangeClapMirrorAmount, ChangeLFOEnvelopeShape, ChangeEnvelopeAccelerationEnabled, ChangeEnvelopeLooping, ChangeEnvelopeIgnorance, ChangeEnvelopeAcceleration, ChangeLFOEnvelopePulseWidth, ChangeLFOEnvelopeTrapezoidRatio, ChangeLFOEnvelopeStairsStepAmount, ChangePasteEnvelope, RandomEnvelope} from "./changes";
 import {HTML, SVG} from "imperative-html/dist/esm/elements-strict";
 import {Localization as _} from "./Localization";
 import {clamp, remap} from "./UsefulCodingStuff";
@@ -40,11 +40,8 @@ export class EnvelopeLineGraph {
 			envelope = Config.envelopes[instEnv.envelope];
 		}
 		let speed: number = instEnv.envelopeSpeed;
-		let lowerBound: number = instEnv.lowerBound;
-		let upperBound: number = instEnv.upperBound;
-		let stepAmount: number = instEnv.stepAmount;
 		let delay: number = instEnv.delay;
-		let mirrorAmount: number = instEnv.mirrorAmount;
+		let LFOStepAmount: number = instEnv.LFOSettings.LFOStepAmount;
 		const beatsPerTick: number = 1.0 / (Config.ticksPerPart * Config.partsPerBeat);
 		const beatsPerMinute: number = this._doc.song != null ? this._doc.song.getBeatsPerMinute() : 0;
         const beatsPerSecond: number = beatsPerMinute / 60.0;
@@ -73,7 +70,7 @@ export class EnvelopeLineGraph {
 			const beatNote: number = (x * timeRangeInBeats) * speed;
 			const noteSize: number = (1 - x) * Config.noteSizeMax;
 			const pitch: number = 1;
-			let value = EnvelopeComputer.computeEnvelope(envelope, seconds, beats, beatNote, noteSize, lowerBound, upperBound, stepAmount, delayInBeats, delayInSeconds, 0, 0, pitch, mirrorAmount, instEnv.LFOSettings.LFOShape, instEnv.LFOSettings.LFOAllowAccelerate ? instEnv.LFOSettings.LFOAcceleration : 1, instEnv.LFOSettings.LFOLoopOnce, instEnv.LFOSettings.LFOIgnorance, instEnv.LFOSettings.LFOPulseWidth * 5, instEnv.LFOSettings.LFOTrapezoidRatio);
+			let value = EnvelopeComputer.computeEnvelope(envelope, seconds, beats, beatNote, noteSize, instEnv.lowerBound, instEnv.upperBound, delayInBeats, delayInSeconds, 0, 0, pitch, instEnv.mirrorAmount, instEnv.LFOSettings.LFOShape, instEnv.LFOSettings.LFOAllowAccelerate ? instEnv.LFOSettings.LFOAcceleration : 1, instEnv.LFOSettings.LFOLoopOnce, instEnv.LFOSettings.LFOIgnorance, instEnv.LFOSettings.LFOPulseWidth * 5, instEnv.LFOSettings.LFOTrapezoidRatio, LFOStepAmount);
 			envelopeGraph.push(value);
 			maxValue = Math.max(value, maxValue);
         	minValue = Math.min(value, minValue);
@@ -209,9 +206,6 @@ export class EnvelopeEditor {
 	private readonly _upperBoundInputBoxes: HTMLInputElement[] = [];
 	private readonly _lowerBoundRows: HTMLElement[] = [];
 	private readonly _upperBoundRows: HTMLElement[] = [];
-	private readonly _stairsStepAmountSliders: HTMLInputElement[] = [];
-	private readonly _stairsStepAmountInputBoxes: HTMLInputElement[] = [];
-	private readonly _stairsStepAmountRows: HTMLElement[] = [];
 	private readonly _envelopeDelaySliders: HTMLInputElement[] = [];
 	private readonly _envelopeDelayInputBoxes: HTMLInputElement[] = [];
 	private readonly _envelopeDelayRows: HTMLElement[] = [];
@@ -255,6 +249,9 @@ export class EnvelopeEditor {
 	private readonly _LFOPulseWidthRows: HTMLElement[] = [];
 	private readonly _LFOTrapezoidRatioSliders: HTMLInputElement[] = [];
 	private readonly _LFOTrapezoidRatioRows: HTMLElement[] = [];
+	private readonly _LFOStairsStepAmountSliders: HTMLInputElement[] = [];
+	private readonly _LFOStairsStepAmountInputBoxes: HTMLInputElement[] = [];
+	private readonly _LFOStairsStepAmountRows: HTMLElement[] = [];
 	private readonly _envelopeDropdownGroups: HTMLElement[] = [];
 	private readonly _envelopeDropdowns: HTMLButtonElement[] = [];
 	private readonly _targetSelects: HTMLSelectElement[] = [];
@@ -283,16 +280,41 @@ export class EnvelopeEditor {
 	private _onInput = (event: Event) => {
 		const instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
 
+		// For sliders here, we'll only record the change in _onChange(). Instead, just assign the
+		// change class to this._lastChange but don't record yet.
 		const plotterTimeRangeInputBoxIndex = this._plotterTimeRangeInputBoxes.indexOf(<any> event.target);
+		const perEnvelopeSpeedInputBoxIndex = this._perEnvelopeSpeedInputBoxes.indexOf(<any> event.target);
+		const perEnvelopeSpeedSliderIndex = this._perEnvelopeSpeedSliders.indexOf(<any> event.target);
+		const discreteEnvelopeToggleIndex = this._discreteEnvelopeToggles.indexOf(<any> event.target);
+		const lowerBoundInputBoxIndex = this._lowerBoundInputBoxes.indexOf(<any> event.target);
+		const lowerBoundSliderIndex = this._lowerBoundSliders.indexOf(<any> event.target);
+		const upperBoundInputBoxIndex = this._upperBoundInputBoxes.indexOf(<any> event.target);
+		const upperBoundSliderIndex = this._upperBoundSliders.indexOf(<any> event.target);
+		const envelopeDelayInputBoxIndex = this._envelopeDelayInputBoxes.indexOf(<any> event.target);
+		const envelopeDelaySliderIndex = this._envelopeDelaySliders.indexOf(<any> event.target);
+		const startInputBoxIndex = this._pitchStartInputBoxes.indexOf(<any>event.target);
+		const endInputBoxIndex = this._pitchEndInputBoxes.indexOf(<any>event.target);
+		const startSliderIndex = this._pitchStartSliders.indexOf(<any>event.target);
+		const endSliderIndex = this._pitchEndSliders.indexOf(<any>event.target);
+		const pitchAmplifyToggleIndex = this._pitchAmplifyToggles.indexOf(<any> event.target);
+		const pitchBounceToggleIndex = this._pitchBounceToggles.indexOf(<any> event.target);
+		const envelopePhaseInputBoxIndex = this._envelopePhaseInputBoxes.indexOf(<any> event.target);
+		const envelopePhaseSliderIndex = this._envelopePhaseSliders.indexOf(<any> event.target);
+		const clapMirrorAmountInputBoxIndex = this._clapMirrorAmountInputBoxes.indexOf(<any> event.target);
+		const clapMirrorAmountSliderIndex = this._clapMirrorAmountSliders.indexOf(<any> event.target);
+		const LFOEnableAccelerationToggleIndex = this._LFOEnableAccelerationToggles.indexOf(<any> event.target);
+		const LFOLoopOnceToggleIndex = this._LFOLoopOnceToggles.indexOf(<any> event.target);
+		const LFOIgnoranceToggleIndex = this._LFOIgnoranceToggles.indexOf(<any> event.target);
+		const LFOAccelerationInputBoxIndex = this._LFOAccelerationInputBoxes.indexOf(<any> event.target);
+		const LFOAccelerationSliderIndex = this._LFOAccelerationSliders.indexOf(<any> event.target);
+		const LFOPulseWidthSliderIndex = this._LFOPulseWidthSliders.indexOf(<any> event.target);
+		const LFOTrapezoidRatioSliderIndex = this._LFOTrapezoidRatioSliders.indexOf(<any> event.target);
+		const LFOStairsStepAmountInputBoxIndex = this._LFOStairsStepAmountInputBoxes.indexOf(<any> event.target);
+		const LFOStairsStepAmountSliderIndex = this._LFOStairsStepAmountSliders.indexOf(<any> event.target);
+
 		if (plotterTimeRangeInputBoxIndex != -1) {
 			this._changeTimeRange(plotterTimeRangeInputBoxIndex, this._envelopePlotters[plotterTimeRangeInputBoxIndex].range, +(this._plotterTimeRangeInputBoxes[plotterTimeRangeInputBoxIndex].value));
 		}
-
-		// For sliders here, we'll only record the change in _onChange(). Instead, just assign the
-		// change class to this._lastChange but don't record yet.
-		// MID TODO: Reorganize this and _onChange() a tiny bit for my OCD pleaseeeeeeeee
-		const perEnvelopeSpeedInputBoxIndex = this._perEnvelopeSpeedInputBoxes.indexOf(<any> event.target);
-		const perEnvelopeSpeedSliderIndex = this._perEnvelopeSpeedSliders.indexOf(<any> event.target);
 		if (perEnvelopeSpeedInputBoxIndex != -1) {
 			this._lastChange = new ChangePerEnvelopeSpeed(this._doc, perEnvelopeSpeedInputBoxIndex, instrument.envelopes[perEnvelopeSpeedInputBoxIndex].envelopeSpeed, +(this._perEnvelopeSpeedInputBoxes[perEnvelopeSpeedInputBoxIndex].value));
 		}
@@ -300,14 +322,9 @@ export class EnvelopeEditor {
 			this._perEnvelopeSpeedInputBoxes[perEnvelopeSpeedSliderIndex].value = this._perEnvelopeSpeedSliders[perEnvelopeSpeedSliderIndex].value;
 			this._lastChange = new ChangePerEnvelopeSpeed(this._doc, perEnvelopeSpeedSliderIndex, instrument.envelopes[perEnvelopeSpeedSliderIndex].envelopeSpeed, +(this._perEnvelopeSpeedSliders[perEnvelopeSpeedSliderIndex].value));
 		}
-		const discreteEnvelopeToggleIndex = this._discreteEnvelopeToggles.indexOf(<any> event.target);
 		if (discreteEnvelopeToggleIndex != -1) {
 			this._doc.record(new ChangeDiscreteEnvelope(this._doc, discreteEnvelopeToggleIndex, this._discreteEnvelopeToggles[discreteEnvelopeToggleIndex].checked));
 		}
-		const lowerBoundInputBoxIndex = this._lowerBoundInputBoxes.indexOf(<any> event.target);
-		const lowerBoundSliderIndex = this._lowerBoundSliders.indexOf(<any> event.target);
-		const upperBoundInputBoxIndex = this._upperBoundInputBoxes.indexOf(<any> event.target);
-		const upperBoundSliderIndex = this._upperBoundSliders.indexOf(<any> event.target);
 		if (lowerBoundInputBoxIndex != -1) {
 			this._lastChange = new ChangeLowerBound(this._doc, lowerBoundInputBoxIndex, instrument.envelopes[lowerBoundInputBoxIndex].lowerBound, +(this._lowerBoundInputBoxes[lowerBoundInputBoxIndex].value));
 		}
@@ -322,17 +339,6 @@ export class EnvelopeEditor {
 			this._upperBoundInputBoxes[upperBoundSliderIndex].value = this._upperBoundSliders[upperBoundSliderIndex].value;
 			this._lastChange = new ChangeUpperBound(this._doc, upperBoundSliderIndex, instrument.envelopes[upperBoundSliderIndex].upperBound, +(this._upperBoundSliders[upperBoundSliderIndex].value));
 		}
-		const stairsStepAmountInputBoxIndex = this._stairsStepAmountInputBoxes.indexOf(<any> event.target);
-		const stairsStepAmountSliderIndex = this._stairsStepAmountSliders.indexOf(<any> event.target);
-		if (stairsStepAmountInputBoxIndex != -1) {
-			this._lastChange = new ChangeStairsStepAmount(this._doc, stairsStepAmountInputBoxIndex, instrument.envelopes[stairsStepAmountInputBoxIndex].stepAmount, +(this._stairsStepAmountInputBoxes[stairsStepAmountInputBoxIndex].value));
-		}
-		if (stairsStepAmountSliderIndex != -1) {
-			this._stairsStepAmountInputBoxes[stairsStepAmountSliderIndex].value = this._stairsStepAmountSliders[stairsStepAmountSliderIndex].value;
-			this._lastChange = new ChangeStairsStepAmount(this._doc, stairsStepAmountSliderIndex, instrument.envelopes[stairsStepAmountSliderIndex].stepAmount, +(this._stairsStepAmountSliders[stairsStepAmountSliderIndex].value));
-		}
-		const envelopeDelayInputBoxIndex = this._envelopeDelayInputBoxes.indexOf(<any> event.target);
-		const envelopeDelaySliderIndex = this._envelopeDelaySliders.indexOf(<any> event.target);
 		if (envelopeDelayInputBoxIndex != -1) {
 			this._lastChange = new ChangeEnvelopeDelay(this._doc, envelopeDelayInputBoxIndex, instrument.envelopes[envelopeDelayInputBoxIndex].delay, +(this._envelopeDelayInputBoxes[envelopeDelayInputBoxIndex].value));
 		}
@@ -340,10 +346,6 @@ export class EnvelopeEditor {
 			this._envelopeDelayInputBoxes[envelopeDelaySliderIndex].value = this._envelopeDelaySliders[envelopeDelaySliderIndex].value;
 			this._lastChange = new ChangeEnvelopeDelay(this._doc, envelopeDelaySliderIndex, instrument.envelopes[envelopeDelaySliderIndex].delay, +(this._envelopeDelaySliders[envelopeDelaySliderIndex].value));
 		}
-		const startInputBoxIndex = this._pitchStartInputBoxes.indexOf(<any>event.target);
-		const endInputBoxIndex = this._pitchEndInputBoxes.indexOf(<any>event.target);
-		const startSliderIndex = this._pitchStartSliders.indexOf(<any>event.target);
-		const endSliderIndex = this._pitchEndSliders.indexOf(<any>event.target);
 		if (startInputBoxIndex != -1) {
 			this._lastChange = new ChangePitchEnvelopeStart(this._doc, startInputBoxIndex, instrument.envelopes[startInputBoxIndex].pitchStart, +(this._pitchStartInputBoxes[startInputBoxIndex].value));
 		}
@@ -360,16 +362,12 @@ export class EnvelopeEditor {
 			this._pitchEndNoteTexts[endSliderIndex].textContent = String(_.pitchEndLabel + this._pitchToNote(parseInt(this._pitchEndInputBoxes[endSliderIndex].value), instrument.isNoiseInstrument) + ":");
 			this._lastChange = new ChangePitchEnvelopeEnd(this._doc, endSliderIndex, instrument.envelopes[endSliderIndex].pitchEnd, +(this._pitchEndSliders[endSliderIndex].value));
 		}
-		const pitchAmplifyToggleIndex = this._pitchAmplifyToggles.indexOf(<any> event.target);
-		const pitchBounceToggleIndex = this._pitchBounceToggles.indexOf(<any> event.target);
 		if (pitchAmplifyToggleIndex != -1) {
 			this._doc.record(new ChangePitchAmplify(this._doc, pitchAmplifyToggleIndex, this._pitchAmplifyToggles[pitchAmplifyToggleIndex].checked));
 		}
 		if (pitchBounceToggleIndex != -1) {
 			this._doc.record(new ChangePitchBounce(this._doc, pitchBounceToggleIndex, this._pitchBounceToggles[pitchBounceToggleIndex].checked));
 		}
-		const envelopePhaseInputBoxIndex = this._envelopePhaseInputBoxes.indexOf(<any> event.target);
-		const envelopePhaseSliderIndex = this._envelopePhaseSliders.indexOf(<any> event.target);
 		if (envelopePhaseInputBoxIndex != -1) {
 			this._lastChange = new ChangeEnvelopePosition(this._doc, envelopePhaseInputBoxIndex, instrument.envelopes[envelopePhaseInputBoxIndex].phase, +(this._envelopePhaseInputBoxes[envelopePhaseInputBoxIndex].value));
 		}
@@ -377,8 +375,6 @@ export class EnvelopeEditor {
 			this._envelopePhaseInputBoxes[envelopePhaseSliderIndex].value = this._envelopePhaseSliders[envelopePhaseSliderIndex].value;
 			this._lastChange = new ChangeEnvelopePosition(this._doc, envelopePhaseSliderIndex, instrument.envelopes[envelopePhaseSliderIndex].phase, +(this._envelopePhaseSliders[envelopePhaseSliderIndex].value));
 		}
-		const clapMirrorAmountInputBoxIndex = this._clapMirrorAmountInputBoxes.indexOf(<any> event.target);
-		const clapMirrorAmountSliderIndex = this._clapMirrorAmountSliders.indexOf(<any> event.target);
 		if (clapMirrorAmountInputBoxIndex != -1) {
 			this._lastChange = new ChangeClapMirrorAmount(this._doc, clapMirrorAmountInputBoxIndex, instrument.envelopes[clapMirrorAmountInputBoxIndex].mirrorAmount, +(this._clapMirrorAmountInputBoxes[clapMirrorAmountInputBoxIndex].value));
 		}
@@ -386,9 +382,6 @@ export class EnvelopeEditor {
 			this._clapMirrorAmountInputBoxes[clapMirrorAmountSliderIndex].value = this._clapMirrorAmountSliders[clapMirrorAmountSliderIndex].value;
 			this._lastChange = new ChangeClapMirrorAmount(this._doc, clapMirrorAmountSliderIndex, instrument.envelopes[clapMirrorAmountSliderIndex].mirrorAmount, +(this._clapMirrorAmountSliders[clapMirrorAmountSliderIndex].value));
 		}
-		const LFOEnableAccelerationToggleIndex = this._LFOEnableAccelerationToggles.indexOf(<any> event.target);
-		const LFOLoopOnceToggleIndex = this._LFOLoopOnceToggles.indexOf(<any> event.target);
-		const LFOIgnoranceToggleIndex = this._LFOIgnoranceToggles.indexOf(<any> event.target);
 		if (LFOEnableAccelerationToggleIndex != -1) {
 			this._doc.record(new ChangeEnvelopeAccelerationEnabled(this._doc, LFOEnableAccelerationToggleIndex, this._LFOEnableAccelerationToggles[LFOEnableAccelerationToggleIndex].checked));
 		}
@@ -398,8 +391,6 @@ export class EnvelopeEditor {
 		if (LFOIgnoranceToggleIndex != -1) {
 			this._doc.record(new ChangeEnvelopeIgnorance(this._doc, LFOIgnoranceToggleIndex, this._LFOIgnoranceToggles[LFOIgnoranceToggleIndex].checked));
 		}
-		const LFOAccelerationInputBoxIndex = this._LFOAccelerationInputBoxes.indexOf(<any> event.target);
-		const LFOAccelerationSliderIndex = this._LFOAccelerationSliders.indexOf(<any> event.target);
 		if (LFOAccelerationInputBoxIndex != -1) {
 			this._lastChange = new ChangeEnvelopeAcceleration(this._doc, LFOAccelerationInputBoxIndex, instrument.envelopes[LFOAccelerationInputBoxIndex].phase, +(this._LFOAccelerationInputBoxes[LFOAccelerationInputBoxIndex].value));
 		}
@@ -407,21 +398,50 @@ export class EnvelopeEditor {
 			this._LFOAccelerationInputBoxes[LFOAccelerationSliderIndex].value = this._LFOAccelerationSliders[LFOAccelerationSliderIndex].value;
 			this._lastChange = new ChangeEnvelopeAcceleration(this._doc, LFOAccelerationSliderIndex, instrument.envelopes[LFOAccelerationSliderIndex].phase, +(this._LFOAccelerationSliders[LFOAccelerationSliderIndex].value));
 		}
-		const LFOPulseWidthSliderIndex = this._LFOPulseWidthSliders.indexOf(<any> event.target);
 		if (LFOPulseWidthSliderIndex != -1) {
 			this._lastChange = new ChangeLFOEnvelopePulseWidth(this._doc, LFOPulseWidthSliderIndex, instrument.envelopes[LFOPulseWidthSliderIndex].phase, +(this._LFOPulseWidthSliders[LFOPulseWidthSliderIndex].value));
 		}
-		const LFOTrapezoidRatioSliderIndex = this._LFOTrapezoidRatioSliders.indexOf(<any> event.target);
 		if (LFOTrapezoidRatioSliderIndex != -1) {
 			this._lastChange = new ChangeLFOEnvelopeTrapezoidRatio(this._doc, LFOTrapezoidRatioSliderIndex, instrument.envelopes[LFOTrapezoidRatioSliderIndex].phase, +(this._LFOTrapezoidRatioSliders[LFOTrapezoidRatioSliderIndex].value));
 		}
-	};
+		if (LFOStairsStepAmountInputBoxIndex != -1) {
+			this._lastChange = new ChangeLFOEnvelopeStairsStepAmount(this._doc, LFOStairsStepAmountInputBoxIndex, instrument.envelopes[LFOStairsStepAmountInputBoxIndex].LFOSettings.LFOStepAmount, +(this._LFOStairsStepAmountInputBoxes[LFOStairsStepAmountInputBoxIndex].value));
+		}
+		if (LFOStairsStepAmountSliderIndex != -1) {
+			this._LFOStairsStepAmountInputBoxes[LFOStairsStepAmountSliderIndex].value = this._LFOStairsStepAmountSliders[LFOStairsStepAmountSliderIndex].value;
+			this._lastChange = new ChangeLFOEnvelopeStairsStepAmount(this._doc, LFOStairsStepAmountSliderIndex, instrument.envelopes[LFOStairsStepAmountSliderIndex].LFOSettings.LFOStepAmount, +(this._LFOStairsStepAmountSliders[LFOStairsStepAmountSliderIndex].value));
+		}
+	}
 
 	private _onChange = (event: Event): void => {
 		const instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
 
 		const targetSelectIndex: number = this._targetSelects.indexOf(<any> event.target);
 		const envelopeSelectIndex: number = this._envelopeSelects.indexOf(<any> event.target);
+		const perEnvelopeSpeedInputBoxIndex = this._perEnvelopeSpeedInputBoxes.indexOf(<any> event.target);
+		const perEnvelopeSpeedSliderIndex = this._perEnvelopeSpeedSliders.indexOf(<any> event.target);
+		const lowerBoundInputBoxIndex = this._lowerBoundInputBoxes.indexOf(<any> event.target);
+		const upperBoundInputBoxIndex = this._upperBoundInputBoxes.indexOf(<any> event.target);
+		const lowerBoundSliderIndex = this._lowerBoundSliders.indexOf(<any> event.target);
+		const upperBoundSliderIndex = this._upperBoundSliders.indexOf(<any> event.target);
+		const envelopeDelayInputBoxIndex = this._envelopeDelayInputBoxes.indexOf(<any> event.target);
+		const envelopeDelaySliderIndex = this._envelopeDelaySliders.indexOf(<any> event.target);
+		const startInputBoxIndex = this._pitchStartInputBoxes.indexOf(<any>event.target);
+		const endInputBoxIndex = this._pitchEndInputBoxes.indexOf(<any>event.target);
+		const startSliderIndex = this._pitchStartSliders.indexOf(<any>event.target);
+		const endSliderIndex = this._pitchEndSliders.indexOf(<any>event.target);
+		const envelopePhaseInputBoxIndex = this._envelopePhaseInputBoxes.indexOf(<any> event.target);
+		const envelopePhaseSliderIndex = this._envelopePhaseSliders.indexOf(<any> event.target);
+		const clapMirrorAmountInputBoxIndex = this._clapMirrorAmountInputBoxes.indexOf(<any> event.target);
+		const clapMirrorAmountSliderIndex = this._clapMirrorAmountSliders.indexOf(<any> event.target);
+		const LFOShapeSelectIndex = this._LFOShapeSelects.indexOf(<any> event.target);
+		const LFOAccelerationInputBoxIndex = this._LFOAccelerationInputBoxes.indexOf(<any> event.target);
+		const LFOAccelerationSliderIndex = this._LFOAccelerationSliders.indexOf(<any> event.target);
+		const LFOPulseWidthSliderIndex = this._LFOPulseWidthSliders.indexOf(<any> event.target);
+		const LFOTrapezoidRatioSliderIndex = this._LFOTrapezoidRatioSliders.indexOf(<any> event.target);
+		const LFOStairsStepAmountInputBoxIndex = this._LFOStairsStepAmountInputBoxes.indexOf(<any> event.target);
+		const LFOStairsStepAmountSliderIndex = this._LFOStairsStepAmountSliders.indexOf(<any> event.target);
+
 		if (targetSelectIndex != -1) {
 			const combinedValue: number = parseInt(this._targetSelects[targetSelectIndex].value);
 			const target: number = combinedValue % Config.instrumentAutomationTargets.length;
@@ -430,8 +450,6 @@ export class EnvelopeEditor {
 		} else if (envelopeSelectIndex != -1) {
 			this._doc.record(new ChangeSetEnvelopeType(this._doc, envelopeSelectIndex, this._envelopeSelects[envelopeSelectIndex].selectedIndex));
 		}
-		const perEnvelopeSpeedInputBoxIndex = this._perEnvelopeSpeedInputBoxes.indexOf(<any> event.target);
-		const perEnvelopeSpeedSliderIndex = this._perEnvelopeSpeedSliders.indexOf(<any> event.target);
 		if (perEnvelopeSpeedInputBoxIndex != -1) {
 			if (this._lastChange != null) {
 				this._doc.record(this._lastChange);
@@ -444,10 +462,6 @@ export class EnvelopeEditor {
 				this._lastChange = null;
 			}
 		}
-		const lowerBoundInputBoxIndex = this._lowerBoundInputBoxes.indexOf(<any> event.target);
-		const upperBoundInputBoxIndex = this._upperBoundInputBoxes.indexOf(<any> event.target);
-		const lowerBoundSliderIndex = this._lowerBoundSliders.indexOf(<any> event.target);
-		const upperBoundSliderIndex = this._upperBoundSliders.indexOf(<any> event.target);
 		if (lowerBoundInputBoxIndex != -1) {
 			if (this._lastChange != null) {
 				this._doc.record(this._lastChange);
@@ -472,22 +486,6 @@ export class EnvelopeEditor {
 				this._lastChange = null;
 			}
 		}
-		const stairsStepAmountInputBoxIndex = this._stairsStepAmountInputBoxes.indexOf(<any> event.target);
-		const stairsStepAmountSliderIndex = this._stairsStepAmountSliders.indexOf(<any> event.target);
-		if (stairsStepAmountInputBoxIndex != -1) {
-			if (this._lastChange != null) {
-				this._doc.record(this._lastChange);
-				this._lastChange = null;
-			}
-		}
-		if (stairsStepAmountSliderIndex != -1) {
-			if (this._lastChange != null) {
-				this._doc.record(this._lastChange);
-				this._lastChange = null;
-			}
-		}
-		const envelopeDelayInputBoxIndex = this._envelopeDelayInputBoxes.indexOf(<any> event.target);
-		const envelopeDelaySliderIndex = this._envelopeDelaySliders.indexOf(<any> event.target);
 		if (envelopeDelayInputBoxIndex != -1) {
 			if (this._lastChange != null) {
 				this._doc.record(this._lastChange);
@@ -500,10 +498,6 @@ export class EnvelopeEditor {
 				this._lastChange = null;
 			}
 		}
-		const startInputBoxIndex = this._pitchStartInputBoxes.indexOf(<any>event.target);
-		const endInputBoxIndex = this._pitchEndInputBoxes.indexOf(<any>event.target);
-		const startSliderIndex = this._pitchStartSliders.indexOf(<any>event.target);
-		const endSliderIndex = this._pitchEndSliders.indexOf(<any>event.target);
 		if (startInputBoxIndex != -1) {
 			if (this._lastChange != null) {
 				this._doc.record(this._lastChange);
@@ -528,8 +522,6 @@ export class EnvelopeEditor {
 				this._lastChange = null;
 			}
 		}
-		const envelopePhaseInputBoxIndex = this._envelopePhaseInputBoxes.indexOf(<any> event.target);
-		const envelopePhaseSliderIndex = this._envelopePhaseSliders.indexOf(<any> event.target);
 		if (envelopePhaseInputBoxIndex != -1) {
 			if (this._lastChange != null) {
 				this._doc.record(this._lastChange);
@@ -542,8 +534,6 @@ export class EnvelopeEditor {
 				this._lastChange = null;
 			}
 		}
-		const clapMirrorAmountInputBoxIndex = this._clapMirrorAmountInputBoxes.indexOf(<any> event.target);
-		const clapMirrorAmountSliderIndex = this._clapMirrorAmountSliders.indexOf(<any> event.target);
 		if (clapMirrorAmountInputBoxIndex != -1) {
 			if (this._lastChange != null) {
 				this._doc.record(this._lastChange);
@@ -556,12 +546,9 @@ export class EnvelopeEditor {
 				this._lastChange = null;
 			}
 		}
-		const LFOShapeSelectIndex = this._LFOShapeSelects.indexOf(<any> event.target);
 		if (LFOShapeSelectIndex != -1) {
 			this._doc.record(new ChangeLFOEnvelopeShape(this._doc, LFOShapeSelectIndex, instrument.envelopes[LFOShapeSelectIndex].LFOSettings.LFOShape, this._LFOShapeSelects[LFOShapeSelectIndex].selectedIndex));
 		}
-		const LFOAccelerationInputBoxIndex = this._LFOAccelerationInputBoxes.indexOf(<any> event.target);
-		const LFOAccelerationSliderIndex = this._LFOAccelerationSliders.indexOf(<any> event.target);
 		if (LFOAccelerationInputBoxIndex != -1) {
 			if (this._lastChange != null) {
 				this._doc.record(this._lastChange);
@@ -574,15 +561,25 @@ export class EnvelopeEditor {
 				this._lastChange = null;
 			}
 		}
-		const LFOPulseWidthSliderIndex = this._LFOPulseWidthSliders.indexOf(<any> event.target);
 		if (LFOPulseWidthSliderIndex != -1) {
 			if (this._lastChange != null) {
 				this._doc.record(this._lastChange);
 				this._lastChange = null;
 			}
 		}
-		const LFOTrapezoidRatioSliderIndex = this._LFOTrapezoidRatioSliders.indexOf(<any> event.target);
 		if (LFOTrapezoidRatioSliderIndex != -1) {
+			if (this._lastChange != null) {
+				this._doc.record(this._lastChange);
+				this._lastChange = null;
+			}
+		}
+		if (LFOStairsStepAmountInputBoxIndex != -1) {
+			if (this._lastChange != null) {
+				this._doc.record(this._lastChange);
+				this._lastChange = null;
+			}
+		}
+		if (LFOStairsStepAmountSliderIndex != -1) {
 			if (this._lastChange != null) {
 				this._doc.record(this._lastChange);
 				this._lastChange = null;
@@ -599,19 +596,22 @@ export class EnvelopeEditor {
 	}
 
 	private _onClick = (event: MouseEvent): void => {
+		// Commented-out code is a failed dropdown opening system for the movement buttons.
+		//let dropdownStatus: boolean;
+
 		const deleteButtonIndex: number = this._deleteButtons.indexOf(<any> event.target);
+		const moveUpButtonIndex: number = this._envelopeMoveUpButtons.indexOf(<any> event.target);
+		const moveDownButtonIndex: number = this._envelopeMoveDownButtons.indexOf(<any> event.target);
+
 		if (deleteButtonIndex != -1) {
 			this._doc.record(new ChangeRemoveEnvelope(this._doc, deleteButtonIndex));
 		}
-		//let dropdownStatus: boolean;
-		const moveUpButtonIndex: number = this._envelopeMoveUpButtons.indexOf(<any> event.target);
 		if (moveUpButtonIndex != -1) {
 			//dropdownStatus = this._openPerEnvelopeDropdowns[moveUpButtonIndex-1];
 			this._doc.record(new ChangeEnvelopeOrder(this._doc, moveUpButtonIndex, true));
 			//this._openPerEnvelopeDropdowns[moveUpButtonIndex] = dropdownStatus;
 			//this._openPerEnvelopeDropdowns[moveUpButtonIndex-1] = true;
 		}
-		const moveDownButtonIndex: number = this._envelopeMoveDownButtons.indexOf(<any> event.target);
 		if (moveDownButtonIndex != -1) {
 			//dropdownStatus = this._openPerEnvelopeDropdowns[moveUpButtonIndex+1];
 			this._doc.record(new ChangeEnvelopeOrder(this._doc, moveDownButtonIndex, false));
@@ -622,49 +622,28 @@ export class EnvelopeEditor {
 
 	private _typingInInput = (event: KeyboardEvent): void => {
 		const plotterTimeRangeInputBoxIndex: number = this._plotterTimeRangeInputBoxes.indexOf(<any> event.target);
-		if (plotterTimeRangeInputBoxIndex != -1) {
-			event.stopPropagation();
-		}
 		const perEnvelopeSpeedInputBoxIndex: number = this._perEnvelopeSpeedInputBoxes.indexOf(<any> event.target);
-		if (perEnvelopeSpeedInputBoxIndex != -1) {
-			event.stopPropagation();
-		}
 		const lowerBoundInputBoxIndex: number = this._lowerBoundInputBoxes.indexOf(<any> event.target);
-		if (lowerBoundInputBoxIndex != -1) {
-			event.stopPropagation();
-		}
 		const upperBoundInputBoxIndex: number = this._upperBoundInputBoxes.indexOf(<any> event.target);
-		if (upperBoundInputBoxIndex != -1) {
-			event.stopPropagation();
-		}
-		const stairsStepAmountInputBoxIndex: number = this._stairsStepAmountInputBoxes.indexOf(<any> event.target);
-		if (stairsStepAmountInputBoxIndex != -1) {
-			event.stopPropagation();
-		}
 		const envelopeDelayInputBoxIndex: number = this._envelopeDelayInputBoxes.indexOf(<any> event.target);
-		if (envelopeDelayInputBoxIndex != -1) {
-			event.stopPropagation();
-		}
 		const startInputBoxIndex: number = this._pitchStartInputBoxes.indexOf(<any>event.target);
-		if (startInputBoxIndex != -1) {
-			event.stopPropagation();
-		}
 		const endInputBoxIndex: number = this._pitchEndInputBoxes.indexOf(<any>event.target);
-		if (endInputBoxIndex != -1) {
-			event.stopPropagation();
-		}
 		const envelopePhaseInputBoxIndex: number = this._envelopePhaseInputBoxes.indexOf(<any>event.target);
-		if (envelopePhaseInputBoxIndex != -1) {
-			event.stopPropagation();
-		}
 		const clapMirrorAmountInputBoxIndex: number = this._clapMirrorAmountInputBoxes.indexOf(<any> event.target);
-		if (clapMirrorAmountInputBoxIndex != -1) {
-			event.stopPropagation();
-		}
 		const LFOAccelerationInputBoxIndex: number = this._LFOAccelerationInputBoxes.indexOf(<any> event.target);
-		if (LFOAccelerationInputBoxIndex != -1) {
-			event.stopPropagation();
-		}
+		const LFOStairsStepAmountInputBoxIndex: number = this._LFOStairsStepAmountInputBoxes.indexOf(<any> event.target);
+
+		if (plotterTimeRangeInputBoxIndex != -1) event.stopPropagation();
+		if (perEnvelopeSpeedInputBoxIndex != -1) event.stopPropagation();
+		if (lowerBoundInputBoxIndex != -1) event.stopPropagation();
+		if (upperBoundInputBoxIndex != -1) event.stopPropagation();
+		if (envelopeDelayInputBoxIndex != -1) event.stopPropagation();
+		if (startInputBoxIndex != -1) event.stopPropagation();
+		if (endInputBoxIndex != -1) event.stopPropagation();
+		if (envelopePhaseInputBoxIndex != -1) event.stopPropagation();
+		if (clapMirrorAmountInputBoxIndex != -1) event.stopPropagation();
+		if (LFOAccelerationInputBoxIndex != -1) event.stopPropagation();
+		if (LFOStairsStepAmountInputBoxIndex != -1) event.stopPropagation();
 	}
 	
 	private _makeOption(target: number, index: number): HTMLOptionElement {
@@ -743,12 +722,6 @@ export class EnvelopeEditor {
 				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeBounds")}, span(_.upperBoundLabel)),
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, upperBoundInputBox),
 			), upperBoundSlider);
-			const stairsStepAmountSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: 1, max: Config.stairsStepAmountMax, value: "4", step: "1"});
-			const stairsStepAmountInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "stairsStepAmountInputBox", type: "number", step: "1", min: 1, max: Config.stairsStepAmountMax, value: "4"});
-			const stairsStepAmountRow: HTMLElement = div({class: "selectRow dropFader"}, div({},
-				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("stepAmount")}, span(_.stairsStepAmountLabel)),
-				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, stairsStepAmountInputBox),
-			), stairsStepAmountSlider);
 			const envelopeDelaySlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: 0, max: Config.envelopeDelayMax, value: "0", step: "0.5"});
 			const envelopeDelayInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "envelopeDelayInputBox", type: "number", step: "0.01", min: 0, max: Config.envelopeDelayMax, value: "0"});
 			const envelopeDelayRow: HTMLElement = div({class: "selectRow dropFader"}, div({},
@@ -803,6 +776,7 @@ export class EnvelopeEditor {
 				_.LFOShape4Label,
 				_.LFOShape5Label,
 				_.LFOShape6Label,
+				_.LFOShape7Label
 			]);
 			const LFOShapeRow: HTMLElement = div({class: "selectRow"}, span({ class: "tip", onclick: () => this._openPrompt("LFOShape") }, span(_.LFOShapeLabel)), div({ class: "selectContainer" }, LFOShapeSelect));
 			const LFOEnableAccelerationToggle: HTMLInputElement = input({style: "width: 3em; padding: 0;", type: "checkbox"});
@@ -832,6 +806,12 @@ export class EnvelopeEditor {
 			const LFOPulseWidthRow: HTMLElement = div({class: "selectRow dropFader"}, span({ class: "tip", onclick: () => this._openPrompt("LFOPulseWidth") }, span(_.LFOPulseWidthLabel)), LFOPulseWidthSlider);
 			const LFOTrapezoidRatioSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: Config.LFOTrapezoidRatioMin, max: Config.LFOTrapezoidRatioMax, value: "1", step: "0.1"});
 			const LFOTrapezoidRatioRow: HTMLElement = div({class: "selectRow dropFader"}, span({ class: "tip", onclick: () => this._openPrompt("LFOTrapezoidRatio") }, span(_.LFOTrapezoidRatioLabel)), LFOTrapezoidRatioSlider);
+			const LFOStairsStepAmountSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: 1, max: Config.LFOStairsStepAmountMax, value: "4", step: "1"});
+			const LFOStairsStepAmountInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "LFOStairsStepAmountInputBox", type: "number", step: "1", min: 1, max: Config.LFOStairsStepAmountMax, value: "4"});
+			const LFOStairsStepAmountRow: HTMLElement = div({class: "selectRow dropFader"}, div({},
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("LFOStepAmount")}, span(_.LFOStairsStepAmountLabel)),
+				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, LFOStairsStepAmountInputBox),
+			), LFOStairsStepAmountSlider);
 			const envelopeCopyButton: HTMLButtonElement = button({class: "envelope-button", title: _.copyLabel, style: "flex: 3;", onclick: () => this._copyEnvelopeSettings(envelopeIndex)}, 
 				// Copy icon:
 				SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 4%; top: 40%; margin-top: -0.75em; pointer-events: none;", width: "2em", height: "2em", viewBox: "-5 -21 26 26" }, [
@@ -875,7 +855,7 @@ export class EnvelopeEditor {
 					SVG.path({ d: "M12 6 11.8 6.2 13.8 8.2 14 8C14 6.8 13.2 6 12 6M11.5 6.5 11.8 6.8 7.5 11 7.8 11 7.8 11.3 8.1 11.3 8.1 11.6 8.4 11.6 8.4 11.9 8.7 11.9 8.7 12.2 9 12.2 9 12.5 13 8.5 11.5 7 11.8 6.8 13.5 8.5 9 13 7 11 11.5 6.5M7 11 7 13 9 13", fill: "currentColor"}),
 				]),
 			);
-			const envelopeDropdownGroup: HTMLElement = div({class: "editor-controls", style: "display: none;"}, plotterTimeRangeRow, envelopePlotterRow, pitchStartGroup, pitchEndGroup, extraPitchSettingRow, LFOShapeRow, LFORadioButtonsRow, LFOAccelerationRow, LFOPulseWidthRow, LFOTrapezoidRatioRow, stairsStepAmountRow, perEnvelopeSpeedRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, clapMirrorAmountRow, measurementTypeRow, envelopeDelayRow, envelopePhaseRow);
+			const envelopeDropdownGroup: HTMLElement = div({class: "editor-controls", style: "display: none;"}, plotterTimeRangeRow, envelopePlotterRow, pitchStartGroup, pitchEndGroup, extraPitchSettingRow, LFOShapeRow, LFORadioButtonsRow, LFOAccelerationRow, LFOPulseWidthRow, LFOTrapezoidRatioRow, LFOStairsStepAmountRow, perEnvelopeSpeedRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, clapMirrorAmountRow, measurementTypeRow, envelopeDelayRow, envelopePhaseRow);
 			const envelopeDropdown: HTMLButtonElement = button({style: "margin-left: 0.6em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.PerEnvelope, envelopeIndex)}, "▼");
 
 			const targetSelect: HTMLSelectElement = select();
@@ -933,9 +913,9 @@ export class EnvelopeEditor {
 			this._upperBoundInputBoxes[envelopeIndex] = upperBoundInputBox;
 			this._lowerBoundRows[envelopeIndex] = lowerBoundRow;
 			this._upperBoundRows[envelopeIndex] = upperBoundRow;
-			this._stairsStepAmountSliders[envelopeIndex] = stairsStepAmountSlider;
-			this._stairsStepAmountInputBoxes[envelopeIndex] = stairsStepAmountInputBox;
-			this._stairsStepAmountRows[envelopeIndex] = stairsStepAmountRow;
+			this._LFOStairsStepAmountSliders[envelopeIndex] = LFOStairsStepAmountSlider;
+			this._LFOStairsStepAmountInputBoxes[envelopeIndex] = LFOStairsStepAmountInputBox;
+			this._LFOStairsStepAmountRows[envelopeIndex] = LFOStairsStepAmountRow;
 			this._envelopeDelaySliders[envelopeIndex] = envelopeDelaySlider;
 			this._envelopeDelayInputBoxes[envelopeIndex] = envelopeDelayInputBox;
 			this._envelopeDelayRows[envelopeIndex] = envelopeDelayRow;
@@ -1022,8 +1002,6 @@ export class EnvelopeEditor {
 			this._upperBoundSliders[envelopeIndex].value = String(clamp(Config.upperBoundMin, Config.upperBoundMax+1, instEnv.upperBound));
 			this._lowerBoundInputBoxes[envelopeIndex].value = String(clamp(Config.lowerBoundMin, Config.lowerBoundMax+1, instEnv.lowerBound));
 			this._upperBoundInputBoxes[envelopeIndex].value = String(clamp(Config.upperBoundMin, Config.upperBoundMax+1, instEnv.upperBound));
-			this._stairsStepAmountSliders[envelopeIndex].value = String(clamp(1, Config.stairsStepAmountMax+1, instEnv.stepAmount));
-			this._stairsStepAmountInputBoxes[envelopeIndex].value = String(clamp(1, Config.stairsStepAmountMax+1, instEnv.stepAmount));
 			this._envelopeDelaySliders[envelopeIndex].value = String(clamp(0, Config.envelopeDelayMax+1, instEnv.delay));
 			this._envelopeDelayInputBoxes[envelopeIndex].value = String(clamp(0, Config.envelopeDelayMax+1, instEnv.delay));
 			// Reset min/max for pitch envelope UI elements before resetting value.
@@ -1062,6 +1040,8 @@ export class EnvelopeEditor {
 			this._LFOAccelerationInputBoxes[envelopeIndex].value = String(clamp(Config.LFOAccelerationMin, Config.LFOAccelerationMax+1, instEnv.LFOSettings.LFOAcceleration));
 			this._LFOPulseWidthSliders[envelopeIndex].value = String(clamp(0, 21, instEnv.LFOSettings.LFOPulseWidth));
 			this._LFOTrapezoidRatioSliders[envelopeIndex].value = String(clamp(Config.LFOTrapezoidRatioMin, Config.LFOTrapezoidRatioMax+1, instEnv.LFOSettings.LFOTrapezoidRatio));
+			this._LFOStairsStepAmountSliders[envelopeIndex].value = String(clamp(1, Config.LFOStairsStepAmountMax+1, instEnv.LFOSettings.LFOStepAmount));
+			this._LFOStairsStepAmountInputBoxes[envelopeIndex].value = String(clamp(1, Config.LFOStairsStepAmountMax+1, instEnv.LFOSettings.LFOStepAmount));
 			this._envelopeMoveUpButtons[envelopeIndex].disabled = !(this._doc.prefs.showEnvReorderButtons);
 			this._envelopeMoveDownButtons[envelopeIndex].disabled = !(this._doc.prefs.showEnvReorderButtons);
 			this._pitchEnvAutoBoundButtons[envelopeIndex].disabled = !(instEnv.envelope == Config.envelopes.dictionary["pitch"].index);
@@ -1164,22 +1144,22 @@ export class EnvelopeEditor {
 					this._LFOAccelerationRows[envelopeIndex].style.display = "none";
 				}
 				// Pulse width is special-cased to the "pulses" LFO shape.
-				if (instEnv.LFOSettings.LFOShape == 2) { 
+				if (instEnv.LFOSettings.LFOShape == LFOShapes.Pulses) { 
 					this._LFOPulseWidthRows[envelopeIndex].style.display = "";
 				} else {
 					this._LFOPulseWidthRows[envelopeIndex].style.display = "none";
 				}
 				// Trapezoid ratio is special-cased to the "trapezoid" LFO shape.
-				if (instEnv.LFOSettings.LFOShape == 4) { 
+				if (instEnv.LFOSettings.LFOShape == LFOShapes.Trapezoid) { 
 					this._LFOTrapezoidRatioRows[envelopeIndex].style.display = "";
 				} else {
 					this._LFOTrapezoidRatioRows[envelopeIndex].style.display = "none";
 				}
 				// Step amount is special-cased to the "stairs" LFO shape.
-				if (instEnv.LFOSettings.LFOShape == 5) { 
-					this._stairsStepAmountRows[envelopeIndex].style.display = "";
+				if (instEnv.LFOSettings.LFOShape == LFOShapes.Stairs) { 
+					this._LFOStairsStepAmountRows[envelopeIndex].style.display = "";
 				} else {
-					this._stairsStepAmountRows[envelopeIndex].style.display = "none";
+					this._LFOStairsStepAmountRows[envelopeIndex].style.display = "none";
 				}
 			} else {
 				this._LFOShapeRows[envelopeIndex].style.display = "none";
@@ -1187,7 +1167,7 @@ export class EnvelopeEditor {
 				this._LFOAccelerationRows[envelopeIndex].style.display = "none";
 				this._LFOPulseWidthRows[envelopeIndex].style.display = "none";
 				this._LFOTrapezoidRatioRows[envelopeIndex].style.display = "none";
-				this._stairsStepAmountRows[envelopeIndex].style.display = "none";
+				this._LFOStairsStepAmountRows[envelopeIndex].style.display = "none";
 			}
 		}
 		

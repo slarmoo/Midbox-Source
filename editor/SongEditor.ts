@@ -16,7 +16,7 @@ import { CustomFilterPrompt } from "./CustomFilterPrompt";
 import { EditorConfig, isMobile, prettyNumber, Preset, PresetCategory } from "./EditorConfig";
 import { ExportPrompt } from "./ExportPrompt";
 import "./Layout"; // Imported here for the sake of ensuring this code is transpiled early.
-import { Instrument, Channel, Synth } from "../synth/synth";
+import { Instrument, Channel, Synth, LFOShapes } from "../synth/synth";
 import { HTML, SVG } from "imperative-html/dist/esm/elements-strict";
 import { Preferences } from "./Preferences";
 import { HarmonicsEditor } from "./HarmonicsEditor";
@@ -49,7 +49,7 @@ import { ThemePrompt } from "./ThemePrompt";
 import { TipPrompt } from "./TipPrompt";
 import { LanguagePrompt } from "./LanguagePrompt";
 import { Localization as _ } from "./Localization";
-import { ChangeTempo, ChangeKeyOctave, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangeSupersawDynamism, ChangeSupersawSpread, ChangeSupersawShape, ChangeWavetableSpeed, ChangeWaveInterpolation, ChangeCyclePerNote, ChangeOneShotCycle, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeCustomAlgorithmOrFeedback, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, Change6OpFeedbackType, Change6OpAlgorithm, ChangeChipWave, ChangeNoiseWave, /*ChangeNoiseSeedRandomization, ChangeNoiseSeed,*/ ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeUnisonVoices, ChangeUnisonSpread, ChangeUnisonOffset, ChangeUnisonExpression, ChangeUnisonSign, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeReshapeAmount, ChangeReshapeShift, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeLowerWavefold, ChangeUpperWavefold, ChangeAddEnvelope, ChangeEnvelopeSpeed, ChangeDrumsetEnvelopeSpeed, ChangeDrumsetDiscreteEnvelope, ChangeDrumsetLowerBound, ChangeDrumsetUpperBound, ChangeDrumsetStairsStepAmount, ChangeDrumsetEnvelopeDelay, ChangeDrumsetEnvelopePosition, ChangeDrumsetMeasurementType, ChangeDrumsetClapMirrorAmount, ChangeDrumsetLFOEnvelopeShape, ChangeDrumsetEnvelopeAccelerationEnabled, ChangeDrumsetEnvelopeAcceleration, ChangeDrumsetEnvelopeLooping, ChangeDrumsetEnvelopeIgnorance, ChangeDrumsetLFOEnvelopePulseWidth, ChangeDrumsetLFOEnvelopeTrapezoidRatio, ChangePasteDrumsetEnvelope, ChangeDrumsetEnvelopeOrder, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeWavetableCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeArpeggioPattern, ChangeClicklessTransition, ChangeContinueThruPattern, ChangeAliasing, ChangePercussion, ChangeSDAffected, ChangeSOAffected, ChangeStrumSpeed, ChangeSlideSpeed, ChangeSongSubtitle, ChangeSetPatternInstruments, ChangeHoldingModRecording } from "./changes";
+import { ChangeTempo, ChangeKeyOctave, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangeSupersawDynamism, ChangeSupersawSpread, ChangeSupersawShape, ChangeWavetableSpeed, ChangeWaveInterpolation, ChangeCyclePerNote, ChangeOneShotCycle, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeCustomAlgorithmOrFeedback, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, Change6OpFeedbackType, Change6OpAlgorithm, ChangeChipWave, ChangeNoiseWave, /*ChangeNoiseSeedRandomization, ChangeNoiseSeed,*/ ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeUnisonVoices, ChangeUnisonSpread, ChangeUnisonOffset, ChangeUnisonExpression, ChangeUnisonSign, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeReshapeAmount, ChangeReshapeShift, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeLowerWavefold, ChangeUpperWavefold, ChangeAddEnvelope, ChangeEnvelopeSpeed, ChangeDrumsetEnvelopeSpeed, ChangeDrumsetDiscreteEnvelope, ChangeDrumsetLowerBound, ChangeDrumsetUpperBound, ChangeDrumsetLFOEnvelopeStairsStepAmount, ChangeDrumsetEnvelopeDelay, ChangeDrumsetEnvelopePosition, ChangeDrumsetMeasurementType, ChangeDrumsetClapMirrorAmount, ChangeDrumsetLFOEnvelopeShape, ChangeDrumsetEnvelopeAccelerationEnabled, ChangeDrumsetEnvelopeAcceleration, ChangeDrumsetEnvelopeLooping, ChangeDrumsetEnvelopeIgnorance, ChangeDrumsetLFOEnvelopePulseWidth, ChangeDrumsetLFOEnvelopeTrapezoidRatio, ChangePasteDrumsetEnvelope, ChangeDrumsetEnvelopeOrder, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeWavetableCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeArpeggioPattern, ChangeClicklessTransition, ChangeContinueThruPattern, ChangeAliasing, ChangePercussion, ChangeSDAffected, ChangeSOAffected, ChangeStrumSpeed, ChangeSlideSpeed, ChangeSongSubtitle, ChangeSetPatternInstruments, ChangeHoldingModRecording } from "./changes";
 import { oscilloscopeCanvas } from "../global/Oscilloscope";
 import { TrackEditor } from "./TrackEditor";
 import { clamp } from "./UsefulCodingStuff";
@@ -1955,9 +1955,6 @@ export class SongEditor {
     private readonly _drumsetUpperBoundSliders: SliderNoParse[] = [];
     private readonly _drumsetUpperBoundInputBoxes: HTMLInputElement[] = [];
     private readonly _drumsetUpperBoundRows: HTMLDivElement[] = [];
-    private readonly _drumsetStepAmountSliders: SliderNoParse[] = [];
-    private readonly _drumsetStepAmountInputBoxes: HTMLInputElement[] = [];
-    private readonly _drumsetStepAmountRows: HTMLDivElement[] = [];
     private readonly _drumsetEnvelopeDelaySliders: SliderNoParse[] = [];
     private readonly _drumsetEnvelopeDelayInputBoxes: HTMLInputElement[] = [];
     private readonly _drumsetEnvelopeDelayRows: HTMLDivElement[] = [];
@@ -1988,6 +1985,9 @@ export class SongEditor {
 	private readonly _drumsetLFOPulseWidthRows: HTMLDivElement[] = [];
 	private readonly _drumsetLFOTrapezoidRatioSliders: SliderNoParse[] = [];
 	private readonly _drumsetLFOTrapezoidRatioRows: HTMLDivElement[] = [];
+    private readonly _drumsetLFOStepAmountSliders: SliderNoParse[] = [];
+    private readonly _drumsetLFOStepAmountInputBoxes: HTMLInputElement[] = [];
+    private readonly _drumsetLFOStepAmountRows: HTMLDivElement[] = [];
     private readonly _drumsetEnvelopeDropdownGroups: HTMLDivElement[] = [];
     private readonly _drumsetEnvelopeDropdowns: HTMLButtonElement[] = [];
     private _showModSliders: boolean[] = [];
@@ -2063,8 +2063,12 @@ export class SongEditor {
                 _.waveform9Label,
                 _.waveform10Label,
                 _.waveform11Label,
-                _.waveform12Label
-
+                _.waveform12Label,
+                _.waveform13Label,
+                _.waveform14Label,
+                _.waveform15Label,
+                _.waveform16Label,
+                _.waveform17Label
             ]);
             const waveformDropdown: HTMLButtonElement = button({ style: "margin-left:0em; margin-right: 2px; height:1.5em; width: 8px; max-width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.FM, i) }, "▼");
             const waveformDropdownHint: HTMLSpanElement = span({ class: "tip", style: "margin-left: 10px;", onclick: () => this._openPrompt("operatorWaveform") }, span(_.operWaveLabel));
@@ -2159,12 +2163,6 @@ export class SongEditor {
 				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeBounds")}, span(_.upperBoundLabel)),
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, upperBoundInputBox),
 			), upperBoundSlider.container);
-            const stepAmountSlider: SliderNoParse = new SliderNoParse(input({ style: "margin: 0;", type: "range", min: "1", max: Config.stairsStepAmountMax, value: "4", step: "1" }), this._doc, (oldValue: number, newValue: number, forceUpdate: boolean = false) => new ChangeDrumsetStairsStepAmount(this._doc, i, oldValue, newValue, forceUpdate), false);
-            const stepAmountInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "drumsetStairsStepAmountInputBox", type: "number", step: "1", min: "1", max: Config.stairsStepAmountMax, value: "4"});
-			const stepAmountRow: HTMLDivElement = div({class: "selectRow dropFader"}, div({},
-				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("stepAmount")}, span(_.stairsStepAmountLabel)),
-				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, stepAmountInputBox),
-			), stepAmountSlider.container);
             const envelopeDelaySlider: SliderNoParse = new SliderNoParse(input({ style: "margin: 0;", type: "range", min: "0", max: Config.envelopeDelayMax, value: "0", step: "0.5" }), this._doc, (oldValue: number, newValue: number, forceUpdate: boolean = false) => new ChangeDrumsetEnvelopeDelay(this._doc, i, oldValue, newValue, forceUpdate), false);
             const envelopeDelayInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "drumsetEnvelopeDelayInputBox", type: "number", step: "0.01", min: "0", max: Config.envelopeDelayMax, value: "0"});
 			const envelopeDelayRow: HTMLDivElement = div({class: "selectRow dropFader"}, div({},
@@ -2193,6 +2191,7 @@ export class SongEditor {
 				_.LFOShape4Label,
 				_.LFOShape5Label,
 				_.LFOShape6Label,
+                _.LFOShape7Label
 			]);
             const LFOShapeRow: HTMLDivElement = div({class: "selectRow"}, span({ class: "tip", onclick: () => this._openPrompt("LFOShape") }, span(_.LFOShapeLabel)), div({ class: "selectContainer" }, LFOShapeSelect));
 			const LFOEnableAccelerationToggle: HTMLInputElement = input({style: "width: 3em; padding: 0;", type: "checkbox"});
@@ -2222,6 +2221,12 @@ export class SongEditor {
 			const LFOPulseWidthRow: HTMLDivElement = div({class: "selectRow dropFader"}, span({ class: "tip", onclick: () => this._openPrompt("LFOPulseWidth") }, span(_.LFOPulseWidthLabel)), LFOPulseWidthSlider.container);
 			const LFOTrapezoidRatioSlider: SliderNoParse = new SliderNoParse(input({style: "margin: 0;", type: "range", min: Config.LFOTrapezoidRatioMin, max: Config.LFOTrapezoidRatioMax, value: "1", step: "0.1"}), this._doc, (oldValue: number, newValue: number, forceUpdate: boolean = false) => new ChangeDrumsetLFOEnvelopeTrapezoidRatio(this._doc, i, oldValue, newValue, forceUpdate), false);
 			const LFOTrapezoidRatioRow: HTMLDivElement = div({class: "selectRow dropFader"}, span({ class: "tip", onclick: () => this._openPrompt("LFOTrapezoidRatio") }, span(_.LFOTrapezoidRatioLabel)), LFOTrapezoidRatioSlider.container);
+            const LFOStepAmountSlider: SliderNoParse = new SliderNoParse(input({ style: "margin: 0;", type: "range", min: "1", max: Config.LFOStairsStepAmountMax, value: "4", step: "1" }), this._doc, (oldValue: number, newValue: number, forceUpdate: boolean = false) => new ChangeDrumsetLFOEnvelopeStairsStepAmount(this._doc, i, oldValue, newValue, forceUpdate), false);
+            const LFOStepAmountInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "drumsetStairsLFOStepAmountInputBox", type: "number", step: "1", min: "1", max: Config.LFOStairsStepAmountMax, value: "4"});
+			const LFOStepAmountRow: HTMLDivElement = div({class: "selectRow dropFader"}, div({},
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("LFOStepAmount")}, span(_.LFOStairsStepAmountLabel)),
+				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, LFOStepAmountInputBox),
+			), LFOStepAmountSlider.container);
             const envelopeCopyButton: HTMLButtonElement = button({style: "flex: 3; margin-right: 0.3em;", onclick: () => this._copyDrumsetEnvelopeSettings(i)}, 
 				// Copy icon:
 				SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 20%; top: 37%; margin-top: -0.75em; pointer-events: none;", width: "2em", height: "2em", viewBox: "-5 -21 26 26" }, [
@@ -2248,7 +2253,7 @@ export class SongEditor {
 				]),
 			);
 			const envelopeButtonContainer: HTMLDivElement = div({ class: "selectRow", style: "padding-top: 1px; margin-bottom: 2px; display: flex;"}, envelopeCopyButton, envelopePasteButton, envelopeMoveUpButton, envelopeMoveDownButton);
-            const drumsetEnvelopeDropdownGroup: HTMLDivElement = div({class: "editor-controls", style: "display: none;"}, envelopeButtonContainer, plotterTimeRangeRow, envelopePlotterRow, LFOShapeRow, LFORadioButtonsRow, LFOAccelerationRow, LFOPulseWidthRow, LFOTrapezoidRatioRow, stepAmountRow, envelopeSpeedRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, mirrorAmountRow, measurementTypeRow, envelopeDelayRow, envelopePhaseRow);
+            const drumsetEnvelopeDropdownGroup: HTMLDivElement = div({class: "editor-controls", style: "display: none;"}, envelopeButtonContainer, plotterTimeRangeRow, envelopePlotterRow, LFOShapeRow, LFORadioButtonsRow, LFOAccelerationRow, LFOPulseWidthRow, LFOTrapezoidRatioRow, LFOStepAmountRow, envelopeSpeedRow, discreteEnvelopeRow, lowerBoundRow, upperBoundRow, mirrorAmountRow, measurementTypeRow, envelopeDelayRow, envelopePhaseRow);
             const drumsetEnvelopeDropdown: HTMLButtonElement = button({ style: "margin-left: 0.6em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.DrumsetEnv, i) }, "▼");
             envelopeSelect.addEventListener("change", () => {
                 this._doc.record(new ChangeDrumsetEnvelope(this._doc, i, envelopeSelect.selectedIndex));
@@ -2266,7 +2271,6 @@ export class SongEditor {
             discreteEnvelopeToggle.addEventListener("input", () => { pseudoChange(new ChangeDrumsetDiscreteEnvelope(this._doc, i, discreteEnvelopeToggle.checked))});
             lowerBoundInputBox.addEventListener("input", () => { pseudoChange(new ChangeDrumsetLowerBound(this._doc, i, instrument.drumsetEnvelopes[i].lowerBound, Math.min(Config.lowerBoundMax, Math.max(Config.lowerBoundMin, +lowerBoundInputBox.value))))});
             upperBoundInputBox.addEventListener("input", () => { pseudoChange(new ChangeDrumsetUpperBound(this._doc, i, instrument.drumsetEnvelopes[i].upperBound, Math.min(Config.upperBoundMax, Math.max(Config.upperBoundMin, +upperBoundInputBox.value))))});
-            stepAmountInputBox.addEventListener("input", () => { pseudoChange(new ChangeDrumsetStairsStepAmount(this._doc, i, instrument.drumsetEnvelopes[i].stepAmount, Math.min(Config.stairsStepAmountMax, Math.max(1, +stepAmountInputBox.value))))});
             mirrorAmountInputBox.addEventListener("input", () => { pseudoChange(new ChangeDrumsetClapMirrorAmount(this._doc, i, instrument.drumsetEnvelopes[i].mirrorAmount, Math.min(Config.clapMirrorsMax, Math.max(1, +mirrorAmountInputBox.value))))});
             envelopeDelayInputBox.addEventListener("input", () => { pseudoChange(new ChangeDrumsetEnvelopeDelay(this._doc, i, instrument.drumsetEnvelopes[i].delay, Math.min(Config.envelopeDelayMax, Math.max(0, +envelopeDelayInputBox.value))))});
             envelopePhaseInputBox.addEventListener("input", () => { pseudoChange(new ChangeDrumsetEnvelopePosition(this._doc, i, instrument.drumsetEnvelopes[i].phase, Math.min(Config.envelopePhaseMax, Math.max(0, +envelopePhaseInputBox.value))))});
@@ -2274,12 +2278,12 @@ export class SongEditor {
             LFOEnableAccelerationToggle.addEventListener("input", () => { pseudoChange(new ChangeDrumsetEnvelopeAccelerationEnabled(this._doc, i, LFOEnableAccelerationToggle.checked))});
             LFOLoopOnceToggle.addEventListener("input", () => { pseudoChange(new ChangeDrumsetEnvelopeLooping(this._doc, i, LFOLoopOnceToggle.checked))});
             LFOIgnoranceToggle.addEventListener("input", () => { pseudoChange(new ChangeDrumsetEnvelopeIgnorance(this._doc, i, LFOIgnoranceToggle.checked))});
+            LFOStepAmountInputBox.addEventListener("input", () => { pseudoChange(new ChangeDrumsetLFOEnvelopeStairsStepAmount(this._doc, i, instrument.drumsetEnvelopes[i].LFOSettings.LFOStepAmount, Math.min(Config.LFOStairsStepAmountMax, Math.max(1, +LFOStepAmountInputBox.value))))});
             plotterTimeRangeInputBox.addEventListener("input", () => { this._changeDrumsetTimeRange(i, envelopePlotter.range, +(plotterTimeRangeInputBox.value))});
             envelopeSpeedInputBox.addEventListener("change", () => { if (lastChange != null) this._doc.record(lastChange)});
             discreteEnvelopeToggle.addEventListener("change", () => { if (lastChange != null) this._doc.record(lastChange)});
             lowerBoundInputBox.addEventListener("change", () => { if (lastChange != null) this._doc.record(lastChange)});
             upperBoundInputBox.addEventListener("change", () => { if (lastChange != null) this._doc.record(lastChange)});
-            stepAmountInputBox.addEventListener("change", () => { if (lastChange != null) this._doc.record(lastChange)});
             mirrorAmountInputBox.addEventListener("change", () => { if (lastChange != null) this._doc.record(lastChange)});
             envelopeDelayInputBox.addEventListener("change", () => { if (lastChange != null) this._doc.record(lastChange)});
             envelopePhaseInputBox.addEventListener("change", () => { if (lastChange != null) this._doc.record(lastChange)});
@@ -2287,6 +2291,7 @@ export class SongEditor {
             LFOEnableAccelerationToggle.addEventListener("change", () => { if (lastChange != null) this._doc.record(lastChange)});
             LFOLoopOnceToggle.addEventListener("change", () => { if (lastChange != null) this._doc.record(lastChange)});
             LFOIgnoranceToggle.addEventListener("change", () => { if (lastChange != null) this._doc.record(lastChange)});
+            LFOStepAmountInputBox.addEventListener("change", () => { if (lastChange != null) this._doc.record(lastChange)});
 
             this._drumsetSpectrumEditors[i] = spectrumEditor;
             this._drumsetEnvelopeSelects[i] = envelopeSelect;
@@ -2306,9 +2311,6 @@ export class SongEditor {
             this._drumsetUpperBoundSliders[i] = upperBoundSlider;
             this._drumsetUpperBoundInputBoxes[i] = upperBoundInputBox;
             this._drumsetUpperBoundRows[i] = upperBoundRow;
-            this._drumsetStepAmountSliders[i] = stepAmountSlider;
-            this._drumsetStepAmountInputBoxes[i] = stepAmountInputBox;
-            this._drumsetStepAmountRows[i] = stepAmountRow;
             this._drumsetEnvelopeDelaySliders[i] = envelopeDelaySlider;
             this._drumsetEnvelopeDelayInputBoxes[i] = envelopeDelayInputBox;
             this._drumsetEnvelopeDelayRows[i] = envelopeDelayRow;
@@ -2339,6 +2341,9 @@ export class SongEditor {
 			this._drumsetLFOPulseWidthRows[i] = LFOPulseWidthRow;
 			this._drumsetLFOTrapezoidRatioSliders[i] = LFOTrapezoidRatioSlider;
 			this._drumsetLFOTrapezoidRatioRows[i] = LFOTrapezoidRatioRow;
+            this._drumsetLFOStepAmountSliders[i] = LFOStepAmountSlider;
+            this._drumsetLFOStepAmountInputBoxes[i] = LFOStepAmountInputBox;
+            this._drumsetLFOStepAmountRows[i] = LFOStepAmountRow;
             this._drumsetEnvelopeDropdownGroups[i] = drumsetEnvelopeDropdownGroup;
             this._drumsetEnvelopeDropdowns[i] = drumsetEnvelopeDropdown;
             this._openDrumsetEnvDropdowns[i] = false;
@@ -3262,8 +3267,6 @@ export class SongEditor {
                     this._drumsetLowerBoundInputBoxes[i].value = String(clamp(Config.lowerBoundMin, Config.lowerBoundMax+1, drumEnv.lowerBound));
                     this._drumsetUpperBoundSliders[i].updateValue(drumEnv.upperBound);
                     this._drumsetUpperBoundInputBoxes[i].value = String(clamp(Config.upperBoundMin, Config.upperBoundMax+1, drumEnv.upperBound));
-                    this._drumsetStepAmountSliders[i].updateValue(drumEnv.stepAmount);
-                    this._drumsetStepAmountInputBoxes[i].value = String(clamp(0, Config.stairsStepAmountMax+1, drumEnv.stepAmount));
                     this._drumsetEnvelopeDelaySliders[i].updateValue(drumEnv.delay);
                     this._drumsetEnvelopeDelayInputBoxes[i].value = String(clamp(0, Config.envelopeDelayMax+1, drumEnv.delay));
                     this._drumsetEnvelopePhaseSliders[i].updateValue(drumEnv.phase);
@@ -3281,6 +3284,8 @@ export class SongEditor {
                     this._drumsetLFOAccelerationInputBoxes[i].value = String(clamp(Config.LFOAccelerationMin, Config.LFOAccelerationMax+1, drumEnv.LFOSettings.LFOAcceleration));
                     this._drumsetLFOPulseWidthSliders[i].updateValue(drumEnv.LFOSettings.LFOPulseWidth);
                     this._drumsetLFOTrapezoidRatioSliders[i].updateValue(drumEnv.LFOSettings.LFOTrapezoidRatio);
+                    this._drumsetLFOStepAmountSliders[i].updateValue(drumEnv.LFOSettings.LFOStepAmount);
+                    this._drumsetLFOStepAmountInputBoxes[i].value = String(clamp(0, Config.LFOStairsStepAmountMax+1, drumEnv.LFOSettings.LFOStepAmount));
                     this._drumsetLFOEnableAccelerationToggles[i].checked = drumEnv.LFOSettings.LFOAllowAccelerate ? true: false;
                     this._drumsetLFOLoopOnceToggles[i].checked = drumEnv.LFOSettings.LFOLoopOnce ? true: false;
                     this._drumsetLFOIgnoranceToggles[i].checked = drumEnv.LFOSettings.LFOIgnorance ? true: false;
@@ -3348,20 +3353,20 @@ export class SongEditor {
                         } else {
                             this._drumsetLFOAccelerationRows[i].style.display = "none";
                         }
-                        if (drumEnv.LFOSettings.LFOShape == 2) { 
+                        if (drumEnv.LFOSettings.LFOShape == LFOShapes.Pulses) { 
                             this._drumsetLFOPulseWidthRows[i].style.display = "";
                         } else {
                             this._drumsetLFOPulseWidthRows[i].style.display = "none";
                         }
-                        if (drumEnv.LFOSettings.LFOShape == 4) { 
+                        if (drumEnv.LFOSettings.LFOShape == LFOShapes.Trapezoid) { 
                             this._drumsetLFOTrapezoidRatioRows[i].style.display = "";
                         } else {
                             this._drumsetLFOTrapezoidRatioRows[i].style.display = "none";
                         }
-                        if (drumEnv.LFOSettings.LFOShape == 5) { 
-                            this._drumsetStepAmountRows[i].style.display = "";
+                        if (drumEnv.LFOSettings.LFOShape == LFOShapes.Stairs) { 
+                            this._drumsetLFOStepAmountRows[i].style.display = "";
                         } else {
-                            this._drumsetStepAmountRows[i].style.display = "none";
+                            this._drumsetLFOStepAmountRows[i].style.display = "none";
                         }
                     } else {
                         this._drumsetLFOShapeRows[i].style.display = "none";
@@ -3369,7 +3374,7 @@ export class SongEditor {
                         this._drumsetLFOAccelerationRows[i].style.display = "none";
                         this._drumsetLFOPulseWidthRows[i].style.display = "none";
                         this._drumsetLFOTrapezoidRatioRows[i].style.display = "none";
-                        this._drumsetStepAmountRows[i].style.display = "none";
+                        this._drumsetLFOStepAmountRows[i].style.display = "none";
                     }
                 }
             } else {
@@ -4787,11 +4792,11 @@ export class SongEditor {
             || this._drumsetEnvelopeSpeedInputBoxes.find(x => x == document.activeElement)
             || this._drumsetLowerBoundInputBoxes.find(x => x == document.activeElement)
             || this._drumsetUpperBoundInputBoxes.find(x => x == document.activeElement)
-            || this._drumsetStepAmountInputBoxes.find(x => x == document.activeElement)
             || this._drumsetEnvelopeDelayInputBoxes.find(x => x == document.activeElement)
             || this._drumsetEnvelopePhaseInputBoxes.find(x => x == document.activeElement)
             || this._drumsetMirrorAmountInputBoxes.find(x => x == document.activeElement)
             || this._drumsetLFOAccelerationInputBoxes.find(x => x == document.activeElement)
+            || this._drumsetLFOStepAmountInputBoxes.find(x => x == document.activeElement)
             || this._drumsetPlotterTimeRangeInputBoxes.find(x => x == document.activeElement)
             ){
             // Enter/esc returns focus to form

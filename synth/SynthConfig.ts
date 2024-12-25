@@ -712,7 +712,6 @@ export class Config {
     public static readonly lowerBoundMax:              number = 8;
     public static readonly upperBoundMin:              number = 0;
     public static readonly upperBoundMax:              number = 8;
-    public static readonly stairsStepAmountMax:        number = 64;
     public static readonly envelopeDelayMax:           number = 32;
     public static readonly envelopePhaseMax:           number = this.envelopeDelayMax * 2;
     public static readonly clapMirrorsMax:             number = 32;
@@ -721,6 +720,7 @@ export class Config {
     public static readonly LFOPulseWidthDefault:       number = 4;
     public static readonly LFOTrapezoidRatioMin:       number = 0.5;
     public static readonly LFOTrapezoidRatioMax:       number = 4;
+    public static readonly LFOStairsStepAmountMax:     number = 64;
     public static readonly customEnvGridMinWidth:      number = 4;
     public static readonly customEnvGridMaxWidth:      number = 32;
     public static readonly customEnvGridDefaultWidth:  number = 12;
@@ -914,18 +914,23 @@ export class Config {
     ]);
 
     public static readonly operatorWaves: DictionaryArray<OperatorWave> = toNameMap([
-        { name: "sine",        samples: Config.sineWave           },
-        { name: "triangle",    samples: generateTriWave()         },
-        { name: "sawtooth",    samples: generateSawWave()         },
-        { name: "pulse width", samples: generateSquareWave()      },
-        { name: "ramp",        samples: generateSawWave(true)     },
-        { name: "trapezoid",   samples: generateTrapezoidWave(2)  },
-        { name: "clang",       samples: generateClangNoise()      },
-        { name: "metal",       samples: generateMetalNoise()      },
-        { name: "rounded",     samples: generateRoundedSineWave() },
-        { name: "secant",      samples: generateSecantWave()      },
-        { name: "double sine", samples: generateDoubleSineWave()  },
-        { name: "white noise", samples: generateWhiteNoise()      },
+        { name: "sine",              samples: Config.sineWave           },
+        { name: "triangle",          samples: generateTriWave()         },
+        { name: "sawtooth",          samples: generateSawWave()         },
+        { name: "pulse width",       samples: generateSquareWave()      },
+        { name: "ramp",              samples: generateSawWave(true)     },
+        { name: "trapezoid",         samples: generateTrapezoidWave(2)  },
+        { name: "clang",             samples: generateClangNoise()      },
+        { name: "metallic",          samples: generateMetallicNoise()   },
+        { name: "quasi-sine",        samples: generateQuasiSineWave()   },
+        { name: "secant",            samples: generateSecantWave()      },
+        { name: "absine",            samples: generateAbsineWave()      },
+        { name: "semi-sine",         samples: generateSemiSineWave()    },
+        { name: "camelsine",         samples: generateCamelsineWave()   },
+        { name: "pulsine",           samples: generatePulsineWave()     },
+        { name: "shark sine",        samples: generateSharkSineWave()   },
+        { name: "logarithmic saw",   samples: generateLogSawWave()      },
+        { name: "white noise",       samples: generateWhiteNoise()      },
     ]);
 
     // Kept for compatibility.
@@ -1507,7 +1512,7 @@ function perlinNoise(p: number): number {
 function generateSineWave(): Float32Array {
     const wave: Float32Array = new Float32Array(Config.sineWaveLength + 1);
     for (let i: number = 0; i < Config.sineWaveLength + 1; i++) {
-        wave[i] = Math.sin(i * Math.PI * 2.0 / Config.sineWaveLength);
+        wave[i] = Math.sin(i * Math.PI * 2 / Config.sineWaveLength);
     }
     return wave;
 }
@@ -1515,7 +1520,7 @@ function generateSineWave(): Float32Array {
 function generateTriWave(): Float32Array {
     const wave: Float32Array = new Float32Array(Config.sineWaveLength + 1);
     for (let i: number = 0; i < Config.sineWaveLength + 1; i++) {
-        wave[i] = Math.asin(Math.sin(i * Math.PI * 2.0 / Config.sineWaveLength)) / (Math.PI / 2);
+        wave[i] = Math.asin(Math.sin(i * Math.PI * 2 / Config.sineWaveLength)) / (Math.PI / 2);
     }
     return wave;
 }
@@ -1523,7 +1528,7 @@ function generateTriWave(): Float32Array {
 function generateTrapezoidWave(drive: number = 2): Float32Array {
     const wave: Float32Array = new Float32Array(Config.sineWaveLength + 1);
     for (let i: number = 0; i < Config.sineWaveLength + 1; i++) {
-        wave[i] = Math.max(-1.0, Math.min(1.0, Math.asin(Math.sin(i * Math.PI * 2.0 / Config.sineWaveLength)) * drive));
+        wave[i] = Math.max(-1, Math.min(1, Math.asin(Math.sin(i * Math.PI * 2 / Config.sineWaveLength)) * drive));
     }
     return wave;
 }
@@ -1541,7 +1546,7 @@ function generateSquareWave(phaseWidth: number = 0): Float32Array {
 function generateSawWave(inverse: boolean = false): Float32Array {
     const wave: Float32Array = new Float32Array(Config.sineWaveLength + 1);
     for (let i: number = 0; i < Config.sineWaveLength + 1; i++) {
-        wave[i] = ((i + (Config.sineWaveLength / 4.0)) * 2.0 / Config.sineWaveLength) % 2 - 1;
+        wave[i] = ((i + (Config.sineWaveLength / 4)) * 2 / Config.sineWaveLength) % 2 - 1;
         wave[i] = inverse ? -wave[i] : wave[i];
     }
     return wave;
@@ -1550,11 +1555,8 @@ function generateSawWave(inverse: boolean = false): Float32Array {
 function generateClangNoise() { 
     let drumBuffer: number = 1;
     const wave = new Float32Array(Config.sineWaveLength + 1);
-    for (let i = 0; i < 256 + 1; i++) {
-        // Hold the wave in place to stretch it and make it sound right.
-        for (let j = 0; j < 128; j++) {
-            wave[i * 128 + j] = (drumBuffer & 1) * 2.0 - 1.0;
-        }
+    for (let i = 0; i < Config.sineWaveLength + 1; i++) {
+        wave[i] = (drumBuffer & 1) * 2 - 1.0;
         let newBuffer: number = drumBuffer >> 1;
         if (((drumBuffer + newBuffer) & 1) == 1) {
             newBuffer += 2 << 14;
@@ -1564,12 +1566,12 @@ function generateClangNoise() {
     return wave;
 }
 
-function generateMetalNoise() {
+function generateMetallicNoise() {
     const wave: Float32Array = new Float32Array(Config.sineWaveLength + 1);
     for (let i: number = 0; i < Config.sineWaveLength + 1; i++) {
         let drumBuffer = 1;
         for (let j = 0; j < Config.sineWaveLength; j++) {
-            wave[j] = (drumBuffer & 1) / 2.0 - 1;
+            wave[j] = (drumBuffer & 1) * 1.25 - 0.33;
             let newBuffer = drumBuffer >> 1;
             if (((drumBuffer + newBuffer) & 1) == 1) {
                 newBuffer -= 10 << 2;
@@ -1580,10 +1582,10 @@ function generateMetalNoise() {
     return wave;
 }
 
-function generateRoundedSineWave() {
+function generateQuasiSineWave() {
     const wave = new Float32Array(Config.sineWaveLength + 1);
     for (let i = 0; i < Config.sineWaveLength + 1; i++) {
-        wave[i] = Math.round(Math.sin(i * Math.PI * 2.0 / Config.sineWaveLength));
+        wave[i] = Math.round(Math.sin(i * Math.PI * 2 / Config.sineWaveLength));
     }
     return wave;
 }
@@ -1591,15 +1593,57 @@ function generateRoundedSineWave() {
 function generateSecantWave() {
     const wave: Float32Array = new Float32Array(Config.sineWaveLength + 1);
     for (let i = 0; i < Config.sineWaveLength + 1; i++) {
-        wave[i] = 1 - (Math.sin((i / Config.sineWaveLength) * Math.PI * 2.0) % 2 + 2) % 2;
+        wave[i] = 1 - (Math.sin((i / Config.sineWaveLength) * Math.PI * 2) % 2 + 2) % 2;
     }
     return wave;
 }
 
-function generateDoubleSineWave() {
+function generateAbsineWave() {
     const wave: Float32Array = new Float32Array(Config.sineWaveLength + 1);
     for (let i: number = 0; i < Config.sineWaveLength + 1; i++) {
-        wave[i] = Math.abs(Math.sin(i * Math.PI * 2.0 / Config.sineWaveLength)) * 2 - 1;
+        wave[i] = Math.abs(Math.sin(i * Math.PI / Config.sineWaveLength)) * 2 - 1;
+    }
+    return wave;
+}
+
+function generateSemiSineWave(): Float32Array {
+    const wave: Float32Array = new Float32Array(Config.sineWaveLength + 1);
+    for (let i: number = 0; i < Config.sineWaveLength + 1; i++) {
+        wave[i] = Math.max(Math.sin(i * Math.PI * 2 / Config.sineWaveLength), 0) * 2 - 1;
+    }
+    return wave;
+}
+
+function generateCamelsineWave(): Float32Array {
+    const wave: Float32Array = new Float32Array(Config.sineWaveLength + 1);
+    for (let i: number = 0; i < Config.sineWaveLength + 1; i++) {
+        wave[i] = Math.max(Math.cos((2 * i * Math.PI + (Math.PI / 2) * 3) / Config.sineWaveLength) * Math.abs(Math.sin((Math.PI * i * 2 + (Math.PI / 2)) / Config.sineWaveLength)), 0) * 4 - 1;
+    }
+    return wave;
+}
+
+function generatePulsineWave(): Float32Array {
+    const wave: Float32Array = new Float32Array(Config.sineWaveLength + 1);
+    for (let i: number = 0; i < Config.sineWaveLength + 1; i++) {
+        wave[i] = Math.cos((2 * i * Math.PI) / Config.sineWaveLength) * Math.abs(Math.sin((2 * i * Math.PI) / Config.sineWaveLength)) + (0.5 * Math.sin((4 * i * Math.PI) / Config.sineWaveLength));
+    }
+    return wave;
+}
+
+function generateSharkSineWave(): Float32Array {
+    const wave: Float32Array = new Float32Array(Config.sineWaveLength + 1);
+    for (let i: number = 0; i < Config.sineWaveLength + 1; i++) {
+        wave[i] = Math.abs(Math.sin(i * Math.PI / Config.sineWaveLength)) * Math.round(mod((i + 0.5) / Config.sineWaveLength, 1)) * 2 - 1;
+    }
+    return wave;
+}
+
+function generateLogSawWave(): Float32Array {
+    const wave: Float32Array = new Float32Array(Config.sineWaveLength + 1);
+    for (let i: number = 0; i < Config.sineWaveLength + 1; i++) {
+        let l1: number = mod(Math.PI * 2 * i / Config.sineWaveLength, 2 * Math.PI);
+        let l2: number = Math.cos(l1 / 2) < 0 ? 1 : -1;
+        wave[i] = l2 + Math.cos((l1 + Math.PI) / 2) * l2;
     }
     return wave;
 }
@@ -1607,7 +1651,7 @@ function generateDoubleSineWave() {
 function generateWhiteNoise() {
     const wave: Float32Array = new Float32Array(Config.sineWaveLength + 1);
     for (let i: number = 0; i < Config.sineWaveLength + 1; i++) {
-        wave[i] = Math.random() * 2.0 - 1.0;
+        wave[i] = Math.random() * 2 - 1;
     }
     return wave;
 }

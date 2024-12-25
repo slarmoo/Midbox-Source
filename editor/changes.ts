@@ -1625,9 +1625,14 @@ export class ChangeRandomGeneratedInstrument extends Change {
                             { item: "trapezoid", weight: 3 },
                             { item: "clang", weight: 3},
                             { item: "metal", weight: 3},
-                            { item: "rounded", weight: 3},
+                            { item: "quasi-sine", weight: 3},
                             { item: "secant", weight: 3},
-                            { item: "double sine", weight: 3},
+                            { item: "absine", weight: 3},
+                            { item: "semi-sine", weight: 3},
+                            { item: "camelsine", weight: 3},
+                            { item: "pulsine", weight: 3},
+                            { item: "shark sine", weight: 3},
+                            { item: "logarithmic saw", weight: 3},
                             { item: "white noise", weight: 3},
                         ])].index;
                         if (instrument.operators[i].waveform == 3/*"pulse width"*/) {
@@ -1694,9 +1699,14 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "trapezoid", weight: 3 },
                                 { item: "clang", weight: 3 },
                                 { item: "metal", weight: 3 },
-                                { item: "rounded", weight: 3},
+                                { item: "quasi-sine", weight: 3},
                                 { item: "secant", weight: 3},
-                                { item: "double sine", weight: 3},
+                                { item: "absine", weight: 3},
+                                { item: "semi-sine", weight: 3},
+                                { item: "camelsine", weight: 3},
+                                { item: "pulsine", weight: 3},
+                                { item: "shark sine", weight: 3},
+                                { item: "logarithmic saw", weight: 3},
                                 { item: "white noise", weight: 3},
                             ])].index;
                             if (instrument.operators[i].waveform == 3) {
@@ -2546,32 +2556,6 @@ export class ChangeDrumsetUpperBound extends Change {
     }
 }
 
-export class ChangeStairsStepAmount extends Change {
-    constructor(doc: SongDocument, envelopeIndex: number, oldValue: number, newValue: number) {
-        super();
-        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        if (oldValue != newValue) {
-            instrument.envelopes[envelopeIndex].stepAmount = newValue;
-            instrument.preset = instrument.type;
-            doc.notifier.changed();
-            this._didSomething();
-        }
-    }
-}
-
-export class ChangeDrumsetStairsStepAmount extends Change {
-    constructor(doc: SongDocument, drumIndex: number, oldValue: number, newValue: number, forceUpdate: boolean = false) {
-        super();
-        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        if (forceUpdate || oldValue != newValue) {
-            instrument.drumsetEnvelopes[drumIndex].stepAmount = newValue;
-            instrument.preset = instrument.type;
-            doc.notifier.changed();
-            this._didSomething();
-        }
-    }
-}
-
 export class ChangeEnvelopeDelay extends Change {
     constructor(doc: SongDocument, envelopeIndex: number, oldValue: number, newValue: number) {
         super();
@@ -2947,6 +2931,32 @@ export class ChangeDrumsetLFOEnvelopeTrapezoidRatio extends Change {
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
         if (forceUpdate || oldValue != newValue) {
             instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOTrapezoidRatio = newValue;
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
+export class ChangeLFOEnvelopeStairsStepAmount extends Change {
+    constructor(doc: SongDocument, envelopeIndex: number, oldValue: number, newValue: number) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        if (oldValue != newValue) {
+            instrument.envelopes[envelopeIndex].LFOSettings.LFOStepAmount = newValue;
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        }
+    }
+}
+
+export class ChangeDrumsetLFOEnvelopeStairsStepAmount extends Change {
+    constructor(doc: SongDocument, drumIndex: number, oldValue: number, newValue: number, forceUpdate: boolean = false) {
+        super();
+        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
+        if (forceUpdate || oldValue != newValue) {
+            instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOStepAmount = newValue;
             instrument.preset = instrument.type;
             doc.notifier.changed();
             this._didSomething();
@@ -5940,20 +5950,20 @@ export class RandomEnvelope extends Change {
         }
         if (randomEnvelope == Config.envelopes.dictionary["LFO"].index) {
             instEnv.LFOSettings.LFOShape = Math.floor(Math.random() * LFOShapes.length);
-            if (instEnv.LFOSettings.LFOShape == 2) {
+            if (instEnv.LFOSettings.LFOShape == LFOShapes.Pulses) {
                 instEnv.LFOSettings.LFOPulseWidth = Math.floor(Math.random() * 20);
             } else {
                 instEnv.LFOSettings.LFOPulseWidth = Config.LFOPulseWidthDefault;
             }
-            if (instEnv.LFOSettings.LFOShape == 4) {
+            if (instEnv.LFOSettings.LFOShape == LFOShapes.Trapezoid) {
                 instEnv.LFOSettings.LFOTrapezoidRatio = Math.floor(Math.random() * Config.LFOTrapezoidRatioMax - Config.LFOTrapezoidRatioMin) + Config.LFOTrapezoidRatioMin;
             } else {
                 instEnv.LFOSettings.LFOTrapezoidRatio = 1;
             }
-            if (instEnv.LFOSettings.LFOShape == 5) {
-                instEnv.stepAmount = randomStepAmounts[Math.floor(Math.random() * randomStepAmounts.length)];
+            if (instEnv.LFOSettings.LFOShape == LFOShapes.Stairs) {
+                instEnv.LFOSettings.LFOStepAmount = randomStepAmounts[Math.floor(Math.random() * randomStepAmounts.length)];
             } else {
-                instEnv.stepAmount = 4;
+                instEnv.LFOSettings.LFOStepAmount = 4;
             }
             let spunRandomRadioButton: number = randomLFORadioButtons[Math.floor(Math.random() * randomLFORadioButtons.length)];
             if (spunRandomRadioButton == 1) {
@@ -5999,7 +6009,6 @@ export class ChangeRemoveEnvelope extends Change {
             instEnv.discrete = nextEnv.discrete;
             instEnv.lowerBound = nextEnv.lowerBound;
             instEnv.upperBound = nextEnv.upperBound;
-            instEnv.stepAmount = nextEnv.stepAmount;
             instEnv.delay = nextEnv.delay;
             instEnv.pitchStart = nextEnv.pitchStart;
             instEnv.pitchEnd = nextEnv.pitchEnd;
@@ -6065,7 +6074,6 @@ export class ChangeEnvelopeOrder extends Change {
         let env1Discrete = instEnv.discrete;
         let env1LowerBound = instEnv.lowerBound;
         let env1UpperBound = instEnv.upperBound;
-        let env1StepAmount = instEnv.stepAmount;
         let env1Delay = instEnv.delay;
         let env1PitchStart = instEnv.pitchStart;
         let env1PitchEnd = instEnv.pitchEnd;
@@ -6084,7 +6092,6 @@ export class ChangeEnvelopeOrder extends Change {
             let env2Discrete = envAbove.discrete;
             let env2LowerBound = envAbove.lowerBound;
             let env2UpperBound = envAbove.upperBound;
-            let env2StepAmount = envAbove.stepAmount;
             let env2Delay = envAbove.delay;
             let env2PitchStart = envAbove.pitchStart;
             let env2PitchEnd = envAbove.pitchEnd;
@@ -6102,7 +6109,6 @@ export class ChangeEnvelopeOrder extends Change {
             envAbove.discrete = env1Discrete;
             envAbove.lowerBound = env1LowerBound;
             envAbove.upperBound = env1UpperBound;
-            envAbove.stepAmount = env1StepAmount;
             envAbove.delay = env1Delay;
             envAbove.pitchStart = env1PitchStart;
             envAbove.pitchEnd = env1PitchEnd;
@@ -6120,7 +6126,6 @@ export class ChangeEnvelopeOrder extends Change {
             instEnv.discrete = env2Discrete;
             instEnv.lowerBound = env2LowerBound;
             instEnv.upperBound = env2UpperBound;
-            instEnv.stepAmount = env2StepAmount;
             instEnv.delay = env2Delay;
             instEnv.pitchStart = env2PitchStart;
             instEnv.pitchEnd = env2PitchEnd;
@@ -6138,7 +6143,6 @@ export class ChangeEnvelopeOrder extends Change {
             let env2Discrete = envBelow.discrete;
             let env2LowerBound = envBelow.lowerBound;
             let env2UpperBound = envBelow.upperBound;
-            let env2StepAmount = envBelow.stepAmount;
             let env2Delay = envBelow.delay;
             let env2PitchStart = envBelow.pitchStart;
             let env2PitchEnd = envBelow.pitchEnd;
@@ -6156,7 +6160,6 @@ export class ChangeEnvelopeOrder extends Change {
             envBelow.discrete = env1Discrete;
             envBelow.lowerBound = env1LowerBound;
             envBelow.upperBound = env1UpperBound;
-            envBelow.stepAmount = env1StepAmount;
             envBelow.delay = env1Delay;
             envBelow.pitchStart = env1PitchStart;
             envBelow.pitchEnd = env1PitchEnd;
@@ -6174,7 +6177,6 @@ export class ChangeEnvelopeOrder extends Change {
             instEnv.discrete = env2Discrete;
             instEnv.lowerBound = env2LowerBound;
             instEnv.upperBound = env2UpperBound;
-            instEnv.stepAmount = env2StepAmount;
             instEnv.delay = env2Delay;
             instEnv.pitchStart = env2PitchStart;
             instEnv.pitchEnd = env2PitchEnd;
@@ -6208,7 +6210,6 @@ export class ChangeDrumsetEnvelopeOrder extends Change {
         let env1Discrete = drumEnv.discrete;
         let env1LowerBound = drumEnv.lowerBound;
         let env1UpperBound = drumEnv.upperBound;
-        let env1StepAmount = drumEnv.stepAmount;
         let env1Delay = drumEnv.delay;
         let env1Phase = drumEnv.phase;
         let env1MeasurementType = drumEnv.measurementType;
@@ -6221,7 +6222,6 @@ export class ChangeDrumsetEnvelopeOrder extends Change {
             let env2Discrete = envAbove.discrete;
             let env2LowerBound = envAbove.lowerBound;
             let env2UpperBound = envAbove.upperBound;
-            let env2StepAmount = envAbove.stepAmount;
             let env2Delay = envAbove.delay;
             let env2Phase = envAbove.phase;
             let env2MeasurementType = envAbove.measurementType;
@@ -6233,7 +6233,6 @@ export class ChangeDrumsetEnvelopeOrder extends Change {
             envAbove.discrete = env1Discrete;
             envAbove.lowerBound = env1LowerBound;
             envAbove.upperBound = env1UpperBound;
-            envAbove.stepAmount = env1StepAmount;
             envAbove.delay = env1Delay;
             envAbove.phase = env1Phase;
             envAbove.measurementType = env1MeasurementType;
@@ -6245,7 +6244,6 @@ export class ChangeDrumsetEnvelopeOrder extends Change {
             drumEnv.discrete = env2Discrete;
             drumEnv.lowerBound = env2LowerBound;
             drumEnv.upperBound = env2UpperBound;
-            drumEnv.stepAmount = env2StepAmount;
             drumEnv.delay = env2Delay;
             drumEnv.phase = env2Phase;
             drumEnv.measurementType = env2MeasurementType;
@@ -6257,7 +6255,6 @@ export class ChangeDrumsetEnvelopeOrder extends Change {
             let env2Discrete = envBelow.discrete;
             let env2LowerBound = envBelow.lowerBound;
             let env2UpperBound = envBelow.upperBound;
-            let env2StepAmount = envBelow.stepAmount;
             let env2Delay = envBelow.delay;
             let env2Phase = envBelow.phase;
             let env2MeasurementType = envBelow.measurementType;
@@ -6269,7 +6266,6 @@ export class ChangeDrumsetEnvelopeOrder extends Change {
             envBelow.discrete = env1Discrete;
             envBelow.lowerBound = env1LowerBound;
             envBelow.upperBound = env1UpperBound;
-            envBelow.stepAmount = env1StepAmount;
             envBelow.delay = env1Delay;
             envBelow.phase = env1Phase;
             envBelow.measurementType = env1MeasurementType;
@@ -6281,7 +6277,6 @@ export class ChangeDrumsetEnvelopeOrder extends Change {
             drumEnv.discrete = env2Discrete;
             drumEnv.lowerBound = env2LowerBound;
             drumEnv.upperBound = env2UpperBound;
-            drumEnv.stepAmount = env2StepAmount;
             drumEnv.delay = env2Delay;
             drumEnv.phase = env2Phase;
             drumEnv.measurementType = env2MeasurementType;
