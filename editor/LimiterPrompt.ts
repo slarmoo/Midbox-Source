@@ -7,7 +7,7 @@ import { ColorConfig } from "./ColorConfig";
 import { ChangeLimiterSettings } from "./changes";
 import { SongEditor } from "./SongEditor";
 import { prettyNumber } from "./EditorConfig";
-import { Localization as _ } from "./Localization";
+
 
 //namespace beepbox {
 const { button, div, h2, input } = HTML;
@@ -26,10 +26,10 @@ export class LimiterCanvas {
 	private readonly _label0: SVGTextElement = SVG.text({ x: "-1.5%", y: "148.5%", "pointer-events": "none", "font-size": "7pt", fill: "var(--secondary-text)" }, "0");
 	private readonly _label1: SVGTextElement = SVG.text({ x: "48.2%", y: "148.5%", "pointer-events": "none", "font-size": "7pt", fill: "var(--secondary-text)" }, "1");
 	private readonly _label2: SVGTextElement = SVG.text({ x: "98.2%", y: "148.5%", "pointer-events": "none", "font-size": "7pt", fill: "var(--secondary-text)" }, "2");
-	private readonly _inLabel: SVGTextElement = SVG.text({ x: "-7%", y: "113.5%", "pointer-events": "none", "font-size": "6pt", fill: "var(--secondary-text)" }, _.limiterSettingsPrompt1Label);
-	private readonly _outLabel: SVGTextElement = SVG.text({ x: "-11%", y: "131%", "pointer-events": "none", "font-size": "6pt", fill: "var(--secondary-text)" }, _.limiterSettingsPrompt2Label);
-	private readonly _xAxisLabel: SVGTextElement = SVG.text({ x: "42%", y: "172%", "pointer-events": "none", "font-size": "7pt", fill: "var(--primary-text)" }, _.limiterSettingsPrompt3Label);
-	private readonly _yAxisLabel: SVGTextElement = SVG.text({ x: "55.2%", y: "160%", "pointer-events": "none", "font-size": "7pt", transform: "rotate(-90 30,120)", fill: "var(--primary-text)" }, _.limiterSettingsPrompt4Label);
+	private readonly _inLabel: SVGTextElement = SVG.text({ x: "-7%", y: "113.5%", "pointer-events": "none", "font-size": "6pt", fill: "var(--secondary-text)" }, "In");
+	private readonly _outLabel: SVGTextElement = SVG.text({ x: "-11%", y: "131%", "pointer-events": "none", "font-size": "6pt", fill: "var(--secondary-text)" }, "Out");
+	private readonly _xAxisLabel: SVGTextElement = SVG.text({ x: "42%", y: "172%", "pointer-events": "none", "font-size": "7pt", fill: "var(--primary-text)" }, "Volume");
+	private readonly _yAxisLabel: SVGTextElement = SVG.text({ x: "55.2%", y: "160%", "pointer-events": "none", "font-size": "7pt", transform: "rotate(-90 30,120)", fill: "var(--primary-text)" }, "Gain");
 	private readonly _inVolumeBg: SVGRectElement = SVG.rect({ "pointer-events": "none", width: "100%", height: "6px", x: "0%", y: "105%", fill: ColorConfig.uiWidgetBackground });
 	private readonly _outVolumeBg: SVGRectElement = SVG.rect({ "pointer-events": "none", width: "100%", height: "6px", x: "0%", y: "120%", fill: ColorConfig.uiWidgetBackground });
 	private readonly _inVolumeBar: SVGRectElement = SVG.rect({ "pointer-events": "none", height: "6px", x: "0%", y: "105%", fill: "url('#volumeGrad')" });
@@ -181,13 +181,13 @@ export class LimiterPrompt implements Prompt {
 
 	public readonly _playButton: HTMLButtonElement = button({ style: "width: 55%;", type: "button" });
 
-	public readonly limitDecaySlider: HTMLInputElement = input({ title: _.limiterSettingsPrompt5Label, style: `width: 5em; flex-grow: 1; margin: 0;`, type: "range", min: "1", max: "30", value: "4", step: "1" });
-	public readonly limitRiseSlider: HTMLInputElement = input({ title: _.limiterSettingsPrompt6Label, style: `width: 5em; flex-grow: 1; margin: 0;`, type: "range", min: "2000", max: "10000", value: "4000", step: "250" });
-	public readonly compressionThresholdSlider: HTMLInputElement = input({ title: _.limiterSettingsPrompt7Label, style: `width: 100%; flex-grow: 1; margin: 0;`, type: "range", min: "0", max: "1.1", value: "1", step: "0.05" });
-	public readonly limitThresholdSlider: HTMLInputElement = input({ title: _.limiterSettingsPrompt8Label, style: `width: 100%; flex-grow: 1; margin: 0;`, type: "range", min: "0", max: "2", value: "1", step: "0.05" });
-	public readonly compressionRatioSlider: HTMLInputElement = input({ title: _.limiterSettingsPrompt9Label, style: `width: 100%; flex-grow: 1; margin: 0;`, type: "range", min: "0", max: "20", value: "10", step: "1" });
-	public readonly limitRatioSlider: HTMLInputElement = input({ title: _.limiterSettingsPrompt10Label, style: `width: 100%; flex-grow: 1; margin: 0;`, type: "range", min: "0", max: "20", value: "10", step: "1" });
-	public readonly masterGainSlider: HTMLInputElement = input({ title: _.limiterSettingsPrompt11Label, style: `width: 5em; flex-grow: 1; margin: 0;`, type: "range", min: "0", max: "5", value: "1", step: "0.02" });
+	public readonly limitDecaySlider: HTMLInputElement = input({ title: "Limit Decay", style: `width: 5em; flex-grow: 1; margin: 0;`, type: "range", min: "1", max: "30", value: "4", step: "1" });
+	public readonly limitRiseSlider: HTMLInputElement = input({ title: "Limit Rise", style: `width: 5em; flex-grow: 1; margin: 0;`, type: "range", min: "2000", max: "10000", value: "4000", step: "250" });
+	public readonly compressionThresholdSlider: HTMLInputElement = input({ title: "Compressor Threshold", style: `width: 100%; flex-grow: 1; margin: 0;`, type: "range", min: "0", max: "1.1", value: "1", step: "0.05" });
+	public readonly limitThresholdSlider: HTMLInputElement = input({ title: "Limiter Threshold", style: `width: 100%; flex-grow: 1; margin: 0;`, type: "range", min: "0", max: "2", value: "1", step: "0.05" });
+	public readonly compressionRatioSlider: HTMLInputElement = input({ title: "Compressor Ratio", style: `width: 100%; flex-grow: 1; margin: 0;`, type: "range", min: "0", max: "20", value: "10", step: "1" });
+	public readonly limitRatioSlider: HTMLInputElement = input({ title: "Limiter Ratio", style: `width: 100%; flex-grow: 1; margin: 0;`, type: "range", min: "0", max: "20", value: "10", step: "1" });
+	public readonly masterGainSlider: HTMLInputElement = input({ title: "Master Gain", style: `width: 5em; flex-grow: 1; margin: 0;`, type: "range", min: "0", max: "5", value: "1", step: "0.02" });
 
 	private startingLimitDecay: number;
 	private startingLimitRise: number;
@@ -203,11 +203,11 @@ export class LimiterPrompt implements Prompt {
 	private outVolumeHistoricCap: number = 0.0;
 
 	private readonly _cancelButton: HTMLButtonElement = button({ class: "cancelButton" });
-	private readonly _okayButton: HTMLButtonElement = button({ class: "okayButton", style: "width:45%;" }, _.confirmLabel);
-	private readonly _resetButton: HTMLButtonElement = button({ style: "width:45%;" }, _.resetLabel);
+	private readonly _okayButton: HTMLButtonElement = button({ class: "okayButton", style: "width:45%;" }, "Confirm");
+	private readonly _resetButton: HTMLButtonElement = button({ style: "width:45%;" }, "Reset");
 
 	public readonly container: HTMLDivElement = div({ class: "prompt noSelection", style: "width: 250px;" },
-		h2(_.limiterSettingsPrompt12Label),
+		h2("Limiter Options"),
 		div({ style: "display: flex; width: 55%; align-self: center; flex-direction: row; align-items: center; justify-content: center;" },
 			this._playButton,
 		),
@@ -219,15 +219,15 @@ export class LimiterPrompt implements Prompt {
 				""
 			),
 			div({ style: `text-align: center; width: 33%; margin-right: 4.5%; color: ${ColorConfig.textSelection};` },
-				_.limiterSettingsPrompt13Label
+				"Boost"
 			),
 			div({ style: `text-align: center; width: 33%; margin-right: 0%; color: ${ColorConfig.linkAccent};` },
-				_.limiterSettingsPrompt14Label
+				"Cutoff"
 			),
 		),
 		div({ style: "display: flex; flex-direction: row; align-items: center; height: 2em; margin-top: 0.5em; justify-content: flex-end;" },
 			div({ style: `text-align: right; width: 25%; margin-right: 4.5%; color: ${ColorConfig.primaryText};` },
-				_.limiterSettingsPrompt15Label
+				"Threshold:"
 			),
 			div({ style: `width: 33%; margin-right: 4.5%;` },
 				this.compressionThresholdSlider,
@@ -239,7 +239,7 @@ export class LimiterPrompt implements Prompt {
 		),
 		div({ style: "display: flex; flex-direction: row; align-items: center; height: 2em; justify-content: flex-end;" },
 			div({ style: `text-align: right; width: 25%; margin-right: 4.5%; color: ${ColorConfig.primaryText};` },
-				_.limiterSettingsPrompt16Label
+				"Ratio:"
 			),
 			div({ style: `width: 33%; margin-right: 4.5%;` },
 				this.compressionRatioSlider,
@@ -250,19 +250,19 @@ export class LimiterPrompt implements Prompt {
 		),
 		div({ style: "display: flex; flex-direction: row; align-items: center; height: 2em; justify-content: flex-end;" },
 			div({ style: `text-align: right; width: 8.5em; margin-right: 1em; color: ${ColorConfig.primaryText};` },
-				_.limiterSettingsPrompt17Label
+				"Limit Decay:"
 			),
 			this.limitDecaySlider,
 		),
 		div({ style: "display: flex; flex-direction: row; align-items: center; height: 2em; justify-content: flex-end;" },
 			div({ style: `text-align: right; width: 8.5em; margin-right: 1em; color: ${ColorConfig.primaryText};` },
-				_.limiterSettingsPrompt18Label
+				"Limit Rise:"
 			),
 			this.limitRiseSlider,
 		),
 		div({ style: "display: flex; flex-direction: row; align-items: center; height: 2em; justify-content: flex-end;" },
 			div({ style: `text-align: right; width: 8.5em; margin-right: 1em; color: ${ColorConfig.primaryText};` },
-				_.limiterSettingsPrompt19Label
+				"Master Gain:"
 			),
 			this.masterGainSlider,
 		),
@@ -348,13 +348,13 @@ export class LimiterPrompt implements Prompt {
 		if (this._doc.synth.playing) {
 			this._playButton.classList.remove("playButton");
 			this._playButton.classList.add("pauseButton");
-			this._playButton.title = _.pauseSpaceLabel;
-			this._playButton.innerText = _.pauseLabel;
+			this._playButton.title = "Pause (Space)";
+			this._playButton.innerText = "Pause";
 		} else {
 			this._playButton.classList.remove("pauseButton");
 			this._playButton.classList.add("playButton");
-			this._playButton.title = _.playSpaceLabel;
-			this._playButton.innerText = _.shortenedPlayLabel;
+			this._playButton.title = "Play (Space)";
+			this._playButton.innerText = "Play";
 		}
 	}
 

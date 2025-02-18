@@ -21,7 +21,6 @@ SOFTWARE.
 */
 
 import { clamp, mod } from "../editor/UsefulCodingStuff";
-import { Localization as _ } from "../editor/Localization";
 
 export interface Dictionary<T> {
     [K: string]: T;
@@ -99,6 +98,7 @@ export const enum DropdownID {
     Unison      = 7,
     PerEnvelope = 8,
     DrumsetEnv  = 9,
+    AdvSettings = 10,
 }
 
 export const enum EffectType {
@@ -114,9 +114,8 @@ export const enum EffectType {
     vibrato,
     transition,
     chord,
-    percussion,
     wavefold,
-    reshaper,
+    clipper,
     length,
 }
 
@@ -143,7 +142,8 @@ export const enum EnvelopeComputeIndex {
     freqCrusher,
     chorus,
     reverb,
-    reshapeAmount,
+    clipBounds,
+    wavefoldBounds,
     length,
 }
 
@@ -286,28 +286,28 @@ export class Config {
 
     public static readonly scales: DictionaryArray<Scale> = toNameMap([
 //        The keys in a scale:                                         C     C#|Db  D      D#|Eb  E      F      F#|Gb  G      Ab|G#  A      Bb|A#  B      
-        { name: "Free",              realName: _.scale1Label,  flags: [true, true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true ]}, 
-        { name: "Major",             realName: _.scale2Label,  flags: [true, false, true,  false, true,  true,  false, true,  false, true,  false, true ]},
-        { name: "Minor",             realName: _.scale3Label,  flags: [true, false, true,  true,  false, true,  false, true,  true,  false, true,  false]},
-        { name: "Mixolydian",        realName: _.scale4Label,  flags: [true, false, true,  false, true,  true,  false, true,  false, true,  true,  false]}, 
-        { name: "Lydian",            realName: _.scale5Label,  flags: [true, false, true,  false, true,  false, true,  true,  false, true,  false, true ]}, 
-        { name: "Dorian",            realName: _.scale6Label,  flags: [true, false, true,  true,  false, true,  false, true,  false, true,  true,  false]}, 
-        { name: "Phrygian",          realName: _.scale7Label,  flags: [true, true,  false, true,  false, true,  false, true,  true,  false, true,  false]}, 
-        { name: "Locrian",           realName: _.scale8Label,  flags: [true, true,  false, true,  false, true,  true,  false, true,  false, true,  false]}, 
-        { name: "Lydian Dominant",   realName: _.scale9Label,  flags: [true, false, true,  false, true,  false, true,  true,  false, true,  true,  false]}, 
-        { name: "Phrygian Dominant", realName: _.scale10Label, flags: [true, true,  false, false, true,  true,  false, true,  true,  false, true,  false]}, 
-        { name: "Harmonic Major",    realName: _.scale11Label, flags: [true, false, true,  false, true,  true,  false, true,  true,  false, false, true ]},
-        { name: "Harmonic Minor",    realName: _.scale12Label, flags: [true, false, true,  true,  false, true,  false, true,  true,  false, false, true ]},
-        { name: "Melodic Minor",     realName: _.scale13Label, flags: [true, false, true,  true,  false, true,  false, true,  false, true,  false, true ]},
-        { name: "Blues",             realName: _.scale14Label, flags: [true, false, false, true,  false, true,  true,  true,  false, false, true,  false]},
-        { name: "Altered",           realName: _.scale15Label, flags: [true, true,  false, true,  true,  false, true,  false, true,  false, true,  false]}, 
-        { name: "Major Pentatonic",  realName: _.scale16Label, flags: [true, false, true,  false, true,  false, false, true,  false, true,  false, false]},
-        { name: "Minor Pentatonic",  realName: _.scale17Label, flags: [true, false, false, true,  false, true,  false, true,  false, false, true,  false]}, 
-        { name: "Whole Tone",        realName: _.scale18Label, flags: [true, false, true,  false, true,  false, true,  false, true,  false, true,  false]}, 
-        { name: "Octatonic",         realName: _.scale19Label, flags: [true, false, true,  true,  false, true,  true,  false, true,  true,  false, true ]}, 
-        { name: "Hexatonic",         realName: _.scale20Label, flags: [true, false, false, true,  true,  false, false, true,  true,  false, false, true ]},
+        { name: "Free",              realName: "Free / Chromatic",  flags: [true, true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true ]}, 
+        { name: "Major",             realName: "Major",             flags: [true, false, true,  false, true,  true,  false, true,  false, true,  false, true ]},
+        { name: "Minor",             realName: "Minor",             flags: [true, false, true,  true,  false, true,  false, true,  true,  false, true,  false]},
+        { name: "Mixolydian",        realName: "Mixolydian",        flags: [true, false, true,  false, true,  true,  false, true,  false, true,  true,  false]}, 
+        { name: "Lydian",            realName: "Lydian",            flags: [true, false, true,  false, true,  false, true,  true,  false, true,  false, true ]}, 
+        { name: "Dorian",            realName: "Dorian",            flags: [true, false, true,  true,  false, true,  false, true,  false, true,  true,  false]}, 
+        { name: "Phrygian",          realName: "Phrygian",          flags: [true, true,  false, true,  false, true,  false, true,  true,  false, true,  false]}, 
+        { name: "Locrian",           realName: "Locrian",           flags: [true, true,  false, true,  false, true,  true,  false, true,  false, true,  false]}, 
+        { name: "Lydian Dominant",   realName: "Lydian Dominant",   flags: [true, false, true,  false, true,  false, true,  true,  false, true,  true,  false]}, 
+        { name: "Phrygian Dominant", realName: "Phrygian Dominant", flags: [true, true,  false, false, true,  true,  false, true,  true,  false, true,  false]}, 
+        { name: "Harmonic Major",    realName: "Harmonic Major",    flags: [true, false, true,  false, true,  true,  false, true,  true,  false, false, true ]},
+        { name: "Harmonic Minor",    realName: "Harmonic Minor",    flags: [true, false, true,  true,  false, true,  false, true,  true,  false, false, true ]},
+        { name: "Melodic Minor",     realName: "Melodic Minor",     flags: [true, false, true,  true,  false, true,  false, true,  false, true,  false, true ]},
+        { name: "Blues",             realName: "Blues",             flags: [true, false, false, true,  false, true,  true,  true,  false, false, true,  false]},
+        { name: "Altered",           realName: "Altered",           flags: [true, true,  false, true,  true,  false, true,  false, true,  false, true,  false]}, 
+        { name: "Major Pentatonic",  realName: "Major Pentatonic",  flags: [true, false, true,  false, true,  false, false, true,  false, true,  false, false]},
+        { name: "Minor Pentatonic",  realName: "Minor Pentatonic",  flags: [true, false, false, true,  false, true,  false, true,  false, false, true,  false]}, 
+        { name: "Whole Tone",        realName: "Whole Tone",        flags: [true, false, true,  false, true,  false, true,  false, true,  false, true,  false]}, 
+        { name: "Octatonic",         realName: "Octatonic",         flags: [true, false, true,  true,  false, true,  true,  false, true,  true,  false, true ]}, 
+        { name: "Hexatonic",         realName: "Hexatonic",         flags: [true, false, false, true,  true,  false, false, true,  true,  false, false, true ]},
 //        Nothing will really matter for this one. These are just placeholder values until the user configures them as this is the custom scale.
-        { name: "Custom Scale",      realName: _.scale21Label, flags: [true, false, true,  true,  false, false, false, true,  true,  false, true,  true ]},
+        { name: "Custom Scale",      realName: "Custom Scale",      flags: [true, false, true,  true,  false, false, false, true,  true,  false, true,  true ]},
     ]);
 
     public static readonly keys: DictionaryArray<Key> = toNameMap([
@@ -420,12 +420,12 @@ export class Config {
         { name: "organ",           expression: 0.2,   samples: centerAndNormalizeWave([11.0,  10.0,  12.0,  11.0, 14.0, 7.0, 5.0, 5.0, 12.0, 10.0, 10.0, 9.0, 12.0, 6.0, 4.0, 5.0, 13.0, 12.0, 12.0, 10.0, 12.0, 5.0, 2.0, 2.0, 8.0, 6.0, 6.0, 5.0, 8.0, 3.0, 2.0, 1.0])},
         { name: "pan flute",       expression: 0.35,  samples: centerAndNormalizeWave([1.0,   4.0,   7.0,   6.0,  7.0, 9.0, 7.0, 7.0, 11.0, 12.0, 13.0, 15.0, 13.0, 11.0, 11.0, 12.0, 13.0, 10.0, 7.0, 5.0, 3.0, 6.0, 10.0, 7.0, 3.0, 3.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0])},
         { name: "glitch",          expression: 0.5,   samples: centerWave            ([1.0,   1.0,   1.0,   1.0,  1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0])},
-        { name: "accurate sine",   expression: 0.1,   samples: centerWave            ([2, 7, 11, 14, 16, 18, 19, 20, 21, 22, 22, 23, 23, 23, 24, 24, 24, 24, 23, 23, 23, 22, 22, 21, 20, 19, 18, 16, 14, 11, 7, 2, -2, -7, -11, -14, -16, -18, -19, -20, -21, -22, -22, -23, -23, -23, -24, -24, -24, -24, -23, -23, -23, -22, -22, -21, -20, -19, -18, -16, -14, -11, -7, -2])},
-        { name: "accurate tri",    expression: 0.1,   samples: centerWave            ([1, 2, 4, 5, 7, 8, 10, 11, 13, 14, 16, 17, 19, 20, 22, 23, 23, 22, 20, 19, 17, 16, 14, 13, 11, 10, 8, 7, 5, 4, 2, 1, -1, -2, -4, -5, -7,-8, -10, -11, -13, -14, -16, -17, -19, -20, -22, -23, -23, -22, -20, -19, -17, -16, -14, -13, -11, -10, -8, -7, -5, -4, -2, -1])},
-        { name: "secant",          expression: 0.1,   samples: centerWave            ([23, 18, 13, 10, 8, 6, 5, 4, 3, 2, 2, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 2, 2, 3, 4, 5, 6, 8, 10, 13, 18, 23, -23, -18, -14, -10, -8, -6, -5, -4, -3, -2, -2, -1, -1, -1, 0, 0, 0, 0, -1, -1, -1, -2, -2, -3, -4, -5, -6, -8, -10, -14, -18, -23])},
-        { name: "glitch 2",        expression: 0.1,   samples: centerWave            ([0, 24, 0, 24, 0, 24, 0, 24, 0, -24, 0, -24, 0, -24, 0, -24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -24, 0, -24, 0, -24, 0, -24, 0, 24, 0, 24, 0, 24, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])},
+        { name: "accurate sine",   expression: 0.5,   samples: centerAndNormalizeWave([2,4,7,9,11,14,15,17,19,20,21,22,23,23,24,24,24,24,23,23,22,21,20,19,17,15,14,11,9,7,4,2,-2,-4,-7,-9,-11,-14,-15,-17,-19,-20,-21,-22,-23,-23,-24,-24,-24,-24,-23,-23,-22,-21,-20,-19,-17,-15,-14,-11,-9,-7,-4,-2])},
+        { name: "accurate tri",    expression: 0.45,  samples: centerAndNormalizeWave([1, 2, 4, 5, 7, 8, 10, 11, 13, 14, 16, 17, 19, 20, 22, 23, 23, 22, 20, 19, 17, 16, 14, 13, 11, 10, 8, 7, 5, 4, 2, 1, -1, -2, -4, -5, -7,-8, -10, -11, -13, -14, -16, -17, -19, -20, -22, -23, -23, -22, -20, -19, -17, -16, -14, -13, -11, -10, -8, -7, -5, -4, -2, -1])},
+        { name: "secant",          expression: 0.35,  samples: centerAndNormalizeWave([22,20,17,15,13,10,9,7,5,4,3,2,1,1,0,0,0,0,1,1,2,3,4,5,7,9,10,13,15,17,20,22,-22,-20,-17,-15,-13,-10,-9,-7,-5,-4,-3,-2,-1,-1,0,0,0,0,-1,-1,-2,-3,-4,-5,-7,-9,-10,-13,-15,-17,-20,-22])},
+        { name: "glitch 2",        expression: 0.2,   samples: centerAndNormalizeWave([0, 24, 0, 24, 0, 24, 0, 24, 0, -24, 0, -24, 0, -24, 0, -24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -24, 0, -24, 0, -24, 0, -24, 0, 24, 0, 24, 0, 24, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])},
         { name: "trapezoid",       expression: 1.0,   samples: centerWave            ([1.0 / 15.0, 6.0 / 15.0, 10.0 / 15.0, 14.0 / 15.0, 15.0 / 15.0, 15.0 / 15.0, 15.0 / 15.0, 15.0 / 15.0, 15.0 / 15.0, 15.0 / 15.0, 15.0 / 15.0, 15.0 / 15.0, 14.0 / 15.0, 10.0 / 15.0, 6.0 / 15.0, 1.0 / 15.0, -1.0 / 15.0, -6.0 / 15.0, -10.0 / 15.0, -14.0 / 15.0, -15.0 / 15.0, -15.0 / 15.0, -15.0 / 15.0, -15.0 / 15.0, -15.0 / 15.0, -15.0 / 15.0, -15.0 / 15.0, -15.0 / 15.0, -14.0 / 15.0, -10.0 / 15.0, -6.0 / 15.0, -1.0 / 15.0,])},
-        { name: "accurate trapez", expression: 0.1,   samples: centerWave            ([1, 4, 7, 10, 13, 16, 19, 22, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 22, 19, 16, 13, 10, 7, 4, 1, -1, -4, -7, -10, -13, -16, -19, -22, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -22, -19, -16, -13, -10, -7, -4, -1])}
+        { name: "accurate trapez", expression: 0.4,   samples: centerAndNormalizeWave([1, 4, 7, 10, 13, 16, 19, 22, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 22, 19, 16, 13, 10, 7, 4, 1, -1, -4, -7, -10, -13, -16, -19, -22, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -24, -22, -19, -16, -13, -10, -7, -4, -1])}
     ]);
 
     public static readonly chipWaves:  DictionaryArray<ChipWave>  = rawChipToIntegrated(Config.rawChipWaves);
@@ -452,8 +452,8 @@ export class Config {
         { name: "crackling",        expression: 0.9,   basePitch: 69,    pitchFilterMult: 1024.0, isSoft: false, samples: null },
         { name: "pink",             expression: 1.0,   basePitch: 69,    pitchFilterMult: 8.0,    isSoft: true,  samples: null },
         { name: "brownian",         expression: 1.0,   basePitch: 69,    pitchFilterMult: 8.0,    isSoft: true,  samples: null },
-        { name: "perlin",           expression: 1.0,   basePitch: 105,   pitchFilterMult: 1.0,    isSoft: true,  samples: null },
-        { name: "fractal",          expression: 1.0,   basePitch: 116,   pitchFilterMult: 1.0,    isSoft: true,  samples: null },
+        { name: "perlin",           expression: 1.0,   basePitch: 85,    pitchFilterMult: 1.0,    isSoft: true,  samples: null },
+        { name: "fractal",          expression: 1.0,   basePitch: 100,   pitchFilterMult: 1.0,    isSoft: true,  samples: null },
         { name: "vinyl crackle",    expression: 0.25,  basePitch: 96,    pitchFilterMult: 1024.0, isSoft: false, samples: null },
         { name: "noise square",     expression: 1.0,   basePitch: 69,    pitchFilterMult: 1024.0, isSoft: true,  samples: null },
     ]);
@@ -530,8 +530,8 @@ export class Config {
         { name: "testing unison",  voices: 3, spread: 0.05,     offset:  0.0,    expression: 1.0,  sign:  1.0 },
     ]);
 
-    public static readonly effectNames: ReadonlyArray<string> =     ["reverb", "chorus", "panning", "distortion", "bitcrusher", "note filter", "echo", "pitch shift", "detune", "vibrato", "transition type", "chord type", "percussion", "wavefold", "reshaper"];
-    public static readonly effectOrder: ReadonlyArray<EffectType> = [EffectType.panning, EffectType.transition, EffectType.chord, EffectType.pitchShift, EffectType.detune, EffectType.vibrato, EffectType.noteFilter, EffectType.distortion, EffectType.reshaper, EffectType.bitcrusher, EffectType.wavefold, EffectType.chorus, EffectType.echo, EffectType.reverb, EffectType.percussion];
+    public static readonly effectNames: ReadonlyArray<string> =     ["reverb", "chorus", "panning", "distortion", "bitcrusher", "note filter", "echo", "pitch shift", "detune", "vibrato", "transition type", "chord type", "wavefold", "clipper"];
+    public static readonly effectOrder: ReadonlyArray<EffectType> = [EffectType.panning, EffectType.transition, EffectType.chord, EffectType.pitchShift, EffectType.detune, EffectType.vibrato, EffectType.noteFilter, EffectType.wavefold, EffectType.distortion, EffectType.clipper, EffectType.bitcrusher, EffectType.chorus, EffectType.echo, EffectType.reverb];
 
     public static readonly noteSizeMax:         number = 6;
     public static readonly volumeRange:         number = 50;
@@ -713,7 +713,7 @@ export class Config {
     public static readonly upperBoundMin:              number = 0;
     public static readonly upperBoundMax:              number = 8;
     public static readonly envelopeDelayMax:           number = 32;
-    public static readonly envelopePhaseMax:           number = this.envelopeDelayMax * 2;
+    public static readonly envelopePhaseMax:           number = this.envelopeDelayMax / 2;
     public static readonly clapMirrorsMax:             number = 32;
     public static readonly LFOAccelerationMin:         number = 0.25;
     public static readonly LFOAccelerationMax:         number = 4;
@@ -853,7 +853,7 @@ export class Config {
     public static readonly unisonExpressionMax:              number = 2; 
     public static readonly unisonSignMin:                    number = -2;
     public static readonly unisonSignMax:                    number = 2; 
-    public static readonly sineWaveLength:                   number = 1 << 8/*15*/;
+    public static readonly sineWaveLength:                   number = 1 << 8;
     public static readonly sineWaveMask:                     number = Config.sineWaveLength - 1;
     public static readonly sineWave:                         Float32Array = generateSineWave();
 //  Picked strings have an all-pass filter with a corner frequency based on the tone fundamental frequency, in order to add a slight inharmonicity. (Which is important for distortion.)
@@ -862,8 +862,8 @@ export class Config {
     public static readonly pickedStringDispersionFreqMult:   number = 4.0;    // The all-pass corner freq is based on this times the adjusted tone fundamental freq.
     public static readonly pickedStringShelfHz:              number = 4000.0; // The cutoff freq of the shelf filter that is used to decay the high frequency energy in the picked string.
     public static readonly distortionRange:                  number = 16;
-    public static readonly reshapeMax:                       number = 16;
-    public static readonly reshapeShiftMax:                  number = 16;
+    public static readonly clipMax:                          number = 24;
+    public static readonly wavefoldMax:                      number = 40;
     public static readonly stringSustainRange:               number = 15;
     public static readonly stringDecayRate:                  number = 0.12;
     public static readonly enableAcousticSustain:            boolean = true;
@@ -871,11 +871,7 @@ export class Config {
     public static readonly bitcrusherFreqRange:              number = 14;
     public static readonly bitcrusherOctaveStep:             number = 0.5;
     public static readonly bitcrusherQuantizationRange:      number = 8;
-    public static readonly wavefoldLowerMin:                 number = 1;
-    public static readonly wavefoldUpperMin:                 number = 1;
-    public static readonly wavefoldLowerMax:                 number = 128;
-    public static readonly wavefoldUpperMax:                 number = 128;
-    public static readonly maxEnvelopeCount:                 number = 12;
+    public static readonly maxEnvelopeCount:                 number = 18;
     public static readonly defaultAutomationRange:           number = 13;
     public static readonly maxAmountOfRandomSeeds:           number = 32;
     public static readonly instrumentAutomationTargets: DictionaryArray<AutomationTarget> = toNameMap([
@@ -901,7 +897,8 @@ export class Config {
         { name: "freqCrusher",            computeIndex: EnvelopeComputeIndex.freqCrusher,            displayName: "freq crush",        interleave: false, isFilter: false, maxCount: 1,                       effect: EffectType.bitcrusher, compatibleInstruments: null },
         { name: "chorus",                 computeIndex: EnvelopeComputeIndex.chorus,                 displayName: "chorus",            interleave: false, isFilter: false, maxCount: 1,                       effect: EffectType.chorus,     compatibleInstruments: null },
         { name: "reverb",                 computeIndex: EnvelopeComputeIndex.reverb,                 displayName: "reverb",            interleave: false, isFilter: false, maxCount: 1,                       effect: EffectType.reverb,     compatibleInstruments: null },
-        { name: "reshapeAmount",          computeIndex: EnvelopeComputeIndex.reshapeAmount,          displayName: "reshape amount",    interleave: false, isFilter: false, maxCount: 1,                       effect: EffectType.reshaper,   compatibleInstruments: null },
+        { name: "clipBounds",             computeIndex: EnvelopeComputeIndex.clipBounds,             displayName: "clipping",          interleave: false, isFilter: false, maxCount: 1,                       effect: EffectType.clipper,    compatibleInstruments: null },
+        { name: "wavefoldBounds",         computeIndex: EnvelopeComputeIndex.wavefoldBounds,         displayName: "wavefold",          interleave: false, isFilter: false, maxCount: 1,                       effect: EffectType.wavefold,   compatibleInstruments: null },
 /*      { name: "noteFilterGain",         computeIndex: EnvelopeComputeIndex.noteFilterGain0,        displayName: "n. filter # vol",   interleave: false, isFilter: true,  maxCount: Config.filterMaxPoints,  effect: EffectType.noteFilter, compatibleInstruments: null },
         { name: "eqFilterAllFreqs",       computeIndex: EnvelopeComputeIndex.eqFilterAllFreqs,       displayName: "eq filter freqs",   interleave: false, isFilter: true,  maxCount: 1,                       effect: null,                  compatibleInstruments: null },
         { name: "eqFilterFreq",           computeIndex: EnvelopeComputeIndex.eqFilterFreq0,          displayName: "eq filter # freq",  interleave: true,  isFilter: true,  maxCount: Config.filterMaxPoints,  effect: null,                  compatibleInstruments: null },
@@ -1010,12 +1007,6 @@ export class Config {
         { name: "fm slider 4",     pianoName: "FM 4",                   maxRawVol: 15,                                                     newNoteVol: 15,                                                           forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.length,
             promptName: "FM Slider 4",                  promptDesc: ["This setting affects the strength of the fourth FM slider, just like the corresponding slider on your instrument.", "It works in a multiplicative way, so at $HI your slider will sound the same is its default value, and at $LO it will sound like it has been moved all the way to the left.", "For the full range of control with this mod, move your underlying slider all the way to the right.", "[MULTIPLICATIVE] [$LO - $HI] [%]"] },
 
-        { name: "fm slider 5",     pianoName: "FM 5",                   maxRawVol: 15,                                                     newNoteVol: 15,                                                           forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.length,
-            promptName: "FM Slider 5",                  promptDesc: ["This setting affects the strength of the fifth FM slider, just like the corresponding slider on your instrument.", "It works in a multiplicative way, so at $HI your slider will sound the same is its default value, and at $LO it will sound like it has been moved all the way to the left.", "For the full range of control with this mod, move your underlying slider all the way to the right.", "[MULTIPLICATIVE] [$LO - $HI] [%]"] },
-
-        { name: "fm slider 6",     pianoName: "FM 6",                   maxRawVol: 15,                                                     newNoteVol: 15,                                                           forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.length,
-            promptName: "FM Slider 6",                  promptDesc: ["This setting affects the strength of the sixth FM slider, just like the corresponding slider on your instrument.", "It works in a multiplicative way, so at $HI your slider will sound the same is its default value, and at $LO it will sound like it has been moved all the way to the left.", "For the full range of control with this mod, move your underlying slider all the way to the right.", "[MULTIPLICATIVE] [$LO - $HI] [%]"] },
-
         { name: "fm feedback",     pianoName: "FM Feedback",            maxRawVol: 15,                                                     newNoteVol: 15,                                                           forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.length,
             promptName: "FM Feedback",                  promptDesc: ["This setting affects the strength of the FM feedback slider, just like the corresponding slider on your instrument.", "It works in a multiplicative way, so at $HI your slider will sound the same is its default value, and at $LO it will sound like it has been moved all the way to the left.", "For the full range of control with this mod, move your underlying slider all the way to the right.", "[MULTIPLICATIVE] [$LO - $HI] [%]"] },
 
@@ -1039,9 +1030,6 @@ export class Config {
 
         { name: "arp speed",       pianoName: "Arp Speed",              maxRawVol: 50,                                                     newNoteVol: 12,                                                           forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.chord,
             promptName: "Arpeggio Speed",               promptDesc: ["This setting controls the speed at which your instrument's chords arpeggiate, just like the arpeggio speed slider.", "Each setting corresponds to a different speed, from the slowest to the fastest. The speeds are listed below.", "[0-4]: x0, x1/16, x⅛, x⅕, x¼,", "[5-9]: x⅓, x⅖, x½, x⅔, x¾,", "[10-14]: x⅘, x0.9, x1, x1.1, x1.2,", "[15-19]: x1.3, x1.4, x1.5, x1.6, x1.7,", "[20-24]: x1.8, x1.9, x2, x2.1, x2.2,", "[25-29]: x2.3, x2.4, x2.5, x2.6, x2.7,", "[30-34]: x2.8, x2.9, x3, x3.1, x3.2,", "[35-39]: x3.3, x3.4, x3.5, x3.6, x3.7," ,"[40-44]: x3.8, x3.9, x4, x4.15, x4.3,", "[45-50]: x4.5, x4.8, x5, x5.5, x6, x8", "[OVERWRITING] [$LO - $HI]"] },
-
-        { name: "strum speed",     pianoName: "Strum Speed",            maxRawVol: 23,                                                     newNoteVol: 0,                                                            forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.chord,
-            promptName: "Strum Speed",                  promptDesc: ["This setting controls the speed at which your instrument's chords strum, just like the strum speed slider.", "Note that the lower numbers will strum faster, while the higher numbers will strum slower.", "[OVERWRITING] [$HI - $LO]"]},
 
         { name: "pan delay",       pianoName: "Pan Delay",              maxRawVol: 20,                                                     newNoteVol: 10,                                                           forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.panning,
             promptName: "Panning Delay",                promptDesc: ["This setting controls the delay applied to panning for your instrument, just like the pan delay slider.", "With more delay, the panning effect will generally be more pronounced. $MID is the default value, whereas $LO will remove any delay at all. No delay can be desirable for chiptune songs.", "[OVERWRITING] [$LO - $HI]"] },
@@ -1091,6 +1079,15 @@ export class Config {
         { name: "mix volume",      pianoName: "Mix Vol.",               maxRawVol: Config.volumeRange,                                     newNoteVol: Math.ceil(Config.volumeRange / 2),                            forSong: false,   convertRealFactor: Math.ceil(-Config.volumeRange / 2.0), associatedEffect: EffectType.length,
             promptName: "Mix Volume",                   promptDesc: ["This setting affects the volume of your instrument as if its volume slider had been moved.", "At $MID, an instrument's volume will be unchanged from default. This means you can still use the volume sliders to mix the base volume of instruments, since this setting and the default value work multiplicatively. The volume gradually increases up to $HI, or decreases down to mute at $LO.", "Unlike the 'note volume' setting, mix volume is very straightforward and simply affects the resultant instrument volume after all effects are applied.", "[MULTIPLICATIVE] [$LO - $HI]"] },
 
+        { name: "fm slider 5",     pianoName: "FM 5",                   maxRawVol: 15,                                                     newNoteVol: 15,                                                           forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.length,
+            promptName: "FM Slider 5",                  promptDesc: ["This setting affects the strength of the fifth FM slider, just like the corresponding slider on your instrument.", "It works in a multiplicative way, so at $HI your slider will sound the same is its default value, and at $LO it will sound like it has been moved all the way to the left.", "For the full range of control with this mod, move your underlying slider all the way to the right.", "[MULTIPLICATIVE] [$LO - $HI] [%]"] },
+
+        { name: "fm slider 6",     pianoName: "FM 6",                   maxRawVol: 15,                                                     newNoteVol: 15,                                                           forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.length,
+            promptName: "FM Slider 6",                  promptDesc: ["This setting affects the strength of the sixth FM slider, just like the corresponding slider on your instrument.", "It works in a multiplicative way, so at $HI your slider will sound the same is its default value, and at $LO it will sound like it has been moved all the way to the left.", "For the full range of control with this mod, move your underlying slider all the way to the right.", "[MULTIPLICATIVE] [$LO - $HI] [%]"] },
+            
+        { name: "envelope speed",  pianoName: "EnvelopeSpd",            maxRawVol: 50,                                                     newNoteVol: 12,                                                           forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.length,
+            promptName: "Envelope Speed",               promptDesc: ["This setting controls how fast all of the envelopes for the instrument play.", "At $LO, your instrument's envelopes will be frozen, and at values near there they will change very slowly. At 12, the envelopes will work as usual, performing at normal speed. This increases up to $HI, where the envelopes will change very quickly. The speeds are given below:", "[0-4]: x0, x1/16, x⅛, x⅕, x¼,", "[5-9]: x⅓, x⅖, x½, x⅔, x¾,", "[10-14]: x⅘, x0.9, x1, x1.1, x1.2,", "[15-19]: x1.3, x1.4, x1.5, x1.6, x1.7,", "[20-24]: x1.8, x1.9, x2, x2.1, x2.2,", "[25-29]: x2.3, x2.4, x2.5, x2.6, x2.7,", "[30-34]: x2.8, x2.9, x3, x3.1, x3.2,", "[35-39]: x3.3, x3.4, x3.5, x3.6, x3.7," ,"[40-44]: x3.8, x3.9, x4, x4.15, x4.3,", "[45-50]: x4.5, x4.8, x5, x5.5, x6, x8", "[OVERWRITING] [$LO - $HI]"] },
+            
         { name: "dynamism",        pianoName: "Dynamism",               maxRawVol: Config.supersawDynamismMax,                             newNoteVol: 0,                                                            forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.length,
             promptName: "Supersaw Dynamism",            promptDesc: ["This setting controls the supersaw dynamism of your instrument, just like the dynamism slider.", "At $LO, your instrument will have only a single pulse contributing. Increasing this will raise the contribution of other waves which is similar to a chorus effect. The effect gets more noticeable up to the max value, $HI.", "[OVERWRITING] [$LO - $HI]"]},
 
@@ -1121,16 +1118,16 @@ export class Config {
         { name: "slide speed",     pianoName: "Slide Speed",            maxRawVol: 23,                                                     newNoteVol: 0,                                                            forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.transition,
             promptName: "Slide Speed",                  promptDesc: ["This setting controls the speed at which your instrument 'slides' between notes.", "Note that the lower numbers will slide faster, while the higher numbers will slide slower.", "[OVERWRITING] [$HI - $LO]"]},
 
-        { name: "cycle wave",      pianoName: "Cycle Wave",             maxRawVol: 31,                                                     newNoteVol: 0,                                                            forSong: false,   convertRealFactor: 1,                                    associatedEffect: EffectType.length,
-            promptName: "Cycle Wave",                   promptDesc: ["This setting sets the current position in the cycle your wavetable instrument is in according to the value you put.", "Note that only the value at the beginning of the note will count.", "If waves are missing from the cycle, this wave that will play from the modulator will loop around the cycle depending on the number and the amount of waves that are removed from the cycle. (Example: If only 9 waves are in the cycle, 23 on this modulator would set the current wave to wave 5.)", "[$LO - $HI]"]},
+        { name: "strum speed",     pianoName: "Strum Speed",            maxRawVol: 23,                                                     newNoteVol: 0,                                                            forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.chord,
+            promptName: "Strum Speed",                  promptDesc: ["This setting controls the speed at which your instrument's chords strum, just like the strum speed slider.", "Note that the lower numbers will strum faster, while the higher numbers will strum slower.", "[OVERWRITING] [$HI - $LO]"]},
 
         { name: "wavetable speed", pianoName: "WavetableSpd",           maxRawVol: Config.wavetableSpeedMax,                               newNoteVol: 0,                                                            forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.length,
             promptName: "Wavetable Speed",              promptDesc: ["This setting controls the speed at which your wavetable instrument swaps between waves.", "[OVERWRITING] [$LO - $HI]"]},
-
-        { name: "envelope speed",  pianoName: "EnvelopeSpd",            maxRawVol: 50,                                                     newNoteVol: 12,                                                           forSong: false,   convertRealFactor: 0,                                    associatedEffect: EffectType.length,
-            promptName: "Envelope Speed",               promptDesc: ["This setting controls how fast all of the envelopes for the instrument play.", "At $LO, your instrument's envelopes will be frozen, and at values near there they will change very slowly. At 12, the envelopes will work as usual, performing at normal speed. This increases up to $HI, where the envelopes will change very quickly. The speeds are given below:", "[0-4]: x0, x1/16, x⅛, x⅕, x¼,", "[5-9]: x⅓, x⅖, x½, x⅔, x¾,", "[10-14]: x⅘, x0.9, x1, x1.1, x1.2,", "[15-19]: x1.3, x1.4, x1.5, x1.6, x1.7,", "[20-24]: x1.8, x1.9, x2, x2.1, x2.2,", "[25-29]: x2.3, x2.4, x2.5, x2.6, x2.7,", "[30-34]: x2.8, x2.9, x3, x3.1, x3.2,", "[35-39]: x3.3, x3.4, x3.5, x3.6, x3.7," ,"[40-44]: x3.8, x3.9, x4, x4.15, x4.3,", "[45-50]: x4.5, x4.8, x5, x5.5, x6, x8", "[OVERWRITING] [$LO - $HI]"] }
         
-        // Issue#7, Issue#9 - More modulators. The high priority ones are strum speed, slide speed, and limiter settings.
+        { name: "cycle wave",      pianoName: "Cycle Wave",             maxRawVol: 31,                                                     newNoteVol: 0,                                                            forSong: false,   convertRealFactor: 1,                                    associatedEffect: EffectType.length,
+            promptName: "Cycle Wave",                   promptDesc: ["This setting sets the current position in the cycle your wavetable instrument is in according to the value you put.", "Note that only the value at the beginning of the note will count.", "If waves are missing from the cycle, this wave that will play from the modulator will loop around the cycle depending on the number and the amount of waves that are removed from the cycle. (Example: If only 9 waves are in the cycle, 23 on this modulator would set the current wave to wave 5.)", "[$LO - $HI]"]},
+        
+        // Issue#7, Issue#9 - More modulators.
     ]);
 }
 
@@ -1186,7 +1183,6 @@ export function performIntegralOld(wave: { length: number, [index: number]: numb
 export function getPulseWidthRatio(pulseWidth: number): number {
     // BeepBox formula for reference
     //return Math.pow(0.5, (Config.pulseWidthRange - 1 - pulseWidth) * Config.pulseWidthStepPower) * 0.5;
-
     return pulseWidth / (Config.pulseWidthRange * 2);
 }
 
@@ -1267,7 +1263,7 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
             // The "cutter" noise type from ModBox.
             var drumBuffer = 1;
             for (var i = 0; i < Config.chipNoiseLength; i++) {
-                wave[i] = (drumBuffer & 1) * 4.0 * (Math.random() * 14 + 1) - 8.0;
+                wave[i] = (drumBuffer & 1) * 4.0 * (Math.random() * 14 + 1) - 27.0;
                 var newBuffer = drumBuffer >> 1;
                 if (((drumBuffer + newBuffer) & 1) == 1) {
                     newBuffer += 15 << 2;
@@ -1278,7 +1274,7 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
             // The "metallic" noise type from ModBox.
             var drumBuffer = 1;
             for (var i = 0; i < Config.chipNoiseLength; i++) {
-                wave[i] = (drumBuffer & 1) / 2.0 - 0.5;
+                wave[i] = (drumBuffer & 1) / 2.0 - 0.25;
                 var newBuffer = drumBuffer >> 1;
                 if (((drumBuffer + newBuffer) & 1) == 1) {
                     newBuffer -= 10 << 2;
@@ -1289,7 +1285,7 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
             // The "static" noise type from GoldBox.
             let drumBuffer: number = 1;
             for (let i: number = 0; i < Config.chipNoiseLength; i++) {
-                wave[i] = (drumBuffer & 1) * 2.0 - 1.1;
+                wave[i] = (drumBuffer & 1) * 2.0 - 1.0;
                 let newBuffer: number = drumBuffer >> 1;
                 if (((drumBuffer + newBuffer) & 1) == 1) {
                     newBuffer += 8 ^ 2 << 16;
@@ -1300,7 +1296,7 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
             // The "retro clang" noise type from Zefbox.
             let drumBuffer: number = 1;
             for (let i: number = 0; i < Config.chipNoiseLength; i++) {
-                wave[i] = (drumBuffer & 1) * 2.0 - 3.0;
+                wave[i] = (drumBuffer & 1) * 2.0 - 1.0;
                 let newBuffer: number = drumBuffer >> 1;
                 if (((drumBuffer + newBuffer) & 1) == 1) {
                      newBuffer += 3 << 14;
@@ -1322,7 +1318,7 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
             // The "harsh" noise type from Zefbox.
             let drumBuffer: number = 1;
             for (let i: number = 0; i < Config.chipNoiseLength; i++) {
-                wave[i] = (drumBuffer & 1) * 4.0 / 11;
+                wave[i] = (drumBuffer & 1) * 4.0 / 11 - 0.17;
                 let newBuffer: number = drumBuffer >> 1;
                 if (((drumBuffer + newBuffer) & 1) == 1) {
                     newBuffer += 15 << 2;
@@ -1333,7 +1329,7 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
             // The "trill" noise type from Zefbox.
             let drumBuffer: number = 1;
             for (let i: number = 0; i < Config.chipNoiseLength; i++) {
-                wave[i] = (drumBuffer & 1) / 4.0 * Math.random();
+                wave[i] = (drumBuffer & 1) / 4.0 * Math.random() - 0.11;
                 let newBuffer: number = drumBuffer >> 2;
                 if (((drumBuffer + newBuffer) & 1) == 1) {
                     newBuffer -= 4 << 2;
@@ -1359,13 +1355,13 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
         } else if (index == 16) {
             // "1-Bit White" from UltraBox.
             for (let i = 0; i < Config.chipNoiseLength; i++) {
-                wave[i] = Math.round(Math.random());
+                wave[i] = Math.round(Math.random()) - 0.5;
             }
         } else if (index == 17) {
             // "1-Bit Metallic" from UltraBox.
             var drumBuffer = 1;
             for (var i = 0; i < Config.chipNoiseLength; i++) {
-                wave[i] = Math.round((drumBuffer & 1));
+                wave[i] = Math.round((drumBuffer & 1)) - 0.5;
                 var newBuffer = drumBuffer >> 1;
                 if (((drumBuffer + newBuffer) & 1) == 1) {
                     newBuffer -= 10 << 2;
@@ -1376,7 +1372,7 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
             // "Crackling" from UltraBox.
             for (let i = 0; i < Config.chipNoiseLength; i++) {
                 var ultraboxnewchipnoiserand = Math.random();
-                wave[i] = Math.pow(ultraboxnewchipnoiserand, Math.clz32(ultraboxnewchipnoiserand));
+                wave[i] = Math.pow(ultraboxnewchipnoiserand, Math.clz32(ultraboxnewchipnoiserand)) - 0.15;
             }
         } else if (index == 19) {
             // "Pink" noise from UltraBox (noise.js).
@@ -1410,17 +1406,17 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
         } else if (index == 21) {
             // "Perlin Noise", a smooth variant of white noise.
             // https://gpfault.net/posts/perlin-sound.txt.html
-            const freq: number = 440;
-            for (let i: number = 0; i < Config.chipNoiseLength; i++) {
+            const freq: number = 440 * 7;
+            for (let i: number = 0; i < (Config.chipNoiseLength); i++) {
                 const x1: number = (i / Config.chipNoiseLength) * freq;
                 wave[i] = perlinNoise(x1);
             }
         } else if (index == 22) {
             // "Fractal Noise", a modified variant of perlin noise.
             // https://gpfault.net/posts/perlin-sound.txt.html
-            const f1: number = 110;
-            const f2: number = 220;
-            const f3: number = 440;
+            const f1: number = 110 * 5;
+            const f2: number = 220 * 5;
+            const f3: number = 440 * 5;
             for (let i: number = 0; i < Config.chipNoiseLength; i++) {
                 const x1: number = (i / Config.chipNoiseLength) * f1;
                 const x2: number = (i / Config.chipNoiseLength) * f2;
@@ -1447,7 +1443,7 @@ export function getDrumWave(index: number, inverseRealFourierTransform: Function
             for (let i: number = 0; i < Config.chipNoiseLength; i++) {
                 const square: number = mod(Math.round(i/32 + 0.5), 2);
                 const noise: number = Math.random();
-                wave[i] = noise * square;
+                wave[i] = noise * square - 0.5;
             }
         } else {
             throw new Error("Unrecognized drum index: " + index);
@@ -1492,8 +1488,8 @@ function perlinNoiseCurve(t: number): number {
     return t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
 }
 const perlinNoiseGradientRandom: number[] = [];
-for (let i: number = 0; i < 440; i++) {
-    perlinNoiseGradientRandom[i] = i === 0 || i === 440 ? 0.0 : Math.random();
+for (let i: number = 0; i < 440*7; i++) {
+    perlinNoiseGradientRandom[i] = (i == 0 || i == 440*7-1) ? 0.0 : Math.random();
 }
 function perlinNoiseGradient(p: number): number {
     return perlinNoiseGradientRandom[Math.floor(p) % perlinNoiseGradientRandom.length] > 0.5 ? 1.0 : -1.0;
@@ -1712,17 +1708,17 @@ export function effectsIncludeVibrato(effects: number): boolean {
 export function effectsIncludeNoteFilter(effects: number): boolean {
     return (effects & (1 << EffectType.noteFilter)) != 0;
 }
+export function effectsIncludeWavefold(effects: number): boolean {
+    return (effects & (1 << EffectType.wavefold)) != 0;
+}
 export function effectsIncludeDistortion(effects: number): boolean {
     return (effects & (1 << EffectType.distortion)) != 0;
 }
-export function effectsIncludeReshaper(effects: number): boolean {
-    return (effects & (1 << EffectType.reshaper)) != 0;
+export function effectsIncludeClipper(effects: number): boolean {
+    return (effects & (1 << EffectType.clipper)) != 0;
 }
 export function effectsIncludeBitcrusher(effects: number): boolean {
     return (effects & (1 << EffectType.bitcrusher)) != 0;
-}
-export function effectsIncludeWavefold(effects: number): boolean {
-    return (effects & (1 << EffectType.wavefold)) != 0;
 }
 export function effectsIncludePanning(effects: number): boolean {
     return (effects & (1 << EffectType.panning)) != 0;
@@ -1735,9 +1731,6 @@ export function effectsIncludeEcho(effects: number): boolean {
 }
 export function effectsIncludeReverb(effects: number): boolean {
     return (effects & (1 << EffectType.reverb)) != 0;
-}
-export function effectsIncludePercussion(effects: number): boolean {
-    return (effects & (1 << EffectType.percussion)) != 0;
 }
 export function rawChipToIntegrated(raw: DictionaryArray<ChipWave>): DictionaryArray<ChipWave> {
     const newArray: Array<ChipWave> = new Array<ChipWave>(raw.length);

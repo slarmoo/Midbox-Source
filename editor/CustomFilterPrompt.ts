@@ -8,7 +8,7 @@ import { FilterEditor } from "./FilterEditor";
 import { SongEditor } from "./SongEditor";
 import { FilterSettings } from "../synth/synth";
 import { ColorConfig } from "./ColorConfig";
-import { Localization as _ } from "./Localization";
+
 
 //namespace beepbox {
 const { button, div, h2, p } = HTML;
@@ -29,21 +29,21 @@ export class CustomFilterPrompt implements Prompt {
 	public readonly _filterButtonContainer: HTMLDivElement = div({class: "instrument-bar", style: "justify-content: center;"});
 
 	private readonly _cancelButton: HTMLButtonElement = button({ class: "cancelButton" });
-	private readonly _okayButton: HTMLButtonElement = button({ class: "okayButton", style: "width:45%;" }, _.confirmLabel);
+	private readonly _okayButton: HTMLButtonElement = button({ class: "okayButton", style: "width:45%;" }, "Confirm");
 
 	private readonly _filterContainer: HTMLDivElement = div({ style: "width: 100%; display: flex; flex-direction: row; align-items: center; justify-content: center;" });
 
 	private readonly _editorTitle: HTMLDivElement = div({}, h2("Edit Filter"));
 
 	private readonly _filterCopyButton: HTMLButtonElement = button({ style: "width:86px; margin-right: 5px;", class: "copyButton" }, [
-		_.copyLabel,
+		"Copy",
 		// Copy icon:
 		SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 0; top: 50%; margin-top: -1em; pointer-events: none;", width: "2em", height: "2em", viewBox: "-5 -21 26 26" }, [
 			SVG.path({ d: "M 0 -15 L 1 -15 L 1 0 L 13 0 L 13 1 L 0 1 L 0 -15 z M 2 -1 L 2 -17 L 10 -17 L 14 -13 L 14 -1 z M 3 -2 L 13 -2 L 13 -12 L 9 -12 L 9 -16 L 3 -16 z", fill: "currentColor" }),
 		]),
 	]);
 	private readonly _filterPasteButton: HTMLButtonElement = button({ style: "width:86px;", class: "pasteButton" }, [
-		_.pasteLabel,
+		"Paste",
 		// Paste icon:
 		SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 0; top: 50%; margin-top: -1em; pointer-events: none;", width: "2em", height: "2em", viewBox: "0 0 26 26" }, [
 			SVG.path({ d: "M 8 18 L 6 18 L 6 5 L 17 5 L 17 7 M 9 8 L 16 8 L 20 12 L 20 22 L 9 22 z", stroke: "currentColor", fill: "none" }),
@@ -170,13 +170,13 @@ export class CustomFilterPrompt implements Prompt {
 		if (this._doc.synth.playing) {
 			this._playButton.classList.remove("playButton");
 			this._playButton.classList.add("pauseButton");
-			this._playButton.title = _.pauseSpaceLabel;
-			this._playButton.innerText = _.pauseLabel;
+			this._playButton.title = "Pause (Space)";
+			this._playButton.innerText = "Pause";
 		} else {
 			this._playButton.classList.remove("pauseButton");
 			this._playButton.classList.add("playButton");
-			this._playButton.title = _.playSpaceLabel;
-			this._playButton.innerText = _.playLabel;
+			this._playButton.title = "Play (Space)";
+			this._playButton.innerText = "Play";
 		}
 	}
 

@@ -80,17 +80,17 @@ export class Preferences {
 	
 	public reload(): void {
 		this.autoPlay = window.localStorage.getItem("autoPlay") == "true";
-		this.autoFollow = window.localStorage.getItem("autoFollow") != "false";
+		this.autoFollow = window.localStorage.getItem("autoFollow") == "true";
 		this.enableNotePreview = window.localStorage.getItem("enableNotePreview") != "false";
 		this.showFifth = window.localStorage.getItem("showFifth") == "true";
 		this.notesOutsideScale = window.localStorage.getItem("notesOutsideScale") == "true";
-		this.showLetters = window.localStorage.getItem("showLetters") == "true";
+		this.showLetters = window.localStorage.getItem("showLetters") != "false";
 		this.showChannels = window.localStorage.getItem("showChannels") == "true";
-		this.showScrollBar = window.localStorage.getItem("showScrollBar") == "true";
+		this.showScrollBar = window.localStorage.getItem("showScrollBar") != "false";
 		this.alwaysFineNoteVol = window.localStorage.getItem("alwaysFineNoteVol") == "true";
-		this.displayVolumeBar = window.localStorage.getItem("displayVolumeBar") == "true";
-		this.instrumentCopyPaste = window.localStorage.getItem("instrumentCopyPaste") == "true";
-		this.enableChannelMuting = window.localStorage.getItem("enableChannelMuting") == "true";
+		this.displayVolumeBar = window.localStorage.getItem("displayVolumeBar") != "false";
+		this.instrumentCopyPaste = window.localStorage.getItem("instrumentCopyPaste") != "false";
+		this.enableChannelMuting = window.localStorage.getItem("enableChannelMuting") != "false";
 		this.displayBrowserUrl = window.localStorage.getItem("displayBrowserUrl") != "false";
 		this.pressControlForShortcuts = window.localStorage.getItem("pressControlForShortcuts") == "true";
 		this.enableMidi = window.localStorage.getItem("enableMidi") != "false";

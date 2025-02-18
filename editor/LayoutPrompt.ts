@@ -4,13 +4,13 @@ import {SongDocument} from "./SongDocument";
 import {Layout} from "./Layout";
 import {Prompt} from "./Prompt";
 import {HTML, SVG} from "imperative-html/dist/esm/elements-strict";
-import { Localization as _ } from "./Localization";
+
 
 const {button, label, div, form, h2, input} = HTML;
 
 export class LayoutPrompt implements Prompt {
 	private readonly _fileInput: HTMLInputElement = input({type: "file", accept: ".json,application/json,.mid,.midi,audio/midi,audio/x-midi"});
-	private readonly _okayButton: HTMLButtonElement = button({class: "okayButton", style: "width:100%;"}, (_.confirmLabel));
+	private readonly _okayButton: HTMLButtonElement = button({class: "okayButton", style: "width:100%;"}, ("Confirm"));
 	private readonly _cancelButton: HTMLButtonElement = button({class: "cancelButton"});
 	private readonly _form: HTMLFormElement = form({style: "display: flex; gap: 10px;"},
 			label({class: "layout-option"},
@@ -23,7 +23,7 @@ export class LayoutPrompt implements Prompt {
 						<rect x="2" y="13" width="11" height="5" fill="currentColor"/>
 					</svg>
 				`),
-				div((_.layout1Label)),
+				div(("Small")),
 			),
 			label({class: "layout-option"},
 				input({type: "radio", name: "layout", value: "long"}),
@@ -36,7 +36,7 @@ export class LayoutPrompt implements Prompt {
 						<rect x="2" y="13" width="22" height="5" fill="currentColor"/>
 					</svg>
 				`),
-				div((_.layout2Label)),
+				div(("Long")),
 			),
 			label({class: "layout-option"},
 				input({type: "radio", name: "layout", value: "tall"}),
@@ -48,7 +48,7 @@ export class LayoutPrompt implements Prompt {
 						<rect x="2" y="2" width="8" height="16" fill="currentColor"/>
 					</svg>
 				`),
-				div((_.layout3Label)),
+				div(("Tall")),
 			),
 			label({class: "layout-option"},
 				input({type: "radio", name: "layout", value: "wide"}),
@@ -61,12 +61,12 @@ export class LayoutPrompt implements Prompt {
 						<rect x="7" y="2" width="10" height="16" fill="currentColor"/>
 					</svg>
 				`),
-				div((_.layout4Label)),
+				div(("Wide (JB)")),
 			),
 		);
 	
 	public readonly container: HTMLDivElement = div({class: "prompt noSelection", style: "width: 300px;"},
-		h2((_.layoutPromptLabel)),
+		h2(("Layout")),
 		this._form,
 		div({style: "display: flex; flex-direction: row-reverse; justify-content: space-between;"},
 			this._okayButton,

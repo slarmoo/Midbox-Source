@@ -7,27 +7,27 @@ import {SongDocument} from "./SongDocument";
 import {Prompt} from "./Prompt";
 import {ChangeGroup} from "./Change";
 import {ChangeStringSustainType} from "./changes";
-import {Localization as _} from "./Localization";
+
 
 const {button, div, h2, p, select, option} = HTML;
 
 export class SustainPrompt implements Prompt {
 	private readonly _typeSelect: HTMLSelectElement = select({style: "width: 100%;"},
-		option({value: "acoustic"}, _.sustainTypePrompt1Label),
-		option({value: "bright"}, _.sustainTypePrompt2Label),
+		option({value: "acoustic"}, "(A) Acoustic"),
+		option({value: "bright"}, "(B) Bright"),
 	);
 	private readonly _cancelButton: HTMLButtonElement = button({class: "cancelButton"});
-	private readonly _okayButton: HTMLButtonElement = button({class: "okayButton", style: "width:45%;"}, _.confirmLabel);
+	private readonly _okayButton: HTMLButtonElement = button({class: "okayButton", style: "width:45%;"}, "Confirm");
 
 	public readonly container: HTMLDivElement = div({class: "prompt", style: "width: 300px;"},
 		div(
-			h2(_.sustainTypePrompt3Label),
-			p(_.sustainTypePromptLargeText1Label),
-			p(_.sustainTypePromptLargeText2Label),
+			h2("String Sustain Type"),
+			p("This setting controls how quickly the picked string's vibration decays."),
+			p("Unlike most of Midbox's instrument synthesizer features, a picked string cannot change frequency suddenly while maintaining its decay. If a tone's pitch changes suddenly (e.g. if the chord type is set to \"arpeggio\" or the transition type is set to \"continue\") then the string will be re-picked and start decaying from the beginning again, even if the envelopes don't otherwise restart."),
 		),
 		div({style: {display: Config.enableAcousticSustain ? undefined : "none", "margin-top": "5px"}},
 		    this._typeSelect,
-			p(_.sustainTypePromptLargeText3Label),
+			p("Midbox comes with two slightly different sustain designs. You can select one here and press \"Confirm\" to confirm it."),
 		),
 		div({style: {display: Config.enableAcousticSustain ? "flex" : "none", "flex-direction": "row-reverse", "justify-content": "space-between"}},
 			this._okayButton,

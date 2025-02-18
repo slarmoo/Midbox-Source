@@ -4,7 +4,7 @@ import { SongDocument } from "./SongDocument";
 import { RecoveredSong, RecoveredVersion, SongRecovery, versionToKey } from "./SongRecovery";
 import { Prompt } from "./Prompt";
 import { HTML } from "imperative-html/dist/esm/elements-strict";
-import { Localization as _ } from "./Localization";
+
 
 	const {button, div, h2, p, select, option, iframe} = HTML;
 
@@ -13,11 +13,11 @@ export class SongRecoveryPrompt implements Prompt {
 		private readonly _cancelButton: HTMLButtonElement = button({class: "cancelButton"});
 		
 		public readonly container: HTMLDivElement = div({class: "prompt", style: "width: 300px;"},
-		h2(_.songRecoveryPromptLabel),
+		h2("Song Recovery"),
 			div({style: "max-height: 385px; overflow-y: auto;"},
-			p(_.songRecoveryPromptLargeText1Label),
+			p("This is a temporary list of songs you have recently modified. Make sure that you have backups for the songs you care about, or perhaps a place to store them. If anything goes wrong, check here to find your song."),
 			this._songContainer,
-			p(_.songRecoveryPromptLargeText2Label),
+			p("(If \"Display Song Data in URL\" is enabled in your preferences, then you may also be able to find song versions in your browser history. However, song recovery won't work if you were browsing in private/incognito mode.)"),
 		),
 		this._cancelButton,
 	);
@@ -28,7 +28,7 @@ export class SongRecoveryPrompt implements Prompt {
 		const songs: RecoveredSong[] = SongRecovery.getAllRecoveredSongs();
 			
 		if (songs.length == 0) {
-			this._songContainer.appendChild(p(_.songRecoveryPromptLargeText3Label));
+			this._songContainer.appendChild(p("There are no songs to be recovered yet. Try making a song!"));
 		}
 			
 		for (const song of songs) {

@@ -7,7 +7,7 @@ import { Instrument, EnvelopeSettings, DrumsetEnvelopeSettings } from "../synth/
 import { ColorConfig } from "./ColorConfig";
 import { SongDocument } from "./SongDocument";
 //import { EnvelopeLineGraph } from "./EnvelopeEditor";
-import { Localization as _ } from "./Localization";
+
 
 const { button, div, h2, canvas } = HTML;
 
@@ -79,7 +79,7 @@ export class BasicCustomEnvelopePrompt implements Prompt {
     //private readonly _envelopePlotterRow: HTMLElement = div({style: "margin-top: 22px; margin-bottom: 29px;"}, this._envelopePlotter.canvas);
 
     private readonly _cancelButton: HTMLButtonElement = button({ class: "cancelButton" });
-	private readonly _okayButton: HTMLButtonElement = button({ class: "okayButton", style: "width: 32%; font-size: 15px; margin-bottom: 0;" }, _.confirmLabel);
+	private readonly _okayButton: HTMLButtonElement = button({ class: "okayButton", style: "width: 32%; font-size: 15px; margin-bottom: 0;" }, "Confirm");
 
     public readonly container: HTMLDivElement = div({ class: "prompt noSelection", style: "width: 600px;" },
 		h2("Edit Basic Custom Envelope"),

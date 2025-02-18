@@ -4,7 +4,7 @@ import { Dictionary, DictionaryArray, EnvelopeType, InstrumentType, Transition, 
 import { ColorConfig } from "../editor/ColorConfig";
 import { NotePin, Note, Pattern, Instrument, Channel, Synth } from "../synth/synth";
 import { HTML, SVG } from "imperative-html/dist/esm/elements-strict";
-import { Localization as _ } from "../editor/Localization";
+
 
 // This file is a duplicate of the main.ts file from the ../player/ folder with
 // various tweaks to fit better in the song recovery prompt. 
@@ -175,8 +175,8 @@ let zoomEnabled: boolean = false;
 let timelineWidth: number = 1;
 
 const synth: Synth = new Synth();
-let editLink: HTMLAnchorElement = a({target: "_top", style: "margin: 0 4px;"}, _.songPlayer1Label);
-let fullscreenLink: HTMLAnchorElement = a({target: "_top", style: "margin: 0 4px;"}, _.songPlayer4Label);
+let editLink: HTMLAnchorElement = a({target: "_top", style: "margin: 0 4px;"}, "✎ Edit");
+let fullscreenLink: HTMLAnchorElement = a({target: "_top", style: "margin: 0 4px;"}, "⇱ Fullscreen");
 
 let draggingPlayhead: boolean = false;
 	const playButton: HTMLButtonElement = button({style: "width: 100%; height: 100%; max-height: 50px;"});
@@ -187,13 +187,13 @@ let draggingPlayhead: boolean = false;
 const volumeIcon: SVGSVGElement = svg({style: "flex: 0 0 12px; margin: 0 1px; width: 12px; height: 12px;", viewBox: "0 0 12 12"},
 	path({fill: ColorConfig.uiWidgetBackground, d: "M 1 9 L 1 3 L 4 3 L 7 0 L 7 12 L 4 9 L 1 9 M 9 3 Q 12 6 9 9 L 8 8 Q 10.5 6 8 4 L 9 3 z"}),
 );
-const volumeSlider: HTMLInputElement = input({ title: _.songPlayer6Label, type: "range", value: 75, min: 0, max: 75, step: 1, style: "width: 12vw; max-width: 100px; margin: 0 1px;" });
+const volumeSlider: HTMLInputElement = input({ title: "Volume", type: "range", value: 75, min: 0, max: 75, step: 1, style: "width: 12vw; max-width: 100px; margin: 0 1px;" });
 
 const zoomIcon: SVGSVGElement = svg({width: 12, height: 12, viewBox: "0 0 12 12"},
 	circle({cx: "5", cy: "5", r: "4.5", "stroke-width": "1", stroke: "currentColor", fill: "none"}),
 	path({stroke: "currentColor", "stroke-width": "2", d: "M 8 8 L 11 11 M 5 2 L 5 8 M 2 5 L 8 5", fill: "none"}),
 );
-const zoomButton: HTMLButtonElement = button({title: _.songPlayer7Label, style: "background: none; flex: 0 0 12px; margin: 0 3px; width: 12px; height: 12px; display: flex;"},
+const zoomButton: HTMLButtonElement = button({title: "Zoom", style: "background: none; flex: 0 0 12px; margin: 0 3px; width: 12px; height: 12px; display: flex;"},
 	zoomIcon,
 );
 
@@ -491,13 +491,13 @@ function renderPlayButton(): void {
 	if (synth.playing) {
 		playButton.classList.remove("playButton");
 		playButton.classList.add("pauseButton");
-		playButton.title = _.pauseSpaceLabel;
-		playButton.textContent = _.pauseLabel;
+		playButton.title = "Pause (Space)";
+		playButton.textContent = "Pause";
 	} else {
 		playButton.classList.remove("pauseButton");
 		playButton.classList.add("playButton");
-		playButton.title = _.playSpaceLabel;
-		playButton.textContent = _.shortenedPlayLabel;
+		playButton.title = "Play (Space)";
+		playButton.textContent = "Play";
 	}
 	pauseButtonDisplayed = synth.playing;
 }

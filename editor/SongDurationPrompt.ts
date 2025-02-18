@@ -7,26 +7,26 @@ import { Prompt } from "./Prompt";
 import { ChangeGroup } from "./Change";
 import { ChangeBarCount } from "./changes";
 import { ColorConfig } from "./ColorConfig";
-import { Localization as _ } from "./Localization";
+
 
 	const {button, div, span, h2, input, br, select, option} = HTML;
 
 export class SongDurationPrompt implements Prompt {
 		private readonly _barsStepper: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "number", step: "1"});
 		private readonly _positionSelect: HTMLSelectElement = select({style: "width: 100%;"},
-			option({value: "end"}, _.songDurationPrompt1Label),
-			option({value: "beginning"}, _.songDurationPrompt2Label),
+			option({value: "end"}, "Apply change at end of song."),
+			option({value: "beginning"}, "Apply change at beginning of song."),
 	);
 		private readonly _cancelButton: HTMLButtonElement = button({class: "cancelButton"});
-		private readonly _okayButton: HTMLButtonElement = button({class: "okayButton", style: "width:45%;"}, _.confirmLabel);
+		private readonly _okayButton: HTMLButtonElement = button({class: "okayButton", style: "width:45%;"}, "Confirm");
 		
 		public readonly container: HTMLDivElement = div({class: "prompt noSelection", style: "width: 250px;"},
-		h2(_.songDurationPrompt3Label),
+		h2("Song Length"),
 			div({style: "display: flex; flex-direction: row; align-items: center; height: 2em; justify-content: flex-end;"},
 				div({style: "display: inline-block; text-align: right;"},
-				_.songDurationPrompt4Label,
+				"Bars per song:",
 				br(),
-					span({style: `font-size: smaller; color: ${ColorConfig.secondaryText};`}, _.songDurationPrompt5Label),
+					span({style: `font-size: smaller; color: ${ColorConfig.secondaryText};`}, "(Tip: You can press the \"enter\" key on your keyboard to quickly add a bar.)"),
 
 			),
 			this._barsStepper,

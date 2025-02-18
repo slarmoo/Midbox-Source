@@ -1,6 +1,6 @@
 // Copyright (c) 2012-2022 John Nesky and contributing authors, distributed under the MIT license, see accompanying the LICENSE.md file.
 
-import { Algorithm, Dictionary, FilterType, SustainType, InstrumentType, EffectType, AutomationTarget, Config, effectsIncludeDistortion, effectsIncludeBitcrusher, effectsIncludeChorus, effectsIncludeDetune, effectsIncludeNoteFilter, effectsIncludePitchShift, effectsIncludeReshaper, effectsIncludeReverb, effectsIncludeVibrato } from "../synth/SynthConfig";
+import { Algorithm, Dictionary, FilterType, SustainType, InstrumentType, EffectType, AutomationTarget, Config, effectsIncludeDistortion, effectsIncludeBitcrusher, effectsIncludeChorus, effectsIncludeDetune, effectsIncludeNoteFilter, effectsIncludePitchShift, effectsIncludeReverb, effectsIncludeVibrato, effectsIncludeWavefold, effectsIncludeClipper } from "../synth/SynthConfig";
 import { NotePin, Note, makeNotePin, Pattern, FilterSettings, FilterControlPoint, SpectrumWave, HarmonicsWave, Instrument, Channel, Song, Synth, convertChipWaveToCustomChip, EnvelopeSettings, DrumsetEnvelopeSettings, LFOShapes } from "../synth/synth";
 import { Preset, PresetCategory, EditorConfig } from "./EditorConfig";
 import { Change, ChangeGroup, ChangeSequence, UndoableChange } from "./Change";
@@ -721,8 +721,9 @@ export class ChangePreset extends Change {
     constructor(doc: SongDocument, newValue: number, channelIdx: number, instrumentIdx: number) {
         super();
         const instrument: Instrument = doc.song.channels[channelIdx].instruments[instrumentIdx];
+        const isMod: boolean = doc.song.getChannelIsMod(channelIdx);
         const oldValue: number = instrument.preset;
-        if (oldValue != newValue) {
+        if ((oldValue != newValue) && !isMod) {
             const preset: Preset | null = EditorConfig.valueToPreset(newValue);
             if (preset != null) {
                 if (preset.customType != undefined) {
@@ -809,6 +810,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
         }
 
         const isNoise: boolean = doc.song.getChannelIsNoise(channelIdx);
+        const isMod: boolean = doc.song.getChannelIsMod(channelIdx);
         const instrument: Instrument = doc.song.channels[channelIdx].instruments[instrumentIdx];
         instrument.effects = 1 << EffectType.panning; // disable all existing effects except panning, which should always be on.
         instrument.aliases = false;
@@ -816,7 +818,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
 
         const midFreq: number = FilterControlPoint.getRoundedSettingValueFromHz(700.0);
         const maxFreq: number = Config.filterFreqRange - 1;
-        if (doc.prefs.EQFilterOnRandomization) {
+        if (doc.prefs.EQFilterOnRandomization && !isMod) {
             applyFilterPoints(instrument.eqFilter, [
                 new PotentialFilterPoint(0.8, FilterType.lowPass, midFreq, maxFreq, 4000.0, -1),
                 new PotentialFilterPoint(0.4, FilterType.highPass, 0, midFreq - 1, 250.0, -1),
@@ -829,7 +831,9 @@ export class ChangeRandomGeneratedInstrument extends Change {
             instrument.eqFilter = instrument.eqFilter;
         }
 
-        if (isNoise) {
+        if (isMod) {
+            // Skip modulator channels.
+        } else if (isNoise) {
             const possibleTypes: ({ item: InstrumentType, weight: number })[] = [];
             if (doc.prefs.drumSpectrumOnRandomization) { possibleTypes.push({ item: InstrumentType.spectrum, weight: 3 }); }
             if (doc.prefs.drumNoiseOnRandomization) { possibleTypes.push({ item: InstrumentType.noise, weight: 3 }); }
@@ -938,6 +942,26 @@ export class ChangeRandomGeneratedInstrument extends Change {
             } else {
                 instrument.noteFilter = instrument.noteFilter;
             }
+            if (Math.random() < 0.175) {
+                instrument.effects |= 1 << EffectType.wavefold;
+                instrument.wavefoldBounds = Math.round(Math.random() * Config.wavefoldMax);
+                if (Math.random() < 0.25) instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["wavefoldBounds"].index, 0, Config.envelopes.dictionary[selectWeightedRandom([
+                    { item: "note size", weight: 2},
+                    { item: "punch", weight: 2 },
+                    { item: "flare", weight: 2},
+                    { item: "twang", weight: 2},
+                    { item: "swell", weight: 2},
+                    { item: "decay", weight: 2},
+                    { item: "modbox blip", weight: 2 },
+                    { item: "modbox click", weight: 2 },
+                    { item: "modbox bow", weight: 2 },
+                    { item: "modbox trill", weight: 2 },
+                    { item: "wibble", weight: 2},
+                    { item: "linear", weight: 2},
+                    { item: "rise", weight: 2},
+                    { item: "jummbox blip", weight: 2},
+                ])].index);
+            }
             if (Math.random() < 0.15) {
                 instrument.effects |= 1 << EffectType.distortion;
                 instrument.distortion = selectCurvedDistribution(1, Config.distortionRange - 1, Config.distortionRange - 1, 2);
@@ -956,6 +980,26 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "linear", weight: 2},
                         { item: "rise", weight: 2},
                         { item: "jummbox blip", weight: 2},
+                ])].index);
+            }
+            if (Math.random() < 0.135) {
+                instrument.effects |= 1 << EffectType.clipper;
+                instrument.clipBounds = Math.round(Math.random() * Config.clipMax);
+                if (Math.random() < 0.25) instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["clipBounds"].index, 0, Config.envelopes.dictionary[selectWeightedRandom([
+                    { item: "note size", weight: 2},
+                    { item: "punch", weight: 2 },
+                    { item: "flare", weight: 2},
+                    { item: "twang", weight: 2},
+                    { item: "swell", weight: 2},
+                    { item: "decay", weight: 2},
+                    { item: "modbox blip", weight: 2 },
+                    { item: "modbox click", weight: 2 },
+                    { item: "modbox bow", weight: 2 },
+                    { item: "modbox trill", weight: 2 },
+                    { item: "wibble", weight: 2},
+                    { item: "linear", weight: 2},
+                    { item: "rise", weight: 2},
+                    { item: "jummbox blip", weight: 2},
                 ])].index);
             }
             if (Math.random() < 0.15) {
@@ -1017,7 +1061,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
             }
             if (Math.random() < 0.1) {
                 instrument.echoSustain = selectCurvedDistribution(0, Config.echoSustainRange - 1, Config.echoSustainRange >> 1, 2);
-                instrument.echoDelay = selectCurvedDistribution(0, Config.echoDelayRange - 1, Config.echoDelayRange >> 1, 2);
+                instrument.echoDelay = Math.round(Math.random() * Config.echoDelayRange);
                 if (instrument.echoSustain != 0 || instrument.echoDelay != 0) {
                     instrument.effects |= 1 << EffectType.echo;
                 }
@@ -1277,10 +1321,50 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "shaky", weight: 2 },
                 ])].index;
             }
+            if (Math.random() < 0.125) {
+                instrument.effects |= 1 << EffectType.wavefold;
+                instrument.wavefoldBounds = Math.round(Math.random() * Config.wavefoldMax);
+                if (Math.random() < 0.25) instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["wavefoldBounds"].index, 0, Config.envelopes.dictionary[selectWeightedRandom([
+                    { item: "note size", weight: 2},
+                    { item: "punch", weight: 2 },
+                    { item: "flare", weight: 2},
+                    { item: "twang", weight: 2},
+                    { item: "swell", weight: 2},
+                    { item: "decay", weight: 2},
+                    { item: "modbox blip", weight: 2 },
+                    { item: "modbox click", weight: 2 },
+                    { item: "modbox bow", weight: 2 },
+                    { item: "modbox trill", weight: 2 },
+                    { item: "wibble", weight: 2},
+                    { item: "linear", weight: 2},
+                    { item: "rise", weight: 2},
+                    { item: "jummbox blip", weight: 2},
+                ])].index);
+            }
             if (Math.random() < 0.135) {
                 instrument.effects |= 1 << EffectType.distortion;
                 instrument.distortion = selectCurvedDistribution(1, Config.distortionRange - 1, Config.distortionRange - 1, 2);
                 if (Math.random() < 0.25) instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["distortion"].index, 0, Config.envelopes.dictionary[selectWeightedRandom([
+                    { item: "note size", weight: 2},
+                    { item: "punch", weight: 2 },
+                    { item: "flare", weight: 2},
+                    { item: "twang", weight: 2},
+                    { item: "swell", weight: 2},
+                    { item: "decay", weight: 2},
+                    { item: "modbox blip", weight: 2 },
+                    { item: "modbox click", weight: 2 },
+                    { item: "modbox bow", weight: 2 },
+                    { item: "modbox trill", weight: 2 },
+                    { item: "wibble", weight: 2},
+                    { item: "linear", weight: 2},
+                    { item: "rise", weight: 2},
+                    { item: "jummbox blip", weight: 2},
+                ])].index);
+            }
+            if (Math.random() < 0.16) {
+                instrument.effects |= 1 << EffectType.clipper;
+                instrument.clipBounds = Math.round(Math.random() * Config.clipMax);
+                if (Math.random() < 0.25) instrument.addEnvelope(Config.instrumentAutomationTargets.dictionary["clipBounds"].index, 0, Config.envelopes.dictionary[selectWeightedRandom([
                     { item: "note size", weight: 2},
                     { item: "punch", weight: 2 },
                     { item: "flare", weight: 2},
@@ -1410,7 +1494,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
             }
             if (Math.random() < 0.12) {
                 instrument.echoSustain = selectCurvedDistribution(0, Config.echoSustainRange - 1, Config.echoSustainRange >> 1, 2);
-                instrument.echoDelay = selectCurvedDistribution(0, Config.echoDelayRange - 1, Config.echoDelayRange >> 1, 2);
+                instrument.echoDelay = Math.round(Math.random() * Config.echoDelayRange);
                 if (instrument.echoSustain != 0 || instrument.echoDelay != 0) {
                     instrument.effects |= 1 << EffectType.echo;
                 }
@@ -1624,7 +1708,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                             { item: "ramp", weight: 3 },
                             { item: "trapezoid", weight: 3 },
                             { item: "clang", weight: 3},
-                            { item: "metal", weight: 3},
+                            { item: "metallic", weight: 3},
                             { item: "quasi-sine", weight: 3},
                             { item: "secant", weight: 3},
                             { item: "absine", weight: 3},
@@ -1698,7 +1782,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                                 { item: "ramp", weight: 3 },
                                 { item: "trapezoid", weight: 3 },
                                 { item: "clang", weight: 3 },
-                                { item: "metal", weight: 3 },
+                                { item: "metallic", weight: 3 },
                                 { item: "quasi-sine", weight: 3},
                                 { item: "secant", weight: 3},
                                 { item: "absine", weight: 3},
@@ -2205,7 +2289,7 @@ export class ChangeAddChannel extends ChangeGroup {
         const newModChannelCount: number = doc.song.modChannelCount + (isNoise || !isMod ? 0 : 1);
 
         if (newPitchChannelCount <= Config.pitchChannelCountMax && newNoiseChannelCount <= Config.noiseChannelCountMax && newModChannelCount <= Config.modChannelCountMax) {
-            const addedChannelIndex: number = isNoise ? doc.song.pitchChannelCount + doc.song.noiseChannelCount : doc.song.pitchChannelCount;
+            const addedChannelIndex: number = isMod ? doc.song.pitchChannelCount + doc.song.noiseChannelCount + doc.song.modChannelCount : (isNoise ? doc.song.pitchChannelCount + doc.song.noiseChannelCount : doc.song.pitchChannelCount);
             this.append(new ChangeChannelCount(doc, newPitchChannelCount, newNoiseChannelCount, newModChannelCount));
             if (addedChannelIndex - 1 >= index) {
                 this.append(new ChangeChannelOrder(doc, index, addedChannelIndex - 1, 1));
@@ -3137,42 +3221,42 @@ export class ChangeAliasing extends Change {
     }
 }
 
-export class ChangePercussion extends Change {
+export class ChangeSongKeyAffected extends Change {
     constructor(doc: SongDocument, newValue: boolean) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        const oldValue: boolean = instrument.percussion;
+        const oldValue: boolean = instrument.songKeyAffected;
         doc.notifier.changed();
         if (oldValue != newValue) {
-            instrument.percussion = newValue;
+            instrument.songKeyAffected = newValue;
             instrument.preset = instrument.type;
             this._didSomething();
         }
     }
 }
 
-export class ChangeSDAffected extends Change {
+export class ChangeSongDetuneAffected extends Change {
     constructor(doc: SongDocument, newValue: boolean) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        const oldValue: boolean = instrument.songDetuneEffected;
+        const oldValue: boolean = instrument.songDetuneAffected;
         doc.notifier.changed();
         if (oldValue != newValue) {
-            instrument.songDetuneEffected = newValue;
+            instrument.songDetuneAffected = newValue;
             instrument.preset = instrument.type;
             this._didSomething();
         }
     }
 }
 
-export class ChangeSOAffected extends Change {
+export class ChangeFMUsingOperatorOffsets extends Change {
     constructor(doc: SongDocument, newValue: boolean) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        const oldValue: boolean = instrument.songOctaveEffected;
+        const oldValue: boolean = instrument.FMUsesOperatorOffsets;
         doc.notifier.changed();
         if (oldValue != newValue) {
-            instrument.songOctaveEffected = newValue;
+            instrument.FMUsesOperatorOffsets = newValue;
             instrument.preset = instrument.type;
             this._didSomething();
         }
@@ -3285,6 +3369,15 @@ export class ChangeDetune extends ChangeInstrumentSlider {
     }
 }
 
+export class ChangeWavefoldBounds extends ChangeInstrumentSlider {
+    constructor(doc: SongDocument, oldValue: number, newValue: number) {
+        super(doc);
+        this._instrument.wavefoldBounds = newValue;
+        doc.notifier.changed();
+        if (oldValue != newValue) this._didSomething();
+    }
+}
+
 export class ChangeDistortion extends ChangeInstrumentSlider {
     constructor(doc: SongDocument, oldValue: number, newValue: number) {
         super(doc);
@@ -3295,19 +3388,10 @@ export class ChangeDistortion extends ChangeInstrumentSlider {
     }
 }
 
-export class ChangeReshapeAmount extends ChangeInstrumentSlider {
+export class ChangeClipBounds extends ChangeInstrumentSlider {
     constructor(doc: SongDocument, oldValue: number, newValue: number) {
         super(doc);
-        this._instrument.reshapeAmount = newValue;
-        doc.notifier.changed();
-        if (oldValue != newValue) this._didSomething();
-    }
-}
-
-export class ChangeReshapeShift extends ChangeInstrumentSlider {
-    constructor(doc: SongDocument, oldValue: number, newValue: number) {
-        super(doc);
-        this._instrument.reshapeShift = newValue;
+        this._instrument.clipBounds = newValue;
         doc.notifier.changed();
         if (oldValue != newValue) this._didSomething();
     }
@@ -3317,7 +3401,7 @@ export class ChangeBitcrusherFreq extends ChangeInstrumentSlider {
     constructor(doc: SongDocument, oldValue: number, newValue: number) {
         super(doc);
         this._instrument.bitcrusherFreq = newValue;
-        //doc.synth.unsetMod(Config.modulators.dictionary["bit crush"].index, doc.channel, doc.getCurrentInstrument());
+        doc.synth.unsetMod(Config.modulators.dictionary["bit crush"].index, doc.channel, doc.getCurrentInstrument());
         doc.notifier.changed();
         if (oldValue != newValue) this._didSomething();
     }
@@ -3326,34 +3410,10 @@ export class ChangeBitcrusherFreq extends ChangeInstrumentSlider {
 export class ChangeBitcrusherQuantization extends ChangeInstrumentSlider {
     constructor(doc: SongDocument, oldValue: number, newValue: number) {
         super(doc);
-        //doc.synth.unsetMod(Config.modulators.dictionary["freq crush"].index, doc.channel, doc.getCurrentInstrument());
+        doc.synth.unsetMod(Config.modulators.dictionary["freq crush"].index, doc.channel, doc.getCurrentInstrument());
         this._instrument.bitcrusherQuantization = newValue;
         doc.notifier.changed();
         if (oldValue != newValue) this._didSomething();
-    }
-}
-
-export class ChangeLowerWavefold extends Change {
-    constructor(doc: SongDocument, oldValue: number, newValue: number) {
-        super();
-        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        if (oldValue != newValue) {
-            instrument.wavefoldLower = newValue;
-            doc.notifier.changed();
-            this._didSomething();
-        }
-    }
-}
-
-export class ChangeUpperWavefold extends Change {
-    constructor(doc: SongDocument, oldValue: number, newValue: number) {
-        super();
-        const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        if (oldValue != newValue) {
-            instrument.wavefoldUpper = newValue;
-            doc.notifier.changed();
-            this._didSomething();
-        }
     }
 }
 
@@ -3852,6 +3912,7 @@ export class ChangeOperatorWaveform extends Change {
         const oldValue: number = instrument.operators[operatorIndex].waveform;
         if (oldValue != newValue) {
             instrument.operators[operatorIndex].waveform = newValue;
+            instrument.clearInvalidEnvelopeTargets(); // For adding or removing the FMpwm envelope target when needed.
             instrument.preset = instrument.type;
             doc.notifier.changed();
             this._didSomething();
@@ -3867,10 +3928,10 @@ export class ChangeOperatorPulseWidth extends Change {
         this.operatorIndex = operatorIndex;
         instrument.operators[operatorIndex].pulseWidth = newValue;
         instrument.operators[operatorIndex].pulseWidthDecimalOffset = 0;
-        instrument.preset = instrument.type;
         doc.synth.unsetMod(Config.modulators.dictionary["fm pwm 1"].index + operatorIndex, doc.channel, doc.getCurrentInstrument());
         doc.notifier.changed();
         if (oldValue != newValue) {
+            instrument.preset = instrument.type;
             this._didSomething();
         }
     }
@@ -5705,8 +5766,8 @@ export class ChangeSongSubtitle extends Change {
 export class ChangeChannelName extends Change {
     constructor(doc: SongDocument, oldValue: string, newValue: string) {
         super();
-        if (newValue.length > 15) {
-            newValue = newValue.substring(0, 15);
+        if (newValue.length > 25) {
+            newValue = newValue.substring(0, 25);
         }
 
         doc.song.channels[doc.muteEditorChannel].name = newValue;
@@ -5894,11 +5955,12 @@ export class RandomEnvelope extends Change {
         if (effectsIncludeDetune(instrument.effects)) availableTargets.push(Config.instrumentAutomationTargets.dictionary["detune"].index);
         if (effectsIncludeVibrato(instrument.effects)) availableTargets.push(Config.instrumentAutomationTargets.dictionary["vibratoDepth"].index);
         if (effectsIncludeNoteFilter(instrument.effects)) availableTargets.push(Config.instrumentAutomationTargets.dictionary["noteFilterAllFreqs"].index, Config.instrumentAutomationTargets.dictionary["noteFilterFreq"].index);
+        if (effectsIncludeWavefold(instrument.effects)) availableTargets.push(Config.instrumentAutomationTargets.dictionary["wavefoldBounds"].index);
         if (effectsIncludeDistortion(instrument.effects)) availableTargets.push(Config.instrumentAutomationTargets.dictionary["distortion"].index);
+        if (effectsIncludeClipper(instrument.effects)) availableTargets.push(Config.instrumentAutomationTargets.dictionary["clipBounds"].index);
         if (effectsIncludeBitcrusher(instrument.effects)) availableTargets.push(Config.instrumentAutomationTargets.dictionary["bitCrusher"].index, Config.instrumentAutomationTargets.dictionary["freqCrusher"].index);
         if (effectsIncludeChorus(instrument.effects)) availableTargets.push(Config.instrumentAutomationTargets.dictionary["chorus"].index);
         if (effectsIncludeReverb(instrument.effects)) availableTargets.push(Config.instrumentAutomationTargets.dictionary["reverb"].index);
-        if (effectsIncludeReshaper(instrument.effects)) availableTargets.push(Config.instrumentAutomationTargets.dictionary["reshapeAmount"].index);
         // Variable to dynamically change the random number depending on the rolled envelope.
         let randomIndex: number[] = [];
         // Declare this random number early so it can be used for randomIndex.

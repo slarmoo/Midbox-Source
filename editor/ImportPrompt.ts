@@ -10,7 +10,7 @@ import { ChangeGroup } from "./Change";
 import { removeDuplicatePatterns, ChangeSong, ChangeReplacePatterns } from "./changes";
 import { AnalogousDrum, analogousDrumMap, MidiChunkType, MidiFileFormat, MidiEventType, MidiControlEventMessage, MidiMetaEventMessage, MidiRegisteredParameterNumberMSB, MidiRegisteredParameterNumberLSB, midiVolumeToVolumeMult, midiExpressionToVolumeMult } from "./Midi";
 import { ArrayBufferReader } from "./ArrayBufferReader";
-import { Localization as _ } from "./Localization";
+
 
 const {button, p, div, h2, input, select, optgroup, option} = HTML;
 
@@ -52,10 +52,6 @@ export class ImportPrompt implements Prompt {
 			{
 				name: "BeepBox-Based", modSelect: <DictionaryArray<ModList>>toNameMap([
 					{name: "BeepBox", value: "beepbox"},
-					{name: "FoxBox", value: "foxbox"},
-					{name: "CardboardBox", value: "cardboardbox"},
-					{name: "Thurmbox", value: "thurmbox"},
-					{name: "Sandbox", value: "sandbox"},
 				])
 			},
 			{
@@ -68,11 +64,7 @@ export class ImportPrompt implements Prompt {
 				name: "JummBox-Based", modSelect: <DictionaryArray<ModList>>toNameMap([
 					{name: "JummBox", value: "jummbox"},
 					{name: "Midbox", value: "midbox"},
-					{name: "SynthBox", value: "synthbox"},
-					{name: "PaandorasBox", value: "paandorasbox"},
-					{name: "DogeBox2", value: "dogebox2"},
 					{name: "GoldBox", value: "goldbox"},
-					{name: "AwesomeBox", value: "awesomebox"},
 				])
 			},
 			{
@@ -81,7 +73,6 @@ export class ImportPrompt implements Prompt {
 					{name: "AbyssBox", value: "abyssbox"},
 					{name: "Unbox", value: "unbox"},
 					{name: "Slarmoo's Box", value: "slarmoobox"},
-					{name: "VoxBox", value: "voxbox"},
 				])
 			},
 		]);
@@ -89,16 +80,16 @@ export class ImportPrompt implements Prompt {
 		private readonly _modSelectRow: HTMLElement = div({style: "width: 100%;"}, this._modSelectBuildOptions);
 		
 		public readonly container: HTMLDivElement = div({class: "prompt noSelection", style: "width: 300px;"},
-		h2(_.importPrompt1Label),
+		h2("Import"),
 		p({style: "text-align: left; margin: 0.5em 0;"},
-			_.importPromptLargeText1Label,
+			"Midbox songs exported and re-imported as .json files. You could also use other means to make .json files for Midbox as long as they follow the same structure.",
 		),
 		p({style: "text-align: left; margin: 0.5em 0;"},
-			_.importPromptLargeText2Label,
+			"Midbox can also (crudely) import .mid files. There are many tools available for creating .mid files. Shorter and simpler songs are more likely to work well.",
 		),
 		this._fileInput,
 		p({style: "text-align: left; margin: 0.5em 0;"},
-			_.importPromptLargeText3Label,
+			"If you are importing a .json from another BeepBox mod, you can select which mod the .json is coming from here so the import will be more accurate.",
 		),
 		div({style: "align-self: center; margin-top: 5px;"},
 			this._modSelectRow,

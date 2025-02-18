@@ -28,13 +28,14 @@ export class TipPrompt implements Prompt {
 					h2("Song Key"),
 					p("This setting can shift the frequency of every note in your entire song up or down, keeping the \"tonic\" pitches (the highlighted row for octaves in the pattern editor) aligned with the selected \"key\" pitch."),
 					p("If you've already placed some notes but they don't emphasize \"tonic\" pitches then the selected key isn't very meaningful. You can select the \"Detect Key\" option in the key menu to automatically align the most emphasized notes with \"tonic\" pitches."),
-					p("If you don't want specific instruments to be affected by this setting, go to that instrument's effects and check out Midbox's percussion effect!"),
+					p("If you don't want specific instruments to be affected by this setting, go to that instrument's \"advanced settings\" and disable the \"affected by song key\" checkbox!"),
 				);
 			} break;
 			case "key_octave": {
 				message = div(
 					h2("Octave"),
 					p("This setting can shift the \"key\" by an octave, allowing you to use a B- or C+ key. This goes from -2 to 2."),
+					p("If you don't want specific instruments to be affected by this setting, go to that instrument's \"advanced settings\" and disable the \"affected by song key\" checkbox!"),
 					p("This feature was ported from UltraBox!"),
 				);
 			} break;
@@ -135,7 +136,7 @@ export class TipPrompt implements Prompt {
 						p("Arpeggio chords follow a pattern in which the notes cycle through each other. This is typically indicated by numbers on the left side of the note that are dependant of the order you placed them in."),
 						p("What this setting does is that it changes the order these notes play in. There is some text above this box containing the name of the pattern type."),
 						p("The default pattern, 'normal', goes upwards in order of when the notes were placed. The 'legacy' pattern type is only slightly different to the default one, where arpeggio chords with three notes in them will do a 1 2 3 2 pattern. The rest are sillier more-unique patterns. Experimentation is key!"),
-						p("If a pattern name has (Bounce) next to it, instead of looping from the last note to the beginning as most arpeggios do, they 'bounce' back to the first note. Use these if you don't like placing arpeggio notes manually!")
+						p("If a pattern name has \"(bounce)\" next to it, instead of looping from the last note to the beginning as most arpeggios do, they 'bounce' back to the first note. Use these if you don't like placing arpeggio notes manually!")
 					);
 				}
 				break;
@@ -288,7 +289,7 @@ export class TipPrompt implements Prompt {
 				message = div(
 					h2("Unison Volume"),
 					p("This setting controls the unison's volume. You can use this if the unison makes your instrument too loud in comparison to other instruments."),
-					p(`This goes from ${Config.unisonExpressionMin} to ${Config.unisonExpressionMax}.`)
+					p(`This goes from ${Config.unisonExpressionMin} to ${Config.unisonExpressionMax}, and when negative will flip the unison waveforms.`)
 				);
 			} break;
 			case "unisonSign": {
@@ -447,6 +448,13 @@ export class TipPrompt implements Prompt {
 					p("This setting slightly adjusts the frequency of notes played by the instrument. You can use a little bit to add a shifting sound similar to the \"unison\" setting when combined with other instruments. If you use too much, then the instrument may sound unpleasantly out-of-tune. This setting can also, when appiled to the grand majority of instruments, change the feel of your song, even if ever so slightly."),
 				);
 			} break;
+			case "wavefold": {
+				message = div(
+					h2("Wavefolding"),
+					p("The wavefold effect 'folds' the instrument's waveform when it gets too loud. This can give the instrument a different tone and texture. This slider adjusts how close the wavefolding bounds are to the quiet point of the sound wave."),
+					p("Note: This effect is destructive on chords.")
+				);
+			} break;
 			case "distortion": {
 				message = div(
 					h2("Distortion"),
@@ -456,11 +464,11 @@ export class TipPrompt implements Prompt {
 					p("Finally, I recommend adjusting the fade-out setting to allow the end of each note to overlap a little bit with the beginning of the next, but not too much!"),
 				);
 			} break;
-			case "reshaper": {
+			case "clipper": {
 				message = div(
-					h2("Reshaper"),
-					p("This is a new effect from Midbox that changes the shape of the instrument's wave. It comes with two sliders."),
-					p("The first slider sets the intensity of the reshaping, while the second slider changes the position in which the instrument's wave is shifted. Mess with it and see what they do!")
+					h2("Clipping"),
+					p("The clipper effect limits how loud an instrument can be by clipping off the sound that is too loud, mimicing a form of distortion. This slider adjusts how close the clipping bounds are to the quiet point of the sound wave."),
+					p("Note: Similar to distortion, chords with this effect work mostly well in power chords.")
 				);
 			} break;
 			case "bitcrusherQuantization": {
@@ -474,20 +482,6 @@ export class TipPrompt implements Prompt {
 					h2("Frequency Quantization"),
 					p("The bitcrusher effect comes with an additional frequency quantization effect! This is a fun one to play with, especially when combined with the note filter effect."),
 					p("Every other notch on this slider is aligned with the currently selected key of the song, and the in-between notches are aligned with the tritones of the key. High amounts of this settings will typically make your instrument sound more retro or corrupt, but don't always expect the same results!"),
-				);
-			} break;
-			case "wavefoldLower": {
-				message = div(
-					h2("Wavefolding"),
-					p("The wavefold effect allows you to put two boundaries on the instrument's waveform, and when the waveform hits them, it will invert direction/bounce off. This can make various unique sounds."),
-					p("This input box sets the lower limit of the wavefold."),
-				);
-			} break;
-			case "wavefoldUpper": {
-				message = div(
-					h2("Wavefolding"),
-					p("The wavefold effect allows you to put two boundaries on the instrument's waveform, and when the waveform hits them, it will invert direction/bounce off. This can make various unique sounds."),
-					p("This input box sets the upper limit of the wavefold."),
 				);
 			} break;
 			case "envelopes": {
@@ -716,29 +710,25 @@ export class TipPrompt implements Prompt {
 					p("When this setting is ticked, that technique is disabled, so you may hear strange audio artifacts especially at high pitches and when bending notes. However, this can lend a grungy sound to an instrument that could be desirable."),
 				);
 			} break;
-			case "percussion":{
+			case "songKeyAffected":{
 				message = div(
 					h2("Key-Affected"),
-					p("The percussion effect comes with multiple checkboxs that toggle whether or not the instrument is affected by pitch-changing elements."),
-					p("By default, the checkbox is checked. When this box is unchecked, the instrument will no longer be affected by the song key."),
-					p("This allows changing your song key without messing up the pitches of your instrument-drums."),
-					p("[Massive thanks to LeoV for making this checkbox.]"),
+					p("The advanced settings are settings that are sparingly used for certain niches and conveniences."),
+					p("This checkbox toggles whether the instrument is affected by changes to the song key/octave or if it remains at the root key."),
 				);
 			} break;
-			case "songDetuneEffected": {
+			case "songDetuneAffected": {
 				message = div(
 					h2("Song Detune-Affected"),
-					p("The percussion effect comes with multiple checkboxs that toggle whether or not the instrument is affected by pitch-changing elements."),
-					p("By default, the checkbox is checked. When this box is unchecked, the instrument will no longer be affected by the song detune modulator."),
-					p("This allows using the song detune modulator without messing up the pitches of your drums."),
+					p("The advanced settings are settings that are sparingly used for certain niches and conveniences."),
+					p("This checkbox toggles whether the instrument is affected by the song detune modulator or if it remains at the root key."),
 				);
 			} break;
-			case "songOctaveEffected": {
+			case "FMOperatorOffsets": {
 				message = div(
-					h2("Song Key Octave-Affected"),
-					p("The percussion effect comes with multiple checkboxs that toggle whether or not the instrument is affected by pitch-changing elements."),
-					p("By default, the checkbox is checked. When this box is unchecked, the instrument will no longer be affected by the song key octave."),
-					p("This allows changing the song key's octave without messing up the pitches of your instrument-drums."),
+					h2("Operator Offsets"),
+					p("The advanced settings are settings that are sparingly used for certain niches and conveniences."),
+					p("In BeepBox, each operator in FM is detuned by a small amount for some slightly unique sounds and phasing behaviors. This checkbox serves to disable that but can be re-enabled if wanted."),
 				);
 			} break;
 			case "operatorWaveform": {

@@ -5,7 +5,7 @@ import { HTML } from "imperative-html/dist/esm/elements-strict";
 import { SongDocument } from "./SongDocument";
 import { Prompt } from "./Prompt";
 import { ChangeCustomScale } from "./changes";
-import { Localization as _ } from "./Localization";
+
 
 
 //namespace beepbox {
@@ -16,7 +16,7 @@ export class CustomScalePrompt implements Prompt {
     private readonly _scaleFlags: HTMLInputElement[] = [];
     private readonly _scaleRows: HTMLDivElement[] = [];
     private readonly _cancelButton: HTMLButtonElement = button({ class: "cancelButton" });
-    private readonly _okayButton: HTMLButtonElement = button({ class: "okayButton", style: "width:45%;" }, _.confirmLabel);
+    private readonly _okayButton: HTMLButtonElement = button({ class: "okayButton", style: "width:45%;" }, "Confirm");
 
     public readonly container: HTMLDivElement;
 
@@ -27,7 +27,7 @@ export class CustomScalePrompt implements Prompt {
         for (var i = 0; i < Config.pitchesPerOctave; i++) {
             this._scaleFlags[i] = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;", "checked": this._flags[i], "value": i });
             this._scaleRows[i] = div({ style: "text-align: left; height: 2em;" },
-                /*_.customScaleNoteLabel + (i+1) + ":",*/
+                /*"Note " + (i+1) + ":",*/
                 scaleNoteName[i] + ":",
                 this._scaleFlags[i]
             );

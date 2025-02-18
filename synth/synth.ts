@@ -1,11 +1,11 @@
 // Copyright (c) 2012-2022 John Nesky and contributing authors, distributed under the MIT license, see accompanying the LICENSE.md file.
 
-import { Dictionary, DictionaryArray, FilterType, SustainType, EnvelopeType, InstrumentType, EffectType, EnvelopeComputeIndex, Transition, Unison, Chord, Vibrato, Envelope, DrumsetEnvelope, AutomationTarget, Config, getDrumWave, drawNoiseSpectrum, getArpeggioPitchIndex, performIntegralOld, getPulseWidthRatio, effectsIncludeTransition, effectsIncludeChord, effectsIncludePitchShift, effectsIncludeDetune, effectsIncludeVibrato, effectsIncludeNoteFilter, effectsIncludeDistortion, effectsIncludeReshaper, effectsIncludeBitcrusher, effectsIncludeWavefold, effectsIncludePanning, effectsIncludeChorus, effectsIncludeEcho, effectsIncludeReverb, effectsIncludePercussion, OperatorWave } from "./SynthConfig";
+import { Dictionary, DictionaryArray, FilterType, SustainType, EnvelopeType, InstrumentType, EffectType, EnvelopeComputeIndex, Transition, Unison, Chord, Vibrato, Envelope, DrumsetEnvelope, AutomationTarget, Config, getDrumWave, drawNoiseSpectrum, getArpeggioPitchIndex, performIntegralOld, getPulseWidthRatio, effectsIncludeTransition, effectsIncludeChord, effectsIncludePitchShift, effectsIncludeDetune, effectsIncludeVibrato, effectsIncludeNoteFilter, effectsIncludeDistortion, effectsIncludeClipper, effectsIncludeWavefold, effectsIncludeBitcrusher, effectsIncludePanning, effectsIncludeChorus, effectsIncludeEcho, effectsIncludeReverb, OperatorWave } from "./SynthConfig";
 import { EditorConfig } from "../editor/EditorConfig";
 import { scaleElementsByFactor, inverseRealFourierTransform } from "./FFT";
 import { Deque } from "./Deque";
 import { FilterCoefficients, FrequencyResponse, DynamicBiquadFilter, warpInfinityToNyquist } from "./filtering";
-import { Localization as _ } from "../editor/Localization";
+
 import { events } from "../global/Events";
 import { clamp, mod, bounceMod } from "../editor/UsefulCodingStuff";
 
@@ -124,9 +124,7 @@ function encodeEnvelopeSettings(buffer: number[], s: number, d: boolean, lb: num
     buffer.push(base64IntToCharCode[w]);
 
     // LFO Stairs' Step Amount
-    let cleanSA = Math.round(Math.abs(sa) * 1000);
-    let cleanSADivided = Math.floor(cleanSA / 63);
-    buffer.push(base64IntToCharCode[cleanSA % 63], base64IntToCharCode[cleanSADivided % 63], base64IntToCharCode[Math.floor(cleanSADivided / 63)]);
+    buffer.push(base64IntToCharCode[sa]);
 
     // Basic Custom Grid Width
     buffer.push(base64IntToCharCode[gridW]);
@@ -200,9 +198,7 @@ function encodeDrumEnvelopeSettings(buffer: number[], s: number, d: boolean, lb:
     buffer.push(base64IntToCharCode[w]);
 
     // LFO Stairs' Step Amount
-    let cleanSA = Math.round(Math.abs(sa) * 1000);
-    let cleanSADivided = Math.floor(cleanSA / 63);
-    buffer.push(base64IntToCharCode[cleanSA % 63], base64IntToCharCode[cleanSADivided % 63], base64IntToCharCode[Math.floor(cleanSADivided / 63)]);
+    buffer.push(base64IntToCharCode[sa]);
 
     // Basic Custom Grid Width
     buffer.push(base64IntToCharCode[gridW]);
@@ -1430,7 +1426,7 @@ export const enum LFOShapes {
     Sawtooth,
     Trapezoid,
     Stairs,
-    Curvetooth,
+    Absine,
     length,
 }
 
@@ -1640,7 +1636,7 @@ export class EnvelopeSettings {
         if (this.pitchBounce != false && this.pitchAmplify != true) envelopeObject["pitchBounce"] = this.pitchBounce;
         // Continue
         if (this.phase != 0) envelopeObject["phase"] = this.phase;
-        if (this.measurementType != false) envelopeObject["measurementType"] = this.measurementType;
+        if (this.measurementType != true) envelopeObject["measurementType"] = this.measurementType;
         if (this.mirrorAmount != 5) envelopeObject["mirrorAmount"] = this.mirrorAmount;
         if (Config.instrumentAutomationTargets[this.target].maxCount > 1) envelopeObject["index"] = this.index;
         if (this.envelope == Config.envelopes.dictionary["LFO"].index) this.LFOSettings.toJsonObject(envelopeObject);
@@ -1870,7 +1866,7 @@ export class DrumsetEnvelopeSettings {
         if (this.upperBound != 1) drumsetEnvelopeObject["upperBound"] = this.upperBound;
         if (this.delay != 0) drumsetEnvelopeObject["delay"] = this.delay;
         if (this.phase != 0) drumsetEnvelopeObject["phase"] = this.phase;
-        if (this.measurementType != false) drumsetEnvelopeObject["measurementType"] = this.measurementType;
+        if (this.measurementType != true) drumsetEnvelopeObject["measurementType"] = this.measurementType;
         if (this.mirrorAmount != 5) drumsetEnvelopeObject["mirrorAmount"] = this.mirrorAmount;
         if (this.envelope == Config.envelopes.dictionary["LFO"].index) this.LFOSettings.toJsonObject(drumsetEnvelopeObject);
         if (this.envelope == Config.envelopes.dictionary["custom (basic)"].index) {
@@ -2065,27 +2061,25 @@ export class Instrument {
     public fastTwoNoteArp: boolean = false;
     public arpeggioPattern: number = 0;
     public strumSpeed: number = 23;
-    public slideSpeed: number = 21;
+    public slideSpeed: number = 22;
     public legacyTieOver: boolean = false;
     public clicklessTransition: boolean = false;
     public continueThruPattern: boolean = false;
     public aliases: boolean = false;
-    public percussion: boolean = true;
-    public songDetuneEffected: boolean = true;
-    public songOctaveEffected: boolean = true;
+    public songKeyAffected: boolean = true;
+    public songDetuneAffected: boolean = true;
+    public FMUsesOperatorOffsets: boolean = false;
     public pulseWidth: number = Config.pulseWidthRange;
     public supersawDynamism: number = Config.supersawDynamismMax;
 	public supersawSpread: number = Math.ceil(Config.supersawSpreadMax / 2.0);
 	public supersawShape: number = 0;
     public stringSustain: number = 10;
     public stringSustainType: SustainType = SustainType.acoustic;
+    public wavefoldBounds: number = 0;
     public distortion: number = 0;
-    public reshapeAmount: number = 0;
-    public reshapeShift: number = 0;
+    public clipBounds: number = 0;
     public bitcrusherFreq: number = 0;
     public bitcrusherQuantization: number = 0;
-    public wavefoldLower: number = Config.wavefoldLowerMax;
-    public wavefoldUpper: number = Config.wavefoldUpperMax;
     public chorus: number = 0;
     public reverb: number = 0;
     public echoSustain: number = 0;
@@ -2207,13 +2201,11 @@ export class Instrument {
         this.noteFilterType = false;
         this.noteFilterSimpleCut = Config.filterSimpleCutRange - 1;
         this.noteFilterSimplePeak = 0;
+        this.wavefoldBounds = 8;
         this.distortion = Math.floor((Config.distortionRange - 1) * 0.75);
-        this.reshapeAmount = Math.floor(Config.reshapeMax / 2);
-        this.reshapeShift = 0;
+        this.clipBounds = 8;
         this.bitcrusherFreq = Math.floor((Config.bitcrusherFreqRange - 1) * 0.5)
         this.bitcrusherQuantization = Math.floor((Config.bitcrusherQuantizationRange - 1) * 0.5);
-        this.wavefoldLower = Config.wavefoldLowerMin;
-        this.wavefoldUpper = Config.wavefoldUpperMax;
         this.pan = Config.panCenter;
         this.panDelay = 10;
         this.pitchShift = Config.pitchShiftCenter;
@@ -2228,12 +2220,12 @@ export class Instrument {
         this.arpeggioPattern = 0;
         this.envelopeSpeed = 12;
         this.strumSpeed = 23;
-        this.slideSpeed = 21;
+        this.slideSpeed = 22;
         this.legacyTieOver = false;
         this.aliases = false;
-        this.percussion = true;
-        this.songDetuneEffected = true;
-        this.songOctaveEffected = true;
+        this.songKeyAffected = true;
+        this.songDetuneAffected = true;
+        this.FMUsesOperatorOffsets = false;
         this.fadeIn = 0;
         this.fadeOut = Config.fadeOutNeutral;
         this.transition = Config.transitions.dictionary["normal"].index;
@@ -2539,21 +2531,19 @@ export class Instrument {
                     instrumentObject["noteSubFilters" + i] = this.noteSubFilters[i]!.toJsonObject();
             }
         }
+        if (effectsIncludeWavefold(this.effects)) {
+            instrumentObject["wavefoldBounds"] = this.wavefoldBounds;
+        }
         if (effectsIncludeDistortion(this.effects)) {
             instrumentObject["distortion"] = Math.round(100 * this.distortion / (Config.distortionRange - 1));
             instrumentObject["aliases"] = this.aliases;
         }
-        if (effectsIncludeReshaper(this.effects)) {
-            instrumentObject["reshapeAmount"] = this.reshapeAmount;
-            instrumentObject["reshapeShift"] = this.reshapeShift;
+        if (effectsIncludeClipper(this.effects)) {
+            instrumentObject["clipBounds"] = this.clipBounds;
         }
         if (effectsIncludeBitcrusher(this.effects)) {
             instrumentObject["bitcrusherOctave"] = (Config.bitcrusherFreqRange - 1 - this.bitcrusherFreq) * Config.bitcrusherOctaveStep;
             instrumentObject["bitcrusherQuantization"] = Math.round(100 * this.bitcrusherQuantization / (Config.bitcrusherQuantizationRange - 1));
-        }
-        if (effectsIncludeWavefold(this.effects)) {
-            instrumentObject["wavefoldLower"] = this.wavefoldLower;
-            instrumentObject["wavefoldUpper"] = this.wavefoldUpper;
         }
         if (effectsIncludePanning(this.effects)) {
             instrumentObject["pan"] = Math.round(100 * (this.pan - Config.panCenter) / Config.panCenter);
@@ -2570,11 +2560,9 @@ export class Instrument {
             instrumentObject["reverb"] = Math.round(100 * this.reverb / (Config.reverbRange - 1));
         }
 
-        if (effectsIncludePercussion(this.effects)) {
-            instrumentObject["percussion"] = this.percussion;
-            instrumentObject["songDetuneEffected"] = this.songDetuneEffected;
-            instrumentObject["songOctaveEffected"] = this.songOctaveEffected;
-        }
+        instrumentObject["songKeyAffected"] = this.songKeyAffected;
+        instrumentObject["songDetuneAffected"] = this.songDetuneAffected;
+        instrumentObject["FMUsesOperatorOffsets"] = this.FMUsesOperatorOffsets;
 
         if (this.type != InstrumentType.drumset) {
             instrumentObject["fadeInSeconds"] = Math.round(10000 * Synth.fadeInSettingToSeconds(this.fadeIn)) / 10000;
@@ -2589,7 +2577,7 @@ export class Instrument {
         }
 
         if (this.type == InstrumentType.noise) {
-            instrumentObject["unison"] = Config.unisons[this.unison].name;
+            instrumentObject["unison"] = this.unison == Config.unisons.length ? "custom" : Config.unisons[this.unison].name;
             if (this.unison == Config.unisons.length) {
                 instrumentObject["unisonVoices"] = this.unisonVoices;
                 instrumentObject["unisonSpread"] = this.unisonSpread;
@@ -2779,6 +2767,16 @@ export class Instrument {
     public fromJsonObject(instrumentObject: any, isNoiseChannel: boolean, isModChannel: boolean, useSlowerRhythm: boolean, useFastTwoNoteArp: boolean, legacyGlobalReverb: number = 0, jsonFormat: string = Config.jsonFormat): void {
         if (instrumentObject == undefined) instrumentObject = {};
 
+        // Shorthand for specific mod-based groups.
+        let fromBeepBox: boolean = false;
+        let fromModBox: boolean = false;
+        //let fromJummBox: boolean = false;
+        //let fromUltraBox: boolean = false;
+        if (jsonFormat == "beepbox") fromBeepBox = true;
+        if (jsonFormat == "modbox" || jsonFormat == "nepbox") fromModBox = true;
+        //if (jsonFormat == "jummbox" || jsonFormat == "midbox" || jsonFormat == "goldbox") fromJummBox = true;
+        //if (jsonFormat == "ultrabox" || jsonFormat == "abyssbox" || jsonFormat == "unbox" || jsonFormat == "slarmoobox") fromUltraBox = true;
+
         let type: InstrumentType = Config.instrumentTypeNames.indexOf(instrumentObject["type"]);
         if (<any>type == -1) type = isModChannel ? InstrumentType.mod : (isNoiseChannel ? InstrumentType.noise : InstrumentType.chip);
         this.setTypeAndReset(type, isNoiseChannel, isModChannel);
@@ -2793,7 +2791,7 @@ export class Instrument {
         }
 
         if (instrumentObject["volume"] != undefined) {
-            if (jsonFormat == "beepbox" || jsonFormat == "modbox" || jsonFormat == "foxbox" || jsonFormat == "nepbox" || jsonFormat == "sandbox" || jsonFormat == "cardboardbox" || jsonFormat == "thurmbox") {
+            if (fromBeepBox || fromModBox) {
                 // BeepBox-like mods had a lot less options for volume and couldn't go above 0 in JummBox-like volumes.
                 this.volume = Math.round(-clamp(0, 8, Math.round(5 - (instrumentObject["volume"] | 0) / 20)) * 25.0 / 7.0);
             } else {
@@ -2855,7 +2853,7 @@ export class Instrument {
                 }
 
                 // Detect ModBox's old transitions and turn them into envelopes.
-                if (jsonFormat == "modbox" || jsonFormat == "nepbox"){
+                if (fromModBox){
                     const oldTransitionToEnvelope = (<any>{
                         "trill": { target: "noteVolume", envelope: "modbox trill", envelopeSpeed: 2 },
                         "click": { target: "pitchShift", envelope: "modbox click", envelopeSpeed: 3 },
@@ -2989,14 +2987,15 @@ export class Instrument {
 
         if (instrumentObject["pan"] != undefined) {
             this.pan = clamp(0, Config.panMax + 1, Math.round(Config.panCenter + (instrumentObject["pan"] | 0) * Config.panCenter / 100));
-
-            // Old songs may have a panning effect without explicitly enabling it.
-            if (this.pan != Config.panCenter) {
-                this.effects = (this.effects | (1 << EffectType.panning));
-            }
+        } else if (instrumentObject["ipan"] != undefined && fromModBox) {
+            // support for modbox fixed
+            this.pan = clamp(0, Config.panMax + 1, Config.panCenter + (instrumentObject["ipan"] * -50));
         } else {
             this.pan = Config.panCenter;
-            // Still enabling pan effect, to make it a default
+        }
+
+        // Old songs may have a panning effect without explicitly enabling it.
+        if (this.pan != Config.panCenter) {
             this.effects = (this.effects | (1 << EffectType.panning));
         }
 
@@ -3010,22 +3009,27 @@ export class Instrument {
             this.detune = clamp(Config.detuneMin, Config.detuneMax + 1, (instrumentObject["detune"] | 0));
         }
         else if (instrumentObject["detuneCents"] == undefined) {
-            if (jsonFormat != "modbox" || !effectsIncludeDetune(this.effects)) {
+            if (!fromModBox || !effectsIncludeDetune(this.effects)) {
                 // Do not overwrite detune.
             } else {
                 this.detune = Config.detuneCenter;
             }
         }
 
+        if (instrumentObject["wavefoldBounds"] != undefined) {
+            this.wavefoldBounds = clamp(0, Config.wavefoldMax+1,instrumentObject["wavefoldBounds"]);
+        } else {
+            this.wavefoldBounds = 8;
+        }
+
         if (instrumentObject["distortion"] != undefined) {
             this.distortion = clamp(0, Config.distortionRange, Math.round((Config.distortionRange - 1) * (instrumentObject["distortion"] | 0) / 100));
         }
 
-        if (instrumentObject["reshapeAmount"] != undefined) {
-            this.reshapeAmount = clamp(0, Config.reshapeMax, instrumentObject["reshapeAmount"]);
-        }
-        if (instrumentObject["reshapeShift"] != undefined) {
-            this.reshapeShift = clamp(0, Config.reshapeShiftMax, instrumentObject["reshapeShift"]);
+        if (instrumentObject["clipBounds"] != undefined) {
+            this.clipBounds = clamp(0, Config.clipMax+1, instrumentObject["clipBounds"]);
+        } else {
+            this.clipBounds = 8;
         }
 
         if (instrumentObject["bitcrusherOctave"] != undefined) {
@@ -3033,17 +3037,6 @@ export class Instrument {
         }
         if (instrumentObject["bitcrusherQuantization"] != undefined) {
             this.bitcrusherQuantization = clamp(0, Config.bitcrusherQuantizationRange, Math.round((Config.bitcrusherQuantizationRange - 1) * (instrumentObject["bitcrusherQuantization"] | 0) / 100));
-        }
-
-        if (instrumentObject["wavefoldLower"] != undefined) {
-            this.wavefoldLower = instrumentObject["wavefoldLower"];
-        } else {
-            this.wavefoldLower = Config.wavefoldLowerMax;
-        }
-        if (instrumentObject["wavefoldUpper"] != undefined) {
-            this.wavefoldUpper = instrumentObject["wavefoldUpper"];
-        } else {
-            this.wavefoldUpper = Config.wavefoldUpperMax;
         }
 
         if (instrumentObject["echoSustain"] != undefined) {
@@ -3757,7 +3750,7 @@ export class Instrument {
                 this.slideSpeed = instrumentObject["slideSpeed"];
             }
             else {
-                this.slideSpeed = 21;
+                this.slideSpeed = 22;
             } 
 
             if (instrumentObject["clicklessTransition"] != undefined) {
@@ -3781,22 +3774,23 @@ export class Instrument {
                 this.aliases = false;
             }
 
-            if (instrumentObject["percussion"] != undefined) {
-                this.percussion = instrumentObject["percussion"];
+            if (instrumentObject["songKeyAffected"] != undefined) {
+                this.songKeyAffected = instrumentObject["songKeyAffected"];
             } else {
-                this.percussion = true;
+                this.songKeyAffected = true;
             }
 
-            if (instrumentObject["songDetuneEffected"] != undefined) {
-                this.songDetuneEffected = instrumentObject["songDetuneEffected"];
+            if (instrumentObject["songDetuneAffected"] != undefined) {
+                this.songDetuneAffected = instrumentObject["songDetuneAffected"];
             } else {
-                this.songDetuneEffected = true;
+                this.songDetuneAffected = true;
             }
 
-            if (instrumentObject["songOctaveEffected"] != undefined) {
-                this.songOctaveEffected = instrumentObject["songOctaveEffected"];
+            if (instrumentObject["FMUsesOperatorOffsets"] != undefined) {
+                this.FMUsesOperatorOffsets = instrumentObject["FMUsesOperatorOffsets"];
             } else {
-                this.songOctaveEffected = true;
+                // Compatibility: Set this to true if undefined.
+                this.FMUsesOperatorOffsets = true;
             }
 
             if (instrumentObject["noteFilterType"] != undefined) {
@@ -4150,7 +4144,7 @@ export class Instrument {
                         }
 
                         // Slarmoo's Box / VoxBox inverse toggle support.
-                        if (jsonFormat == "slarmoobox" || jsonFormat == "voxbox") {
+                        if (jsonFormat == "slarmoobox") {
                             let storedLowerBound = tempEnvelope.lowerBound;
                             if (instrumentObject["envelopeInverse" + i] != undefined && instrumentObject["envelopeInverse" + i] != null) {
                                 if (instrumentObject["envelopeInverse" + i]) {
@@ -4263,6 +4257,13 @@ export class Instrument {
             //	if (index >= this.eqFilter.controlPointCount)   return false;
             //}
         }
+        if ((automationTarget.name == "operatorFrequency") || (automationTarget.name == "operatorAmplitude") || (automationTarget.name == "operatorPulseWidth")) {
+            if (index >= 4 + (this.type == InstrumentType.advfm ? 2 : 0)) return false;
+
+            if ((automationTarget.name == "operatorPulseWidth")) {
+                if (this.operators[index].waveform != Config.operatorWaves.dictionary["pulse width"].index) return false;
+            }
+        }
         return true;
     }
 
@@ -4318,7 +4319,7 @@ export class Song {
     private static readonly _oldestMidboxVersion: number = 0;
     private static readonly _latestMidboxVersion: number = 0;
     // One-character variant detection at the start of URL to distinguish variants such as Midbox.
-    private static readonly _variant = 0x6d; // m (0x6d) is for Midbox. Note to self: If ModBox takes m, move to "mid".
+    private static readonly _variant = 0x6d; // m (0x6d) is for Midbox.
 
     public title: string;
     public subtitle: string;
@@ -4360,31 +4361,95 @@ export class Song {
 
     // Returns the ideal new note volume when dragging (max volume for a normal note, a "neutral" value for mod notes based on how they work)
     public getNewNoteVolume = (isMod: boolean, modChannel?: number, modInstrument?: number, modCount?: number): number => {
-        if (!isMod || modChannel == undefined || modInstrument == undefined || modCount == undefined)
-            return 6;
+        if (!isMod || modChannel == undefined || modInstrument == undefined || modCount == undefined) return Config.noteSizeMax;
         else {
             // Sigh, the way pitches count up and the visual ordering in the UI are flipped.
             modCount = Config.modCount - modCount - 1;
 
-            let vol: number | undefined = Config.modulators[this.channels[modChannel].instruments[modInstrument].modulators[modCount]].newNoteVol;
+            const instrument: Instrument = this.channels[modChannel].instruments[modInstrument];
+            let vol: number | undefined = Config.modulators[instrument.modulators[modCount]].newNoteVol;
 
+            let currentIndex: number = instrument.modulators[modCount];
             // For tempo, actually use user defined tempo
             let tempoIndex: number = Config.modulators.dictionary["tempo"].index;
-            if (this.channels[modChannel].instruments[modInstrument].modulators[modCount] == tempoIndex) {
-                vol = this.tempo - Config.modulators[tempoIndex].convertRealFactor;
-            }
+            if (currentIndex == tempoIndex) vol = this.tempo - Config.modulators[tempoIndex].convertRealFactor;
 
-            if (vol != undefined)
-                return vol;
-            else
-                return 6;
+            // For effects and envelopes, use the user defined value of the selected instrument (or the default value if all or active is selected)
+            if (!Config.modulators[currentIndex].forSong && instrument.modInstruments[modCount] < this.channels[instrument.modChannels[modCount]].instruments.length) {
+                let chorusIndex: number = Config.modulators.dictionary["chorus"].index;
+                let reverbIndex: number = Config.modulators.dictionary["reverb"].index;
+                let panningIndex: number = Config.modulators.dictionary["pan"].index;
+                let panDelayIndex: number = Config.modulators.dictionary["pan delay"].index;
+                let distortionIndex: number = Config.modulators.dictionary["distortion"].index;
+                let detuneIndex: number = Config.modulators.dictionary["detune"].index;
+                let vibratoDepthIndex: number = Config.modulators.dictionary["vibrato depth"].index;
+                let vibratoSpeedIndex: number = Config.modulators.dictionary["vibrato speed"].index;
+                let vibratoDelayIndex: number = Config.modulators.dictionary["vibrato delay"].index;
+                let arpSpeedIndex: number = Config.modulators.dictionary["arp speed"].index;
+                let bitCrushIndex: number = Config.modulators.dictionary["bit crush"].index;
+                let freqCrushIndex: number = Config.modulators.dictionary["freq crush"].index;
+                let echoIndex: number = Config.modulators.dictionary["echo"].index;
+                let pitchShiftIndex: number = Config.modulators.dictionary["pitch shift"].index;
+                let envSpeedIndex: number = Config.modulators.dictionary["envelope speed"].index;
+                let instrumentIndex: number = instrument.modInstruments[modCount];
+                switch (currentIndex) {
+                    case chorusIndex:
+                        vol = this.channels[instrument.modChannels[modCount]].instruments[instrumentIndex].chorus - Config.modulators[chorusIndex].convertRealFactor;
+                        break;
+                    case reverbIndex:
+                        vol = this.channels[instrument.modChannels[modCount]].instruments[instrumentIndex].reverb - Config.modulators[reverbIndex].convertRealFactor;
+                        break;
+                    case panningIndex:
+                        vol = this.channels[instrument.modChannels[modCount]].instruments[instrumentIndex].pan - Config.modulators[panningIndex].convertRealFactor;
+                        break;
+                    case panDelayIndex:
+                        vol = this.channels[instrument.modChannels[modCount]].instruments[instrumentIndex].panDelay - Config.modulators[panDelayIndex].convertRealFactor;
+                        break;
+                    case distortionIndex:
+                        vol = this.channels[instrument.modChannels[modCount]].instruments[instrumentIndex].distortion - Config.modulators[distortionIndex].convertRealFactor;
+                        break;
+                    case detuneIndex:
+                        vol = this.channels[instrument.modChannels[modCount]].instruments[instrumentIndex].detune;
+                        break;
+                    case vibratoDepthIndex:
+                        vol = Math.round(this.channels[instrument.modChannels[modCount]].instruments[instrumentIndex].vibratoDepth * 25 - Config.modulators[vibratoDepthIndex].convertRealFactor);
+                        break;
+                    case vibratoSpeedIndex:
+                        vol = this.channels[instrument.modChannels[modCount]].instruments[instrumentIndex].vibratoSpeed - Config.modulators[vibratoSpeedIndex].convertRealFactor;
+                        break;
+                    case vibratoDelayIndex:
+                        vol = this.channels[instrument.modChannels[modCount]].instruments[instrumentIndex].vibratoDelay - Config.modulators[vibratoDelayIndex].convertRealFactor;
+                        break;
+                    case arpSpeedIndex:
+                        vol = this.channels[instrument.modChannels[modCount]].instruments[instrumentIndex].arpeggioSpeed - Config.modulators[arpSpeedIndex].convertRealFactor;
+                        break;
+                    case bitCrushIndex:
+                        vol = this.channels[instrument.modChannels[modCount]].instruments[instrumentIndex].bitcrusherQuantization - Config.modulators[bitCrushIndex].convertRealFactor;
+                        break;
+                    case freqCrushIndex:
+                        vol = this.channels[instrument.modChannels[modCount]].instruments[instrumentIndex].bitcrusherFreq - Config.modulators[freqCrushIndex].convertRealFactor;
+                        break;
+                    case echoIndex:
+                        vol = this.channels[instrument.modChannels[modCount]].instruments[instrumentIndex].echoSustain - Config.modulators[echoIndex].convertRealFactor;
+                        break;
+                    case pitchShiftIndex:
+                        vol = this.channels[instrument.modChannels[modCount]].instruments[instrumentIndex].pitchShift;
+                        break;
+                    case envSpeedIndex:
+                        vol = this.channels[instrument.modChannels[modCount]].instruments[instrumentIndex].envelopeSpeed - Config.modulators[envSpeedIndex].convertRealFactor;
+                        break;
+                }
+            }    
+
+            if (vol != undefined) return vol;
+            else return Config.noteSizeMax;
         }
     }
 
 
     public getVolumeCap = (isMod: boolean, modChannel?: number, modInstrument?: number, modCount?: number): number => {
         if (!isMod || modChannel == undefined || modInstrument == undefined || modCount == undefined)
-            return 6;
+            return Config.noteSizeMax;
         else {
             // Sigh, the way pitches count up and the visual ordering in the UI are flipped.
             modCount = Config.modCount - modCount - 1;
@@ -4408,8 +4473,7 @@ export class Song {
                 }
                 return cap;
             }
-            else
-                return 6;
+            else return Config.noteSizeMax;
         }
     }
 
@@ -4419,7 +4483,6 @@ export class Song {
         else {
             let cap: number | undefined = Config.modulators[modSetting].maxRawVol;
             if (cap != undefined) {
-
                 // For filters, cap is dependent on which filter setting is targeted
                 if (filterType != undefined && (Config.modulators[modSetting].name == "eq filter" || Config.modulators[modSetting].name == "note filter")) {
                     // type 0: number of filter morphs
@@ -4432,7 +4495,6 @@ export class Song {
                         cap = Config.filterGainRange;
                     }
                 }
-
                 return cap;
             }
             else
@@ -4484,7 +4546,7 @@ export class Song {
         this.layeredInstruments = false;
         this.patternInstruments = false;
 
-        this.title = _.newSongLabel;
+        this.title = "Untitled Project";
         this.subtitle = "";
         document.title = this.title + " - " + EditorConfig.versionDisplayName;
 
@@ -4740,21 +4802,19 @@ export class Song {
                         buffer.push(base64IntToCharCode[instrument.vibratoType]);
                     }
                 }
+                if (effectsIncludeWavefold(instrument.effects)) {
+                    buffer.push(base64IntToCharCode[instrument.wavefoldBounds]); 
+                }
                 if (effectsIncludeDistortion(instrument.effects)) {
                     buffer.push(base64IntToCharCode[instrument.distortion]);
                     // Aliasing is tied into distortion for now
                     buffer.push(base64IntToCharCode[+instrument.aliases]);
                 }
-                if (effectsIncludeReshaper(instrument.effects)) {
-                    buffer.push(base64IntToCharCode[instrument.reshapeAmount]);
-                    buffer.push(base64IntToCharCode[instrument.reshapeShift]);
+                if (effectsIncludeClipper(instrument.effects)) {
+                    buffer.push(base64IntToCharCode[instrument.clipBounds]);
                 }
                 if (effectsIncludeBitcrusher(instrument.effects)) {
                     buffer.push(base64IntToCharCode[instrument.bitcrusherFreq], base64IntToCharCode[instrument.bitcrusherQuantization]);
-                }
-                if (effectsIncludeWavefold(instrument.effects)) {
-                    buffer.push(base64IntToCharCode[instrument.wavefoldLower >> 6], base64IntToCharCode[instrument.wavefoldLower & 0x3f]); 
-                    buffer.push(base64IntToCharCode[instrument.wavefoldUpper >> 6], base64IntToCharCode[instrument.wavefoldUpper & 0x3f]);
                 }
                 if (effectsIncludePanning(instrument.effects)) {
                     buffer.push(base64IntToCharCode[instrument.pan >> 6], base64IntToCharCode[instrument.pan & 0x3f]);
@@ -4769,10 +4829,10 @@ export class Song {
                 if (effectsIncludeReverb(instrument.effects)) {
                     buffer.push(base64IntToCharCode[instrument.reverb]);
                 }
-                if (effectsIncludePercussion(instrument.effects)) {
-                    buffer.push(base64IntToCharCode[+instrument.percussion], base64IntToCharCode[+instrument.songDetuneEffected], base64IntToCharCode[+instrument.songOctaveEffected]);
-                }
-
+                buffer.push(base64IntToCharCode[+instrument.songKeyAffected]), 
+                buffer.push(base64IntToCharCode[+instrument.songDetuneAffected]);
+                buffer.push(base64IntToCharCode[+instrument.FMUsesOperatorOffsets]);
+                
                 if (instrument.type != InstrumentType.drumset) {
                     buffer.push(SongTagCode.fadeInOut, base64IntToCharCode[instrument.fadeIn], base64IntToCharCode[instrument.fadeOut]);
                     // Transition info follows transition song tag
@@ -5359,7 +5419,7 @@ export class Song {
                     legacyGlobalReverb = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
                     legacyGlobalReverb = clamp(0, Config.reverbRange, legacyGlobalReverb);
                 } else {
-                    // Do nothing, BeepBox v9+ do not support song-wide reverb - JummBox still does via modulator.
+                    // Do nothing, BeepBox v9+ do not support song-wide reverb - JummBox and Midbox still do via modulators.
                 }
             } break;
             case SongTagCode.beatCount: {
@@ -5728,7 +5788,7 @@ export class Song {
                         drumsetEnv.LFOSettings.LFOIgnorance = (base64CharCodeToInt[compressed.charCodeAt(charIndex++)]) ? true : false;
                         drumsetEnv.LFOSettings.LFOTrapezoidRatio = clamp(Config.LFOTrapezoidRatioMin, Config.LFOTrapezoidRatioMax+1, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                         drumsetEnv.LFOSettings.LFOPulseWidth = clamp(0, 21, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
-                        drumsetEnv.LFOSettings.LFOStepAmount = clamp(0, Config.LFOStairsStepAmountMax+1, (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] + ((base64CharCodeToInt[compressed.charCodeAt(charIndex++)] + (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] * 63)) * 63)) / 1000);
+                        drumsetEnv.LFOSettings.LFOStepAmount = clamp(0, Config.LFOStairsStepAmountMax+1, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                         drumsetEnv.basicCustomGridWidth = clamp(Config.customEnvGridMinWidth, Config.customEnvGridMaxWidth+1, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                         drumsetEnv.basicCustomGridHeight = clamp(Config.customEnvGridMinHeight, Config.customEnvGridMaxHeight+1, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                         for (let i = 0; i < drumsetEnv.basicCustomGridWidth; i++) {
@@ -6040,21 +6100,13 @@ export class Song {
                         instrument.reverb = legacyGlobalReverb;
                     }
                     // @jummbus - Enabling pan effect on song import no matter what to make it a default.
-                    //if (instrument.pan != Config.panCenter) {
                     instrument.effects |= 1 << EffectType.panning;
-                    //}
-                    if (instrument.vibrato != Config.vibratos.dictionary["none"].index) {
-                        // Enable vibrato if it was used.
-                        instrument.effects |= 1 << EffectType.vibrato;
-                    }
-                    if (instrument.detune != Config.detuneCenter) {
-                        // Enable detune if it was used.
-                        instrument.effects |= 1 << EffectType.detune;
-                    }
-                    if (instrument.aliases)
-                        instrument.effects |= 1 << EffectType.distortion;
-                    else
-                        instrument.effects &= ~(1 << EffectType.distortion);
+                    // Enable vibrato if it was used.
+                    if (instrument.vibrato != Config.vibratos.dictionary["none"].index) instrument.effects |= 1 << EffectType.vibrato;
+                    // Enable detune if it was used.
+                    if (instrument.detune != Config.detuneCenter) instrument.effects |= 1 << EffectType.detune;
+                    if (instrument.aliases) instrument.effects |= 1 << EffectType.distortion;
+                    else instrument.effects &= ~(1 << EffectType.distortion);
 
                     // convertLegacySettings may need to force-enable note filter, call
                     // it again here to make sure that this override takes precedence.
@@ -6077,7 +6129,7 @@ export class Song {
                         if (fromBeepBox || typeCheck == 0) {
                             instrument.noteFilterType = false;
                             if (fromJummBox || fromMidbox)
-                                typeCheck = base64CharCodeToInt[compressed.charCodeAt(charIndex++)]; // Skip to next index in jummbox to get actual count
+                                typeCheck = base64CharCodeToInt[compressed.charCodeAt(charIndex++)]; // Skip to next index in Midbox to get actual count
                             instrument.noteFilter.controlPointCount = clamp(0, Config.filterMaxPoints + 1, typeCheck);
                             for (let i: number = instrument.noteFilter.controlPoints.length; i < instrument.noteFilter.controlPointCount; i++) {
                                 instrument.noteFilter.controlPoints[i] = new FilterControlPoint();
@@ -6140,9 +6192,8 @@ export class Song {
                             instrument.arpeggioSpeed = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
                             instrument.fastTwoNoteArp = (base64CharCodeToInt[compressed.charCodeAt(charIndex++)]) ? true : false;
                             instrument.arpeggioPattern = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
-                        }
-                        // Custom strum speed!
-                        else if (Config.chords[instrument.chord].strumParts > 0 && (fromMidbox)) {
+                        } else if (Config.chords[instrument.chord].strumParts > 0 && (fromMidbox)) {
+                            // Custom strum speed!
                             instrument.strumSpeed = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
                         }
                     }
@@ -6167,51 +6218,44 @@ export class Song {
                             instrument.vibratoSpeed = clamp(0, Config.modulators.dictionary["vibrato speed"].maxRawVol + 1, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                             instrument.vibratoDelay = clamp(0, Config.modulators.dictionary["vibrato delay"].maxRawVol + 1, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                             instrument.vibratoType = clamp(0, Config.vibratoTypes.length, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
-                        }
-                        // Enforce standard vibrato settings
-                        else {
+                        } else { 
+                            // Enforce standard vibrato settings
                             instrument.vibratoDepth = Config.vibratos[instrument.vibrato].amplitude;
                             instrument.vibratoSpeed = 10; // Normal speed
                             instrument.vibratoDelay = Config.vibratos[instrument.vibrato].delayTicks / 2;
                             instrument.vibratoType = Config.vibratos[instrument.vibrato].type;
                         }
                     }
+                    if (effectsIncludeWavefold(instrument.effects)) {
+                        instrument.wavefoldBounds = clamp(0, Config.wavefoldMax+1, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
+                    }
                     if (effectsIncludeDistortion(instrument.effects)) {
                         instrument.distortion = clamp(0, Config.distortionRange, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
-                        if ((fromJummBox && !beforeFive) || fromMidbox)
-                            instrument.aliases = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] ? true : false;
+                        if ((fromJummBox && !beforeFive) || fromMidbox) instrument.aliases = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] ? true : false;
                     }
-                    if (effectsIncludeReshaper(instrument.effects)) {
-                        instrument.reshapeAmount = clamp(0, Config.reshapeMax, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
-                        instrument.reshapeShift = clamp(0, Config.reshapeShiftMax, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
+                    if (effectsIncludeClipper(instrument.effects)) {
+                        instrument.clipBounds = clamp(0, Config.clipMax+1, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                     }
                     if (effectsIncludeBitcrusher(instrument.effects)) {
                         instrument.bitcrusherFreq = clamp(0, Config.bitcrusherFreqRange, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                         instrument.bitcrusherQuantization = clamp(0, Config.bitcrusherQuantizationRange, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                     }
-                    if (effectsIncludeWavefold(instrument.effects)) {
-                        instrument.wavefoldLower = clamp(0, Config.wavefoldLowerMax + 1, (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] << 6) + base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
-                        instrument.wavefoldUpper = clamp(0, Config.wavefoldUpperMax + 1, (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] << 6) + base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
-                    }
                     if (effectsIncludePanning(instrument.effects)) {
                         if (fromBeepBox) {
-                            // Beepbox has a panMax of 8 (9 total positions), Jummbox has a panMax of 100 (101 total positions)
+                            // Beepbox has a panMax of 8 (9 total positions), Midbox has a panMax of 100 (101 total positions)
                             instrument.pan = clamp(0, Config.panMax + 1, Math.round(base64CharCodeToInt[compressed.charCodeAt(charIndex++)] * ((Config.panMax) / 8.0)));
-                        }
-                        else {
+                        } else {
                             instrument.pan = clamp(0, Config.panMax + 1, (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] << 6) + base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                         }
 
-                        // Now, pan delay follows on new versions of jummbox.
-                        if ((fromJummBox && !beforeTwo) || fromMidbox)
-                            instrument.panDelay = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
+                        // Now, pan delay follows on new versions of Midbox.
+                        if ((fromJummBox && !beforeTwo) || fromMidbox) instrument.panDelay = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
                     }
                     if (effectsIncludeChorus(instrument.effects)) {
                         if (fromBeepBox) {
                             // BeepBox has 4 chorus values vs. JB's 8
                             instrument.chorus = clamp(0, (Config.chorusRange / 2) + 1, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]) * 2;
-                        }
-                        else {
+                        } else {
                             instrument.chorus = clamp(0, Config.chorusRange, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                         }
                     }
@@ -6226,11 +6270,10 @@ export class Song {
                             instrument.reverb = clamp(0, Config.reverbRange, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                         }
                     }
-                    if (effectsIncludePercussion(instrument.effects)) {
-                        instrument.percussion = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] ? true : false;
-                        instrument.songDetuneEffected = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] ? true : false;
-                        instrument.songOctaveEffected = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] ? true : false;
-                    }
+
+                    instrument.songKeyAffected = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] ? true : false;
+                    instrument.songDetuneAffected = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] ? true : false;
+                    instrument.FMUsesOperatorOffsets = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] ? true : false;
                 }
                 // Clamp the range.
                 instrument.effects &= (1 << EffectType.length) - 1;
@@ -6255,13 +6298,13 @@ export class Song {
                     instrument.volume = Math.round(clamp(-Config.volumeRange / 2, 1, -base64CharCodeToInt[compressed.charCodeAt(charIndex++)] * 25.0 / 7.0));
                 } else {
                     const instrument: Instrument = this.channels[instrumentChannelIterator].instruments[instrumentIndexIterator];
-                    // Volume is stored in two bytes in jummbox just in case range ever exceeds one byte, e.g. through later waffling on the subject.
+                    // Volume is stored in two bytes in Midbox just in case range ever exceeds one byte, e.g. through later waffling on the subject.
                     instrument.volume = Math.round(clamp(-Config.volumeRange / 2, Config.volumeRange / 2 + 1, ((base64CharCodeToInt[compressed.charCodeAt(charIndex++)] << 6) | (base64CharCodeToInt[compressed.charCodeAt(charIndex++)])) - Config.volumeRange / 2));
                 }
             } break;
             case SongTagCode.pan: {
                 if (beforeNine && fromBeepBox) {
-                    // Beepbox has a panMax of 8 (9 total positions), Jummbox has a panMax of 100 (101 total positions)
+                    // Beepbox has a panMax of 8 (9 total positions), Midbox has a panMax of 100 (101 total positions)
                     const instrument: Instrument = this.channels[instrumentChannelIterator].instruments[instrumentIndexIterator];
                     instrument.pan = clamp(0, Config.panMax + 1, base64CharCodeToInt[compressed.charCodeAt(charIndex++)] * ((Config.panMax) / 8.0));
                 } else if (beforeFive && fromJummBox) {
@@ -6455,7 +6498,7 @@ export class Song {
                         const maxCount: number = Config.instrumentAutomationTargets[target].maxCount;
                         if (maxCount > 1) {
                             index = clamp(0, maxCount, base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
-                        } //
+                        }
                         const envelope: number = clamp(0, Config.envelopes.length, (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] << 6) + base64CharCodeToInt[compressed.charCodeAt(charIndex++)]);
                         const envSpeed: number = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] + ((base64CharCodeToInt[compressed.charCodeAt(charIndex++)] + (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] * 63)) * 63);
                         const discrete: boolean = (base64CharCodeToInt[compressed.charCodeAt(charIndex++)]) ? true : false;
@@ -6476,7 +6519,7 @@ export class Song {
                         const LFOIgnorance: boolean = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] ? true : false;
                         const LFOTrapezoidRatio: number = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
                         const LFOPulseWidth: number = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
-                        const LFOStepAmount: number = base64CharCodeToInt[compressed.charCodeAt(charIndex++)] + ((base64CharCodeToInt[compressed.charCodeAt(charIndex++)] + (base64CharCodeToInt[compressed.charCodeAt(charIndex++)] * 63)) * 63);
+                        const LFOStepAmount: number = base64CharCodeToInt[compressed.charCodeAt(charIndex++)];
                         const LFOSettingBundle: LFOSettings = new LFOSettings();
                         LFOSettingBundle.LFOShape = LFOShape;
                         LFOSettingBundle.LFOAllowAccelerate = LFOAllowAccelerate;
@@ -6790,7 +6833,6 @@ export class Song {
 
                     // Some info about modulator settings immediately follows in mod channels.
                     if (isModChannel) {
-
                         // 2 more indices for 'all' and 'active'
                         const neededModInstrumentIndexBits: number = (fromJummBox && beforeFive) ? neededInstrumentIndexBits : Song.getNeededBits(this.getMaxInstrumentsPerChannel() + 2);
 
@@ -6840,30 +6882,24 @@ export class Song {
                                     if (instrument.modulators[mod] == 7) {
                                         // Legacy filter cut index
                                         // Check if there is no filter dot on prospective filter. If so, add a low pass at max possible freq.
-
                                         if (forNoteFilter) {
                                             instrument.modulators[mod] = Config.modulators.dictionary["note filt cut"].index;
-                                        }
-                                        else {
+                                        } else {
                                             instrument.modulators[mod] = Config.modulators.dictionary["eq filt cut"].index;
                                         }
 
                                         instrument.modFilterTypes[mod] = 1; // Dot 1 X
-
-                                    }
-                                    else if (instrument.modulators[mod] == 8) {
+                                    } else if (instrument.modulators[mod] == 8) {
                                         // Legacy filter peak index
                                         if (forNoteFilter) {
                                             instrument.modulators[mod] = Config.modulators.dictionary["note filt peak"].index;
-                                        }
-                                        else {
+                                        } else {
                                             instrument.modulators[mod] = Config.modulators.dictionary["eq filt peak"].index;
                                         }
 
                                         instrument.modFilterTypes[mod] = 2; // Dot 1 Y
                                     }
-                                }
-                                else if (fromJummBox && beforeFive) {
+                                } else if (fromJummBox && beforeFive) {
                                     // Check for song reverb mod, which must be handled differently now that it is a multiplier
                                     if (instrument.modulators[mod] == Config.modulators.dictionary["song reverb"].index) {
                                         songReverbChannel = channelIndex;
@@ -6926,7 +6962,6 @@ export class Song {
                         let noteCount: number = 0;
                         // Due to arbitrary note positioning, mod channels don't end the count until curPart actually exceeds the max
                         while (curPart < this.beatsPerBar * Config.partsPerBeat + (+isModChannel)) {
-
                             const useOldShape: boolean = bits.read(1) == 1;
                             let newNote: boolean = false;
                             let shapeIndex: number = 0;
@@ -6943,8 +6978,7 @@ export class Song {
                                     const restLength: number = bits.readPartDuration();
                                     if (isBackwards) {
                                         curPart -= restLength;
-                                    }
-                                    else {
+                                    } else {
                                         curPart += restLength;
                                     }
                                 } else {
@@ -6966,8 +7000,7 @@ export class Song {
                                         // Old format: X 1's followed by a 0 => X+1 pitches, up to 4
                                         shape.pitchCount = 1;
                                         while (shape.pitchCount < 4 && bits.read(1) == 1) shape.pitchCount++;
-                                    }
-                                    else {
+                                    } else {
                                         // New format is:
                                         //      0: 1 pitch
                                         // 1[XXX]: 3 bits of binary signifying 2+ pitches
@@ -7003,8 +7036,7 @@ export class Song {
                                             pinObj.size = bits.read(2) * 2;
                                         } else if (!isModChannel) {
                                             pinObj.size = bits.read(bitsPerNoteSize);
-                                        }
-                                        else {
+                                        } else {
                                             pinObj.size = bits.read(11);
                                         }
                                         shape.pins.push(pinObj);
@@ -7104,7 +7136,9 @@ export class Song {
                                             note.continuesLastPattern = channel.instruments[newPattern.instruments[0]].legacyTieOver;
                                         }
                                     }
-                                }
+                                } else {
+									note.continuesLastPattern = false;
+								}
 
                                 curPart = validateRange(0, this.beatsPerBar * Config.partsPerBeat, note.end);
                             }
@@ -7374,36 +7408,31 @@ export class Song {
 
         if (jsonObject["limitThreshold"] != undefined) {
             this.limitThreshold = Math.max(0.0, Math.min(2.0, jsonObject["limitThreshold"] || 0));
-        }
-        else {
+        } else {
             this.limitThreshold = 1.0;
         }
 
         if (jsonObject["compressionThreshold"] != undefined) {
             this.compressionThreshold = Math.max(0.0, Math.min(1.1, jsonObject["compressionThreshold"] || 0));
-        }
-        else {
+        } else {
             this.compressionThreshold = 1.0;
         }
 
         if (jsonObject["limitRise"] != undefined) {
             this.limitRise = Math.max(2000.0, Math.min(10000.0, jsonObject["limitRise"] || 0));
-        }
-        else {
+        } else {
             this.limitRise = 4000.0;
         }
 
         if (jsonObject["limitDecay"] != undefined) {
             this.limitDecay = Math.max(1.0, Math.min(30.0, jsonObject["limitDecay"] || 0));
-        }
-        else {
+        } else {
             this.limitDecay = 4.0;
         }
 
         if (jsonObject["limitRatio"] != undefined) {
             this.limitRatio = Math.max(0.0, Math.min(11.0, jsonObject["limitRatio"] || 0));
-        }
-        else {
+        } else {
             this.limitRatio = 1.0;
         }
 
@@ -7467,8 +7496,7 @@ export class Song {
                     newNoiseChannels.push(channel);
                 } else if (isModChannel) {
                     newModChannels.push(channel);
-                }
-                else {
+                } else {
                     newPitchChannels.push(channel);
                 }
 
@@ -7479,8 +7507,7 @@ export class Song {
 
                 if (channelObject["name"] != undefined) {
                     channel.name = channelObject["name"];
-                }
-                else {
+                } else {
                     channel.name = "";
                 }
 
@@ -8048,7 +8075,7 @@ export class EnvelopeComputer {
                     phaseSeconds = envelopeSettings.phase;
                     phaseBeats = phaseSeconds / secondsPerTick * beatsPerTick;
                 }
-                if (tone) pitch = Synth.notePitchToEnvelopeValue(instrument, envelopeIndex, tone, instrumentState);
+                if (tone) pitch = (envelope.type == EnvelopeType.pitch) ? Synth.notePitchToEnvelopeValue(instrument, envelopeIndex, tone, instrumentState) : 0;
                 mirrorAmount = envelopeSettings.mirrorAmount;
                 LFOShape = envelopeSettings.LFOSettings.LFOShape;
                 if (envelopeSettings.LFOSettings.LFOAllowAccelerate) LFOAcceleration = envelopeSettings.LFOSettings.LFOAcceleration;
@@ -8404,15 +8431,15 @@ export class EnvelopeComputer {
                     if (timeLeft > 0) return 1 * (upperBound - lowerBound) + lowerBound;
                     else return (Math.max(0, Math.min(1, ((x3 / steps) * scale + offset)))) * (upperBound - lowerBound) + lowerBound;
                 } else 
-                // Case 7, curvetooth.
-                if (LFOShape == LFOShapes.Curvetooth) {
+                // Case 7, absine.
+                if (LFOShape == LFOShapes.Absine) {
                     const timeLeft: number = -beatNote + delayBeats;
                     if (LFOIgnorance) {
                         beats = LFOLoopOnce ? Math.max(0, Math.min(0.5, beats - delayBeats + phaseBeats)) : Math.max(0, beats - delayBeats + phaseBeats);
                     } else {
                         beatNote = LFOLoopOnce ? Math.max(0, Math.min(0.5, beatNote - delayBeats + phaseBeats)) : Math.max(0, beatNote - delayBeats + phaseBeats);
                     }
-                    if (timeLeft > 0) return lowerBound;
+                    if (timeLeft > 0) return 1 * (upperBound - lowerBound) + lowerBound;
                     else return (Math.abs(Math.cos((LFOIgnorance ? beats : (Math.pow(beatNote + 1, LFOAcceleration) - 1)) * Math.PI * envelope.speed))) * (upperBound - lowerBound) + lowerBound;
                 } else {
                     // No shapes left.
@@ -8603,6 +8630,9 @@ export class InstrumentState {
     public delayInputMult: number = 0.0;
     public delayInputMultDelta: number = 0.0;
 
+    public wavefold: number = 0.0;
+    public wavefoldDelta: number = 0.0;
+
     public distortion: number = 0.0;
     public distortionDelta: number = 0.0;
     public distortionDrive: number = 0.0;
@@ -8613,11 +8643,8 @@ export class InstrumentState {
     public distortionPrevInput: number = 0.0;
     public distortionNextOutput: number = 0.0;
 
-    public reshape: number = 0.0;
-    public reshapeDelta: number = 0.0;
-    public reshapeShift: number = 0.0;
-    public reshapePhase: number = 0.0;
-    public reshapePhaseDelta: number = 0.0;
+    public clip: number = 0.0;
+    public clipDelta: number = 0.0;
 
     public bitcrusherPrevInput: number = 0.0;
     public bitcrusherCurrentOutput: number = 0.0;
@@ -8765,16 +8792,15 @@ export class InstrumentState {
         this.eqFilterCount = 0;
         this.initialEqFilterInput1 = 0.0;
         this.initialEqFilterInput2 = 0.0;
+        this.wavefold = 0.0;
+        this.wavefoldDelta = 0.0;
         this.distortionFractionalInput1 = 0.0;
         this.distortionFractionalInput2 = 0.0;
         this.distortionFractionalInput3 = 0.0;
         this.distortionPrevInput = 0.0;
         this.distortionNextOutput = 0.0;
-        this.reshape = 0.0;
-        this.reshapeDelta = 0.0;
-        this.reshapeShift = 0.0;
-        this.reshapePhase = 0.0;
-        this.reshapePhaseDelta = 0.0;
+        this.clip = 0.0;
+        this.clipDelta = 0.0;
         this.panningDelayPos = 0;
         if (this.panningDelayLine != null) for (let i: number = 0; i < this.panningDelayLine.length; i++) this.panningDelayLine[i] = 0.0;
         this.echoDelayOffsetEnd = null;
@@ -8865,15 +8891,26 @@ export class InstrumentState {
         const envelopeStarts: number[] = this.envelopeComputer.envelopeStarts;
         const envelopeEnds: number[] = this.envelopeComputer.envelopeEnds;
 
-        const usesDistortion: boolean = effectsIncludeDistortion(this.effects);
-        const usesReshaper: boolean = effectsIncludeReshaper(this.effects);
-        const usesBitcrusher: boolean = effectsIncludeBitcrusher(this.effects);
         const usesWavefold: boolean = effectsIncludeWavefold(this.effects);
+        const usesDistortion: boolean = effectsIncludeDistortion(this.effects);
+        const usesClipper: boolean = effectsIncludeClipper(this.effects);
+        const usesBitcrusher: boolean = effectsIncludeBitcrusher(this.effects);
         const usesPanning: boolean = effectsIncludePanning(this.effects);
         const usesChorus: boolean = effectsIncludeChorus(this.effects);
         const usesEcho: boolean = effectsIncludeEcho(this.effects);
         const usesReverb: boolean = effectsIncludeReverb(this.effects);
-        const usesPercussion: boolean = effectsIncludePercussion(this.effects);
+
+        if (usesWavefold) {
+            let wavefoldSettingStart: number = instrument.wavefoldBounds;
+            let wavefoldSettingEnd: number = instrument.wavefoldBounds;
+
+            const wavefoldEnvelopeStart: number = envelopeStarts[EnvelopeComputeIndex.wavefoldBounds];
+            const wavefoldEnvelopeEnd: number = envelopeEnds[EnvelopeComputeIndex.wavefoldBounds];
+            const wavefoldStart: number = (wavefoldSettingStart * wavefoldEnvelopeStart) / 4;
+            const wavefoldEnd: number = (wavefoldSettingEnd * wavefoldEnvelopeEnd) / 4;
+            this.wavefold = wavefoldStart;
+            this.wavefoldDelta = (wavefoldEnd - wavefoldStart) / roundedSamplesPerTick;
+        }
 
         if (usesDistortion) {
             let useDistortionStart: number = instrument.distortion;
@@ -8899,20 +8936,16 @@ export class InstrumentState {
             this.distortionDriveDelta = (distortionDriveEnd - distortionDriveStart) / roundedSamplesPerTick;
         }
 
-        if (usesReshaper) {
-            let reshapeSettingStart: number = instrument.reshapeAmount;
-            let reshapeSettingEnd: number = instrument.reshapeAmount;
+        if (usesClipper) {
+            let clipperSettingStart: number = instrument.clipBounds;
+            let clipperSettingEnd: number = instrument.clipBounds;
 
-            const reshapeEnvelopeStart: number = envelopeStarts[EnvelopeComputeIndex.reshapeAmount];
-            const reshapeEnvelopeEnd: number = envelopeEnds[EnvelopeComputeIndex.reshapeAmount];
-            const reshapeStart: number = (reshapeSettingStart * reshapeEnvelopeStart) / 4;
-            const reshapeEnd: number = (reshapeSettingEnd * reshapeEnvelopeEnd) / 4;
-            const reshapeShiftValue: number = instrument.reshapeShift / 10;
-            const phaseDelta: number = 220 / samplesPerSecond;
-            this.reshape = reshapeStart;
-            this.reshapeDelta = (reshapeEnd - reshapeStart) / roundedSamplesPerTick;
-            this.reshapeShift = reshapeShiftValue;
-            this.reshapePhaseDelta = phaseDelta;
+            const clipperEnvelopeStart: number = envelopeStarts[EnvelopeComputeIndex.clipBounds];
+            const clipperEnvelopeEnd: number = envelopeEnds[EnvelopeComputeIndex.clipBounds];
+            const clipperStart: number = (clipperSettingStart * clipperEnvelopeStart) / 2;
+            const clipperEnd: number = (clipperSettingEnd * clipperEnvelopeEnd) / 2;
+            this.clip = clipperStart;
+            this.clipDelta = (clipperEnd - clipperStart) / roundedSamplesPerTick;
         }
 
         if (usesBitcrusher) {
@@ -8934,15 +8967,10 @@ export class InstrumentState {
                 quantizationSettingEnd = synth.getModValue(Config.modulators.dictionary["bit crush"].index, channelIndex, instrumentIndex, true);
             }
 
-            // Set basePitch. Take into account if there are any percussion checkboxes disabled.
-            const songKeyBasePitch: number = Config.keys[synth.song!.key].basePitch;
-            const songOctaveBasePitch: number = Config.pitchesPerOctave * synth.song!.octave;
+            const songKeyBasePitch: number = instrument.songKeyAffected ? Config.keys[synth.song!.key].basePitch : 12;
+            const songOctaveBasePitch: number = instrument.songKeyAffected ? (Config.pitchesPerOctave * synth.song!.octave) : 0;
             let basePitch: number = songKeyBasePitch + songOctaveBasePitch;
-            if (usesPercussion) {
-                const keyBasePitch: number = instrument.percussion ? songKeyBasePitch : 12;
-                const octaveBasePitch: number = instrument.songOctaveEffected ? songOctaveBasePitch : 0;
-                basePitch = keyBasePitch + octaveBasePitch;
-            }
+
             const freqCrushEnvelopeStart: number = envelopeStarts[EnvelopeComputeIndex.freqCrusher];
             const freqCrushEnvelopeEnd: number = envelopeEnds[EnvelopeComputeIndex.freqCrusher];
             const bitCrushEnvelopeStart: number = envelopeStarts[EnvelopeComputeIndex.bitCrusher];
@@ -8963,10 +8991,6 @@ export class InstrumentState {
             const foldLevelEnd: number = 2.0 * Config.bitcrusherBaseVolume * Math.pow(1.5, Config.bitcrusherQuantizationRange - 1 - (bitCrushEnvelopeEnd * quantizationSettingEnd));
             this.bitcrusherFoldLevel = foldLevelStart;
             this.bitcrusherFoldLevelScale = Math.pow(foldLevelEnd / foldLevelStart, 1.0 / roundedSamplesPerTick);
-        }
-
-        if (usesWavefold) {
-            // Nothing.
         }
 
         let eqFilterVolume: number = 1.0; //this.envelopeComputer.lowpassCutoffDecayVolumeCompensation;
@@ -9207,7 +9231,6 @@ export class InstrumentState {
 
         let maxReverbMult = 0.0;
         if (usesReverb) {
-
             let useReverbStart: number = instrument.reverb;
             let useReverbEnd: number = instrument.reverb;
 
@@ -9412,7 +9435,6 @@ class ChannelState {
 }
 
 export class Synth {
-
     private syncSongState(): void {
         const channelCount: number = this.song!.getChannelCount();
         for (let i: number = this.channels.length; i < channelCount; i++) {
@@ -9474,7 +9496,7 @@ export class Synth {
                 }
             }
         }
-        // JummBox needs to run synth functions for at least one sample (for JIT purposes)
+        // MidBox needs to run synth functions for at least one sample (for JIT purposes)
 		// before starting audio callbacks to avoid skipping the initial output.
         var dummyArray = new Float32Array(1);
         this.isPlayingSong = true;
@@ -9567,17 +9589,15 @@ export class Synth {
                                     else {
                                         // Generate list of used instruments
                                         let usedInstruments: number[] = [];
-                                        // All
                                         if (instrument.modInstruments[mod] == this.song.channels[instrument.modChannels[mod]].instruments.length) {
+                                            // All
                                             for (let i: number = 0; i < this.song.channels[instrument.modChannels[mod]].instruments.length; i++) {
                                                 usedInstruments.push(i);
                                             }
-                                        }
-                                        // Active
-                                        else if (instrument.modInstruments[mod] > this.song.channels[instrument.modChannels[mod]].instruments.length) {
+                                        } else if (instrument.modInstruments[mod] > this.song.channels[instrument.modChannels[mod]].instruments.length) {
+                                            // Active
                                             const tgtPattern: Pattern | null = this.song.getPattern(instrument.modChannels[mod], currentBar);
-                                            if (tgtPattern != null)
-                                                usedInstruments = tgtPattern.instruments;
+                                            if (tgtPattern != null) usedInstruments = tgtPattern.instruments;
                                         } else {
                                             usedInstruments.push(instrument.modInstruments[mod]);
                                         }
@@ -9585,7 +9605,7 @@ export class Synth {
                                             // Iterate through all used instruments by this modulator
                                             // Special indices for mod filter targets, since they control multiple things.
                                             const eqFilterParam: boolean = instrument.modulators[mod] == Config.modulators.dictionary["eq filter"].index;
-                                            const noteFilterParam: boolean = instrument.modulators[mod] == Config.modulators.dictionary["note filter"].index
+                                            const noteFilterParam: boolean = instrument.modulators[mod] == Config.modulators.dictionary["note filter"].index;
                                             let modulatorAdjust: number = instrument.modulators[mod];
                                             if (eqFilterParam) {
                                                 modulatorAdjust = Config.modulators.length + (instrument.modFilterTypes[mod] | 0);
@@ -9596,7 +9616,6 @@ export class Synth {
 
                                             if (latestModInsTimes[instrument.modChannels[mod]][usedInstruments[instrumentIndex]][modulatorAdjust] == null
                                                 || currentBar * Config.partsPerBeat * this.song.beatsPerBar + latestPinParts[mod] > latestModInsTimes[instrument.modChannels[mod]][usedInstruments[instrumentIndex]][modulatorAdjust]!) {
-
                                                 if (eqFilterParam) {
                                                     let tgtInstrument: Instrument = this.song.channels[instrument.modChannels[mod]].instruments[usedInstruments[instrumentIndex]];
                                                     if (instrument.modFilterTypes[mod] == 0) {
@@ -9637,8 +9656,7 @@ export class Synth {
                                                         }
                                                     }
                                                     tgtInstrument.tmpNoteFilterEnd = tgtInstrument.tmpNoteFilterStart;
-                                                }
-                                                else this.setModValue(latestPinValues[mod], latestPinValues[mod], instrument.modChannels[mod], usedInstruments[instrumentIndex], modulatorAdjust);
+                                                } else this.setModValue(latestPinValues[mod], latestPinValues[mod], instrument.modChannels[mod], usedInstruments[instrumentIndex], modulatorAdjust);
 
                                                 latestModInsTimes[instrument.modChannels[mod]][usedInstruments[instrumentIndex]][modulatorAdjust] = currentBar * Config.partsPerBeat * this.song.beatsPerBar + latestPinParts[mod];
                                             }
@@ -9768,7 +9786,7 @@ export class Synth {
 
     private static readonly fmSynthFunctionCache: Dictionary<Function> = {};
     private static readonly fm6SynthFunctionCache: Dictionary<Function> = {};
-    private static readonly effectsFunctionCache: Function[] = Array(1 << 7).fill(undefined); // keep in sync with the number of post-process effects.
+    private static readonly effectsFunctionCache: Function[] = Array(1 << 9).fill(undefined); // keep in sync with the number of post-process effects.
     private static readonly pickedStringFunctionCache: Function[] = Array(3).fill(undefined); // keep in sync with the number of unison voices.
 
     public readonly channels: ChannelState[] = [];
@@ -11621,15 +11639,9 @@ export class Synth {
         let chordExpressionEnd: number = chordExpression;
 
         let expressionReferencePitch: number = 16; // A low "E" as a MIDI pitch.
-        // Set basePitch. Take into account if there are any percussion checkboxes disabled.
-        const songKeyBasePitch: number = Config.keys[song.key].basePitch;
-        const songOctaveBasePitch: number = Config.pitchesPerOctave * song.octave;
+        const songKeyBasePitch: number = instrument.songKeyAffected ? Config.keys[song.key].basePitch : 12;
+        const songOctaveBasePitch: number = instrument.songKeyAffected ? (Config.pitchesPerOctave * song.octave) : 0;
         let basePitch: number = songKeyBasePitch + songOctaveBasePitch;
-        if (effectsIncludePercussion(instrument.effects)) {
-            const keyBasePitch: number = instrument.percussion ? songKeyBasePitch : 12;
-            const octaveBasePitch: number = instrument.songOctaveEffected ? songOctaveBasePitch : 0;
-            basePitch = keyBasePitch + octaveBasePitch;
-        }
         let baseExpression: number = 1.0;
         let pitchDamping: number = 48;
         if (instrument.type == InstrumentType.spectrum) {
@@ -11880,7 +11892,7 @@ export class Synth {
                 modDetuneStart = this.getModValue(Config.modulators.dictionary["detune"].index, channelIndex, tone.instrumentIndex, false) + Config.detuneCenter;
                 modDetuneEnd = this.getModValue(Config.modulators.dictionary["detune"].index, channelIndex, tone.instrumentIndex, true) + Config.detuneCenter;
             }
-            if (this.isModActive(Config.modulators.dictionary["song detune"].index, channelIndex, tone.instrumentIndex) && (instrument.songDetuneEffected)) {
+            if (this.isModActive(Config.modulators.dictionary["song detune"].index, channelIndex, tone.instrumentIndex) && (instrument.songDetuneAffected)) {
                 modDetuneStart += 4 * this.getModValue(Config.modulators.dictionary["song detune"].index, channelIndex, tone.instrumentIndex, false);
                 modDetuneEnd += 4 * this.getModValue(Config.modulators.dictionary["song detune"].index, channelIndex, tone.instrumentIndex, true);
             }
@@ -11896,8 +11908,7 @@ export class Synth {
             if (instrument.vibrato == Config.vibratos.length) {
                 delayTicks = instrument.vibratoDelay * 2; // Delay was changed from parts to ticks in BB v9
                 // Special case: if vibrato delay is max, NEVER vibrato.
-                if (instrument.vibratoDelay == Config.modulators.dictionary["vibrato delay"].maxRawVol)
-                    delayTicks = Number.POSITIVE_INFINITY;
+                if (instrument.vibratoDelay == Config.modulators.dictionary["vibrato delay"].maxRawVol) delayTicks = Number.POSITIVE_INFINITY;
                 vibratoAmplitudeStart = instrument.vibratoDepth;
                 vibratoAmplitudeEnd = vibratoAmplitudeStart;
             } else {
@@ -11908,9 +11919,7 @@ export class Synth {
 
             if (this.isModActive(Config.modulators.dictionary["vibrato delay"].index, channelIndex, tone.instrumentIndex)) {
                 delayTicks = this.getModValue(Config.modulators.dictionary["vibrato delay"].index, channelIndex, tone.instrumentIndex, false) * 2; // Delay was changed from parts to ticks in BB v9
-                if (delayTicks == Config.modulators.dictionary["vibrato delay"].maxRawVol * 2)
-                    delayTicks = Number.POSITIVE_INFINITY;
-
+                if (delayTicks == Config.modulators.dictionary["vibrato delay"].maxRawVol * 2) delayTicks = Number.POSITIVE_INFINITY;
             }
 
             if (this.isModActive(Config.modulators.dictionary["vibrato depth"].index, channelIndex, tone.instrumentIndex)) {
@@ -12074,11 +12083,10 @@ export class Synth {
 
             const carrierCount: number = (instrument.type == InstrumentType.advfm ? instrument.customAlgorithm.carrierCount : Config.algorithms[instrument.algorithm].carrierCount);
             for (let i: number = 0; i < (instrument.type == InstrumentType.advfm ? 6 : Config.operatorCount); i++) {
-
                 const associatedCarrierIndex: number = (instrument.type == InstrumentType.advfm ? instrument.customAlgorithm.associatedCarrier[i]-1 : Config.algorithms[instrument.algorithm].associatedCarrier[i] - 1);
                 const pitch: number = tone.pitches[arpeggiates ? 0 : ((i < tone.pitchCount) ? i : ((associatedCarrierIndex < tone.pitchCount) ? associatedCarrierIndex : 0))];
                 const freqMult = Config.operatorFrequencies[instrument.operators[i].frequency].mult;
-                const interval = Config.operatorCarrierInterval[associatedCarrierIndex] + arpeggioInterval;
+                const interval = instrument.FMUsesOperatorOffsets ? Config.operatorCarrierInterval[associatedCarrierIndex] + arpeggioInterval : arpeggioInterval;
                 const pitchStart: number = basePitch + (pitch + intervalStart) * intervalScale + interval;
                 const pitchEnd: number = basePitch + (pitch + intervalEnd) * intervalScale + interval;
                 const baseFreqStart: number = Instrument.frequencyFromPitch(pitchStart);
@@ -13045,19 +13053,19 @@ export class Synth {
         // TODO: If automation is involved, don't assume sliders will stay at zero.
         // @jummbus - ^ Correct, removed the non-zero checks as modulation can change them.
 
-        const usesDistortion: boolean = effectsIncludeDistortion(instrumentState.effects);
-        const usesReshaper: boolean = effectsIncludeReshaper(instrumentState.effects);
-        const usesBitcrusher: boolean = effectsIncludeBitcrusher(instrumentState.effects);
         const usesWavefold: boolean = effectsIncludeWavefold(instrumentState.effects);
+        const usesDistortion: boolean = effectsIncludeDistortion(instrumentState.effects);
+        const usesClipper: boolean = effectsIncludeClipper(instrumentState.effects);
+        const usesBitcrusher: boolean = effectsIncludeBitcrusher(instrumentState.effects);
         const usesEqFilter: boolean = instrumentState.eqFilterCount > 0;
         const usesPanning: boolean = effectsIncludePanning(instrumentState.effects);
         const usesChorus: boolean = effectsIncludeChorus(instrumentState.effects);
         const usesEcho: boolean = effectsIncludeEcho(instrumentState.effects);
         const usesReverb: boolean = effectsIncludeReverb(instrumentState.effects);
-        let signature: number = 0; if (usesDistortion) signature = signature | 1;
-        signature = signature << 1; if (usesReshaper) signature = signature | 1;
+        let signature: number = 0; if (usesWavefold) signature = signature | 1;
+        signature = signature << 1; if (usesDistortion) signature = signature | 1;
+        signature = signature << 1; if (usesClipper) signature = signature | 1;
         signature = signature << 1; if (usesBitcrusher) signature = signature | 1;
-        signature = signature << 1; if (usesWavefold) signature = signature | 1;
         signature = signature << 1; if (usesEqFilter) signature = signature | 1;
         signature = signature << 1; if (usesPanning) signature = signature | 1;
         signature = signature << 1; if (usesChorus) signature = signature | 1;
@@ -13081,6 +13089,14 @@ export class Synth {
 				
 				let delayInputMult = +instrumentState.delayInputMult;
 				const delayInputMultDelta = +instrumentState.delayInputMultDelta;`
+            }
+
+            if (usesWavefold) {
+                effectsSource += `
+
+				let wavefold = +instrumentState.wavefold;
+                const wavefoldDelta = +instrumentState.wavefoldDelta;
+                const wavefoldBaseVolume = 15;`
             }
 
             if (usesDistortion) {
@@ -13125,13 +13141,16 @@ export class Synth {
 				let distortionNextOutput = +instrumentState.distortionNextOutput;`
             }
 
-            if (usesReshaper) {
+            if (usesClipper) {
                 effectsSource += `
-                let reshape = +instrumentState.reshape;
-                const reshapeDelta = +instrumentState.reshapeDelta;
-                let reshapeShift = +instrumentState.reshapeShift;
-                let reshapePhase = +instrumentState.reshapePhase;
-                const reshapePhaseDelta = +instrumentState.reshapePhaseDelta;`
+
+                let clip = +instrumentState.clip;
+                const clipDelta = +instrumentState.clipDelta;
+                let inverseClip = Config.clipMax - clip + 1;
+                const p = 3;
+                const clipBaseVolume = 12;
+                // The conditional statement is a zero division check.
+                const max = inverseClip <= 0 ? (0.0001 / Config.clipMax) ** p : (inverseClip / Config.clipMax) ** p;`
             }
 
             if (usesBitcrusher) {
@@ -13146,14 +13165,6 @@ export class Synth {
 				const bitcrusherScaleScale = +instrumentState.bitcrusherScaleScale;
 				let bitcrusherFoldLevel = +instrumentState.bitcrusherFoldLevel;
 				const bitcrusherFoldLevelScale = +instrumentState.bitcrusherFoldLevelScale;`
-            }
-
-            if (usesWavefold) {
-                // MID TODO: Base it off of bitcrush's wavefolding?
-                effectsSource += `
-
-				// Nothing.
-                `
             }
 
             if (usesEqFilter) {
@@ -13290,6 +13301,14 @@ export class Synth {
 					let sample = tempMonoInstrumentSampleBuffer[sampleIndex];
 					tempMonoInstrumentSampleBuffer[sampleIndex] = 0.0;`
 
+            if (usesWavefold) {
+                effectsSource += `
+                            
+                    sample = Math.sin(Math.PI * (sample * wavefoldBaseVolume) * ((wavefold + 1) / 3)) / 2;
+                    sample *= (1 / wavefoldBaseVolume);
+                    wavefold += wavefoldDelta;`
+            }
+
             if (usesDistortion) {
                 effectsSource += `
 					
@@ -13311,13 +13330,12 @@ export class Synth {
 					distortionDrive += distortionDriveDelta;`
             }
 
-            if (usesReshaper) {
+            if (usesClipper) {
                 effectsSource += `
 
-                    let reshapeEquation = Math.abs((-Math.abs(Math.asin(Math.sin(reshapePhase * Math.PI * 0.5))) + reshapeShift) * (reshape / 3)) - ((reshape / 3) * 0.8);
-                    sample *= 1 + reshapeEquation;
-                    reshape += reshapeDelta;
-                    reshapePhase += reshapePhaseDelta;`
+                    sample = Math.min(max / 2, Math.max(-max / 2, (sample * clipBaseVolume))) / -max;
+                    sample *= (1 / clipBaseVolume);
+                    clip += clipDelta;`
             }
 
             if (usesBitcrusher) {
@@ -13347,12 +13365,6 @@ export class Synth {
 					bitcrusherPhaseDelta *= bitcrusherPhaseDeltaScale;
 					bitcrusherScale *= bitcrusherScaleScale;
 					bitcrusherFoldLevel *= bitcrusherFoldLevelScale;`
-            }
-
-            if (usesWavefold) {
-                effectsSource += `
-					// Nothing.
-                    `
             }
 
             if (usesEqFilter) {
@@ -13532,6 +13544,12 @@ export class Synth {
 				instrumentState.delayInputMult = delayInputMult;`
             }
 
+            if (usesWavefold) {
+                effectsSource += `
+				
+                instrumentState.wavefold = wavefold;`
+            }
+
             if (usesDistortion) {
                 effectsSource += `
 				
@@ -13551,11 +13569,10 @@ export class Synth {
 				instrumentState.distortionNextOutput = distortionNextOutput;`
             }
 
-            if (usesReshaper) {
+            if (usesClipper) {
                 effectsSource += `
                 
-                instrumentState.reshape = reshape;
-                instrumentState.reshapePhase = reshapePhase;`
+                instrumentState.clip = clip;`
             }
 
             if (usesBitcrusher) {
@@ -13570,12 +13587,6 @@ export class Synth {
 				instrumentState.bitcrusherScale = bitcrusherScale;
 				instrumentState.bitcrusherFoldLevel = bitcrusherFoldLevel;`
 
-            }
-
-            if (usesWavefold) {
-                effectsSource += `
-				// Nothing.
-                `
             }
 
             if (usesEqFilter) {
@@ -13873,7 +13884,7 @@ export class Synth {
 		synth.sanitizeFilters(filters);
 		tone.initialNoteFilterInput1 = initialFilterInput1;
 		tone.initialNoteFilterInput2 = initialFilterInput2;
-	}
+    }
 
     private static fmSourceTemplate: string[] = (`
 		const data = synth.tempMonoInstrumentSampleBuffer;

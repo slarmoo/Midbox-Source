@@ -1,7 +1,7 @@
 import { Prompt } from "./Prompt";
 import { HTML } from "imperative-html/dist/esm/elements-strict";
 import { SongDocument } from "./SongDocument";
-import { Localization as _ } from "./Localization";
+
 
     const {div, h2, h4, input, label, button, p, option, select} = HTML;
 
@@ -113,7 +113,7 @@ export class RandomGenPrompt implements Prompt {
     private readonly _discreteEnvelopeBox: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "checkbox"});
 
     private readonly _cancelButton: HTMLButtonElement = button({class: "cancelButton"});
-	private readonly _okayButton: HTMLButtonElement = button({class: "okayButton", style: "width:45%;"}, _.confirmLabel);
+	private readonly _okayButton: HTMLButtonElement = button({class: "okayButton", style: "width:45%;"}, "Confirm");
 
 public readonly container: HTMLDivElement = div({class: "prompt noSelection", style: "width: 285px; text-align: center; max-height: 30%; overflow-y: auto;"},
     h2({style: "text-align: center;"},

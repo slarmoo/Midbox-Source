@@ -6,27 +6,27 @@ import { SongDocument } from "./SongDocument";
 import { Prompt } from "./Prompt";
 import { ChangeBeatsPerBar } from "./changes";
 import { ColorConfig } from "./ColorConfig";
-import { Localization as _ } from "./Localization"
+
 
 const {button, div, span, h2, input, br, select, option} = HTML;
 
 export class BeatsPerBarPrompt implements Prompt {
 	private readonly _beatsStepper: HTMLInputElement = input({style: "width: 3em; margin-left: 1em;", type: "number", step: "1"});
 	private readonly _conversionStrategySelect: HTMLSelectElement = select({style: "width: 100%;"},
-		option({value: "splice"}, _.beatsPerBarPrompt1Label),
-		option({value: "stretch"}, _.beatsPerBarPrompt2Label),
-		option({value: "overflow"}, _.beatsPerBarPrompt3Label),
+		option({value: "splice"}, "Splice beats at end of bars."),
+		option({value: "stretch"}, "Stretch notes to fit in bars."),
+		option({value: "overflow"}, "Overflow notes across bars."),
 	);
 	private readonly _cancelButton: HTMLButtonElement = button({class: "cancelButton"});
-	private readonly _okayButton: HTMLButtonElement = button({class: "okayButton", style: "width:45%;"}, _.confirmLabel);
+	private readonly _okayButton: HTMLButtonElement = button({class: "okayButton", style: "width:45%;"}, "Confirm");
 	
 	public readonly container: HTMLDivElement = div({class: "prompt noSelection", style: "width: 250px;"},
-		h2(_.beatsPerBarPrompt4Label),
+		h2("Beats Per Bar"),
 		div({style: "display: flex; flex-direction: row; align-items: center; height: 2em; justify-content: flex-end;"},
 			div({style: "text-align: right;"},
-			_.beatsPerBarPrompt5Label,
+			"Beats per bar:",
 				br(),
-				span({ style: `font-size: smaller; color: ${ColorConfig.secondaryText};` }, _.beatsPerBarPrompt6Label),
+				span({ style: `font-size: smaller; color: ${ColorConfig.secondaryText};` }, "(Multiples of 3 or 4 are recommended.)"),
 			),
 			this._beatsStepper,
 		),

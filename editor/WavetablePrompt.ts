@@ -8,7 +8,6 @@ import { ChangeWavetableCustomWave, ChangeCycleWaves, randomRoundedWave, randomP
 import { ChangeGroup } from "./Change";
 import { Config } from "../synth/SynthConfig";
 import { SongEditor } from "./SongEditor";
-import { Localization as _ } from "./Localization";
 import { convertChipWaveToCustomChip } from "../synth/synth";
 
 const { button, div, h2, select, option } = HTML;
@@ -2078,8 +2077,8 @@ export class WavetablePrompt implements Prompt {
 
 	public readonly _playButton: HTMLButtonElement = button({ style: "width: 55%;", type: "button" });
 
-	public readonly _undoButton: HTMLButtonElement = button({ style: "width: 15%; position: absolute; margin-left: 0px; left: 127px; top: 53px;" }, _.undoLabel);
-	public readonly _redoButton: HTMLButtonElement = button({ style: "width: 15%; position: absolute; margin-right: 0px; right: 127px; top: 53px;" }, _.redoLabel);
+	public readonly _undoButton: HTMLButtonElement = button({ style: "width: 15%; position: absolute; margin-left: 0px; left: 127px; top: 53px;" }, "Undo (Z)");
+	public readonly _redoButton: HTMLButtonElement = button({ style: "width: 15%; position: absolute; margin-right: 0px; right: 127px; top: 53px;" }, "Redo (Y)");
 
 	public readonly _drawType_Standard: HTMLButtonElement = button({ style: "border-radius: 0px; width: 65px;", title: "Cursor"}, [
 		// Cursor icon:
@@ -2121,25 +2120,25 @@ export class WavetablePrompt implements Prompt {
 		]),
 	]);
 
-	private readonly _flipHorizontalButton: HTMLButtonElement = button({ style: "position: absolute; width: 14%; align-self: center; left: 224px; bottom: 20px; font-size: 10.35px;" }, [
+	private readonly _flipHorizontalButton: HTMLButtonElement = button({ style: "position: absolute; width: 14%; align-self: center; left: 224px; bottom: 20px; font-size: 10px;" }, [
 		"Flip Left ↔ Right (H)",
 	]);
-	private readonly _flipVerticalButton: HTMLButtonElement = button({ style: "position: absolute; width: 14%; align-self: center; right: 224px; bottom: 20px; font-size: 10.35px;" }, [
+	private readonly _flipVerticalButton: HTMLButtonElement = button({ style: "position: absolute; width: 14%; align-self: center; right: 224px; bottom: 20px; font-size: 10px;" }, [
 		"Flip Top ↔ Bottom (N)",
 	]);
 
 	private readonly _cancelButton: HTMLButtonElement = button({ class: "cancelButton" });
-	private readonly _okayButton: HTMLButtonElement = button({ class: "okayButton", style: "width:32%; font-size: 15px;" }, _.confirmLabel);
+	private readonly _okayButton: HTMLButtonElement = button({ class: "okayButton", style: "width:32%; font-size: 15px;" }, "Confirm");
 
 	private readonly copyButton: HTMLButtonElement = button({ style: "width: 36.66%; margin-right: 5px; text-align: center;", class: "copyButton" }, [
-		_.copyLabel,
+		"Copy",
 		// Copy icon:
 		SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 0; top: 50%; margin-top: -1em; pointer-events: none;", width: "2em", height: "2em", viewBox: "-5 -21 26 26" }, [
 			SVG.path({ d: "M 0 -15 L 1 -15 L 1 0 L 13 0 L 13 1 L 0 1 L 0 -15 z M 2 -1 L 2 -17 L 10 -17 L 14 -13 L 14 -1 z M 3 -2 L 13 -2 L 13 -12 L 9 -12 L 9 -16 L 3 -16 z", fill: "currentColor" }),
 		]),
 	]);
 	private readonly pasteButton: HTMLButtonElement = button({ style: "width: 36.66%; text-align: center;", class: "pasteButton" }, [
-		_.pasteLabel,
+		"Paste",
 		// Paste icon:
 		SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 0; top: 50%; margin-top: -1em; pointer-events: none;", width: "2em", height: "2em", viewBox: "0 0 26 26" }, [
 			SVG.path({ d: "M 8 18 L 6 18 L 6 5 L 17 5 L 17 7 M 9 8 L 16 8 L 20 12 L 20 22 L 9 22 z", stroke: "currentColor", fill: "none" }),
@@ -2149,7 +2148,7 @@ export class WavetablePrompt implements Prompt {
 	private readonly copyPasteContainer: HTMLDivElement = div({ style: "position: absolute; left: -11px; bottom: 20px; width: 40%;" }, this.copyButton, this.pasteButton);
 
 	private readonly loadWaveformPresetSelect: HTMLSelectElement = buildHeaderedOptions(
-		_.loadPresetLabel, 
+		"Load Preset", 
 		/* List icon:
 		SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 4px; margin-top: 0.05em; pointer-events: none;", width: "16", height: "16", viewBox: "0 0 16 16"}, [
 			SVG.path({ d: "M12 13c0 1.105-1.12 2-2.5 2S7 14.105 7 13s1.12-2 2.5-2 2.5.895 2.5 2", fill: "currentColor"}),
@@ -2161,7 +2160,7 @@ export class WavetablePrompt implements Prompt {
 		Config.chipWaves.map(wave => wave.name));
 
 	private readonly randomizeButton: HTMLButtonElement = button({ style: "font-size: 15px; position: absolute; align-self: right; right: 20px; bottom: 54px; text-align: center; width: 30%; text-align-last: center;" }, [
-		_.random2Label,
+		"Randomize",
 		// Dice icon:
 		SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 4px; margin-top: 0.05em; pointer-events: none;", width: "16", height: "16", viewBox: "0 0 16 16"}, [
 			SVG.path({ d: "M13 1a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2zM3 0a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V3a3 3 0 0 0-3-3z", fill: "currentColor"}),
@@ -2325,13 +2324,13 @@ export class WavetablePrompt implements Prompt {
 		if (this._doc.synth.playing) {
 			this._playButton.classList.remove("playButton");
 			this._playButton.classList.add("pauseButton");
-			this._playButton.title = _.pauseSpaceLabel;
-			this._playButton.innerText = _.pauseLabel;
+			this._playButton.title = "Pause (Space)";
+			this._playButton.innerText = "Pause";
 		} else {
 			this._playButton.classList.remove("pauseButton");
 			this._playButton.classList.add("playButton");
-			this._playButton.title = _.playSpaceLabel;
-			this._playButton.innerText = _.playLabel;
+			this._playButton.title = "Play (Space)";
+			this._playButton.innerText = "Play";
 		}
 	}
 

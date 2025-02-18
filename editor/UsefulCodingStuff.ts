@@ -66,13 +66,13 @@ export function remap(x: number, a: number, b: number, c: number, d: number) {
 import { HTML } from "imperative-html/dist/esm/elements-strict";
 import { Prompt } from "./Prompt";
 import { SongDocument } from "./SongDocument";
-import { Localization as _ } from "./Localization";
+
 
 const { button, div, h2 } = HTML;
 
 export class ExamplePrompt implements Prompt {
     private readonly _cancelButton: HTMLButtonElement = button({ class: "cancelButton" });
-	private readonly _okayButton: HTMLButtonElement = button({ class: "okayButton", style: "width: 32%; font-size: 15px;" }, _.confirmLabel);
+	private readonly _okayButton: HTMLButtonElement = button({ class: "okayButton", style: "width: 32%; font-size: 15px;" }, "Confirm");
 
     public readonly container: HTMLDivElement = div({ class: "prompt noSelection", style: "width: 500px;" },
 		h2("Hello world!"),

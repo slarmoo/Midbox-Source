@@ -372,7 +372,6 @@ export class TrackEditor {
 	}
 		
 	public render(): void {
-
 		this._barWidth = this._doc.getBarWidth();
 			
 		if (this._channels.length != this._doc.song.getChannelCount()) {
@@ -457,8 +456,8 @@ export class TrackEditor {
 		const editorHeight: number = this._doc.song.getChannelCount() * ChannelRow.patternHeight;
 		if (this._renderedEditorHeight != editorHeight) {
 			this._renderedEditorHeight = editorHeight;
-			this._svg.setAttribute("height", "" + editorHeight + Config.barEditorHeight);
-			this._playhead.setAttribute("height", "" + editorHeight + Config.barEditorHeight);
+			this._svg.setAttribute("height", "" + (editorHeight + Config.barEditorHeight));
+			this._playhead.setAttribute("height", "" + (editorHeight + Config.barEditorHeight));
 			this.container.style.height = (editorHeight + Config.barEditorHeight) + "px";
 		}
 			

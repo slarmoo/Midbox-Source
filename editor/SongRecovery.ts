@@ -2,7 +2,7 @@
 
 import { Dictionary } from "../synth/SynthConfig";
 import { Song } from "../synth/synth";
-import { Localization as _ } from "./Localization";
+
 
 	
 export interface RecoveredVersion {
@@ -40,7 +40,7 @@ export function generateUid(): string {
 
 export function errorAlert(error: any): void {
 	console.warn(error);
-	window.alert(_.songCorruptedLabel);
+	window.alert("It appears that the song data has been corrupted. Try to recover the last working version of the song from the \"Recover Recent Song...\" option in Midbox's \"File/Sharing\" menu, or undo the changes that corrupted the song using the undo button on your browser.");
 }
 
 function compareSongs(a: RecoveredSong, b: RecoveredSong): number {

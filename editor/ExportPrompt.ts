@@ -9,7 +9,7 @@ import { Prompt } from "./Prompt";
 import { HTML } from "imperative-html/dist/esm/elements-strict";
 import { ArrayBufferWriter } from "./ArrayBufferWriter";
 import { MidiChunkType, MidiFileFormat, MidiControlEventMessage, MidiEventType, MidiMetaEventMessage, MidiRegisteredParameterNumberMSB, MidiRegisteredParameterNumberLSB, volumeMultToMidiVolume, volumeMultToMidiExpression, defaultMidiPitchBend, defaultMidiExpression } from "./Midi";
-import { Localization as _ } from "./Localization";
+
 
 const { button, div, h2, input, select, option } = HTML;
 
@@ -55,17 +55,17 @@ export class ExportPrompt implements Prompt {
     private readonly _loopDropDown: HTMLInputElement = input({ style: "width: 2em;", type: "number", min: "1", max: "4", step: "1" });
     private readonly _enableOutro: HTMLInputElement = input({ type: "checkbox" });
     private readonly _formatSelect: HTMLSelectElement = select({ style: "width: 100%;" },
-        option({ value: "wav" }, _.exportPrompt1Label),
-        option({ value: "mp3" }, _.exportPrompt2Label),
-        option({ value: "midi" }, _.exportPrompt3Label),
-        option({ value: "json" }, _.exportPrompt4Label),
-        option({ value: "html" }, _.exportPrompt5Label),
+        option({ value: "wav" }, "Export to .wav file."),
+        option({ value: "mp3" }, "Export to .mp3 file."),
+        option({ value: "midi" }, "Export to .mid file."),
+        option({ value: "json" }, "Export to .json file."),
+        option({ value: "html" }, "Export to .html file."),
         // Issue#57 - Add export options for the video formats: MKV and MP4.
-        // option({ value: "mkv" }, _.exportPrompt6Label),
-        // option({ value: "mp4" }, _.exportPrompt7Label),
+        // option({ value: "mkv" }, "Export"),
+        // option({ value: "mp4" }, "Export Options"),
     );
     private readonly _cancelButton: HTMLButtonElement = button({ class: "cancelButton" });
-    private readonly _exportButton: HTMLButtonElement = button({ class: "exportButton", style: "width:45%;" }, _.exportPrompt6Label);
+    private readonly _exportButton: HTMLButtonElement = button({ class: "exportButton", style: "width:45%;" }, "Export");
     private readonly _outputProgressBar: HTMLDivElement = div({ style: `width: 0%; background: ${ColorConfig.loopAccent}; height: 100%; position: absolute; z-index: 2;` });
     private readonly _outputProgressLabel: HTMLDivElement = div({ style: `position: relative; top: -1px; z-index: 3;` }, "0%");
     private readonly _outputProgressContainer: HTMLDivElement = div({ style: `height: 12px; background: ${ColorConfig.uiWidgetBackground}; display: block; position: relative; z-index: 1;` },
@@ -85,20 +85,20 @@ export class ExportPrompt implements Prompt {
     ];
 
     public readonly container: HTMLDivElement = div({ class: "prompt noSelection", style: "width: 200px;" },
-        h2(_.exportPrompt7Label),
+        h2("Export Options"),
         div({ style: "display: flex; flex-direction: row; align-items: center; justify-content: space-between;" },
-            _.exportPrompt8Label,
+            "File Name:",
             this._fileName,
         ),
         div({ style: "display: flex; flex-direction: row; align-items: center; justify-content: space-between;" },
-            _.exportPrompt9Label,
+            "Length:",
             this._computedSamplesLabel,
         ),
         div({ style: "display: table; width: 100%;" },
             div({ style: "display: table-row;" },
-                div({ style: "display: table-cell;" }, _.exportPrompt10Label,),
-                div({ style: "display: table-cell;" }, _.exportPrompt11Label,),
-                div({ style: "display: table-cell;" }, _.exportPrompt12Label,),
+                div({ style: "display: table-cell;" }, "Intro:",),
+                div({ style: "display: table-cell;" }, "Loop Count:",),
+                div({ style: "display: table-cell;" }, "Outro:",),
             ),
             div({ style: "display: table-row;" },
                 div({ style: "display: table-cell; vertical-align: middle;" }, this._enableIntro),
@@ -107,7 +107,7 @@ export class ExportPrompt implements Prompt {
             ),
         ),
         div({ class: "selectContainer", style: "width: 100%;" }, this._formatSelect),
-        div({ style: "text-align: left;" }, _.exportPromptLargeTextLabel),
+        div({ style: "text-align: left;" }, "Exporting can be slow if there is lots of data in the song. Reloading the page or clicking the X will cancel it."),
         this._outputProgressContainer,
         div({ style: "display: flex; flex-direction: row-reverse; justify-content: space-between;" },
             this._exportButton,
@@ -280,7 +280,7 @@ export class ExportPrompt implements Prompt {
             // Done, call final function
             this.synth.renderingSong = false;
             this._doc.synth.renderingSong = false;
-            this._outputProgressLabel.innerText = _.exportPrompt13Label;
+            this._outputProgressLabel.innerText = "Encoding...";
             if (this.thenExportTo == "wav") {
                 this._exportToWavFinish();
             }

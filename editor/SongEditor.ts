@@ -1,7 +1,7 @@
 // Copyright (c) 2012-2022 John Nesky and contributing authors, distributed under the MIT license, see accompanying the LICENSE.md file.
 
 //import {Layout} from "./Layout";
-import { InstrumentType, EffectType, Config, getPulseWidthRatio, effectsIncludeTransition, effectsIncludeChord, effectsIncludePitchShift, effectsIncludeDetune, effectsIncludeVibrato, effectsIncludeNoteFilter, effectsIncludeDistortion, effectsIncludeReshaper, effectsIncludeBitcrusher, effectsIncludeWavefold, effectsIncludePanning, effectsIncludeChorus, effectsIncludeEcho, effectsIncludeReverb, effectsIncludePercussion, DropdownID } from "../synth/SynthConfig";
+import { InstrumentType, EffectType, Config, getPulseWidthRatio, effectsIncludeTransition, effectsIncludeChord, effectsIncludePitchShift, effectsIncludeDetune, effectsIncludeVibrato, effectsIncludeNoteFilter, effectsIncludeWavefold, effectsIncludeDistortion, effectsIncludeClipper, effectsIncludeBitcrusher, effectsIncludePanning, effectsIncludeChorus, effectsIncludeEcho, effectsIncludeReverb, DropdownID } from "../synth/SynthConfig";
 import { BarScrollBar } from "./BarScrollBar";
 import { BeatsPerBarPrompt } from "./BeatsPerBarPrompt";
 import { BasicCustomEnvelopePrompt } from "./BasicCustomEnvelopePrompt";
@@ -21,10 +21,11 @@ import { HTML, SVG } from "imperative-html/dist/esm/elements-strict";
 import { Preferences } from "./Preferences";
 import { HarmonicsEditor } from "./HarmonicsEditor";
 import { InputBox, Slider, SliderNoParse } from "./HTMLWrapper";
+import { Knob } from "./KnobElement";
 import { ImportPrompt } from "./ImportPrompt";
 import { ChannelRow } from "./ChannelRow";
 import { LayoutPrompt } from "./LayoutPrompt";
-import { EnvelopeEditor, EnvelopeLineGraph, EnvelopeStartLine } from "./EnvelopeEditor";
+import { EnvelopeEditor, EnvelopeLineGraph } from "./EnvelopeEditor";
 import { FadeInOutEditor } from "./FadeInOutEditor";
 import { FilterEditor } from "./FilterEditor";
 import { LimiterPrompt } from "./LimiterPrompt";
@@ -47,9 +48,8 @@ import { RecordingSetupPrompt } from "./RecordingSetupPrompt";
 import { SpectrumEditor } from "./SpectrumEditor";
 import { ThemePrompt } from "./ThemePrompt";
 import { TipPrompt } from "./TipPrompt";
-import { LanguagePrompt } from "./LanguagePrompt";
-import { Localization as _ } from "./Localization";
-import { ChangeTempo, ChangeKeyOctave, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangeSupersawDynamism, ChangeSupersawSpread, ChangeSupersawShape, ChangeWavetableSpeed, ChangeWaveInterpolation, ChangeCyclePerNote, ChangeOneShotCycle, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeCustomAlgorithmOrFeedback, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, Change6OpFeedbackType, Change6OpAlgorithm, ChangeChipWave, ChangeNoiseWave, /*ChangeNoiseSeedRandomization, ChangeNoiseSeed,*/ ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeUnisonVoices, ChangeUnisonSpread, ChangeUnisonOffset, ChangeUnisonExpression, ChangeUnisonSign, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeReshapeAmount, ChangeReshapeShift, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeLowerWavefold, ChangeUpperWavefold, ChangeAddEnvelope, ChangeEnvelopeSpeed, ChangeDrumsetEnvelopeSpeed, ChangeDrumsetDiscreteEnvelope, ChangeDrumsetLowerBound, ChangeDrumsetUpperBound, ChangeDrumsetLFOEnvelopeStairsStepAmount, ChangeDrumsetEnvelopeDelay, ChangeDrumsetEnvelopePosition, ChangeDrumsetMeasurementType, ChangeDrumsetClapMirrorAmount, ChangeDrumsetLFOEnvelopeShape, ChangeDrumsetEnvelopeAccelerationEnabled, ChangeDrumsetEnvelopeAcceleration, ChangeDrumsetEnvelopeLooping, ChangeDrumsetEnvelopeIgnorance, ChangeDrumsetLFOEnvelopePulseWidth, ChangeDrumsetLFOEnvelopeTrapezoidRatio, ChangePasteDrumsetEnvelope, ChangeDrumsetEnvelopeOrder, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeWavetableCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeArpeggioPattern, ChangeClicklessTransition, ChangeContinueThruPattern, ChangeAliasing, ChangePercussion, ChangeSDAffected, ChangeSOAffected, ChangeStrumSpeed, ChangeSlideSpeed, ChangeSongSubtitle, ChangeSetPatternInstruments, ChangeHoldingModRecording } from "./changes";
+
+import { ChangeTempo, ChangeKeyOctave, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangeSupersawDynamism, ChangeSupersawSpread, ChangeSupersawShape, ChangeWavetableSpeed, ChangeWaveInterpolation, ChangeCyclePerNote, ChangeOneShotCycle, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeCustomAlgorithmOrFeedback, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, Change6OpFeedbackType, Change6OpAlgorithm, ChangeChipWave, ChangeNoiseWave, /*ChangeNoiseSeedRandomization, ChangeNoiseSeed,*/ ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeUnisonVoices, ChangeUnisonSpread, ChangeUnisonOffset, ChangeUnisonExpression, ChangeUnisonSign, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeWavefoldBounds, ChangeDistortion, ChangeClipBounds, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeAddEnvelope, ChangeEnvelopeSpeed, ChangeDrumsetEnvelopeSpeed, ChangeDrumsetDiscreteEnvelope, ChangeDrumsetLowerBound, ChangeDrumsetUpperBound, ChangeDrumsetLFOEnvelopeStairsStepAmount, ChangeDrumsetEnvelopeDelay, ChangeDrumsetEnvelopePosition, ChangeDrumsetMeasurementType, ChangeDrumsetClapMirrorAmount, ChangeDrumsetLFOEnvelopeShape, ChangeDrumsetEnvelopeAccelerationEnabled, ChangeDrumsetEnvelopeAcceleration, ChangeDrumsetEnvelopeLooping, ChangeDrumsetEnvelopeIgnorance, ChangeDrumsetLFOEnvelopePulseWidth, ChangeDrumsetLFOEnvelopeTrapezoidRatio, ChangePasteDrumsetEnvelope, ChangeDrumsetEnvelopeOrder, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeWavetableCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeArpeggioPattern, ChangeClicklessTransition, ChangeContinueThruPattern, ChangeAliasing, ChangeSongKeyAffected, ChangeSongDetuneAffected, ChangeFMUsingOperatorOffsets, ChangeStrumSpeed, ChangeSlideSpeed, ChangeSongSubtitle, ChangeSetPatternInstruments, ChangeHoldingModRecording } from "./changes";
 import { oscilloscopeCanvas } from "../global/Oscilloscope";
 import { TrackEditor } from "./TrackEditor";
 import { clamp } from "./UsefulCodingStuff";
@@ -96,9 +96,9 @@ function buildPresetOptions(isNoise: boolean, idSet: string): HTMLSelectElement 
         menu.appendChild(option({ value: InstrumentType.wavetable }, EditorConfig.valueToPreset(InstrumentType.wavetable)!.name))
     }
 
-    const randomGroup: HTMLElement = optgroup({ label: (_.randomLabel) });
-    randomGroup.appendChild(option({ value: "randomPreset" }, (_.randomPresetLabel)));
-    randomGroup.appendChild(option({ value: "randomGenerated" }, (_.randomGeneratedLabel)));
+    const randomGroup: HTMLElement = optgroup({ label: ("Randomize ▾") });
+    randomGroup.appendChild(option({ value: "randomPreset" }, ("Random Preset")));
+    randomGroup.appendChild(option({ value: "randomGenerated" }, ("Random Generated")));
     menu.appendChild(randomGroup);
 
     for (let categoryIndex: number = 1; categoryIndex < EditorConfig.presetCategories.length; categoryIndex++) {
@@ -114,19 +114,19 @@ function buildPresetOptions(isNoise: boolean, idSet: string): HTMLSelectElement 
         }
 
         // Need to re-sort some elements for readability. Can't just do this in the menu, because indices are saved in URLs and would get broken if the ordering actually changed.
-        if (category.name == (_.stringPresetsLabel) && foundAny) {
+        if (category.name == "String Presets" && foundAny) {
             // Put violin 2 after violin 1
             let moveViolin2 = group.removeChild(group.children[11]);
             group.insertBefore(moveViolin2, group.children[1]);
         }
 
-        if (category.name == (_.flutePresetsLabel) && foundAny) {
+        if (category.name == "Flute Presets" && foundAny) {
             // Put flute 2 after flute 1
             let moveFlute2 = group.removeChild(group.children[11]);
             group.insertBefore(moveFlute2, group.children[1]);
         }
 
-        if (category.name == (_.keyboardPresetsLabel) && foundAny) {
+        if (category.name == "Keyboard Presets" && foundAny) {
             // Put grand piano 2 after grand piano 1
             let moveGrandPiano2 = group.removeChild(group.children[9]);
             group.insertBefore(moveGrandPiano2, group.children[1]);
@@ -1031,13 +1031,13 @@ export class SongEditor {
     private readonly _loopEditor: LoopEditor = new LoopEditor(this._doc, this._trackEditor);
     private readonly _piano: Piano = new Piano(this._doc);
     private readonly _octaveScrollBar: OctaveScrollBar = new OctaveScrollBar(this._doc, this._piano);
-    private readonly _playButton: HTMLButtonElement = button({ class: "playButton", type: "button", title: _.playSpaceLabel, style: "font-size: 13px;" }, span(_.playLabel));
-    private readonly _pauseButton: HTMLButtonElement = button({ class: "pauseButton", style: "display: none; font-size: 13px;", type: "button", title: _.pauseSpaceLabel }, span(_.pauseLabel));
-    private readonly _recordButton: HTMLButtonElement = button({ class: "recordButton", style: "display: none; font-size: 13px;", type: "button", title: _.recordCTRLSpaceLabel }, span(_.recordLabel));
-    private readonly _stopButton: HTMLButtonElement = button({ class: "stopButton", style: "display: none; font-size: 13px;", type: "button", title: _.stopRecordSpaceLabel }, span(_.stopLabel));
-    private readonly _prevBarButton: HTMLButtonElement = button({ class: "prevBarButton", type: "button", title: _.prevBarLBrackLabel });
-    private readonly _nextBarButton: HTMLButtonElement = button({ class: "nextBarButton", type: "button", title: _.nextBarRBrackLabel });
-    private readonly _volumeSlider: Slider = new Slider(input({ title: _.mainVolumeLabel, style: "width: 5em; flex-grow: 1; margin: 0;", type: "range", min: "0", max: "75", value: "50", step: "1" }), this._doc, null, false);
+    private readonly _playButton: HTMLButtonElement = button({ class: "playButton", type: "button", title: "Play (Space)", style: "font-size: 13px;" }, span("Play"));
+    private readonly _pauseButton: HTMLButtonElement = button({ class: "pauseButton", style: "display: none; font-size: 13px;", type: "button", title: "Pause (Space)" }, span("Pause"));
+    private readonly _recordButton: HTMLButtonElement = button({ class: "recordButton", style: "display: none; font-size: 13px;", type: "button", title: "Record (CTRL + Space)" }, span("Record"));
+    private readonly _stopButton: HTMLButtonElement = button({ class: "stopButton", style: "display: none; font-size: 13px;", type: "button", title: "Stop Recording (Space)" }, span("Stop"));
+    private readonly _prevBarButton: HTMLButtonElement = button({ class: "prevBarButton", type: "button", title: "Previous Bar (Left Bracket)" });
+    private readonly _nextBarButton: HTMLButtonElement = button({ class: "nextBarButton", type: "button", title: "Next Bar (Right Bracket)" });
+    private readonly _volumeSlider: Slider = new Slider(input({ title: "Main Volume", style: "width: 5em; flex-grow: 1; margin: 0;", type: "range", min: "0", max: "75", value: "50", step: "1" }), this._doc, null, false);
     private readonly _outVolumeBarBg: SVGRectElement = SVG.rect({ "pointer-events": "none", width: "90%", height: "50%", x: "5%", y: "25%", fill: ColorConfig.uiWidgetBackground });
     private readonly _outVolumeBar: SVGRectElement = SVG.rect({ "pointer-events": "none", height: "50%", width: "0%", x: "5%", y: "25%", fill: "url('#volumeGrad2')" });
     private readonly _outVolumeCap: SVGRectElement = SVG.rect({ "pointer-events": "none", width: "2px", height: "50%", x: "5%", y: "25%", fill: ColorConfig.uiWidgetFocus });
@@ -1056,127 +1056,97 @@ export class SongEditor {
         this._volumeBarContainer,
     );
     private readonly _fileMenu: HTMLSelectElement = select({ style: "width: 100%;" },
-        option({ selected: true, disabled: true, hidden: false }, span(_.fileSettingsLabel)), // todo: "hidden" should be true but looks wrong on mac chrome, adds checkmark next to first visible option even though it's not selected. :(
-        option({ value: "new" }, (_.newBlankSongLabel)),
-        option({ value: "import" }, (_.importSongLabel) + EditorConfig.ctrlSymbol + "O)"),
-        option({ value: "export" }, (_.exportSongLabel) + EditorConfig.ctrlSymbol + "S)"),
-        option({ value: "copyUrl" }, (_.copyURLLabel)),
-        option({ value: "shareUrl" }, (_.shareURLLabel)),
-        option({ value: "shortenUrl" }, (_.shortenURLLabel)),
-        option({ value: "viewPlayer" }, (_.songPlayerLabel)),
-        option({ value: "copyEmbed" }, (_.copyEmbedCodeLabel)),
-        option({ value: "songRecovery" }, (_.recoverSongLabel)),
+        option({ selected: true, disabled: true, hidden: false }, span("File/Sharing")), // todo: "hidden" should be true but looks wrong on mac chrome, adds checkmark next to first visible option even though it's not selected. :(
+        option({ value: "new" }, ("+ New Blank Song (⇧`)")),
+        option({ value: "import" }, ("↑ Import Song... (") + EditorConfig.ctrlSymbol + "O)"),
+        option({ value: "export" }, ("↓ Export Song...(") + EditorConfig.ctrlSymbol + "S)"),
+        option({ value: "copyUrl" }, ("⎘ Copy Song URL")),
+        option({ value: "shareUrl" }, ("⤳ Share Song URL")),
+        option({ value: "shortenUrl" }, ("… Shorten Song URL (U)")),
+        option({ value: "viewPlayer" }, ("▶ View in Song Player (P)")),
+        option({ value: "copyEmbed" }, ("⎘ Copy HTML Embed Code")),
+        option({ value: "songRecovery" }, ("⚠ Recover Recent Song... (`)")),
     );
     private readonly _editMenu: HTMLSelectElement = select({ style: "width: 100%;" },
-        option({ selected: true, disabled: true, hidden: false }, span(_.editSettingsLabel)), // todo: "hidden" should be true but looks wrong on mac chrome, adds checkmark next to first visible option even though it's not selected. :(
-        option({ value: "undo" }, (_.undoLabel)),
-        option({ value: "redo" }, (_.redoLabel)),
-        option({ value: "copy" }, (_.copyPatternLabel)),
-        option({ value: "pasteNotes" }, (_.pastePatternNotesLabel)),
-        option({ value: "pasteNumbers" }, (_.pastePatternNumbersLabel) + EditorConfig.ctrlSymbol + "⇧V)"),
-        option({ value: "cut"}, (_.cutLabel)),
-        option({ value: "insertBars" }, (_.insertBarLabel)),
-        option({ value: "deleteBars" }, (_.deleteBarLabel)),
-        option({ value: "insertChannel" }, (_.insertChannelLabel) + EditorConfig.ctrlSymbol + "⏎)"),
-        option({ value: "deleteChannel" }, (_.deleteChannelLabel) + EditorConfig.ctrlSymbol + "⌫)"),
-        option({ value: "selectChannel" }, (_.selectChannelLabel)),
-        option({ value: "selectAll" }, (_.selectAllLabel)),
-        option({ value: "duplicatePatterns" }, (_.duplicatePatternsLabel)),
-        option({ value: "transposeUp" }, (_.moveNotesUpLabel)),
-        option({ value: "transposeDown" }, (_.moveNotesDownLabel)),
-        option({ value: "moveNotesSideways" }, (_.moveNotesSidesLabel)),
-        option({ value: "beatsPerBar" }, (_.beatsInBarLabel)),
-        option({ value: "barCount" }, (_.songLengthLabel)),
-        option({ value: "channelSettings" }, (_.channelSettingsLabel)),
-        option({ value: "limiterSettings" }, (_.limiterSettingsLabel)),
-        option({ value: "randomGenSettings"}, (_.randomGenSettingsLabel) + EditorConfig.ctrlSymbol + "R)"),
+        option({ selected: true, disabled: true, hidden: false }, span("Edit/Song")), // todo: "hidden" should be true but looks wrong on mac chrome, adds checkmark next to first visible option even though it's not selected. :(
+        option({ value: "undo" }, ("Undo (Z)")),
+        option({ value: "redo" }, ("Redo (Y)")),
+        option({ value: "copy" }, ("Copy Pattern (C)")),
+        option({ value: "pasteNotes" }, ("Paste Pattern Notes (V)")),
+        option({ value: "pasteNumbers" }, ("Paste Pattern Numbers (") + EditorConfig.ctrlSymbol + "⇧V)"),
+        option({ value: "cut"}, ("Cut (X)")),
+        option({ value: "insertBars" }, ("Insert Bar (⏎)")),
+        option({ value: "deleteBars" }, ("Delete Selected Bars (⌫)")),
+        option({ value: "insertChannel" }, ("Insert Channel (") + EditorConfig.ctrlSymbol + "⏎)"),
+        option({ value: "deleteChannel" }, ("Delete Selected Channels (") + EditorConfig.ctrlSymbol + "⌫)"),
+        option({ value: "selectChannel" }, ("Select Channel (⇧A)")),
+        option({ value: "selectAll" }, ("Select All (A)")),
+        option({ value: "duplicatePatterns" }, ("Duplicate Reused Patterns (D)")),
+        option({ value: "transposeUp" }, ("Move Notes Up (+ or ⇧+)")),
+        option({ value: "transposeDown" }, ("Move Notes Down (- or ⇧-)")),
+        option({ value: "moveNotesSideways" }, ("Move All Notes Sideways... (W)")),
+        option({ value: "beatsPerBar" }, ("Change Beats Per Bar... (⇧B)")),
+        option({ value: "barCount" }, ("Change Song Length... (L)")),
+        option({ value: "channelSettings" }, ("Channel Settings... (Q)")),
+        option({ value: "limiterSettings" }, ("Limiter Settings... (⇧L)")),
+        option({ value: "randomGenSettings"}, ("Random Generation Settings... (") + EditorConfig.ctrlSymbol + "R)"),
     );
     private readonly _optionsMenu: HTMLSelectElement = select({ style: "width: 100%;" },
-        option({ selected: true, disabled: true, hidden: false }, span(_.preferenceSettingsLabel)), // todo: "hidden" should be true but looks wrong on mac chrome, adds checkmark next to first visible option even though it's not selected. :(
-        option({ value: "autoPlay" }, (_.autoPlayLabel)),
-        option({ value: "autoFollow" }, (_.autoFollowLabel)),
-        option({ value: "enableNotePreview" }, (_.enableNotePreviewLabel)),
-        option({ value: "showLetters" }, (_.showPianoLabel)),
-        option({ value: "showFifth" }, (_.showFifthLabel)),
-        option({ value: "notesOutsideScale" }, (_.notesOutsideScaleLabel)),
-        option({ value: "setDefaultScale" }, (_.setDefaultScaleLabel)),
-        option({ value: "showChannels" }, (_.showAllChannelsLabel)),
-        option({ value: "showScrollBar" }, (_.scrollbarLabel)),
-        option({ value: "alwaysFineNoteVol" }, (_.fineNoteVolumeLabel)),
-        option({ value: "enableChannelMuting" }, (_.channelMutingLabel)),
-        option({ value: "displayBrowserUrl" }, (_.displayURLInBrowserLabel)),
-        option({ value: "displayVolumeBar" }, (_.showPlaybackBarLabel)),
-        option({ value: "showOscilloscope" }, (_.showOscilloscopeLabel)),
-        option({ value: "showEnvReorderButtons" }, (_.showEnvReorderButtonsLabel)),
-        option({ value: "language" }, (_.setLanguageLabel)),
-        option({ value: "layout" }, (_.setLayoutLabel)),
-        option({ value: "colorTheme" }, (_.setThemeLabel)),
-        option({ value: "recordingSetup" }, (_.setNoteRecordingLabel)),
-        option({ value: "keybindSetup" }, (_.keybindSetupLabel)),
+        option({ selected: true, disabled: true, hidden: false }, span("Preferences")), // todo: "hidden" should be true but looks wrong on mac chrome, adds checkmark next to first visible option even though it's not selected. :(
+        option({ value: "autoPlay" }, ("Auto Play on Load")),
+        option({ value: "autoFollow" }, ("Keep Current Pattern Selected")),
+        option({ value: "enableNotePreview" }, ("Preview Added Notes")),
+        option({ value: "showLetters" }, ("Show Piano")),
+        option({ value: "showFifth" }, ('Highlight "Fifth" Note')),
+        option({ value: "notesOutsideScale" }, ("Allow Adding Notes Outside Scale")),
+        option({ value: "setDefaultScale" }, ("Set Current Scale as Default")),
+        option({ value: "showChannels" }, ("Show All Channels")),
+        option({ value: "showScrollBar" }, ("Show Octave Scroll Bar")),
+        option({ value: "alwaysFineNoteVol" }, ("Always Fine Note Volume Control")),
+        option({ value: "enableChannelMuting" }, ("Enable Channel Muting/Naming")),
+        option({ value: "displayBrowserUrl" }, ("Display Song Data in URL")),
+        option({ value: "displayVolumeBar" }, ("Show Playback Volume Bar")),
+        option({ value: "showOscilloscope" }, ("Show Oscilloscope")),
+        option({ value: "showEnvReorderButtons" }, ("Show Envelope Reorder Buttons")),
+        option({ value: "layout" }, ("　Set Layout...")),
+        option({ value: "colorTheme" }, ("　Set Theme...")),
+        option({ value: "recordingSetup" }, ("　Note Recording...")),
+        option({ value: "keybindSetup" }, ("Keybind Setup...")),
     );
 
-    private readonly _scaleSelect: HTMLSelectElement = buildOptions(select(), [
-        _.scale1Label, 
-        _.scale2Label, 
-        _.scale3Label, 
-        _.scale4Label, 
-        _.scale5Label, 
-        _.scale6Label, 
-        _.scale7Label, 
-        _.scale8Label, 
-        _.scale9Label, 
-        _.scale10Label, 
-        _.scale11Label, 
-        _.scale12Label, 
-        _.scale13Label, 
-        _.scale14Label, 
-        _.scale15Label, 
-        _.scale16Label, 
-        _.scale17Label, 
-        _.scale18Label, 
-        _.scale19Label, 
-        _.scale20Label,
-        _.scale21Label
-
-    ]);
+    private readonly _scaleSelect: HTMLSelectElement = buildOptions(select(), Config.scales.map(scale => scale.realName));
     private readonly _keySelect: HTMLSelectElement = buildOptions(select(), Config.keys.map(key => key.name).reverse());
     // Issue#31 - Add a song detune slider here replicating that of the modulator's.
     private readonly _octaveStepper: HTMLInputElement = input({ style: "width: 59.5%;", type: "number", min: Config.octaveMin, max: Config.octaveMax, value: "0" });
-    private readonly _tempoSlider: Slider = new Slider(input({ style: "margin: 0; vertical-align: middle;", type: "range", min: "30", max: "320", value: "160", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeTempo(this._doc, oldValue, newValue), false);
+    private readonly _tempoSlider: Slider = new Slider(input({ style: "margin: 0; vertical-align: middle;", type: "range", min: Config.tempoMin, max: Config.tempoMax, value: "160", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeTempo(this._doc, oldValue, newValue), false);
     private readonly _tempoStepper: HTMLInputElement = input({ style: "width: 4em; font-size: 80%; margin-left: 0.4em; vertical-align: middle;", type: "number", step: "1" });
     private readonly _chorusSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.chorusRange - 1, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeChorus(this._doc, oldValue, newValue), false);
-    private readonly _chorusRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("chorus") }, span(_.chorusLabel)), this._chorusSlider.container);
+    private readonly _chorusRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("chorus") }, span("Chorus:")), this._chorusSlider.container);
     private readonly _reverbSlider: Slider = new Slider(input({ style: "margin: 0; position: sticky,", type: "range", min: "0", max: Config.reverbRange - 1, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeReverb(this._doc, oldValue, newValue), false);
-    private readonly _reverbRow: HTMLDivElement = div({ class: "selectRow" }, span({ style: "font-size: x-small;", class: "tip", onclick: () => this._openPrompt("reverb") }, span(_.reverbLabel)), this._reverbSlider.container);
+    private readonly _reverbRow: HTMLDivElement = div({ class: "selectRow" }, span({ style: "", class: "tip", onclick: () => this._openPrompt("reverb") }, span("Reverb:")), this._reverbSlider.container);
     private readonly _echoSustainSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.echoSustainRange - 1, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeEchoSustain(this._doc, oldValue, newValue), false);
-    private readonly _echoSustainRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("echoSustain") }, span(_.echoLabel)), this._echoSustainSlider.container);
+    private readonly _echoSustainRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("echoSustain") }, span("Echo:")), this._echoSustainSlider.container);
     private readonly _echoDelaySlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: /*Config.echoDelaySliderNumbers.length - 2*/ Config.echoDelayRange - 1, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeEchoDelay(this._doc, oldValue, newValue), false);
     private readonly _echoDelayInputBox: HTMLInputElement = input({ style: "width: 4em; font-size: 80%; ", id: "echoDelayInputBox", type: "number", step: Config.echoDelayIntervals, min: "0", max: Config.echoDelayMax, value: "0" });
     private readonly _echoDelayBeatMarkers: HTMLDivElement[] = [div({ class: "pitchShiftMarker", style: { color: ColorConfig.uiWidgetBackground, left: "24%" } }), div({ class: "pitchShiftMarker", style: { color: ColorConfig.uiWidgetBackground, left: "49%" } }), div({ class: "pitchShiftMarker", style: { color: ColorConfig.uiWidgetBackground, left: "74.5%" } }), div({ class: "pitchShiftMarker", style: { color: ColorConfig.uiWidgetBackground, left: "100%" } })];
     private readonly _echoDelayBeatMarkerContainer: HTMLDivElement = div({ style: "display: flex; position: relative;" }, this._echoDelaySlider.container, div({ class: "pitchShiftMarkerContainer" }, this._echoDelayBeatMarkers));
     private readonly _echoDelayRow: HTMLDivElement = div({ class: "selectRow" }, div({},
-        span({ class: "tip", onclick: () => this._openPrompt("echoDelay") }, span(_.echoDelayLabel)), 
+        span({ style: "font-size: 90%;", class: "tip", onclick: () => this._openPrompt("echoDelay") }, span("Echo Delay:")), 
         div({ style: "color: " + ColorConfig.secondaryText + "; margin-top: -3px;" }, this._echoDelayInputBox),
     ), this._echoDelayBeatMarkerContainer);
-    private readonly _rhythmSelect: HTMLSelectElement = buildOptions(select(), [
-        _.rhythmBy3Label,
-        _.rhythmBy4Label,
-        _.rhythmBy6Label,
-        _.rhythmBy8Label,
-        _.rhythmBy24Label
-    ]);
+    private readonly _rhythmSelect: HTMLSelectElement = buildOptions(select(), Config.rhythms.map(rhythm => rhythm.name));
     private readonly _pitchedPresetSelect: HTMLSelectElement = buildPresetOptions(false, "pitchPresetSelect");
     private readonly _drumPresetSelect: HTMLSelectElement = buildPresetOptions(true, "drumPresetSelect");
     private readonly _algorithmSelect: HTMLSelectElement = buildOptions(select(), Config.algorithms.map(algorithm => algorithm.name));
-    private readonly _algorithmSelectRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("algorithm") }, span(_.algorithmLabel)), div({ class: "selectContainer" }, this._algorithmSelect));
+    private readonly _algorithmSelectRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("algorithm") }, span("Algorithm:")), div({ class: "selectContainer" }, this._algorithmSelect));
     private readonly _instrumentButtons: HTMLButtonElement[] = [];
     private readonly _instrumentAddButton: HTMLButtonElement = button({ type: "button", class: "add-instrument last-button" });
     private readonly _instrumentRemoveButton: HTMLButtonElement = button({ type: "button", class: "remove-instrument" });
     private readonly _instrumentsButtonBar: HTMLDivElement = div({ class: "instrument-bar" }, this._instrumentRemoveButton, this._instrumentAddButton);
-    private readonly _instrumentsButtonRow: HTMLDivElement = div({ class: "selectRow", style: "display: none;" }, span({ class: "tip", onclick: () => this._openPrompt("instrumentIndex") }, span(_.instAmountLabel)), this._instrumentsButtonBar);
+    private readonly _instrumentsButtonRow: HTMLDivElement = div({ class: "selectRow", style: "display: none;" }, span({ class: "tip", onclick: () => this._openPrompt("instrumentIndex") }, span("Instrument:")), this._instrumentsButtonBar);
     private readonly _instrumentVolumeSlider: Slider = new Slider(input({ style: "margin: 0; position: sticky;", type: "range", min: Math.floor(-Config.volumeRange / 2), max: Math.floor(Config.volumeRange / 2), value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeVolume(this._doc, oldValue, newValue), true);
     private readonly _instrumentVolumeSliderInputBox: HTMLInputElement = input({ style: "width: 4em; font-size: 80%", id: "volumeSliderInputBox", type: "number", step: "1", min: Math.floor(-Config.volumeRange / 2), max: Math.floor(Config.volumeRange / 2), value: "0" });
-    private readonly _instrumentVolumeSliderTip: HTMLDivElement = div({ class: "selectRow", style: "height: 1em" }, span({ class: "tip", style: "font-size: smaller;", onclick: () => this._openPrompt("instrumentVolume") }, _.volumeLabel));
+    private readonly _instrumentVolumeSliderTip: HTMLDivElement = div({ class: "selectRow", style: "height: 1em" }, span({ class: "tip", style: "font-size: smaller;", onclick: () => this._openPrompt("instrumentVolume") }, "Volume:"));
     private readonly _instrumentVolumeSliderRow: HTMLDivElement = div({ class: "selectRow" }, div({},
         div({ style: `color: ${ColorConfig.secondaryText};` }, span({ class: "tip" }, this._instrumentVolumeSliderTip)),
         div({ style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;` }, this._instrumentVolumeSliderInputBox),
@@ -1185,144 +1155,79 @@ export class SongEditor {
     private readonly _panDropdown: HTMLButtonElement = button({ style: "margin-left:0em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.Pan) }, "▼");
     private readonly _panSliderInputBox: HTMLInputElement = input({ style: "width: 4em; font-size: 80%; ", id: "panSliderInputBox", type: "number", step: "1", min: "0", max: "100", value: "0" });
     private readonly _panSliderRow: HTMLDivElement = div({ class: "selectRow" }, div({},
-        span({ class: "tip", tabindex: "0", style: "height:1em; font-size: smaller;", onclick: () => this._openPrompt("pan") }, span(_.panLabel)),
+        span({ class: "tip", tabindex: "0", style: "height:1em; font-size: smaller;", onclick: () => this._openPrompt("pan") }, span("Pan:")),
         div({ style: "color: " + ColorConfig.secondaryText + "; margin-top: -3px;" }, this._panSliderInputBox),
     ), this._panDropdown, this._panSlider.container);
     private readonly _panDelaySlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.modulators.dictionary["pan delay"].maxRawVol, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangePanDelay(this._doc, oldValue, newValue), false);
-    private readonly _panDelayRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:4px;", onclick: () => this._openPrompt("panDelay") }, span(_.panDelayLabel)), this._panDelaySlider.container);
+    private readonly _panDelayRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:4px;", onclick: () => this._openPrompt("panDelay") }, span("‣ Delay:")), this._panDelaySlider.container);
     private readonly _panDropdownGroup: HTMLElement = div({ class: "editor-controls", style: "display: none;" }, this._panDelayRow);
-    private readonly _chipWaveSelect: HTMLSelectElement = buildOptions(select(), [
-        _.wave1Label,
-        _.wave2Label,
-        _.wave3Label,
-        _.wave4Label,
-        _.wave5Label,
-        _.wave6Label,
-        _.wave7Label,
-        _.wave8Label,
-        _.wave9Label,
-        _.wave10Label,
-        _.wave11Label,
-        _.wave12Label,
-        _.wave13Label,
-        _.wave14Label,
-        _.wave15Label,
-        _.wave16Label,
-        _.wave17Label,
-        _.wave18Label,
-        _.wave19Label,
-        _.wave20Label,
-        _.wave21Label,
-        _.wave22Label,
-        _.wave23Label,
-        _.wave24Label,
-        _.wave25Label,
-        _.wave26Label,
-        _.wave27Label,
-        _.wave28Label,
-        _.wave29Label,
-        _.wave30Label,
-        _.wave31Label,
-        _.wave32Label,
-        _.wave33Label
-    ]);
-    private readonly _chipNoiseSelect: HTMLSelectElement = buildOptions(select(), [
-        _.noise1Label,
-        _.noise2Label,
-        _.noise3Label,
-        _.noise4Label,
-        _.noise5Label,
-        _.noise6Label,
-        _.noise7Label,
-        _.noise8Label,
-        _.noise9Label,
-        _.noise10Label,
-        _.noise11Label,
-        _.noise12Label,
-        _.noise13Label,
-        _.noise14Label,
-        _.noise15Label,
-        _.noise16Label,
-        _.noise17Label,
-        _.noise18Label,
-        _.noise19Label,
-        _.noise20Label,
-        _.noise21Label,
-        _.noise22Label,
-        _.noise23Label,
-        _.noise24Label,
-        _.noise25Label
-    ]);
-    private readonly _chipWaveSelectRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("chipWave") }, span(_.waveLabel)), div({ class: "selectContainer" }, this._chipWaveSelect));
-    private readonly _chipNoiseSelectRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("chipNoise") }, span(_.noiseLabel)), div({ class: "selectContainer" }, this._chipNoiseSelect));
+    private readonly _chipWaveSelect: HTMLSelectElement = buildOptions(select(), Config.chipWaves.map(chipWave => chipWave.name));
+    private readonly _chipNoiseSelect: HTMLSelectElement = buildOptions(select(), Config.chipNoises.map(chipNoise => chipNoise.name));
+    private readonly _chipWaveSelectRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("chipWave") }, span("Wave:")), div({ class: "selectContainer" }, this._chipWaveSelect));
+    private readonly _chipNoiseSelectRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("chipNoise") }, span("Noise:")), div({ class: "selectContainer" }, this._chipNoiseSelect));
     //private readonly _isNoiseSeedRandomizedBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
-    //private readonly _isNoiseSeedRandomizedRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("randomOrSeed") }, span(_.useSeedLabel)), this._isNoiseSeedRandomizedBox);
+    //private readonly _isNoiseSeedRandomizedRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("randomOrSeed") }, span("Use Seed Generation:")), this._isNoiseSeedRandomizedBox);
     //private readonly _noiseSeedInputBox: HTMLInputElement = input({ style: "width: 150%; height: 1.5em; font-size: 80%; margin-left: 0.4em; vertical-align: middle;", id: "noiseSeedInputBox", type: "number", step: "1", min: "0", max: Config.maxAmountOfRandomSeeds, value: "0" });
     //private readonly _noiseSeedRow: HTMLDivElement = div({ class: "selectRow" }, div({},
-    //    span({ class: "tip", style: "height:1em; font-size: 14px;", onclick: () => this._openPrompt("seed") }, _.seedLabel),
+    //    span({ class: "tip", style: "height:1em; font-size: 14px;", onclick: () => this._openPrompt("seed") }, "Seed: "),
     //    div({ style: "margin-top: -1px;"}, this._noiseSeedInputBox),
     //));
     private readonly _fadeInOutEditor: FadeInOutEditor = new FadeInOutEditor(this._doc);
     // Issue#36 - Add input boxes for the fade in/out editor that target post-fade-in, pre-fade-out, and post-fade-out.
-    private readonly _fadeInOutRow: HTMLElement = div({ class: "selectRow" }, span({ style: "font-size: smaller;", class: "tip", onclick: () => this._openPrompt("fadeInOut") }, span(_.fadeLabel)), this._fadeInOutEditor.container);
-    private readonly _transitionSelect: HTMLSelectElement = buildOptions(select(), [
-        _.transition1Label,
-        _.transition2Label,
-        _.transition3Label,
-        _.transition4Label
-    ]);
+    private readonly _fadeInOutRow: HTMLElement = div({ class: "selectRow" }, span({ style: "", class: "tip", onclick: () => this._openPrompt("fadeInOut") }, span("Fade:")), this._fadeInOutEditor.container);
+    private readonly _transitionSelect: HTMLSelectElement = buildOptions(select(), Config.transitions.map(transition => transition.name));
     private readonly _transitionDropdown: HTMLButtonElement = button({ style: "margin-left:0em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.Transition) }, "▼");
-    private readonly _transitionRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("transition") }, span(_.transitionLabel)), this._transitionDropdown, div({ class: "selectContainer", style: "width: 52.5%;" }, this._transitionSelect));
+    private readonly _transitionRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("transition") }, span("Transition:")), this._transitionDropdown, div({ class: "selectContainer", style: "width: 52.5%;" }, this._transitionSelect));
     private readonly _slideSpeedDisplay: HTMLSpanElement = span({ style: `color: ${ColorConfig.secondaryText}; font-size: 11px; text-overflow: clip;`, class: "tip", onclick: () => this._openPrompt("tk") }, "1 tk");
     private readonly _slideSpeedSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.modulators.dictionary["slide speed"].maxRawVol, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeSlideSpeed(this._doc, oldValue, newValue), false);
     // Issue#59 - Add input boxes to various speed/delay sliders for more accurate inputs.
-    private readonly _slideSpeedRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ style: "font-size: smaller; margin-left:4px;", class: "tip", onclick: () => this._openPrompt("slideSpeed") }, span(_.slideSpeedLabel)), this._slideSpeedDisplay, this._slideSpeedSlider.container);
+    private readonly _slideSpeedRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ style: "font-size: smaller; margin-left:4px;", class: "tip", onclick: () => this._openPrompt("slideSpeed") }, span("‣ Spd:")), this._slideSpeedDisplay, this._slideSpeedSlider.container);
     private readonly _clicklessTransitionBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
-    private readonly _clicklessTransitionRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:4px;", onclick: () => this._openPrompt("clicklessTransition") }, span(_.clicklessLabel)), this._clicklessTransitionBox);
+    private readonly _clicklessTransitionRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:4px;", onclick: () => this._openPrompt("clicklessTransition") }, span("‣ Clickless:")), this._clicklessTransitionBox);
     private readonly _continueThruPatternBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
-    private readonly _continueThruPatternRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:4px;", onclick: () => this._openPrompt("continueThruPattern") }, span(_.continueThroughPatternLabel)), this._continueThruPatternBox);
+    private readonly _continueThruPatternRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:4px;", onclick: () => this._openPrompt("continueThruPattern") }, span("‣ In Pattern:")), this._continueThruPatternBox);
     private readonly _transitionDropdownGroup: HTMLElement = div({ class: "editor-controls", style: "display: none;" },this._slideSpeedRow, this._clicklessTransitionRow, this._continueThruPatternRow);
 
     private readonly _effectsSelect: HTMLSelectElement = select(option({ selected: true, disabled: true, hidden: false })); // todo: "hidden" should be true but looks wrong on mac chrome, adds checkmark next to first visible option even though it's not selected. :(
-    private readonly _eqFilterSimpleButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "no-underline", onclick: () => this._switchEQFilterType(true) }, span(_.simpleLabel));
-    private readonly _eqFilterAdvancedButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "last-button no-underline", onclick: () => this._switchEQFilterType(false) }, span(_.advancedLabel));
-    private readonly _eqFilterTypeRow: HTMLElement = div({ class: "selectRow", style: "padding-top: 4px; margin-bottom: 0px;" }, span({ style: "font-size: x-small;", class: "tip", onclick: () => this._openPrompt("filterType") }, span(_.EQTypeLabel)), div({ class: "instrument-bar" }, this._eqFilterSimpleButton, this._eqFilterAdvancedButton));
+    private readonly _eqFilterSimpleButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "no-underline", onclick: () => this._switchEQFilterType(true) }, span("simple"));
+    private readonly _eqFilterAdvancedButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "last-button no-underline", onclick: () => this._switchEQFilterType(false) }, span("advanced"));
+    private readonly _eqFilterTypeRow: HTMLElement = div({ class: "selectRow", style: "padding-top: 4px; margin-bottom: 0px;" }, span({ style: "font-size: x-small;", class: "tip", onclick: () => this._openPrompt("filterType") }, span("EQ Filt. Type:")), div({ class: "instrument-bar" }, this._eqFilterSimpleButton, this._eqFilterAdvancedButton));
     private readonly _eqFilterEditor: FilterEditor = new FilterEditor(this._doc);
     private readonly _eqFilterZoom: HTMLButtonElement = button({ style: "margin-left:0em; padding-left:0.2em; height:1.5em; max-width: 12px;", onclick: () => this._openPrompt("customEQFilterSettings") }, "+");
-    private readonly _eqFilterRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("eqFilter") }, span(_.EQLabel)), this._eqFilterZoom, this._eqFilterEditor.container);
+    private readonly _eqFilterRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("eqFilter") }, span("EQ Filt:")), this._eqFilterZoom, this._eqFilterEditor.container);
     private readonly _eqFilterSimpleCutSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.filterSimpleCutRange - 1, value: "6", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeEQFilterSimpleCut(this._doc, oldValue, newValue), false);
-    private _eqFilterSimpleCutRow: HTMLDivElement = div({ class: "selectRow", style: "font-size: 12px;", title: _.simpleFilter1Label }, span({ class: "tip", onclick: () => this._openPrompt("filterCutoff") }, span(_.filterCutLabel)), this._eqFilterSimpleCutSlider.container);
+    private _eqFilterSimpleCutRow: HTMLDivElement = div({ class: "selectRow", style: "font-size: 12px;", title: "Low-pass Filter Cutoff Frequency" }, span({ class: "tip", onclick: () => this._openPrompt("filterCutoff") }, span("Filter Cut:")), this._eqFilterSimpleCutSlider.container);
     private readonly _eqFilterSimplePeakSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.filterSimplePeakRange - 1, value: "6", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeEQFilterSimplePeak(this._doc, oldValue, newValue), false);
-    private _eqFilterSimplePeakRow: HTMLDivElement = div({ class: "selectRow", style: "font-size: 12px;", title: _.simpleFilter2Label }, span({ class: "tip", onclick: () => this._openPrompt("filterResonance") }, span(_.filterPeakLabel)), this._eqFilterSimplePeakSlider.container);
+    private _eqFilterSimplePeakRow: HTMLDivElement = div({ class: "selectRow", style: "font-size: 12px;", title: "Low-pass Filter Peak Resonance" }, span({ class: "tip", onclick: () => this._openPrompt("filterResonance") }, span("Filter Peak:")), this._eqFilterSimplePeakSlider.container);
 
-    private readonly _noteFilterSimpleButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "no-underline", onclick: () => this._switchNoteFilterType(true) }, span(_.simpleLabel));
-    private readonly _noteFilterAdvancedButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "last-button no-underline", onclick: () => this._switchNoteFilterType(false) }, span(_.advancedLabel));
-    private readonly _noteFilterTypeRow: HTMLElement = div({ class: "selectRow", style: "padding-top: 4px; margin-bottom: 0px;" }, span({ style: "font-size: x-small;", class: "tip", onclick: () => this._openPrompt("filterType") }, span(_.noteFiltTypeLabel)), div({ class: "instrument-bar" }, this._noteFilterSimpleButton, this._noteFilterAdvancedButton));
+    private readonly _noteFilterSimpleButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "no-underline", onclick: () => this._switchNoteFilterType(true) }, span("simple"));
+    private readonly _noteFilterAdvancedButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "last-button no-underline", onclick: () => this._switchNoteFilterType(false) }, span("advanced"));
+    private readonly _noteFilterTypeRow: HTMLElement = div({ class: "selectRow", style: "padding-top: 4px; margin-bottom: 0px;" }, span({ style: "font-size: x-small;", class: "tip", onclick: () => this._openPrompt("filterType") }, span("Note Filt. Type:")), div({ class: "instrument-bar" }, this._noteFilterSimpleButton, this._noteFilterAdvancedButton));
     private readonly _noteFilterEditor: FilterEditor = new FilterEditor(this._doc, true);
     private readonly _noteFilterZoom: HTMLButtonElement = button({ style: "margin-left:0em; padding-left:0.2em; height:1.5em; max-width: 12px;", onclick: () => this._openPrompt("customNoteFilterSettings") }, "+");
-    private readonly _noteFilterRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("noteFilter") }, span(_.noteFiltLabel)), this._noteFilterZoom, this._noteFilterEditor.container);
+    private readonly _noteFilterRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("noteFilter") }, span("Note Filt:")), this._noteFilterZoom, this._noteFilterEditor.container);
     private readonly _noteFilterSimpleCutSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.filterSimpleCutRange - 1, value: "6", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeNoteFilterSimpleCut(this._doc, oldValue, newValue), false);
-    private _noteFilterSimpleCutRow: HTMLDivElement = div({ class: "selectRow", style: "font-size: 12px;", title: _.simpleFilter1Label }, span({ class: "tip", onclick: () => this._openPrompt("filterCutoff") }, span(_.filterCutLabel)), this._noteFilterSimpleCutSlider.container);
+    private _noteFilterSimpleCutRow: HTMLDivElement = div({ class: "selectRow", style: "font-size: 12px;", title: "Low-pass Filter Cutoff Frequency" }, span({ class: "tip", onclick: () => this._openPrompt("filterCutoff") }, span("Filter Cut:")), this._noteFilterSimpleCutSlider.container);
     private readonly _noteFilterSimplePeakSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.filterSimplePeakRange - 1, value: "6", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeNoteFilterSimplePeak(this._doc, oldValue, newValue), false);
-    private _noteFilterSimplePeakRow: HTMLDivElement = div({ class: "selectRow", style: "font-size: 12px;", title: _.simpleFilter2Label }, span({ class: "tip", onclick: () => this._openPrompt("filterResonance") }, span(_.filterPeakLabel)), this._noteFilterSimplePeakSlider.container);
+    private _noteFilterSimplePeakRow: HTMLDivElement = div({ class: "selectRow", style: "font-size: 12px;", title: "Low-pass Filter Peak Resonance" }, span({ class: "tip", onclick: () => this._openPrompt("filterResonance") }, span("Filter Peak:")), this._noteFilterSimplePeakSlider.container);
 
     private readonly _supersawDynamismSlider: Slider = new Slider(input({style: "margin: 0;", type: "range", min: "0", max: Config.supersawDynamismMax, value: "0", step: "1"}), this._doc, (oldValue: number, newValue: number) => new ChangeSupersawDynamism(this._doc, oldValue, newValue), false);
-	private readonly _supersawDynamismRow: HTMLDivElement = div({class: "selectRow"}, span({class: "tip", onclick: ()=>this._openPrompt("supersawDynamism")}, span(_.dynamismLabel)), this._supersawDynamismSlider.container);
+	private readonly _supersawDynamismRow: HTMLDivElement = div({class: "selectRow"}, span({class: "tip", onclick: ()=>this._openPrompt("supersawDynamism")}, span("Dynamism:")), this._supersawDynamismSlider.container);
 	private readonly _supersawSpreadSlider: Slider = new Slider(input({style: "margin: 0;", type: "range", min: "0", max: Config.supersawSpreadMax, value: "0", step: "1"}), this._doc, (oldValue: number, newValue: number) => new ChangeSupersawSpread(this._doc, oldValue, newValue), false);
-	private readonly _supersawSpreadRow: HTMLDivElement = div({class: "selectRow"}, span({class: "tip", onclick: ()=>this._openPrompt("supersawSpread")}, span(_.spreadLabel)), this._supersawSpreadSlider.container);
+	private readonly _supersawSpreadRow: HTMLDivElement = div({class: "selectRow"}, span({class: "tip", onclick: ()=>this._openPrompt("supersawSpread")}, span("Spread:")), this._supersawSpreadSlider.container);
 	private readonly _supersawShapeSlider: Slider = new Slider(input({style: "margin: 0;", type: "range", min: "0", max: Config.supersawShapeMax, value: "0", step: "1"}), this._doc, (oldValue: number, newValue: number) => new ChangeSupersawShape(this._doc, oldValue, newValue), false);
-	private readonly _supersawShapeRow: HTMLDivElement = div({class: "selectRow"}, span({class: "tip", style: "overflow: clip; font-size: 95%;", onclick: ()=>this._openPrompt("supersawShape")}, span(_.sawToPulseLabel)), this._supersawShapeSlider.container);
+	private readonly _supersawShapeRow: HTMLDivElement = div({class: "selectRow"}, span({class: "tip", style: "overflow: clip; font-size: 95%;", onclick: ()=>this._openPrompt("supersawShape")}, span("Saw↔Pulse:")), this._supersawShapeSlider.container);
 
     private readonly _wavetableSpeedDisplay: HTMLSpanElement = span({ style: `color: ${ColorConfig.secondaryText}; font-size: smaller; text-overflow: clip;`, class: "tip", onclick: () => this._openPrompt("wpb") }, "1wpb");
     private readonly _wavetableSpeedSlider: Slider = new Slider(input({style: "margin: 0;", type: "range", min: "0", max: Config.wavetableSpeedMax, value: "0", step: "1"}), this._doc, (oldValue: number, newValue: number) => new ChangeWavetableSpeed(this._doc, oldValue, newValue), false);
     // Issue#59 - Add input boxes to various speed/delay sliders for more accurate inputs.
-    private readonly _wavetableSpeedRow: HTMLDivElement = div({class: "selectRow"}, span({class: "tip", onclick: ()=>this._openPrompt("wavetableSpeed")}, span(_.wavetableSpeedLabel)), this._wavetableSpeedDisplay, this._wavetableSpeedSlider.container);
+    private readonly _wavetableSpeedRow: HTMLDivElement = div({class: "selectRow"}, span({class: "tip", onclick: ()=>this._openPrompt("wavetableSpeed")}, span("Spd:")), this._wavetableSpeedDisplay, this._wavetableSpeedSlider.container);
     private readonly _interpolateWavesBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
-    private readonly _interpolateWavesRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "margin-left:10px;", onclick: () => this._openPrompt("interpolateWaves") }, span(_.interpolateWavesLabel)), this._interpolateWavesBox);
+    private readonly _interpolateWavesRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "margin-left:10px;", onclick: () => this._openPrompt("interpolateWaves") }, span("Interpolate:")), this._interpolateWavesBox);
     private readonly _resetCyclePerNoteBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
-    private readonly _resetCyclePerNoteRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "font-size: 11px; margin-left:10px;", onclick: () => this._openPrompt("resetCyclePerNote") }, span(_.resetCyclePerNoteLabel)), this._resetCyclePerNoteBox);
+    private readonly _resetCyclePerNoteRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "font-size: 11px; margin-left:10px;", onclick: () => this._openPrompt("resetCyclePerNote") }, span("Cycle per Note:")), this._resetCyclePerNoteBox);
     private readonly _oneShotCycleBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
-    private readonly _oneShotCycleRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "margin-left:10px;", onclick: () => this._openPrompt("oneShotCycle") }, span(_.oneShotCycleLabel)), this._oneShotCycleBox);
+    private readonly _oneShotCycleRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "margin-left:10px;", onclick: () => this._openPrompt("oneShotCycle") }, span("One-Shot:")), this._oneShotCycleBox);
     private readonly _wavetableWaveButtons: HTMLButtonElement[] = [
         button({class: "wavetableButtonType2", style: "text-align: center;", }, span("1")),
         button({class: "wavetableButtonType1", style: "text-align: center;", }, span("2")),
@@ -1362,184 +1267,127 @@ export class SongEditor {
     private readonly _pulseWidthSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "1", max: Config.pulseWidthRange, value: "1", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangePulseWidth(this._doc, oldValue, newValue), false);
     private readonly _pwmSliderInputBox: HTMLInputElement = input({ style: "width: 4em; font-size: 70%; ", id: "pwmSliderInputBox", type: "number", step: "1", min: "1", max: Config.pulseWidthRange, value: "1" });
     private readonly _pulseWidthRow: HTMLDivElement = div({ class: "selectRow" }, div({},
-        span({ class: "tip", tabindex: "0", style: "height:1em; font-size: smaller;", onclick: () => this._openPrompt("pulseWidth") }, _.pwmLabel),
+        span({ class: "tip", tabindex: "0", style: "height:1em; font-size: smaller;", onclick: () => this._openPrompt("pulseWidth") }, "Pulse Width:"),
         div({ style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;` }, this._pwmSliderInputBox)
         ), this._pulseWidthSlider.container);
     private readonly _pitchShiftSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.pitchShiftRange - 1, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangePitchShift(this._doc, oldValue, newValue), true);
     private readonly _pitchShiftTonicMarkers: HTMLDivElement[] = [div({ class: "pitchShiftMarker", style: { color: ColorConfig.tonic } }), div({ class: "pitchShiftMarker", style: { color: ColorConfig.tonic, left: "50%" } }), div({ class: "pitchShiftMarker", style: { color: ColorConfig.tonic, left: "100%" } })];
     private readonly _pitchShiftFifthMarkers: HTMLDivElement[] = [div({ class: "pitchShiftMarker", style: { color: ColorConfig.fifthNote, left: (100 * 7 / 24) + "%" } }), div({ class: "pitchShiftMarker", style: { color: ColorConfig.fifthNote, left: (100 * 19 / 24) + "%" } })];
     private readonly _pitchShiftMarkerContainer: HTMLDivElement = div({ style: "display: flex; position: relative;" }, this._pitchShiftSlider.container, div({ class: "pitchShiftMarkerContainer" }, this._pitchShiftTonicMarkers, this._pitchShiftFifthMarkers));
-    private readonly _pitchShiftRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("pitchShift") }, span(_.pitchShiftLabel)), this._pitchShiftMarkerContainer);
+    private readonly _pitchShiftRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("pitchShift") }, span("Pitch Shift:")), this._pitchShiftMarkerContainer);
     private readonly _detuneSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: Config.detuneMin - Config.detuneCenter, max: Config.detuneMax - Config.detuneCenter, value: 0, step: "2" }), this._doc, (oldValue: number, newValue: number) => new ChangeDetune(this._doc, oldValue, newValue), true);
     private readonly _detuneSliderInputBox: HTMLInputElement = input({ style: "width: 4em; font-size: 80%; ", id: "detuneSliderInputBox", type: "number", step: "1", min: Config.detuneMin - Config.detuneCenter, max: Config.detuneMax - Config.detuneCenter, value: 0 });
     private readonly _detuneSliderRow: HTMLDivElement = div({ class: "selectRow" }, div({},
-        span({ class: "tip", style: "height:1em; font-size: x-small;", onclick: () => this._openPrompt("detune") }, span(_.detuneLabel)),
+        span({ class: "tip", style: "height:1em; font-size: smaller;", onclick: () => this._openPrompt("detune") }, span("Detune:")),
         div({ style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, this._detuneSliderInputBox),
     ), this._detuneSlider.container);
+    private readonly _wavefoldSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.wavefoldMax, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeWavefoldBounds(this._doc, oldValue, newValue), false);
+    private readonly _wavefoldRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("wavefold") }, span("Wavefold:")), this._wavefoldSlider.container);
     private readonly _distortionSlider: Slider = new Slider(input({ style: "margin: 0; position: sticky;", type: "range", min: "0", max: Config.distortionRange - 1, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeDistortion(this._doc, oldValue, newValue), false);
-    private readonly _distortionRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("distortion") }, span(_.distortionLabel)), this._distortionSlider.container);
+    private readonly _distortionRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("distortion") }, span("Distortion:")), this._distortionSlider.container);
     private readonly _aliasingBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
-    private readonly _aliasingRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "margin-left:10px;", onclick: () => this._openPrompt("aliases") }, span(_.aliasingLabel)), this._aliasingBox);
-    private readonly _percussionBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
-    private readonly _percussionRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "margin-left:10px;", onclick: () => this._openPrompt("percussion") }, span(_.percussionLabel)), this._percussionBox);
-    private readonly _songDetuneEffectedBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
-    private readonly _songDetuneEffectedRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "margin-left:10px;", onclick: () => this._openPrompt("songDetuneEffected") }, span(_.songDetuneEffectedLabel)), this._songDetuneEffectedBox);
-    private readonly _songOctaveEffectedBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
-    private readonly _songOctaveEffectedRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "margin-left:10px;", onclick: () => this._openPrompt("songOctaveEffected") }, span(_.songOctaveEffectedLabel)), this._songOctaveEffectedBox);
-    private readonly _reshapeAmountSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.reshapeMax, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeReshapeAmount(this._doc, oldValue, newValue), false);
-    private readonly _reshapeAmountRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("reshaper") }, span(_.reshaperLabel)), this._reshapeAmountSlider.container);
-    private readonly _reshapeShiftSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.reshapeShiftMax, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeReshapeShift(this._doc, oldValue, newValue), false);
-    private readonly _reshapeShiftRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("reshaper") }, span(_.reshapeShiftLabel)), this._reshapeShiftSlider.container);
+    private readonly _aliasingRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "margin-left:10px;", onclick: () => this._openPrompt("aliases") }, span("Aliasing:")), this._aliasingBox);
+    private readonly _clipBoundSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.clipMax, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeClipBounds(this._doc, oldValue, newValue), false);
+    private readonly _clipBoundRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("clipper") }, span("Clipping:")), this._clipBoundSlider.container);
     private readonly _bitcrusherQuantizationSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.bitcrusherQuantizationRange - 1, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeBitcrusherQuantization(this._doc, oldValue, newValue), false);
-    private readonly _bitcrusherQuantizationRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", title: (_.bitCrushHover), onclick: () => this._openPrompt("bitcrusherQuantization") }, span(_.bitCrushLabel)), this._bitcrusherQuantizationSlider.container);
+    private readonly _bitcrusherQuantizationRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", title: ("Bitcrusher Quantization"), onclick: () => this._openPrompt("bitcrusherQuantization") }, span("Bit Crush:")), this._bitcrusherQuantizationSlider.container);
     private readonly _bitcrusherFreqSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.bitcrusherFreqRange - 1, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeBitcrusherFreq(this._doc, oldValue, newValue), false);
-    private readonly _bitcrusherFreqRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", title: (_.freqCrushHover), onclick: () => this._openPrompt("bitcrusherFreq") }, span(_.freqCrushLabel)), this._bitcrusherFreqSlider.container);
-    private readonly _wavefoldLowerInputBox: HTMLInputElement = input({ style: "width: 150%; height: 1.5em; font-size: 75%; margin-left: 0.4em; vertical-align: middle;", id: "wavefoldLowerInputBox", type: "number", step: "0.5", min: Config.wavefoldLowerMin, max: Config.wavefoldLowerMax, value: Config.wavefoldLowerMax });
-    private readonly _wavefoldLowerRow: HTMLDivElement = div({ class: "selectRow" }, div({},
-        span({ class: "tip", style: "height:1em; font-size: smaller; margin-top: 2px;", onclick: () => this._openPrompt("wavefoldLower") }, _.wavefoldLowerLabel),
-        div({ style: "margin-top: -1px;"}, this._wavefoldLowerInputBox),
-    ));
-    private readonly _wavefoldUpperInputBox: HTMLInputElement = input({ style: "width: 150%; height: 1.5em; font-size: 75%; margin-left: 0.4em; vertical-align: middle;", id: "wavefoldUpperInputBox", type: "number", step: "0.5", min: Config.wavefoldUpperMin, max: Config.wavefoldUpperMax, value: Config.wavefoldUpperMax });
-    private readonly _wavefoldUpperRow: HTMLDivElement = div({ class: "selectRow" }, div({},
-        span({ class: "tip", style: "height:1em; font-size: smaller; margin-top: 2px;", onclick: () => this._openPrompt("wavefoldUpper") }, _.wavefoldUpperLabel),
-        div({ style: "margin-top: -1px;"}, this._wavefoldUpperInputBox),
-    ));
+    private readonly _bitcrusherFreqRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", title: ("Frequency Quantization"), onclick: () => this._openPrompt("bitcrusherFreq") }, span("Freq Crush:")), this._bitcrusherFreqSlider.container);
     private readonly _stringSustainSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.stringSustainRange - 1, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeStringSustain(this._doc, oldValue, newValue), false);
-    private readonly _stringSustainLabel: HTMLSpanElement = span({class: "tip", onclick: ()=>this._openPrompt("stringSustain")}, span(_.sustainLabel));
+    private readonly _stringSustainLabel: HTMLSpanElement = span({class: "tip", onclick: ()=>this._openPrompt("stringSustain")}, span("Sustain:"));
     private readonly _stringSustainRow: HTMLDivElement = div({class: "selectRow"}, this._stringSustainLabel, this._stringSustainSlider.container);
     private readonly _unisonDropdown: HTMLButtonElement = button({ style: "margin-left:0em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.Unison) }, "▼");
-    private readonly _unisonSelect: HTMLSelectElement = buildOptions(select(), [
-        _.unison1Label,
-        _.unison2Label,
-        _.unison3Label,
-        _.unison4Label,
-        _.unison5Label,
-        _.unison6Label,
-        _.unison7Label,
-        _.unison8Label,
-        _.unison9Label,
-        _.unison10Label,
-        _.unison11Label,
-        _.unison12Label,
-        _.unison13Label,
-        _.unison14Label,
-        _.unison15Label,
-        _.unison16Label,
-        _.unison17Label,
-        _.unison18Label,
-        _.unison19Label,
-        _.unison20Label,
-        _.unison21Label,
-        _.unison22Label,
-        _.unison23Label,
-        _.unison24Label,
-        _.unison25Label,
-        _.unisonTEST
-    ]);
-    private readonly _unisonSelectRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("unison") }, span(_.unisonLabel)), this._unisonDropdown, div({ class: "selectContainer", style: "width: 61.5%;" }, this._unisonSelect));
+    private readonly _unisonSelect: HTMLSelectElement = buildOptions(select(), Config.unisons.map(unison => unison.name));
+    private readonly _unisonSelectRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("unison") }, span("Unison:")), this._unisonDropdown, div({ class: "selectContainer", style: "width: 61.5%;" }, this._unisonSelect));
     private readonly _unisonVoicesInputBox: HTMLInputElement = input({ style: "width: 150%; height: 1.5em; font-size: 80%; margin-left: 0.4em; vertical-align: middle;", id: "unisonVoicesInputBox", type: "number", step: "1", min: Config.unisonVoicesMin, max: Config.unisonVoicesMax, value: 1 });
     private readonly _unisonVoicesRow: HTMLDivElement = div({ class: "selectRow dropFader" }, div({},
-        span({ class: "tip", style: "height:1em; font-size: smaller;", onclick: () => this._openPrompt("unisonVoices") }, _.unisonVoicesLabel),
+        span({ class: "tip", style: "height:1em; font-size: smaller;", onclick: () => this._openPrompt("unisonVoices") }, "‣ Voices: "),
         div({ style: "color: " + ColorConfig.secondaryText + "; margin-top: -3px;" }, this._unisonVoicesInputBox),
     ));
     private readonly _unisonSpreadInputBox: HTMLInputElement = input({ style: "width: 150%; height: 1.5em; font-size: 80%; margin-left: 0.4em; vertical-align: middle;", id: "unisonSpreadInputBox", type: "number", step: "0.001", min: Config.unisonSpreadMin, max: Config.unisonSpreadMax, value: 0.0 });
     private readonly _unisonSpreadRow: HTMLDivElement = div({ class: "selectRow dropFader" }, div({},
-        span({ class: "tip", style: "height:1em; font-size: smaller;", onclick: () => this._openPrompt("unisonSpread") }, _.unisonSpreadLabel),
+        span({ class: "tip", style: "height:1em; font-size: smaller;", onclick: () => this._openPrompt("unisonSpread") }, "‣ Spread: "),
         div({ style: "color: " + ColorConfig.secondaryText + "; margin-top: -3px;" }, this._unisonSpreadInputBox),
     ));
     private readonly _unisonOffsetInputBox: HTMLInputElement = input({ style: "width: 150%; height: 1.5em; font-size: 80%; margin-left: 0.4em; vertical-align: middle;", id: "unisonOffsetInputBox", type: "number", step: "0.001", min: Config.unisonOffsetMin, max: Config.unisonOffsetMax, value: 0.0 });
     private readonly _unisonOffsetRow: HTMLDivElement = div({ class: "selectRow dropFader" }, div({},
-        span({ class: "tip", style: "height:1em; font-size: smaller;", onclick: () => this._openPrompt("unisonOffset") }, _.unisonOffsetLabel),
+        span({ class: "tip", style: "height:1em; font-size: smaller;", onclick: () => this._openPrompt("unisonOffset") }, "‣ Offset: "),
         div({ style: "color: " + ColorConfig.secondaryText + "; margin-top: -3px;" }, this._unisonOffsetInputBox),
     ));
     private readonly _unisonExpressionInputBox: HTMLInputElement = input({ style: "width: 150%; height: 1.5em; font-size: 80%; margin-left: 0.4em; vertical-align: middle;", id: "unisonExpressionInputBox", type: "number", step: "0.001", min: Config.unisonExpressionMin, max: Config.unisonExpressionMax, value: 1.4 });
     private readonly _unisonExpressionRow: HTMLDivElement = div({ class: "selectRow dropFader" }, div({},
-        span({ class: "tip", style: "height:1em; font-size: smaller;", onclick: () => this._openPrompt("unisonVolume") }, _.unisonVolumeLabel),
+        span({ class: "tip", style: "height:1em; font-size: smaller;", onclick: () => this._openPrompt("unisonVolume") }, "‣ Volume: "),
         div({ style: "color: " + ColorConfig.secondaryText + "; margin-top: -3px;" }, this._unisonExpressionInputBox),
     ));
     private readonly _unisonSignInputBox: HTMLInputElement = input({ style: "width: 150%; height: 1.5em; font-size: 80%; margin-left: 0.4em; vertical-align: middle;", id: "unisonSignInputBox", type: "number", step: "0.001", min: Config.unisonSignMin, max: Config.unisonSignMax, value: 1.0 });
     private readonly _unisonSignRow: HTMLDivElement = div({ class: "selectRow dropFader" }, div({},
-        span({ class: "tip", style: "height:1em; font-size: smaller;", onclick: () => this._openPrompt("unisonSign") }, _.unisonSignLabel),
+        span({ class: "tip", style: "height:1em; font-size: smaller;", onclick: () => this._openPrompt("unisonSign") }, "‣ Sign: "),
         div({ style: "color: " + ColorConfig.secondaryText + "; margin-top: -3px;" }, this._unisonSignInputBox),
     ));
     private readonly _unisonDropdownGroup: HTMLElement = div({ class: "editor-controls", style: "display: none;" }, this._unisonVoicesRow, this._unisonSpreadRow, this._unisonOffsetRow, this._unisonExpressionRow, this._unisonSignRow);
 
-    private readonly _chordSelect: HTMLSelectElement = buildOptions(select(), [
-        _.chord1Label,
-        _.chord2Label,
-        _.chord3Label,
-        _.chord4Label,
-    ]);
+    private readonly _chordSelect: HTMLSelectElement = buildOptions(select(), Config.chords.map(chord => chord.name));
     private readonly _chordDropdown: HTMLButtonElement = button({ style: "margin-left:0em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.Chord) }, "▼");
     private readonly _chordDropdown2: HTMLButtonElement = button({ style: "margin-left:0em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.Strum) }, "▼");
 
-    private readonly _chordSelectRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("chords") }, span(_.chordLabel)), this._chordDropdown, this._chordDropdown2, div({ class: "selectContainer" }, this._chordSelect));
+    private readonly _chordSelectRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("chords") }, span("Chords:")), this._chordDropdown, this._chordDropdown2, div({ class: "selectContainer" }, this._chordSelect));
     private readonly _strumSpeedDisplay: HTMLSpanElement = span({ style: `color: ${ColorConfig.secondaryText}; font-size: 11px; text-overflow: clip;`, class: "tip", onclick: () => this._openPrompt("tk") }, "1 tk");
     private readonly _strumSpeedSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.modulators.dictionary["strum speed"].maxRawVol, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeStrumSpeed(this._doc, oldValue, newValue), false);
     // Issue#59 - Add input boxes to various speed/delay sliders for more accurate inputs.
-    private readonly _strumSpeedRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ style: "font-size: smaller; margin-left:4px;", class: "tip", onclick: () => this._openPrompt("strumSpeed") }, span(_.strumSpeedLabel)), this._strumSpeedDisplay, this._strumSpeedSlider.container);
+    private readonly _strumSpeedRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ style: "font-size: smaller; margin-left:4px;", class: "tip", onclick: () => this._openPrompt("strumSpeed") }, span("‣ Spd:")), this._strumSpeedDisplay, this._strumSpeedSlider.container);
     private readonly _arpeggioSpeedDisplay: HTMLSpanElement = span({ style: `color: ${ColorConfig.secondaryText}; font-size: smaller; text-overflow: clip;`, class: "tip", onclick: () => this._openPrompt("x") }, "x1");
     private readonly _arpeggioSpeedSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.modulators.dictionary["arp speed"].maxRawVol, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeArpeggioSpeed(this._doc, oldValue, newValue), false);
     // Issue#59 - Add input boxes to various speed/delay sliders for more accurate inputs.
-    private readonly _arpeggioSpeedRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ style: "font-size: smaller; margin-left:4px;", class: "tip", onclick: () => this._openPrompt("arpeggioSpeed") }, span(_.arpSpeedLabel)), this._arpeggioSpeedDisplay, this._arpeggioSpeedSlider.container);
+    private readonly _arpeggioSpeedRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ style: "font-size: smaller; margin-left:4px;", class: "tip", onclick: () => this._openPrompt("arpeggioSpeed") }, span("‣ Spd:")), this._arpeggioSpeedDisplay, this._arpeggioSpeedSlider.container);
     private readonly _twoNoteArpBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
-    private readonly _twoNoteArpRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:4px; font-size: 11px;", onclick: () => this._openPrompt("twoNoteArpeggio") }, span(_.twoFastArpLabel)), this._twoNoteArpBox);
-    private readonly _arpeggioPatternSelectedText: HTMLSpanElement = span({ style: `color: ${ColorConfig.getChannelColor(this._doc.song, this._doc.channel)}; margin-bottom: 0px;`}, _.arpeggioPattern1Label);
+    private readonly _twoNoteArpRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:4px; font-size: 11px;", onclick: () => this._openPrompt("twoNoteArpeggio") }, span("‣ Fast Two-Note:")), this._twoNoteArpBox);
+    private readonly _arpeggioPatternSelectedText: HTMLSpanElement = span({ style: `color: ${ColorConfig.getChannelColor(this._doc.song, this._doc.channel)}; margin-bottom: 0px; font-size: 70%;`}, "Pattern: 1 2 3 4 5 6 7 8 9");
     private readonly _arpeggioPatternSelect: HTMLSelectElement = buildOptions(select(), [
-        "1 2 3 4 5 6 7 8 9",                              // Normal
-        "1 2 3) 4 5 6 7 8 9",                             // Legacy. For older songs.
-        "1 2 1 3 4 5 4 6 7 8 7 9",                        // Scramble
-        "1 2 1 3 1 4 1 5 1 6 1 7 1 8 1 9",                // Oscillate
-        "1 2 1 3 2 4 3 5 4 6 5 7 6 8 7 9",                // Escalate
-        "1 9 2 8 3 7 4 6 5",                              // Shift
-        "1) 2) 3) 4) 5) 6) 7) 8) 9)",                    // Normal Bounce
-        "1 2 1 3 4 5 4 6 7 8 7 9 4 5 4 6",               // Scramble Bounce
-        "1 2) 1 3) 1 4) 1 5) 1 6) 1 7) 1 8) 1 9)",       // Oscillate Bounce
-        "1) 2) 1 3) 2 4) 3 5) 4 6) 5 7) 6 8) 7 9) 8 1)", // Escalate Bounce
-        "1) 9) 2) 8) 3) 7) 4) 6) 5)",                    // Shift Bounce
+        "normal",
+        "legacy",
+        "scramble",
+        "oscillate",
+        "escalate",
+        "shift",
+        "normal (bounce)",
+        "scramble (bounce)",
+        "oscillate (bounce)",
+        "escalate (bounce)",
+        "shift (bounce)",
     ]);
-    private readonly _arpeggioPatternRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:4px; font-size: 12px;", onclick: () => this._openPrompt("arpeggioPattern") }, _.arpeggioPatternLabel), this._arpeggioPatternSelect);
+    private readonly _arpeggioPatternRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:4px; font-size: 12px;", onclick: () => this._openPrompt("arpeggioPattern") }, "‣ Arp Pattern:"), this._arpeggioPatternSelect);
     private readonly _chordDropdownGroup: HTMLElement = div({ class: "editor-controls", style: "display: none;" }, this._arpeggioSpeedRow, this._twoNoteArpRow, this._arpeggioPatternSelectedText, this._arpeggioPatternRow);
     private readonly _strumDropdownGroup: HTMLElement = div({ class: "editor-controls", style: "display: none;" }, this._strumSpeedRow);
 
-    private readonly _vibratoSelect: HTMLSelectElement = buildOptions(select(), [
-        _.vibrato1Label,
-        _.vibrato2Label,
-        _.vibrato3Label,
-        _.vibrato4Label,
-        _.vibrato5Label
-    ]);
+    private readonly _vibratoSelect: HTMLSelectElement = buildOptions(select(), Config.vibratos.map(vibrato => vibrato.name));
     private readonly _vibratoDropdown: HTMLButtonElement = button({ style: "margin-left:0em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.Vibrato) }, "▼");
-    private readonly _vibratoSelectRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("vibrato") }, span(_.vibratoLabel)), this._vibratoDropdown, div({ class: "selectContainer", style: "width: 61.5%;" }, this._vibratoSelect));
+    private readonly _vibratoSelectRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("vibrato") }, span("Vibrato:")), this._vibratoDropdown, div({ class: "selectContainer", style: "width: 61.5%;" }, this._vibratoSelect));
     private readonly _vibratoDepthSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.modulators.dictionary["vibrato depth"].maxRawVol, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeVibratoDepth(this._doc, oldValue, newValue), false);
-    private readonly _vibratoDepthRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:4px; font-size: x-small;", onclick: () => this._openPrompt("vibratoDepth") }, span(_.vibratoDepthLabel)), this._vibratoDepthSlider.container);
+    private readonly _vibratoDepthRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:4px; font-size: x-small;", onclick: () => this._openPrompt("vibratoDepth") }, span("‣ Depth:")), this._vibratoDepthSlider.container);
     private readonly _vibratoSpeedDisplay: HTMLSpanElement = span({ style: `color: ${ColorConfig.secondaryText}; font-size: smaller; text-overflow: clip;`, class: "tip", onclick: () => this._openPrompt("x") }, "x1");
     private readonly _vibratoSpeedSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.modulators.dictionary["vibrato speed"].maxRawVol, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeVibratoSpeed(this._doc, oldValue, newValue), false);
-    private readonly _vibratoSpeedRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:4px; font-size: smaller;", onclick: () => this._openPrompt("vibratoSpeed") }, span(_.vibratoSpeedLabel)), this._vibratoSpeedDisplay, this._vibratoSpeedSlider.container);
+    private readonly _vibratoSpeedRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:4px; font-size: smaller;", onclick: () => this._openPrompt("vibratoSpeed") }, span("‣ Spd:")), this._vibratoSpeedDisplay, this._vibratoSpeedSlider.container);
     private readonly _vibratoDelaySlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.modulators.dictionary["vibrato delay"].maxRawVol, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeVibratoDelay(this._doc, oldValue, newValue), false);
-    private readonly _vibratoDelayRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:4px;", onclick: () => this._openPrompt("vibratoDelay") }, span(_.vibratoDelayLabel)), this._vibratoDelaySlider.container);
-    private readonly _vibratoTypeSelect: HTMLSelectElement = buildOptions(select(), [
-        _.vibratoNormalLabel,
-        _.vibratoShakyLabel
-    ]);
-    private readonly _vibratoTypeSelectRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:4px;", onclick: () => this._openPrompt("vibratoType") }, span(_.vibratoTypeLabel)), div({ class: "selectContainer", style: "width: 61.5%;" }, this._vibratoTypeSelect));
+    private readonly _vibratoDelayRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:4px;", onclick: () => this._openPrompt("vibratoDelay") }, span("‣ Delay:")), this._vibratoDelaySlider.container);
+    private readonly _vibratoTypeSelect: HTMLSelectElement = buildOptions(select(), Config.vibratoTypes.map(vibratoType => vibratoType.name));
+    private readonly _vibratoTypeSelectRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:4px;", onclick: () => this._openPrompt("vibratoType") }, span("‣ Type:")), div({ class: "selectContainer", style: "width: 61.5%;" }, this._vibratoTypeSelect));
     private readonly _vibratoDropdownGroup: HTMLElement = div({ class: "editor-controls", style: "display: none;" }, this._vibratoDepthRow, this._vibratoSpeedRow, this._vibratoDelayRow, this._vibratoTypeSelectRow);
     private readonly _phaseModGroup: HTMLElement = div({ class: "editor-controls" });
     private readonly _feedbackTypeSelect: HTMLSelectElement = buildOptions(select(), Config.feedbacks.map(feedback => feedback.name));
-    private readonly _feedbackRow1: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("feedbackType") }, span(_.feedbackLabel)), div({ class: "selectContainer" }, this._feedbackTypeSelect));
+    private readonly _feedbackRow1: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("feedbackType") }, span("Feedback:")), div({ class: "selectContainer" }, this._feedbackTypeSelect));
     private readonly _spectrumEditor: SpectrumEditor = new SpectrumEditor(this._doc, null);
     // Issue#12 - Spectrum improvements. Add a zoom-in prompt for spectrum (and possibly drumset/ADVdrumset).
-    private readonly _spectrumRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("spectrum") }, span(_.spectrumLabel)), this._spectrumEditor.container);
+    private readonly _spectrumRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("spectrum") }, span("Spectrum:")), this._spectrumEditor.container);
     private readonly _harmonicsEditor: HarmonicsEditor = new HarmonicsEditor(this._doc);
-    /*private readonly _harmonicsCopyButton: HTMLButtonElement = button({ style: "max-width:40px; width: 40px;", class: "copyButton", title: _.copyLabel }, [
-        (_.copyLabel),
+    /*private readonly _harmonicsCopyButton: HTMLButtonElement = button({ style: "max-width:40px; width: 40px;", class: "copyButton", title: "Copy" }, [
+        ("Copy"),
         // Copy icon:
         SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 0; top: 50%; margin-top: -0.75em; pointer-events: none;", width: "2em", height: "2em", viewBox: "-5 -21 26 26" }, [
             SVG.path({ d: "M 0 -15 L 1 -15 L 1 0 L 13 0 L 13 1 L 0 1 L 0 -15 z M 2 -1 L 2 -17 L 10 -17 L 14 -13 L 14 -1 z M 3 -2 L 13 -2 L 13 -12 L 9 -12 L 9 -16 L 3 -16 z", fill: "currentColor" }),
         ]),
     ]);
-    private readonly _harmonicsPasteButton: HTMLButtonElement = button({ style: "max-width:40px;", class: "pasteButton", title: _.pasteLabel }, [
-        (_.pasteLabel),
+    private readonly _harmonicsPasteButton: HTMLButtonElement = button({ style: "max-width:40px;", class: "pasteButton", title: "Paste" }, [
+        ("Paste"),
         // Paste icon:
         SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 0; top: 50%; margin-top: -0.75em; pointer-events: none;", width: "2em", height: "2em", viewBox: "0 0 26 26" }, [
             SVG.path({ d: "M 8 18 L 6 18 L 6 5 L 17 5 L 17 7 M 9 8 L 16 8 L 20 12 L 20 22 L 9 22 z", stroke: "currentColor", fill: "none" }),
@@ -1548,14 +1396,26 @@ export class SongEditor {
     ]);*/
     // Issue#12 - Harmonics improvements. Add a zoom-in prompt for harmonics and picked string harmonics.
     // private readonly _harmonicsZoom: HTMLButtonElement = button({ style: "margin-left:0em; padding-left:0.2em; height:1.5em; max-width: 12px;", onclick: () => this._openPrompt("harmonicsSettings") }, "+");
-    private readonly _harmonicsRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "font-size: smaller;", onclick: () => this._openPrompt("harmonics") }, span(_.harmonicsLabel)), /*this._harmonicsZoom,*/ this._harmonicsEditor.container);
+    private readonly _harmonicsRow: HTMLElement = div({ class: "selectRow" }, span({ class: "tip", style: "font-size: smaller;", onclick: () => this._openPrompt("harmonics") }, span("Harmonics:")), /*this._harmonicsZoom,*/ this._harmonicsEditor.container);
     //private readonly _harmonicsCopyPasteRow: HTMLDivElement = div({class: "selectRow", style: "width: 90px; align-content: space-between; align-self: right;" }, this._harmonicsCopyButton, this._harmonicsPasteButton);
     
+    private readonly _songKeyAffectedBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
+    private readonly _songKeyAffectedRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:10px;", onclick: () => this._openPrompt("songKeyAffected") }, span("‣ Key-Affected:")), this._songKeyAffectedBox);
+    private readonly _songDetuneAffectedBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
+    private readonly _songDetuneAffectedRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:10px;", onclick: () => this._openPrompt("songDetuneAffected") }, span("‣ SD-Affected:")), this._songDetuneAffectedBox);
+    private readonly _operatorOffsetBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
+    private readonly _operatorOffsetRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:10px; font-size: 85%;", onclick: () => this._openPrompt("FMOperatorOffsets") }, span("‣ Use Default Carrier Offsets:")), this._operatorOffsetBox);
+    private readonly _knobTest: Knob = new Knob(0, 20, 10, 2, [5, 16], 1, this._doc);
+    private readonly _knobTestRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:10px; font-size: 90%;"}, span("Testing Knob:")), this._knobTest);
+    private readonly _advancedSettingsDropdownGroup: HTMLElement = div({ class: "editor-controls", style: "display: none; margin-top: -4px;" }, this._songKeyAffectedRow, this._songDetuneAffectedRow, this._operatorOffsetRow, this._knobTestRow);
+    private readonly _advancedSettingsDropdown: HTMLButtonElement = button({ style: "height: 1.5em; width: 65%; padding: 0px; font-size: 10px;", onclick: () => this._toggleDropdownMenu(DropdownID.AdvSettings) }, "▼ Advanced Settings ▼");
+    private readonly _advancedSettingsDropdownRow: HTMLElement = div({ class: "selectRow", style: "justify-content: center;" }, this._advancedSettingsDropdown);
+
     private readonly _envelopeEditor: EnvelopeEditor = new EnvelopeEditor(this._doc, (name) => this._openPrompt(name));
     private readonly _envelopeSpeedDisplay: HTMLSpanElement = span({ style: `color: ${ColorConfig.secondaryText}; font-size: smaller; text-overflow: clip;`, class: "tip", onclick: () => this._openPrompt("x") }, "x1");
     private readonly _envelopeSpeedSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.modulators.dictionary["envelope speed"].maxRawVol, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeEnvelopeSpeed(this._doc, oldValue, newValue), false);
     // Issue#59 - Add input boxes to various speed/delay sliders for more accurate inputs.
-    private readonly _envelopeSpeedRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:4px;", onclick: () => this._openPrompt("envelopeSpeed") }, _.envelopeSpeedLabel), this._envelopeSpeedDisplay, this._envelopeSpeedSlider.container);
+    private readonly _envelopeSpeedRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:4px;", onclick: () => this._openPrompt("envelopeSpeed") }, "‣ Spd:"), this._envelopeSpeedDisplay, this._envelopeSpeedSlider.container);
     private readonly _envelopeDropdownGroup: HTMLElement = div({ class: "editor-controls", style: "display: none;" }, this._envelopeSpeedRow);
     private readonly _envelopeDropdown: HTMLButtonElement = button({ style: "margin-left:0em; margin-right: 1em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.Envelope) }, "▼");
     
@@ -1571,23 +1431,23 @@ export class SongEditor {
     private readonly _modTargetIndicators: SVGElement[];
 
     private readonly _feedback6OpTypeSelect: HTMLSelectElement = buildOptions(select(), Config.feedbacks6Op.map(feedback => feedback.name));
-    private readonly _feedback6OpRow1: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("feedbackType") }, _.feedbackLabel), div({ class: "selectContainer" }, this._feedback6OpTypeSelect));
+    private readonly _feedback6OpRow1: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("feedbackType") }, "Feedback:"), div({ class: "selectContainer" }, this._feedback6OpTypeSelect));
 
     private readonly _algorithmCanvasSwitch: HTMLButtonElement = button({ style: "margin-left:0em; height:1.5em; width: 10px; padding: 0px; font-size: 8px;", onclick: (e:Event) => this._toggleAlgorithmCanvas(e) }, "F");
     private readonly _customAlgorithmCanvas: CustomAlgorithmCanvas = new CustomAlgorithmCanvas(canvas({ width: 144, height: 144, style: "border:2px solid " + ColorConfig.uiWidgetBackground, id: "customAlgorithmCanvas" }), this._doc, (newArray: number[][], carry: number, mode: string) => new ChangeCustomAlgorithmOrFeedback(this._doc, newArray, carry, mode));
     private readonly _algorithm6OpSelect: HTMLSelectElement = buildOptions(select(), Config.algorithms6Op.map(algorithm => algorithm.name));
-    private readonly _algorithm6OpSelectRow: HTMLDivElement = div(div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("algorithm") }, _.algorithmLabel), div({ class: "selectContainer" }, this._algorithm6OpSelect))
+    private readonly _algorithm6OpSelectRow: HTMLDivElement = div(div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("algorithm") }, "Algorithm:"), div({ class: "selectContainer" }, this._algorithm6OpSelect))
         , div({ style: "height:144px; display:flex; flex-direction: row; align-items:center; justify-content:center;" }, div({style:"display:block; width:10px; margin-right: 0.2em"},this._algorithmCanvasSwitch), div({style: "width:144px; height:144px;"},this._customAlgorithmCanvas.canvas)));
 
-    private readonly _instrumentCopyButton: HTMLButtonElement = button({ style: "max-width:86px; width: 86px;", class: "copyButton", title: _.copyInstrumentLabel }, [
-        (_.copyLabel),
+    private readonly _instrumentCopyButton: HTMLButtonElement = button({ style: "max-width:86px; width: 86px;", class: "copyButton", title: "Copy Instrument (⇧C)" }, [
+        ("Copy"),
         // Copy icon:
         SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 0; top: 50%; margin-top: -1em; pointer-events: none;", width: "2em", height: "2em", viewBox: "-5 -21 26 26" }, [
             SVG.path({ d: "M 0 -15 L 1 -15 L 1 0 L 13 0 L 13 1 L 0 1 L 0 -15 z M 2 -1 L 2 -17 L 10 -17 L 14 -13 L 14 -1 z M 3 -2 L 13 -2 L 13 -12 L 9 -12 L 9 -16 L 3 -16 z", fill: "currentColor" }),
         ]),
     ]);
-    private readonly _instrumentPasteButton: HTMLButtonElement = button({ style: "max-width:86px;", class: "pasteButton", title: _.pasteInstrumentLabel }, [
-        (_.pasteLabel),
+    private readonly _instrumentPasteButton: HTMLButtonElement = button({ style: "max-width:86px;", class: "pasteButton", title: "Paste Instrument (⇧V)" }, [
+        ("Paste"),
         // Paste icon:
         SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 0; top: 50%; margin-top: -1em; pointer-events: none;", width: "2em", height: "2em", viewBox: "0 0 26 26" }, [
             SVG.path({ d: "M 8 18 L 6 18 L 6 5 L 17 5 L 17 7 M 9 8 L 16 8 L 20 12 L 20 22 L 9 22 z", stroke: "currentColor", fill: "none" }),
@@ -1601,28 +1461,28 @@ export class SongEditor {
         this._globalOscilloscope.canvas
     );
     private readonly _oscilloscopeScaleSlider: Slider = new Slider(input({ style: "width: 120px; flex-grow: 1; margin: 0;", type: "range", min: "0.25", max: "5", value: "1", step: "0.25" }), this._doc, null, false);
-    private readonly _oscilloscopeScaleRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("oscilloscopeScaling") }, span(_.oscilloscopeScaleLabel)), this._oscilloscopeScaleSlider.container);
+    private readonly _oscilloscopeScaleRow: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("oscilloscopeScaling") }, span("Scale:")), this._oscilloscopeScaleSlider.container);
 
     private readonly _customWaveDrawCanvas: CustomChipCanvas = new CustomChipCanvas(canvas({ width: 128, height: 52, style: "border:2px solid " + ColorConfig.uiWidgetBackground, id: "customWaveDrawCanvas" }), this._doc, (newArray: Float32Array) => new ChangeCustomWave(this._doc, newArray));
     private readonly _wavetableCustomWaveDrawCanvas: WavetableCustomChipCanvas = new WavetableCustomChipCanvas(canvas({ width: 128, height: 52, style: "border:2px solid " + ColorConfig.uiWidgetBackground, id: "customWaveDrawCanvas" }), this._doc, (newArray: Float32Array) => new ChangeWavetableCustomWave(this._doc, newArray, this._wavetableIndices[this._doc.channel][this._doc.getCurrentInstrument()]));
 
-    private readonly _customWavePresetDrop: HTMLSelectElement = buildHeaderedOptions(_.loadPresetLabel, select({ style: "width: 50%; height:1.5em; text-align: center; text-align-last: center;" }),
+    private readonly _customWavePresetDrop: HTMLSelectElement = buildHeaderedOptions("Load Preset", select({ style: "width: 50%; height:1.5em; text-align: center; text-align-last: center;" }),
         Config.chipWaves.map(wave => wave.name));
-    private readonly _wavetableCustomWavePresetDrop: HTMLSelectElement = buildHeaderedOptions(_.loadPresetLabel, select({ style: "width: 50%; height:1.5em; text-align: center; text-align-last: center;" }),
+    private readonly _wavetableCustomWavePresetDrop: HTMLSelectElement = buildHeaderedOptions("Load Preset", select({ style: "width: 50%; height:1.5em; text-align: center; text-align-last: center;" }),
         Config.chipWaves.map(wave => wave.name));
 
     private readonly _customWaveZoom: HTMLButtonElement = button({ style: "margin-left:0.5em; height:1.5em; max-width: 20px;", onclick: () => this._openPrompt("customChipSettings") }, "+");
     private readonly _wavetableCustomWaveZoom: HTMLButtonElement = button({ style: "margin-left:0.5em; height:1.5em; max-width: 20px;", onclick: () => this._openPrompt("wavetableCustomChipSettings") }, "+");
 
     private readonly _customWaveCopy: HTMLButtonElement = button({ style: "width:58px; height:1.5em; text-align: right;", class: "copyButton" }, [
-		_.copyLabel,
+		"Copy",
 		// Copy icon:
 		SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 0; top: 50%; margin-top: -0.75em; pointer-events: none;", width: "1.5em", height: "1.5em", viewBox: "-5 -21 26 26" }, [
 			SVG.path({ d: "M 0 -15 L 1 -15 L 1 0 L 13 0 L 13 1 L 0 1 L 0 -15 z M 2 -1 L 2 -17 L 10 -17 L 14 -13 L 14 -1 z M 3 -2 L 13 -2 L 13 -12 L 9 -12 L 9 -16 L 3 -16 z", fill: "currentColor" }),
 		]),
 	]);
     private readonly _customWavePaste: HTMLButtonElement = button({ style: "width:58px; height:1.5em; text-align: right;", class: "pasteButton" }, [
-		_.pasteLabel,
+		"Paste",
 		// Paste icon:
 		SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 0; top: 50%; margin-top: -0.75em; pointer-events: none;", width: "1.5em", height: "1.5em", viewBox: "0 0 26 26" }, [
 			SVG.path({ d: "M 8 18 L 6 18 L 6 5 L 17 5 L 17 7 M 9 8 L 16 8 L 20 12 L 20 22 L 9 22 z", stroke: "currentColor", fill: "none" }),
@@ -1631,14 +1491,14 @@ export class SongEditor {
 	]);
     private readonly _customWaveCopyPasteContainer: HTMLDivElement = div({class: "selectRow", style: "width: 124px; align-content: space-between;" }, this._customWaveCopy, this._customWavePaste);
     private readonly _wavetableCustomWaveCopy: HTMLButtonElement = button({ style: "width:58px; height:1.5em; text-align: right;", class: "copyButton" }, [
-		_.copyLabel,
+		"Copy",
 		// Copy icon:
 		SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 0; top: 50%; margin-top: -0.75em; pointer-events: none;", width: "1.5em", height: "1.5em", viewBox: "-5 -21 26 26" }, [
 			SVG.path({ d: "M 0 -15 L 1 -15 L 1 0 L 13 0 L 13 1 L 0 1 L 0 -15 z M 2 -1 L 2 -17 L 10 -17 L 14 -13 L 14 -1 z M 3 -2 L 13 -2 L 13 -12 L 9 -12 L 9 -16 L 3 -16 z", fill: "currentColor" }),
 		]),
 	]);
     private readonly _wavetableCustomWavePaste: HTMLButtonElement = button({ style: "width:58px; height:1.5em; text-align: right;", class: "pasteButton" }, [
-		_.pasteLabel,
+		"Paste",
 		// Paste icon:
 		SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 0; top: 50%; margin-top: -0.75em; pointer-events: none;", width: "1.5em", height: "1.5em", viewBox: "0 0 26 26" }, [
 			SVG.path({ d: "M 8 18 L 6 18 L 6 5 L 17 5 L 17 7 M 9 8 L 16 8 L 20 12 L 20 22 L 9 22 z", stroke: "currentColor", fill: "none" }),
@@ -1662,8 +1522,8 @@ export class SongEditor {
     private readonly _songTitleInputBox: InputBox = new InputBox(input({ style: "font-weight:bold; border:none; width: 96%; background-color:${ColorConfig.editorBackground}; color:${ColorConfig.primaryText}; text-align:center", maxlength: "30", type: "text", value: EditorConfig.versionDisplayName }), this._doc, (oldValue: string, newValue: string) => new ChangeSongTitle(this._doc, oldValue, newValue));
     private readonly _songSubtitleInputBox: InputBox = new InputBox(input({ style: "font-weight:bold; font-size:12px; border:none; width: 90%; background-color:${ColorConfig.editorBackground}; color: " + ColorConfig.secondaryText + " text-align:center", maxlength: "30", type: "text", }), this._doc, (oldValue: string, newValue: string) => new ChangeSongSubtitle(this._doc, oldValue, newValue));
 
-    private readonly _feedbackAmplitudeSlider: Slider = new Slider(input({ type: "range", min: "0", max: Config.operatorAmplitudeMax, value: "0", step: "1", title: _.hoverText12Label }), this._doc, (oldValue: number, newValue: number) => new ChangeFeedbackAmplitude(this._doc, oldValue, newValue), false);
-    private readonly _feedbackRow2: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("feedbackVolume") }, span(_.feedbackVolumeLabel)), this._feedbackAmplitudeSlider.container);
+    private readonly _feedbackAmplitudeSlider: Slider = new Slider(input({ type: "range", min: "0", max: Config.operatorAmplitudeMax, value: "0", step: "1", title: "Feedback Amplitude" }), this._doc, (oldValue: number, newValue: number) => new ChangeFeedbackAmplitude(this._doc, oldValue, newValue), false);
+    private readonly _feedbackRow2: HTMLDivElement = div({ class: "selectRow" }, span({ class: "tip", onclick: () => this._openPrompt("feedbackVolume") }, span("Fdback Vol:")), this._feedbackAmplitudeSlider.container);
     /*
      * @jummbus - my very real, valid reason for cutting this button: I don't like it.
      * 
@@ -1672,8 +1532,8 @@ export class SongEditor {
         "Customize Instrument",
     );
     */
-    private readonly _addEnvelopeButton: HTMLButtonElement = button({ type: "button", class: "add-envelope", title: _.addEnvelopeLabel});
-    private readonly _addPasteEnvelopeButton: HTMLButtonElement = button({ type: "button", class: "envelope-button", title: _.addCopiedEnvelopeLabel, style: "margin-right: 2px;" },
+    private readonly _addEnvelopeButton: HTMLButtonElement = button({ type: "button", class: "add-envelope", title: "Add Envelope"});
+    private readonly _addPasteEnvelopeButton: HTMLButtonElement = button({ type: "button", class: "envelope-button", title: "Add Copied Envelope", style: "margin-right: 2px;" },
         SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 2%; top: 38%; margin-top: -0.75em; pointer-events: none;", width: "2em", height: "2em", viewBox: "0 0 26 26" }, [
             SVG.path({ d: "M 8 18 L 6 18 L 6 5 L 17 5 L 17 7 M 9 8 L 16 8 L 20 12 L 20 16 L 14 16 L 14 22 L 9 22 z", stroke: "currentColor", fill: "none" }),
             SVG.path({ d: "M 9 3 L 14 3 L 14 6 L 9 6 L 9 3 z M 16 8 L 20 12 L 16 12 L 16 8 z", fill: "currentColor" }),
@@ -1716,8 +1576,10 @@ export class SongEditor {
         this._stringSustainRow,
         this._unisonSelectRow,
         this._unisonDropdownGroup,
+        this._advancedSettingsDropdownRow,
+        this._advancedSettingsDropdownGroup,
         div({ style: `padding: 2px 0; margin-left: 2em; display: flex; align-items: center;` },
-            span({ style: `flex-grow: 1; text-align: center;` }, span({ class: "tip", onclick: () => this._openPrompt("effects") }, span(_.effectsLabel))),
+            span({ style: `flex-grow: 1; text-align: center;` }, span({ class: "tip", onclick: () => this._openPrompt("effects") }, span("Effects"))),
             div({ class: "effects-menu" }, this._effectsSelect),
         ),
         this._transitionRow,
@@ -1733,23 +1595,18 @@ export class SongEditor {
         this._noteFilterRow,
         this._noteFilterSimpleCutRow,
         this._noteFilterSimplePeakRow,
+        this._wavefoldRow,
         this._distortionRow,
         this._aliasingRow,
-        this._reshapeAmountRow,
-        this._reshapeShiftRow,
+        this._clipBoundRow,
         this._bitcrusherQuantizationRow,
         this._bitcrusherFreqRow,
-        this._wavefoldLowerRow,
-        this._wavefoldUpperRow,
         this._chorusRow,
         this._echoSustainRow,
         this._echoDelayRow,
         this._reverbRow,
-        this._percussionRow,
-        this._songDetuneEffectedRow,
-        this._songOctaveEffectedRow,
         div({ style: `padding: 2px 0; margin-left: 2em; display: flex; align-items: center;` },
-            span({ style: `flex-grow: 1; text-align: center;` }, span({ class: "tip", onclick: () => this._openPrompt("envelopes") }, span(_.envelopesLabel))),
+            span({ style: `flex-grow: 1; text-align: center;` }, span({ class: "tip", onclick: () => this._openPrompt("envelopes") }, span("Envelopes"))),
             this._envelopeDropdown,
             this._addPasteEnvelopeButton,
             this._addEnvelopeButton,
@@ -1763,11 +1620,11 @@ export class SongEditor {
             this._instrumentPasteButton,
         ),
     );
-    private readonly _instrumentSettingsTextRow: HTMLDivElement = div({ id: "instrumentSettingsText", style: `padding: 3px 0; max-width: 15em; text-align: center; color: ${ColorConfig.secondaryText};` },
-        (_.instSettingsLabel),
+    private readonly _instrumentSettingsTextRow: HTMLDivElement = div({ id: "instrumentSettingsText", style: `padding: 3px 0; max-width: 15em; word-break: break-word; text-align: center; color: ${ColorConfig.secondaryText};` },
+        ("Instrument Settings"),
     );
     private readonly _instrumentTypeSelectRow: HTMLDivElement = div({ class: "selectRow", id: "typeSelectRow" },
-        span({ class: "tip", onclick: () => this._openPrompt("instrumentType") }, span(_.instTypeLabel)),
+        span({ class: "tip", onclick: () => this._openPrompt("instrumentType") }, span("Type:")),
         div(
             div({ class: "pitchSelect" }, this._pitchedPresetSelect),
             div({ class: "drumSelect" }, this._drumPresetSelect)
@@ -1790,8 +1647,8 @@ export class SongEditor {
         SVG.path({ d: "M150 65 c0 -8 -7 -15 -15 -15 -8 0 -15 -4 -15 -10 0 -14 23 -13 38 2 15 15 16 38 2 38 -5 0 -10 -7 -10 -15z" })]);
 
     private readonly _promptContainer: HTMLDivElement = div({ class: "promptContainer", style: "display: none;" });
-    private readonly _zoomInButton: HTMLButtonElement = button({ class: "zoomInButton", type: "button", title: _.hoverText10Label });
-    private readonly _zoomOutButton: HTMLButtonElement = button({ class: "zoomOutButton", type: "button", title: _.hoverText11Label });
+    private readonly _zoomInButton: HTMLButtonElement = button({ class: "zoomInButton", type: "button", title: "Zoom In" });
+    private readonly _zoomOutButton: HTMLButtonElement = button({ class: "zoomOutButton", type: "button", title: "Zoom Out" });
     private readonly _patternEditorRow: HTMLDivElement = div({ style: "flex: 1; height: 100%; display: flex; overflow: hidden; justify-content: center;" },
         this._patternEditorPrev.container,
         this._patternEditor.container,
@@ -1845,31 +1702,31 @@ export class SongEditor {
                             this._usedInstrumentIndicator,
                         ),
                     ),
-                    span(_.songSettingsLabel),
+                    span("Song Settings"),
                     div({ style: "width: 100%; left: 0; top: -1px; position:absolute; overflow-x:clip;" }, this._jumpToModIndicator),
                 ),
             ),
             div({ class: "selectRow" },
-                span({ class: "tip", onclick: () => this._openPrompt("scale") }, span(_.songScaleLabel)),
+                span({ class: "tip", onclick: () => this._openPrompt("scale") }, span("Scale:")),
                 div({ class: "selectContainer" }, this._scaleSelect),
             ),
             div({ class: "selectRow" },
-                span({ class: "tip", onclick: () => this._openPrompt("key") }, span(_.songKeyLabel)),
+                span({ class: "tip", onclick: () => this._openPrompt("key") }, span("Key:")),
                 div({ class: "selectContainer" }, this._keySelect),
             ),
             div({ class: "selectRow" },
-                span({ class: "tip", onclick: () => this._openPrompt("key_octave") }, span(_.songKeyOctaveLabel)),
+                span({ class: "tip", onclick: () => this._openPrompt("key_octave") }, span("Octave: ")),
                 this._octaveStepper,
             ),
             div({ class: "selectRow" },
-                span({ class: "tip", onclick: () => this._openPrompt("tempo") }, span(_.songTempoLabel)),
+                span({ class: "tip", onclick: () => this._openPrompt("tempo") }, span("Tempo:")),
                 span({ style: "display: flex;" },
                     this._tempoSlider.container,
                     this._tempoStepper,
                 ),
             ),
             div({ class: "selectRow" },
-                span({ class: "tip", onclick: () => this._openPrompt("rhythm") }, span(_.songRhythmLabel)),
+                span({ class: "tip", onclick: () => this._openPrompt("rhythm") }, span("Rhythm:")),
                 div({ class: "selectContainer" }, this._rhythmSelect),
             ),
         ),
@@ -1940,7 +1797,6 @@ export class SongEditor {
     private readonly _drumsetSpectrumEditors: SpectrumEditor[] = [];
     private readonly _drumsetEnvelopeSelects: HTMLSelectElement[] = [];
     private readonly _drumsetEnvelopePlotters: EnvelopeLineGraph[] = [];
-	private readonly _drumsetEnvelopeStartPlotterLines: EnvelopeStartLine[] = [];
 	private readonly _drumsetEnvelopePlotterRows: HTMLDivElement[] = [];
 	private readonly _drumsetPlotterTimeRangeInputBoxes: HTMLInputElement[] = [];
 	private readonly _drumsetPlotterTimeRangeRows: HTMLDivElement[] = [];
@@ -2004,6 +1860,7 @@ export class SongEditor {
     private _openOperatorDropdowns: boolean[] = [];
     private _openUnisonDropdown: boolean = false;
     private _openDrumsetEnvDropdowns: boolean[] = [];
+    private _openAdvancedSettingsDropdown: boolean = false;
 
     private outVolumeHistoricTimer: number = 0;
     private outVolumeHistoricCap: number = 0;
@@ -2023,56 +1880,38 @@ export class SongEditor {
             this._fileMenu.removeChild(this._fileMenu.querySelector("[value='shareUrl']")!);
         }
 
-        this._scaleSelect.appendChild(optgroup({ label: (_.editLabel) },
-            option({ value: "forceScale" }, span(_.snapScaleLabel)),
-            option({ value: "customize" }, span(_.customizeScaleLabel)),
+        this._scaleSelect.appendChild(optgroup({ label: ("Edit") },
+            option({ value: "forceScale" }, span("Snap Notes to Scale")),
+            option({ value: "customize" }, span("Configure Custom Scale")),
         ));
-        this._keySelect.appendChild(optgroup({ label: (_.editLabel) },
-            option({ value: "detectKey" }, span(_.detectKeyLabel)),
+        this._keySelect.appendChild(optgroup({ label: ("Edit") },
+            option({ value: "detectKey" }, span("Detect Key")),
         ));
-        this._rhythmSelect.appendChild(optgroup({ label: (_.editLabel) },
-            option({ value: "forceRhythm" }, span(_.snapRhythmLabel)),
+        this._rhythmSelect.appendChild(optgroup({ label: ("Edit") },
+            option({ value: "forceRhythm" }, span("Snap Notes to Rhythm")),
         ));
 
-        this._vibratoSelect.appendChild(option({ hidden: true, value: 5 }, span(_.customLabel)));
+        this._vibratoSelect.appendChild(option({ hidden: true, value: 5 }, span("custom")));
 
-        this._unisonSelect.appendChild(option({ hidden: true, value: Config.unisons.length }, _.customLabel));
+        this._unisonSelect.appendChild(option({ hidden: true, value: Config.unisons.length }, "custom"));
 
         this._showModSliders = new Array<boolean>(Config.modulators.length);
         this._modSliderValues = new Array<number>(Config.modulators.length);
 
         this._phaseModGroup.appendChild(div({ class: "selectRow", style: `color: ${ColorConfig.secondaryText}; height: 1em; margin-top: 0.5em;` },
             div({ style: "margin-right: .1em; visibility: hidden;" }, 1 + "."),
-            div({ style: "width: 3em; margin-right: .3em;", class: "tip", onclick: () => this._openPrompt("operatorFrequency") }, span(_.operFreqLabel)),
-            div({ class: "tip", onclick: () => this._openPrompt("operatorVolume") }, span(_.operVolumeLabel)),
+            div({ style: "width: 3em; margin-right: .3em;", class: "tip", onclick: () => this._openPrompt("operatorFrequency") }, span("Freq:")),
+            div({ class: "tip", onclick: () => this._openPrompt("operatorVolume") }, span("Volume:")),
         ));
         for (let i: number = 0; i < Config.operatorCount+2; i++) {
             const operatorIndex: number = i;
             const operatorNumber: HTMLDivElement = div({ style: "margin-right: 0px; color: " + ColorConfig.secondaryText + ";" }, i + 1 + "");
-            const frequencySelect: HTMLSelectElement = buildOptions(select({ style: "width: 100%;", title: _.hoverText6Label }), Config.operatorFrequencies.map(freq => freq.name));
-            const amplitudeSlider: Slider = new Slider(input({ type: "range", min: "0", max: Config.operatorAmplitudeMax, value: "0", step: "1", title: _.hoverText7Label }), this._doc, (oldValue: number, newValue: number) => new ChangeOperatorAmplitude(this._doc, operatorIndex, oldValue, newValue), false);
-            const waveformSelect: HTMLSelectElement = buildOptions(select({ style: "width: 100%;", title: _.hoverText8Label }), [
-                _.waveform1Label,
-                _.waveform2Label,
-                _.waveform3Label,
-                _.waveform4Label,
-                _.waveform5Label,
-                _.waveform6Label,
-                _.waveform7Label,
-                _.waveform8Label,
-                _.waveform9Label,
-                _.waveform10Label,
-                _.waveform11Label,
-                _.waveform12Label,
-                _.waveform13Label,
-                _.waveform14Label,
-                _.waveform15Label,
-                _.waveform16Label,
-                _.waveform17Label
-            ]);
+            const frequencySelect: HTMLSelectElement = buildOptions(select({ style: "width: 100%;", title: "Frequency" }), Config.operatorFrequencies.map(freq => freq.name));
+            const amplitudeSlider: Slider = new Slider(input({ type: "range", min: "0", max: Config.operatorAmplitudeMax, value: "0", step: "1", title: "Volume" }), this._doc, (oldValue: number, newValue: number) => new ChangeOperatorAmplitude(this._doc, operatorIndex, oldValue, newValue), false);
+            const waveformSelect: HTMLSelectElement = buildOptions(select({ style: "width: 100%;", title: "Waveform" }), Config.operatorWaves.map(operatorWave => operatorWave.name));
             const waveformDropdown: HTMLButtonElement = button({ style: "margin-left:0em; margin-right: 2px; height:1.5em; width: 8px; max-width: 10px; padding: 0px; font-size: 8px;", onclick: () => this._toggleDropdownMenu(DropdownID.FM, i) }, "▼");
-            const waveformDropdownHint: HTMLSpanElement = span({ class: "tip", style: "margin-left: 10px;", onclick: () => this._openPrompt("operatorWaveform") }, span(_.operWaveLabel));
-            const waveformPulsewidthSlider: Slider = new Slider(input({ style: "", type: "range", min: "1", max: (Config.pulseWidthRange * 2) - 1, value: "0", step: "1", title: _.hoverText9Label }), this._doc, (oldValue: number, newValue: number) => new ChangeOperatorPulseWidth(this._doc, operatorIndex, oldValue, newValue), true);
+            const waveformDropdownHint: HTMLSpanElement = span({ class: "tip", style: "margin-left: 10px;", onclick: () => this._openPrompt("operatorWaveform") }, span("Wave:"));
+            const waveformPulsewidthSlider: Slider = new Slider(input({ style: "", type: "range", min: "1", max: (Config.pulseWidthRange * 2) - 1, value: "0", step: "1", title: "Pulse Width" }), this._doc, (oldValue: number, newValue: number) => new ChangeOperatorPulseWidth(this._doc, operatorIndex, oldValue, newValue), true);
             waveformPulsewidthSlider.container.style.marginLeft = "10px";
             waveformPulsewidthSlider.container.style.width = "50%";
             const waveformDropdownRow: HTMLElement = div({ class: "selectRow" }, waveformDropdownHint, waveformPulsewidthSlider.container,
@@ -2123,8 +1962,8 @@ export class SongEditor {
 
         this._drumsetGroup.appendChild(
             div({ class: "selectRow" },
-                span({ class: "tip", onclick: () => this._openPrompt("drumsetEnvelope") }, span(_.envelopesLabel)),
-                span({ class: "tip", onclick: () => this._openPrompt("drumsetSpectrum") }, span(_.spectrumLabel)),
+                span({ class: "tip", onclick: () => this._openPrompt("drumsetEnvelope") }, span("Envelopes")),
+                span({ class: "tip", onclick: () => this._openPrompt("drumsetSpectrum") }, span("Spectrum:")),
             ),
         );
         for (let i: number = Config.drumCount - 1; i >= 0; i--) {
@@ -2132,99 +1971,98 @@ export class SongEditor {
             const spectrumEditor: SpectrumEditor = new SpectrumEditor(this._doc, i);
             spectrumEditor.container.addEventListener("mousedown", this.refocusStage);
 
-            const envelopeSelect: HTMLSelectElement = buildOptions(select({ style: "width: 100%;", title: _.hoverText13Label }), Config.drumsetEnvelopes.map(envelope => envelope.name));
+            const envelopeSelect: HTMLSelectElement = buildOptions(select({ style: "width: 100%;", title: "Filter Envelope" }), Config.drumsetEnvelopes.map(envelope => envelope.name));
             const envelopePlotter: EnvelopeLineGraph = new EnvelopeLineGraph(canvas({ width: 180, height: 80, style: `border: 2px solid ${ColorConfig.uiWidgetBackground}; width: 140px; height: 60px; margin-left: 24px;`, id: "EnvelopeLineGraph" }), this._doc, i, true);
-			const envelopeStartPlotLine: EnvelopeStartLine = new EnvelopeStartLine(canvas({ width: 180, height: 90, style: `width: 142px; height: 70px; top: -6px; right: -1px; position: relative; margin-left: 24px;`, id: "EnvelopeStartPlotLine" }), this._doc, i, true);
-			const envelopePlotterRow: HTMLDivElement = div({class: "selectRow dropFader", style: "margin-top: 18px; margin-bottom: 25px;"}, envelopePlotter.canvas, envelopeStartPlotLine.canvas);
+			const envelopePlotterRow: HTMLDivElement = div({class: "selectRow dropFader", style: "margin-top: 18px; margin-bottom: 25px;"}, envelopePlotter.canvas);
 			const plotterTimeRangeInputBox: HTMLInputElement = input({style: "width: 13.1em; font-size: 80%; margin-left: 0px; vertical-align: middle;", id: "drumsetTimeRangeInputBox", type: "number", step: "0.1", min: "0.1", max: "200", value: "4"});
 			const plotterTimeRangeRow: HTMLDivElement = div({ class: "selectRow dropFader", style: "margin-left: 25px; margin-bottom: 20px;" }, div({},
-				span({ class: "tip", style: "height:1em; font-size: small; white-space: nowrap;", onclick: () => this._openPrompt("plotterTimeRange") }, _.timeRangeLabel),
-				div({ style: "color: " + ColorConfig.secondaryText + "; margin-top: -3px;" }, plotterTimeRangeInputBox),
+				span({ class: "tip", style: "height:1em; font-size: small; white-space: nowrap;", onclick: () => this._openPrompt("plotterTimeRange") }, "‣ Time Range: "),
+				div({ style: "color: " + ColorConfig.secondaryText + "; margin-top: -1px;" }, plotterTimeRangeInputBox),
 			));
             const envelopeSpeedSlider: SliderNoParse = new SliderNoParse(input({ style: "margin: 0;", type: "range", min: Config.perEnvelopeSpeedMin, max: Config.perEnvelopeSpeedMax, value: "1", step: "0.25" }), this._doc, (oldValue: number, newValue: number, forceUpdate: boolean = false) => new ChangeDrumsetEnvelopeSpeed(this._doc, i, oldValue, newValue, forceUpdate), false);
             const envelopeSpeedInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "drumsetPerEnvelopeSpeedInputBox", type: "number", step: "0.001", min: Config.perEnvelopeSpeedMin, max: Config.perEnvelopeSpeedMax, value: "1"});
 			const envelopeSpeedRow: HTMLDivElement = div({class: "selectRow dropFader"}, div({},
-				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("perEnvelopeSpeed")}, span(_.perEnvelopeSpeedLabel)),
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("perEnvelopeSpeed")}, span("‣ Env Spd:")),
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, envelopeSpeedInputBox),
 			), envelopeSpeedSlider.container);
             const discreteEnvelopeToggle: HTMLInputElement = input({style: "width: 3em; padding: 0; margin-right: 3em;", type: "checkbox"});
 			const discreteEnvelopeRow: HTMLDivElement = div({class: "selectRow dropFader"}, div({},
-				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("discreteEnvelope")}, span(_.discreteEnvelopeLabel))
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("discreteEnvelope")}, span("‣ Discrete:"))
 			), discreteEnvelopeToggle);
             const lowerBoundSlider: SliderNoParse = new SliderNoParse(input({ style: "margin: 0;", type: "range", min: Config.lowerBoundMin, max: Config.lowerBoundMax, value: "0", step: "0.25" }), this._doc, (oldValue: number, newValue: number, forceUpdate: boolean = false) => new ChangeDrumsetLowerBound(this._doc, i, oldValue, newValue, forceUpdate), false);
-            const lowerBoundInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "drumsetLowerBoundInputBox", type: "number", step: "0.001", min: Config.lowerBoundMin, max: Config.lowerBoundMax, value: "0"});
+            const lowerBoundInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "drumsetLowerBoundInputBox", type: "number", step: "0.01", min: Config.lowerBoundMin, max: Config.lowerBoundMax, value: "0"});
 			const lowerBoundRow: HTMLDivElement = div({class: "selectRow dropFader"}, div({},
-				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeBounds")}, span(_.lowerBoundLabel)),
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeBounds")}, span("‣ Lwr Bnd:")),
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, lowerBoundInputBox),
 			), lowerBoundSlider.container);
             const upperBoundSlider: SliderNoParse = new SliderNoParse(input({ style: "margin: 0;", type: "range", min: Config.upperBoundMin, max: Config.upperBoundMax, value: "1", step: "0.25" }), this._doc, (oldValue: number, newValue: number, forceUpdate: boolean = false) => new ChangeDrumsetUpperBound(this._doc, i, oldValue, newValue, forceUpdate), false);
-            const upperBoundInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "drumsetUpperBoundInputBox", type: "number", step: "0.001", min: Config.upperBoundMin, max: Config.upperBoundMax, value: "1"});
+            const upperBoundInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "drumsetUpperBoundInputBox", type: "number", step: "0.01", min: Config.upperBoundMin, max: Config.upperBoundMax, value: "1"});
 			const upperBoundRow: HTMLDivElement = div({class: "selectRow dropFader"}, div({},
-				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeBounds")}, span(_.upperBoundLabel)),
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeBounds")}, span("‣ Upr Bnd:")),
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, upperBoundInputBox),
 			), upperBoundSlider.container);
             const envelopeDelaySlider: SliderNoParse = new SliderNoParse(input({ style: "margin: 0;", type: "range", min: "0", max: Config.envelopeDelayMax, value: "0", step: "0.5" }), this._doc, (oldValue: number, newValue: number, forceUpdate: boolean = false) => new ChangeDrumsetEnvelopeDelay(this._doc, i, oldValue, newValue, forceUpdate), false);
             const envelopeDelayInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "drumsetEnvelopeDelayInputBox", type: "number", step: "0.01", min: "0", max: Config.envelopeDelayMax, value: "0"});
 			const envelopeDelayRow: HTMLDivElement = div({class: "selectRow dropFader"}, div({},
-				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeDelay")}, span(_.envelopeDelayLabel)),
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeDelay")}, span("‣ Delay:")),
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, envelopeDelayInputBox),
 			), envelopeDelaySlider.container);
-            const envelopePhaseSlider: SliderNoParse = new SliderNoParse(input({ style: "margin: 0;", type: "range", min: "0", max: Config.envelopePhaseMax, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number, forceUpdate: boolean = false) => new ChangeDrumsetEnvelopePosition(this._doc, i, oldValue, newValue, forceUpdate), false);
+            const envelopePhaseSlider: SliderNoParse = new SliderNoParse(input({ style: "margin: 0;", type: "range", min: "0", max: Config.envelopePhaseMax, value: "0", step: "0.25" }), this._doc, (oldValue: number, newValue: number, forceUpdate: boolean = false) => new ChangeDrumsetEnvelopePosition(this._doc, i, oldValue, newValue, forceUpdate), false);
             const envelopePhaseInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "drumsetEnvelopePhaseInputBox", type: "number", step: "0.01", min: "0", max: Config.envelopePhaseMax, value: "0"});
 			const envelopePhaseRow: HTMLDivElement = div({class: "selectRow dropFader"}, div({},
-				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopePhase")}, span(_.envelopeStartingPointLabel)),
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopePhase")}, span("‣ Position:")),
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, envelopePhaseInputBox),
 			), envelopePhaseSlider.container);
-            const measureInBeatsButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "no-underline", onclick: () => this._switchDrumsetMeasurementType(true, i) }, span(_.measureInBeatsLabel));
-    		const measureInSecondsButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "last-button no-underline", onclick: () => this._switchDrumsetMeasurementType(false, i) }, span(_.measureInSecondsLabel));
-    		const measurementTypeRow: HTMLDivElement = div({ class: "selectRow", style: "padding-top: 4px; margin-bottom: -3px;" }, span({ style: "font-size: small;", class: "tip", onclick: () => this._openPrompt("envelopeDelayPhaseMeasurement") }, span(_.delayPhaseMeasurementLabel)), div({ class: "instrument-bar" }, measureInBeatsButton, measureInSecondsButton));
+            const measureInBeatsButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "no-underline", onclick: () => this._switchDrumsetMeasurementType(true, i) }, span("Beats"));
+    		const measureInSecondsButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "last-button no-underline", onclick: () => this._switchDrumsetMeasurementType(false, i) }, span("Seconds"));
+    		const measurementTypeRow: HTMLDivElement = div({ class: "selectRow", style: "padding-top: 4px; margin-bottom: -3px;" }, span({ style: "font-size: small;", class: "tip", onclick: () => this._openPrompt("envelopeDelayPhaseMeasurement") }, span("‣ Measure:")), div({ class: "instrument-bar" }, measureInBeatsButton, measureInSecondsButton));
             const mirrorAmountSlider: SliderNoParse = new SliderNoParse(input({ style: "margin: 0;", type: "range", min: "1", max: Config.clapMirrorsMax, value: "5", step: "1" }), this._doc, (oldValue: number, newValue: number, forceUpdate: boolean = false) => new ChangeDrumsetClapMirrorAmount(this._doc, i, oldValue, newValue, forceUpdate), false);
             const mirrorAmountInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "drumsetClapMirrorAmountInputBox", type: "number", step: "1", min: "1", max: Config.clapMirrorsMax, value: "5"});
 			const mirrorAmountRow: HTMLDivElement = div({class: "selectRow dropFader"}, div({},
-				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("mirrorAmount")}, span(_.clapMirrorAmountLabel)),
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("mirrorAmount")}, span("‣ Mirrors:")),
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, mirrorAmountInputBox),
 			), mirrorAmountSlider.container);
             const LFOShapeSelect: HTMLSelectElement = buildOptions(select(), [
-				_.LFOShape1Label,
-				_.LFOShape2Label,
-				_.LFOShape3Label,
-				_.LFOShape4Label,
-				_.LFOShape5Label,
-				_.LFOShape6Label,
-                _.LFOShape7Label
+				"sine (tremolo)",
+				"triangle",
+				"pulses",
+				"sawtooth",
+				"trapezoid",
+				"stairs",
+                "absine"
 			]);
-            const LFOShapeRow: HTMLDivElement = div({class: "selectRow"}, span({ class: "tip", onclick: () => this._openPrompt("LFOShape") }, span(_.LFOShapeLabel)), div({ class: "selectContainer" }, LFOShapeSelect));
+            const LFOShapeRow: HTMLDivElement = div({class: "selectRow"}, span({ class: "tip", onclick: () => this._openPrompt("LFOShape") }, span("‣ Shape:")), div({ class: "selectContainer" }, LFOShapeSelect));
 			const LFOEnableAccelerationToggle: HTMLInputElement = input({style: "width: 3em; padding: 0;", type: "checkbox"});
 			const LFOLoopOnceToggle: HTMLInputElement = input({style: "width: 3em; padding: 0;", type: "checkbox"});
 			const LFOIgnoranceToggle: HTMLInputElement = input({style: "width: 3em; padding: 0;", type: "checkbox"});
 			const LFORadioButtonsRow: HTMLDivElement = div({}, div({class: "", style: "display: flex; flex-direction: row; justify-content: space-evenly;"},
 				div({style: "display: flex; flex-direction: column; gap: 5px; text-align: center;"},
-					span({class: "tip", style: "font-size: 10.5px; height: 1em; width: 5em;", onclick: () => this._openPrompt("LFOAcceleration")}, span(_.LFOEnableAccelerationLabel)),
+					span({class: "tip", style: "font-size: 10.5px; height: 1em; width: 5em;", onclick: () => this._openPrompt("LFOAcceleration")}, span("Accelerate:")),
 					div({style: ""}, LFOEnableAccelerationToggle),
 				),
 				div({style: "display: flex; flex-direction: column; gap: 5px; text-align: center;"},
-					span({class: "tip", style: "font-size: 10.5px; height: 1em; width: 5em;", onclick: () => this._openPrompt("LFOLoopOnce")}, span(_.LFOLoopsLabel)),
+					span({class: "tip", style: "font-size: 10.5px; height: 1em; width: 5em; white-space: nowrap;", onclick: () => this._openPrompt("LFOLoopOnce")}, span("Play Once:")),
 					div({style: ""}, LFOLoopOnceToggle),
 				),
 				div({style: "display: flex; flex-direction: column; gap: 5px; text-align: center;"},
-					span({class: "tip", style: "font-size: 10.5px; height: 1em; width: 5em;", onclick: () => this._openPrompt("LFOIgnorance")}, span(_.LFOIgnorantLabel)),
+					span({class: "tip", style: "font-size: 10.5px; height: 1em; width: 5em;", onclick: () => this._openPrompt("LFOIgnorance")}, span("Ignorant:")),
 					div({style: ""}, LFOIgnoranceToggle),
 				),
 			));
 			const LFOAccelerationSlider: SliderNoParse = new SliderNoParse(input({style: "margin: 0;", type: "range", min: Config.LFOAccelerationMin, max: Config.LFOAccelerationMax, value: "1", step: "0.25"}), this._doc, (oldValue: number, newValue: number, forceUpdate: boolean = false) => new ChangeDrumsetEnvelopeAcceleration(this._doc, i, oldValue, newValue, forceUpdate), false);
 			const LFOAccelerationInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "drumsetLFOAccelerationInputBox", type: "number", step: "0.01", min: Config.LFOAccelerationMin, max: Config.LFOAccelerationMax, value: "1"});
 			const LFOAccelerationRow: HTMLDivElement = div({class: "selectRow dropFader"}, div({},
-				span({class: "tip", style: "height: 1em; font-size: 10.5px;", onclick: () => this._openPrompt("LFOAcceleration")}, span(_.LFOAccelerationLabel)),
+				span({class: "tip", style: "height: 1em; font-size: 10.5px;", onclick: () => this._openPrompt("LFOAcceleration")}, span("‣ Acceleration:")),
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, LFOAccelerationInputBox),
 			), LFOAccelerationSlider.container);
 			const LFOPulseWidthSlider: SliderNoParse = new SliderNoParse(input({style: "margin: 0;", type: "range", min: 0, max: "20", value: "4", step: "1"}), this._doc, (oldValue: number, newValue: number, forceUpdate: boolean = false) => new ChangeDrumsetLFOEnvelopePulseWidth(this._doc, i, oldValue, newValue, forceUpdate), false);
-			const LFOPulseWidthRow: HTMLDivElement = div({class: "selectRow dropFader"}, span({ class: "tip", onclick: () => this._openPrompt("LFOPulseWidth") }, span(_.LFOPulseWidthLabel)), LFOPulseWidthSlider.container);
+			const LFOPulseWidthRow: HTMLDivElement = div({class: "selectRow dropFader"}, span({ class: "tip", onclick: () => this._openPrompt("LFOPulseWidth") }, span("‣ Width:")), LFOPulseWidthSlider.container);
 			const LFOTrapezoidRatioSlider: SliderNoParse = new SliderNoParse(input({style: "margin: 0;", type: "range", min: Config.LFOTrapezoidRatioMin, max: Config.LFOTrapezoidRatioMax, value: "1", step: "0.1"}), this._doc, (oldValue: number, newValue: number, forceUpdate: boolean = false) => new ChangeDrumsetLFOEnvelopeTrapezoidRatio(this._doc, i, oldValue, newValue, forceUpdate), false);
-			const LFOTrapezoidRatioRow: HTMLDivElement = div({class: "selectRow dropFader"}, span({ class: "tip", onclick: () => this._openPrompt("LFOTrapezoidRatio") }, span(_.LFOTrapezoidRatioLabel)), LFOTrapezoidRatioSlider.container);
+			const LFOTrapezoidRatioRow: HTMLDivElement = div({class: "selectRow dropFader"}, span({ class: "tip", onclick: () => this._openPrompt("LFOTrapezoidRatio") }, span("‣ Ratio:")), LFOTrapezoidRatioSlider.container);
             const LFOStepAmountSlider: SliderNoParse = new SliderNoParse(input({ style: "margin: 0;", type: "range", min: "1", max: Config.LFOStairsStepAmountMax, value: "4", step: "1" }), this._doc, (oldValue: number, newValue: number, forceUpdate: boolean = false) => new ChangeDrumsetLFOEnvelopeStairsStepAmount(this._doc, i, oldValue, newValue, forceUpdate), false);
             const LFOStepAmountInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "drumsetStairsLFOStepAmountInputBox", type: "number", step: "1", min: "1", max: Config.LFOStairsStepAmountMax, value: "4"});
 			const LFOStepAmountRow: HTMLDivElement = div({class: "selectRow dropFader"}, div({},
-				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("LFOStepAmount")}, span(_.LFOStairsStepAmountLabel)),
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("LFOStepAmount")}, span("‣ Steps:")),
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, LFOStepAmountInputBox),
 			), LFOStepAmountSlider.container);
             const envelopeCopyButton: HTMLButtonElement = button({style: "flex: 3; margin-right: 0.3em;", onclick: () => this._copyDrumsetEnvelopeSettings(i)}, 
@@ -2296,7 +2134,6 @@ export class SongEditor {
             this._drumsetSpectrumEditors[i] = spectrumEditor;
             this._drumsetEnvelopeSelects[i] = envelopeSelect;
             this._drumsetEnvelopePlotters[i] = envelopePlotter;
-            this._drumsetEnvelopeStartPlotterLines[i] = envelopeStartPlotLine;
             this._drumsetEnvelopePlotterRows[i] = envelopePlotterRow;
             this._drumsetPlotterTimeRangeInputBoxes[i] = plotterTimeRangeInputBox;
             this._drumsetPlotterTimeRangeRows[i] = plotterTimeRangeRow;
@@ -2377,8 +2214,8 @@ export class SongEditor {
 
             let modSetBox: HTMLSelectElement = select();
             let modFilterBox: HTMLSelectElement = select();
-            let modSetRow: HTMLDivElement = div({ class: "selectRow", id: "modSettingText" + mod, style: "margin-bottom: 0.9em; color: currentColor;" }, span({ class: "tip", onclick: () => this._openPrompt("modSet") }, span(_.modSettingLabel)), span({ class: "tip", style: "font-size:x-small;", onclick: () => this._openPrompt("modSetInfo" + mod) }, "?"), div({ class: "selectContainer" }, modSetBox));
-            let modFilterRow: HTMLDivElement = div({ class: "selectRow", id: "modFilterText" + mod, style: "margin-bottom: 0.9em; color: currentColor;" }, span({ class: "tip", onclick: () => this._openPrompt("modFilter" + mod) }, span(_.modTargetLabel)), div({ class: "selectContainer" }, modFilterBox));
+            let modSetRow: HTMLDivElement = div({ class: "selectRow", id: "modSettingText" + mod, style: "margin-bottom: 0.9em; color: currentColor;" }, span({ class: "tip", onclick: () => this._openPrompt("modSet") }, span("Setting:")), span({ class: "tip", style: "font-size:x-small;", onclick: () => this._openPrompt("modSetInfo" + mod) }, "?"), div({ class: "selectContainer" }, modSetBox));
+            let modFilterRow: HTMLDivElement = div({ class: "selectRow", id: "modFilterText" + mod, style: "margin-bottom: 0.9em; color: currentColor;" }, span({ class: "tip", onclick: () => this._openPrompt("modFilter" + mod) }, span("Target:")), div({ class: "selectContainer" }, modFilterBox));
 
             // @jummbus: I could template this up above and simply create from the template, especially since I also reuse it in song settings, but unsure how to do that with imperative-html :P
             let modTarget: SVGElement = SVG.svg({ style: "transform: translate(0px, 1px);", width: "1.5em", height: "1em", viewBox: "0 0 200 200" }, [
@@ -2526,8 +2363,6 @@ export class SongEditor {
         this._unisonOffsetInputBox.addEventListener("input", () => { this._doc.record(new ChangeUnisonOffset(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].unisonOffset, Math.min(Config.unisonOffsetMax, Math.max(Config.unisonOffsetMin, +this._unisonOffsetInputBox.value)))) });
         this._unisonExpressionInputBox.addEventListener("input", () => { this._doc.record(new ChangeUnisonExpression(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].unisonExpression, Math.min(Config.unisonExpressionMax, Math.max(Config.unisonExpressionMin, +this._unisonExpressionInputBox.value)))) });
         this._unisonSignInputBox.addEventListener("input", () => { this._doc.record(new ChangeUnisonSign(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].unisonSign, Math.min(Config.unisonSignMax, Math.max(Config.unisonSignMin, +this._unisonSignInputBox.value)))) });
-        this._wavefoldLowerInputBox.addEventListener("input", () => { this._doc.record(new ChangeLowerWavefold(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].wavefoldLower, Math.min(Config.wavefoldLowerMax, Math.max(Config.wavefoldLowerMin, +this._wavefoldLowerInputBox.value)))) });
-        this._wavefoldUpperInputBox.addEventListener("input", () => { this._doc.record(new ChangeUpperWavefold(this._doc, this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()].wavefoldUpper, Math.min(Config.wavefoldUpperMax, Math.max(Config.wavefoldUpperMin, +this._wavefoldUpperInputBox.value)))) });
 
         this._customWaveDraw.addEventListener("input", () => { this._doc.record(new ChangeCustomWave(this._doc, this._customWaveDrawCanvas.newArray)) });
         this._interpolateWavesBox.addEventListener("input", () => { this._doc.record(new ChangeWaveInterpolation(this._doc, this._interpolateWavesBox.checked)) });
@@ -2538,9 +2373,9 @@ export class SongEditor {
         this._clicklessTransitionBox.addEventListener("input", () => { this._doc.record(new ChangeClicklessTransition(this._doc, this._clicklessTransitionBox.checked)) });
         this._continueThruPatternBox.addEventListener("input", () => { this._doc.record(new ChangeContinueThruPattern(this._doc, this._continueThruPatternBox.checked)) });
         this._aliasingBox.addEventListener("input", () => { this._doc.record(new ChangeAliasing(this._doc, this._aliasingBox.checked)) });
-        this._percussionBox.addEventListener("input", () => { this._doc.record(new ChangePercussion(this._doc, this._percussionBox.checked)) });
-        this._songDetuneEffectedBox.addEventListener("input", () => { this._doc.record(new ChangeSDAffected(this._doc, this._songDetuneEffectedBox.checked)) });
-        this._songOctaveEffectedBox.addEventListener("input", () => { this._doc.record(new ChangeSOAffected(this._doc, this._songOctaveEffectedBox.checked)) });
+        this._songKeyAffectedBox.addEventListener("input", () => { this._doc.record(new ChangeSongKeyAffected(this._doc, this._songKeyAffectedBox.checked)) });
+        this._songDetuneAffectedBox.addEventListener("input", () => { this._doc.record(new ChangeSongDetuneAffected(this._doc, this._songDetuneAffectedBox.checked)) });
+        this._operatorOffsetBox.addEventListener("input", () => { this._doc.record(new ChangeFMUsingOperatorOffsets(this._doc, this._operatorOffsetBox.checked)) });
 
         /*(this._promptContainer.addEventListener("click", (event) => {
             if (event.target == this._promptContainer) {
@@ -2614,7 +2449,6 @@ export class SongEditor {
     private _changeDrumsetTimeRange(index: number, oldValue: number, newValue: number): void {
         if (oldValue != newValue) {
             this._drumsetEnvelopePlotters[index].range = newValue;
-			this._drumsetEnvelopeStartPlotterLines[index].timeRange = newValue;
             this._doc.notifier.changed();
         }
 	}
@@ -2668,18 +2502,24 @@ export class SongEditor {
                 this._openDrumsetEnvDropdowns[submenu] = this._openDrumsetEnvDropdowns[submenu] ? false : true;
                 group = this._drumsetEnvelopeDropdownGroups[submenu];
                 break;
+            case DropdownID.AdvSettings:
+                target = this._advancedSettingsDropdown;
+                this._openAdvancedSettingsDropdown = this._openAdvancedSettingsDropdown ? false : true;
+                group = this._advancedSettingsDropdownGroup;
+                break;
         }
 
-        if (target.textContent == "▼") {
+        if (target.textContent == "▼" || target.textContent == "▼ Advanced Settings ▼") {
             let instrument: Instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
-            target.textContent = "▲";
+            if (target.textContent == "▼") target.textContent = "▲";
+            if (target.textContent == "▼ Advanced Settings ▼") target.textContent = "▲ Advanced Settings ▲";
             if (group != this._chordDropdownGroup || group != this._strumDropdownGroup) {
                 group.style.display = "";
-            } // Only show arpeggio dropdown if chord arpeggiates.
-            else if (instrument.chord == Config.chords.dictionary["arpeggio"].index) {
+            } else if (instrument.chord == Config.chords.dictionary["arpeggio"].index) {
+                // Only show arpeggio dropdown if chord arpeggiates.
                 group.style.display = "";
-            } // Only show strum dropdown if chord strums.
-            else if (Config.chords[instrument.chord].strumParts > 0) {
+            } else if (Config.chords[instrument.chord].strumParts > 0) {
+                // Only show strum dropdown if chord strums.
                 group.style.display = "";
             }
         
@@ -2690,13 +2530,14 @@ export class SongEditor {
                     (group.children[i] as HTMLElement).style.opacity = '1';}
                 );
             }
-        }
-        else {
+        } else if (target.textContent == "▲" || target.textContent == "▲ Advanced Settings ▲") {
             for (let i: number = 0; i < group.children.length; i++) {
                 (group.children[i] as HTMLElement).style.animationDelay = '0s';
                 (group.children[i] as HTMLElement).style.opacity = '0';
             }
-            target.textContent = "▼";
+
+            if (target.textContent == "▲") target.textContent = "▼";
+            if (target.textContent == "▲ Advanced Settings ▲") target.textContent = "▼ Advanced Settings ▼";
             group.style.display = "none";
         }
     }
@@ -2955,9 +2796,6 @@ export class SongEditor {
                     // The "extra stuff" here is the envelope or drumset drum index.
                     this.prompt = new BasicCustomEnvelopePrompt(this._doc, extraStuff);
                     break;
-                case "language":
-                    this.prompt = new LanguagePrompt(this._doc);
-                    break;
                 case "theme":
                     this.prompt = new ThemePrompt(this._doc);
                     break;
@@ -3072,26 +2910,25 @@ export class SongEditor {
         this._patternEditor.render();
 
         const optionCommands: ReadonlyArray<string> = [
-            (prefs.autoPlay ? "✓ " : "　") + (_.autoPlayLabel),
-            (prefs.autoFollow ? "✓ " : "　") + (_.autoFollowLabel),
-            (prefs.enableNotePreview ? "✓ " : "　") + (_.enableNotePreviewLabel),
-            (prefs.showLetters ? "✓ " : "　") + (_.showPianoLabel),
-            (prefs.showFifth ? "✓ " : "　") + (_.showFifthLabel),
-            (prefs.notesOutsideScale ? "✓ " : "　") + (_.notesOutsideScaleLabel),
-            (prefs.defaultScale == this._doc.song.scale ? "✓ " : "　") + (_.setDefaultScaleLabel),
-            (prefs.showChannels ? "✓ " : "　") + (_.showAllChannelsLabel),
-            (prefs.showScrollBar ? "✓ " : "　") + (_.scrollbarLabel),
-            (prefs.alwaysFineNoteVol ? "✓ " : "") + (_.fineNoteVolumeLabel),
-            (prefs.enableChannelMuting ? "✓ " : "　") + (_.channelMutingLabel),
-            (prefs.displayBrowserUrl ? "✓ " : "　") + (_.displayURLInBrowserLabel),
-            (prefs.displayVolumeBar ? "✓ " : "　") + (_.showPlaybackBarLabel),
-            (prefs.showOscilloscope ? "✓ " : "　") + (_.showOscilloscopeLabel),
-            (prefs.showEnvReorderButtons ? "✓ " : "　") + (_.showEnvReorderButtonsLabel),
-            (_.setLanguageLabel),
-            (_.setLayoutLabel),
-            (_.setThemeLabel),
-            (_.setNoteRecordingLabel),
-            (_.keybindSetupLabel),
+            (prefs.autoPlay ? "✓ " : "　") + ("Auto Play on Load"),
+            (prefs.autoFollow ? "✓ " : "　") + ("Keep Current Pattern Selected"),
+            (prefs.enableNotePreview ? "✓ " : "　") + ("Preview Added Notes"),
+            (prefs.showLetters ? "✓ " : "　") + ("Show Piano"),
+            (prefs.showFifth ? "✓ " : "　") + ('Highlight "Fifth" Note'),
+            (prefs.notesOutsideScale ? "✓ " : "　") + ("Allow Adding Notes Outside Scale"),
+            (prefs.defaultScale == this._doc.song.scale ? "✓ " : "　") + ("Set Current Scale as Default"),
+            (prefs.showChannels ? "✓ " : "　") + ("Show All Channels"),
+            (prefs.showScrollBar ? "✓ " : "　") + ("Show Octave Scroll Bar"),
+            (prefs.alwaysFineNoteVol ? "✓ " : "") + ("Always Fine Note Volume Control"),
+            (prefs.enableChannelMuting ? "✓ " : "　") + ("Enable Channel Muting/Naming"),
+            (prefs.displayBrowserUrl ? "✓ " : "　") + ("Display Song Data in URL"),
+            (prefs.displayVolumeBar ? "✓ " : "　") + ("Show Playback Volume Bar"),
+            (prefs.showOscilloscope ? "✓ " : "　") + ("Show Oscilloscope"),
+            (prefs.showEnvReorderButtons ? "✓ " : "　") + ("Show Envelope Reorder Buttons"),
+            ("　Set Layout..."),
+            ("　Set Theme..."),
+            ("　Note Recording..."),
+            ("Keybind Setup..."),
         ];
         for (let i: number = 0; i < optionCommands.length; i++) {
             const option: HTMLOptionElement = <HTMLOptionElement>this._optionsMenu.children[i + 1];
@@ -3110,21 +2947,20 @@ export class SongEditor {
         }
         this._effectsSelect.selectedIndex = -1;
         const translatedEffectNames: string[] = [
-            (_.reverbEffectLabel),
-            (_.chorusEffectLabel),
-            (_.panEffectLabel),
-            (_.distortionEffectLabel),
-            (_.bitCrushEffectLabel),
-            (_.noteFiltEffectLabel),
-            (_.echoEffectLabel),
-            (_.pitchShiftEffectLabel),
-            (_.detuneEffectLabel),
-            (_.vibratoEffectLabel),
-            (_.transitionEffectLabel),
-            (_.chordEffectLabel),
-            (_.percussionEffectLabel),
-            (_.wavefoldEffectLabel),
-            (_.reshapeEffectLabel),
+            ("reverb"),
+            ("chorus"),
+            ("panning"),
+            ("distortion"),
+            ("bitcrusher"),
+            ("note filter"),
+            ("echo"),
+            ("pitch shift"),
+            ("detune"),
+            ("vibrato"),
+            ("transition type"),
+            ("chord type"),
+            ("wavefold"),
+            ("clipper"),
         ];
         for (let i: number = 0; i < Config.effectOrder.length; i++) {
             let effectFlag: number = Config.effectOrder[i];
@@ -3165,7 +3001,6 @@ export class SongEditor {
         setSelectedValue(this._rhythmSelect, this._doc.song.rhythm);
 
         if (!this._doc.song.getChannelIsMod(this._doc.channel)) {
-
             this._customInstrumentSettingsGroup.style.display = "";
             this._panSliderRow.style.display = "";
             this._panDropdownGroup.style.display = (this._openPanDropdown ? "" : "none");
@@ -3177,9 +3012,8 @@ export class SongEditor {
             this._instrumentSettingsGroup.insertBefore(this._instrumentSettingsTextRow, this._instrumentSettingsGroup.firstChild);
 
             if (this._doc.song.channels[this._doc.channel].name == "") {
-                this._instrumentSettingsTextRow.textContent = (_.instSettingsLabel);
-            }
-            else {
+                this._instrumentSettingsTextRow.textContent = ("Instrument Settings");
+            } else {
                 this._instrumentSettingsTextRow.textContent = this._doc.song.channels[this._doc.channel].name;
             }
 
@@ -3244,7 +3078,7 @@ export class SongEditor {
                 this._chipWaveSelectRow.style.display = "none";
                 this._stringSustainRow.style.display = "";
                 this._stringSustainSlider.updateValue(instrument.stringSustain);
-                this._stringSustainLabel.textContent = Config.enableAcousticSustain ? (_.sustain2Label) + Config.sustainTypeNames[instrument.stringSustainType].substring(0,1).toUpperCase() + "):" : (_.sustainLabel);
+                this._stringSustainLabel.textContent = Config.enableAcousticSustain ? ("Sustain (") + Config.sustainTypeNames[instrument.stringSustainType].substring(0,1).toUpperCase() + "):" : ("Sustain:");
             } else {
                 this._stringSustainRow.style.display = "none";
             }
@@ -3258,7 +3092,6 @@ export class SongEditor {
                     setSelectedValue(this._drumsetEnvelopeSelects[i], drumEnv.envelope);
                     this._drumsetSpectrumEditors[i].render();
                     this._drumsetEnvelopePlotters[i].render();
-			        this._drumsetEnvelopeStartPlotterLines[i].render();
                     this._drumsetPlotterTimeRangeInputBoxes[i].value = String(clamp(0.1, 201, this._drumsetEnvelopePlotters[i].range));
                     this._drumsetEnvelopeSpeedSliders[i].updateValue(drumEnv.envelopeSpeed);
                     this._drumsetEnvelopeSpeedInputBoxes[i].value = String(clamp(Config.perEnvelopeSpeedMin, Config.perEnvelopeSpeedMax+1, drumEnv.envelopeSpeed));
@@ -3417,9 +3250,9 @@ export class SongEditor {
                     this._operatorWaveformPulsewidthSliders[i].updateValue(instrument.operators[i].pulseWidth);
                     this._operatorWaveformPulsewidthSliders[i].input.title = "" + prettyNumber(instrument.operators[i].pulseWidth - instrument.operators[i].pulseWidthDecimalOffset / 100) + "%";
                     this._operatorDropdownGroups[i].style.color = isCarrier ? ColorConfig.primaryText : "";
-                    const operatorName: string = (isCarrier ? _.hoverText1Label : _.hoverText2Label) + (i + 1);
-                    this._operatorFrequencySelects[i].title = operatorName + _.hoverText3Label;
-                    this._operatorAmplitudeSliders[i].input.title = operatorName + (isCarrier ? _.hoverText4Label : _.hoverText5Label);
+                    const operatorName: string = (isCarrier ? "Voice " : "Modulator ") + (i + 1);
+                    this._operatorFrequencySelects[i].title = operatorName + " Frequency";
+                    this._operatorAmplitudeSliders[i].input.title = operatorName + (isCarrier ? " Volume" : " Amplitude");
                     this._operatorDropdownGroups[i].style.display = (this._openOperatorDropdowns[i] ? "" : "none");
                     if (instrument.operators[i].waveform == 3) {
                         this._operatorWaveformPulsewidthSliders[i].container.style.display = "";
@@ -3545,7 +3378,7 @@ export class SongEditor {
             if (effectsIncludePitchShift(instrument.effects)) {
                 this._pitchShiftRow.style.display = "";
                 this._pitchShiftSlider.updateValue(instrument.pitchShift);
-                this._pitchShiftSlider.input.title = (instrument.pitchShift - Config.pitchShiftCenter) + _.semitonesLabel;
+                this._pitchShiftSlider.input.title = (instrument.pitchShift - Config.pitchShiftCenter) + " semitone(s)";
                 for (const marker of this._pitchShiftFifthMarkers) {
                     marker.style.display = prefs.showFifth ? "" : "none";
                 }
@@ -3556,7 +3389,7 @@ export class SongEditor {
             if (effectsIncludeDetune(instrument.effects)) {
                 this._detuneSliderRow.style.display = "";
                 this._detuneSlider.updateValue(instrument.detune - Config.detuneCenter);
-                this._detuneSlider.input.title = (Synth.detuneToCents(instrument.detune)) + _.centsLabel;
+                this._detuneSlider.input.title = (Synth.detuneToCents(instrument.detune)) + " cent(s)";
             } else {
                 this._detuneSliderRow.style.display = "none";
             }
@@ -3606,6 +3439,13 @@ export class SongEditor {
                 this._noteFilterTypeRow.style.display = "none";
             }
 
+            if (effectsIncludeWavefold(instrument.effects)) {
+                this._wavefoldRow.style.display = "";
+                this._wavefoldSlider.updateValue(instrument.wavefoldBounds);
+            } else {
+                this._wavefoldRow.style.display = "none";
+            }
+
             if (effectsIncludeDistortion(instrument.effects)) {
                 this._distortionRow.style.display = "";
                 if (instrument.type == InstrumentType.chip || instrument.type == InstrumentType.customChipWave || instrument.type == InstrumentType.pwm || instrument.type == InstrumentType.wavetable || instrument.type == InstrumentType.supersaw)
@@ -3618,14 +3458,11 @@ export class SongEditor {
                 this._aliasingRow.style.display = "none";
             }
 
-            if (effectsIncludeReshaper(instrument.effects)) {
-                this._reshapeAmountRow.style.display = "";
-                this._reshapeShiftRow.style.display = "";
-                this._reshapeAmountSlider.updateValue(instrument.reshapeAmount);
-                this._reshapeShiftSlider.updateValue(instrument.reshapeShift);
+            if (effectsIncludeClipper(instrument.effects)) {
+                this._clipBoundRow.style.display = "";
+                this._clipBoundSlider.updateValue(instrument.clipBounds);
             } else {
-                this._reshapeAmountRow.style.display = "none";
-                this._reshapeShiftRow.style.display = "none";
+                this._clipBoundRow.style.display = "none";
             }
 
             if (effectsIncludeBitcrusher(instrument.effects)) {
@@ -3639,11 +3476,7 @@ export class SongEditor {
             }
 
             if (effectsIncludeWavefold(instrument.effects)) {
-                this._wavefoldLowerRow.style.display = "";
-                this._wavefoldUpperRow.style.display = "";
             } else {
-                this._wavefoldLowerRow.style.display = "none";
-                this._wavefoldUpperRow.style.display = "none";
             }
 
             if (effectsIncludePanning(instrument.effects)) {
@@ -3680,16 +3513,6 @@ export class SongEditor {
                 this._reverbRow.style.display = "none";
             }
 
-            if (effectsIncludePercussion(instrument.effects)) {
-                this._percussionRow.style.display = "";
-                this._songDetuneEffectedRow.style.display = "";
-                this._songOctaveEffectedRow.style.display = "";
-            } else {
-                this._percussionRow.style.display = "none";
-                this._songDetuneEffectedRow.style.display = "none";
-                this._songOctaveEffectedRow.style.display = "none";
-            }
-
             if (instrument.type == InstrumentType.chip || instrument.type == InstrumentType.customChipWave || instrument.type == InstrumentType.harmonics || instrument.type == InstrumentType.pickedString || instrument.type == InstrumentType.spectrum || instrument.type == InstrumentType.pwm || instrument.type == InstrumentType.wavetable || instrument.type == InstrumentType.noise) {
                 this._unisonSelectRow.style.display = "";
                 setSelectedValue(this._unisonSelect, instrument.unison);
@@ -3711,6 +3534,16 @@ export class SongEditor {
                 this.prompt.basicCustomEnvelopeGrid.render();
             }
 
+            if (this._openAdvancedSettingsDropdown) {
+                this._advancedSettingsDropdownGroup.style.display = "";
+                if (instrument.type == InstrumentType.fm || instrument.type == InstrumentType.advfm) {
+                    this._operatorOffsetRow.style.display = "";
+                } else {
+                    this._operatorOffsetRow.style.display = "none";
+                }
+            }
+            else this._advancedSettingsDropdownGroup.style.display = "none";
+
             for (let chordIndex: number = 0; chordIndex < Config.chords.length; chordIndex++) {
                 let hidden: boolean = (!Config.instrumentTypeHasSpecialInterval[instrument.type] && Config.chords[chordIndex].customInterval);
                 const option: Element = this._chordSelect.children[chordIndex];
@@ -3730,7 +3563,7 @@ export class SongEditor {
             setSelectedValue(this._vibratoTypeSelect, instrument.vibratoType);
             setSelectedValue(this._chordSelect, instrument.chord);
             this._panSliderInputBox.value = instrument.pan + "";
-            this._echoDelaySlider.input.title = Config.echoDelaySliderNumbers[instrument.echoDelay+1] + _.beatsLabel;
+            this._echoDelaySlider.input.title = Config.echoDelaySliderNumbers[instrument.echoDelay+1] + " beat(s)";
             this._echoDelayInputBox.value = instrument.echoDelay + "";
             this._pwmSliderInputBox.value = instrument.pulseWidth + "";
             this._detuneSliderInputBox.value = (instrument.detune - Config.detuneCenter) + "";
@@ -3752,18 +3585,18 @@ export class SongEditor {
             this._panDelaySlider.input.title = "" + instrument.panDelay;
             this._arpeggioSpeedSlider.input.title = "x" + prettyNumber(Config.arpSpeedScale[instrument.arpeggioSpeed]);
             this._arpeggioSpeedDisplay.textContent = "x" + prettyNumber(Config.arpSpeedScale[instrument.arpeggioSpeed]);
-            if (this._arpeggioPatternSelect.selectedIndex == 0) this._arpeggioPatternSelectedText.textContent = _.arpeggioPattern1Label;
-            else if (this._arpeggioPatternSelect.selectedIndex == 1) this._arpeggioPatternSelectedText.textContent = _.arpeggioPattern2Label;
-            else if (this._arpeggioPatternSelect.selectedIndex == 2) this._arpeggioPatternSelectedText.textContent = _.arpeggioPattern3Label;
-            else if (this._arpeggioPatternSelect.selectedIndex == 3) this._arpeggioPatternSelectedText.textContent = _.arpeggioPattern4Label;
-            else if (this._arpeggioPatternSelect.selectedIndex == 4) this._arpeggioPatternSelectedText.textContent = _.arpeggioPattern5Label;
-            else if (this._arpeggioPatternSelect.selectedIndex == 5) this._arpeggioPatternSelectedText.textContent = _.arpeggioPattern6Label;
-            else if (this._arpeggioPatternSelect.selectedIndex == 6) this._arpeggioPatternSelectedText.textContent = _.arpeggioPattern7Label;
-            else if (this._arpeggioPatternSelect.selectedIndex == 7) this._arpeggioPatternSelectedText.textContent = _.arpeggioPattern8Label;
-            else if (this._arpeggioPatternSelect.selectedIndex == 8) this._arpeggioPatternSelectedText.textContent = _.arpeggioPattern9Label;
-            else if (this._arpeggioPatternSelect.selectedIndex == 9) this._arpeggioPatternSelectedText.textContent = _.arpeggioPattern10Label;
-            else if (this._arpeggioPatternSelect.selectedIndex == 10) this._arpeggioPatternSelectedText.textContent = _.arpeggioPattern11Label;
-            else throw new Error("There is no label for the arpeggio pattern type selected.");
+            if (this._arpeggioPatternSelect.selectedIndex == 0) this._arpeggioPatternSelectedText.textContent = "Pattern: 1 2 3 4 5 6 7 8 9";
+            else if (this._arpeggioPatternSelect.selectedIndex == 1) this._arpeggioPatternSelectedText.textContent = "Pattern: 1 2 3) 4 5 6 7 8 9";
+            else if (this._arpeggioPatternSelect.selectedIndex == 2) this._arpeggioPatternSelectedText.textContent = "Pattern: 1 2 1 3 4 5 4 6 7 8 7 9";
+            else if (this._arpeggioPatternSelect.selectedIndex == 3) this._arpeggioPatternSelectedText.textContent = "Pattern: 1 2 1 3 1 4 1 5 1 6 1 7 1 8 1 9";
+            else if (this._arpeggioPatternSelect.selectedIndex == 4) this._arpeggioPatternSelectedText.textContent = "Pattern: 1 2 1 3 2 4 3 5 4 6 5 7 6 8 7 9";
+            else if (this._arpeggioPatternSelect.selectedIndex == 5) this._arpeggioPatternSelectedText.textContent = "Pattern: 1 9 2 8 3 7 4 6 5";
+            else if (this._arpeggioPatternSelect.selectedIndex == 6) this._arpeggioPatternSelectedText.textContent = "Pattern: 1) 2) 3) 4) 5) 6) 7) 8) 9)";
+            else if (this._arpeggioPatternSelect.selectedIndex == 7) this._arpeggioPatternSelectedText.textContent = "Pattern: 1 2 1 3 4 5 4 6 7 8 7 9 4 5 4 6";
+            else if (this._arpeggioPatternSelect.selectedIndex == 8) this._arpeggioPatternSelectedText.textContent = "Pattern: 1 2) 1 3) 1 4) 1 5) 1 6) 1 7) 1 8) 1 9)";
+            else if (this._arpeggioPatternSelect.selectedIndex == 9) this._arpeggioPatternSelectedText.textContent = "Pattern: 1) 2) 1 3) 2 4) 3 5) 4 6) 5 7) 6 8) 7 9) 8 1)";
+            else if (this._arpeggioPatternSelect.selectedIndex == 10) this._arpeggioPatternSelectedText.textContent = "Pattern: 1) 9) 2) 8) 3) 7) 4) 6) 5)";
+            else this._arpeggioPatternSelectedText.textContent = "Unknown Pattern";
             this._strumSpeedSlider.input.title = prettyNumber((Config.strumSpeedScale[instrument.strumSpeed]) * -1 + 24);
             this._strumSpeedDisplay.textContent = prettyNumber((Config.strumSpeedScale[instrument.strumSpeed]) * 2) + " tk";
             this._slideSpeedSlider.input.title = prettyNumber((Config.slideSpeedScale[instrument.slideSpeed]) * -1 + 24);
@@ -3796,9 +3629,7 @@ export class SongEditor {
             }
 
             this._renderInstrumentBar(channel, instrumentIndex, colors);
-        }
-        // Options for mod channel
-        else {
+        } else { // Options for mod channel
             this._usageCheck(this._doc.channel, instrumentIndex);
 
             this._pitchedPresetSelect.style.display = "none";
@@ -3810,9 +3641,8 @@ export class SongEditor {
             this._modulatorGroup.insertBefore(this._instrumentsButtonRow, this._modulatorGroup.firstChild);
             this._modulatorGroup.insertBefore(this._instrumentSettingsTextRow, this._modulatorGroup.firstChild);
             if (this._doc.song.channels[this._doc.channel].name == "") {
-                this._instrumentSettingsTextRow.textContent = _.modSettingsLabel;
-            }
-            else {
+                this._instrumentSettingsTextRow.textContent = "Modulator Settings";
+            } else {
                 this._instrumentSettingsTextRow.textContent = this._doc.song.channels[this._doc.channel].name;
             }
 
@@ -3826,9 +3656,6 @@ export class SongEditor {
             this._chordSelectRow.style.display = "none";
             this._chordDropdownGroup.style.display = "none";
             this._strumDropdownGroup.style.display = "none";
-            //this._filterCutoffRow.style.display = "none";
-            //this._filterResonanceRow.style.display = "none";
-            //this._filterEnvelopeRow.style.display = "none";
             this._drumsetGroup.style.display = "none";
             this._customWaveDraw.style.display = "none";
             this._supersawDynamismRow.style.display = "none";
@@ -3838,16 +3665,15 @@ export class SongEditor {
             this._phaseModGroup.style.display = "none";
             this._feedbackRow1.style.display = "none";
             this._feedbackRow2.style.display = "none";
-            //this._pulseEnvelopeRow.style.display = "none";
             this._pulseWidthRow.style.display = "none";
             this._vibratoSelectRow.style.display = "none";
             this._vibratoDropdownGroup.style.display = "none";
             this._envelopeDropdownGroup.style.display = "none";
-            //this._intervalSelectRow.style.display = "none";
             this._detuneSliderRow.style.display = "none";
             this._panSliderRow.style.display = "none";
             this._panDropdownGroup.style.display = "none";
             this._unisonDropdownGroup.style.display = "none";
+            this._advancedSettingsDropdownGroup.style.display = "none";
 
             this._modulatorGroup.style.display = "";
             this._modulatorGroup.style.color = ColorConfig.getChannelColor(this._doc.song, this._doc.channel).primaryNote;
@@ -3872,11 +3698,11 @@ export class SongEditor {
                 if (this._doc.recalcChannelNames || (this._modChannelBoxes[mod].children.length != 2 + this._doc.song.pitchChannelCount + this._doc.song.noiseChannelCount)) {
                     while (this._modChannelBoxes[mod].firstChild) this._modChannelBoxes[mod].remove(0);
                     const channelList: string[] = [];
-                    channelList.push(_.modOptions1Label);
-                    channelList.push(_.modOptions2Label);
+                    channelList.push("none");
+                    channelList.push("song");
                     for (let i: number = 0; i < this._doc.song.pitchChannelCount; i++) {
                         if (this._doc.song.channels[i].name == "") {
-                            channelList.push(_.modOptions3Label + (i + 1));
+                            channelList.push("pitch " + (i + 1));
                         }
                         else {
                             channelList.push(this._doc.song.channels[i].name);
@@ -3884,7 +3710,7 @@ export class SongEditor {
                     }
                     for (let i: number = 0; i < this._doc.song.noiseChannelCount; i++) {
                         if (this._doc.song.channels[i + this._doc.song.pitchChannelCount].name == "") {
-                            channelList.push(_.modOptions4Label + (i + 1));
+                            channelList.push("noise " + (i + 1));
                         }
                         else {
                             channelList.push(this._doc.song.channels[i + this._doc.song.pitchChannelCount].name);
@@ -3906,8 +3732,8 @@ export class SongEditor {
                     for (let i: number = 0; i < channel.instruments.length; i++) {
                         instrumentList.push("" + i + 1);
                     }
-                    instrumentList.push(_.modOptions5Label);
-                    instrumentList.push(_.modOptions6Label);
+                    instrumentList.push("all");
+                    instrumentList.push("active");
                     buildOptions(this._modInstrumentBoxes[mod], instrumentList);
                 }
 
@@ -3973,7 +3799,8 @@ export class SongEditor {
                             anyInstrumentVibratos:       boolean = false,
                             anyInstrumentNoteFilters:    boolean = false,
                             anyInstrumentDistorts:       boolean = false,
-                            anyInstrumentReshapes:       boolean = false,
+                          //anyInstrumentClips:          boolean = false,
+                          //anyInstrumentWavefolds:      boolean = false,
                             anyInstrumentBitcrushes:     boolean = false,
                             anyInstrumentPans:           boolean = false,
                             anyInstrumentChorus:         boolean = false,
@@ -3985,7 +3812,8 @@ export class SongEditor {
                             allInstrumentDetunes:        boolean = true,
                             allInstrumentVibratos:       boolean = true,
                             allInstrumentDistorts:       boolean = true,
-                            allInstrumentReshapes:       boolean = true,
+                          //allInstrumentClips:          boolean = true,
+                          //allInstrumentWavefolds:      boolean = true,
                             allInstrumentBitcrushes:     boolean = true,
                             allInstrumentPans:           boolean = true,
                             allInstrumentChorus:         boolean = true,
@@ -4004,26 +3832,27 @@ export class SongEditor {
 
                             if (!tgtInstrumentTypes.includes(channel.instruments[instrumentIndex].type))
                                 tgtInstrumentTypes.push(channel.instruments[instrumentIndex].type);
-                            if (channel.instruments[instrumentIndex].eqFilterType)
+                            if (channel.instruments[instrumentIndex].eqFilterType) {
                                 anyInstrumentSimpleEQ = true;
-                            else
+                            } else {
                                 anyInstrumentAdvancedEQ = true;
+                            }
                             if (effectsIncludeChord(channel.instruments[instrumentIndex].effects) && channel.instruments[instrumentIndex].getChord().arpeggiates) {
                                 anyInstrumentArps = true;
                             }
                             if (effectsIncludePitchShift(channel.instruments[instrumentIndex].effects)) {
                                 anyInstrumentPitchShifts = true;
+                            } else {
+                                allInstrumentPitchShifts = false;
                             }
                             if (effectsIncludeDetune(channel.instruments[instrumentIndex].effects)) {
                                 anyInstrumentDetunes = true;
-                            }
-                            else {
+                            } else {
                                 allInstrumentDetunes = false;
                             }
                             if (effectsIncludeVibrato(channel.instruments[instrumentIndex].effects)) {
                                 anyInstrumentVibratos = true;
-                            }
-                            else {
+                            } else {
                                 allInstrumentVibratos = false;
                             }
                             if (effectsIncludeNoteFilter(channel.instruments[instrumentIndex].effects)) {
@@ -4032,50 +3861,47 @@ export class SongEditor {
                                     anyInstrumentSimpleNote = true;
                                 else
                                     anyInstrumentAdvancedNote = true;
-                            }
-                            else {
+                            } else {
                                 allInstrumentNoteFilters = false;
+                            }
+                            if (effectsIncludeWavefold(channel.instruments[instrumentIndex].effects)) {
+                                //anyInstrumentWavefolds = true;
+                            } else {
+                                //allInstrumentWavefolds = false;
                             }
                             if (effectsIncludeDistortion(channel.instruments[instrumentIndex].effects)) {
                                 anyInstrumentDistorts = true;
-                            }
-                            else {
+                            } else {
                                 allInstrumentDistorts = false;
                             }
-                            if (effectsIncludeReshaper(channel.instruments[instrumentIndex].effects)) {
-                                anyInstrumentReshapes = true;
-                            }
-                            else {
-                                allInstrumentReshapes = false;
+                            if (effectsIncludeClipper(channel.instruments[instrumentIndex].effects)) {
+                                //anyInstrumentClips = true;
+                            } else {
+                                //allInstrumentClips = false;
                             }
                             if (effectsIncludeBitcrusher(channel.instruments[instrumentIndex].effects)) {
                                 anyInstrumentBitcrushes = true;
-                            }
-                            else {
+                            } else {
                                 allInstrumentBitcrushes = false;
                             }
                             if (effectsIncludePanning(channel.instruments[instrumentIndex].effects)) {
                                 anyInstrumentPans = true;
-                            }
-                            else {
+                            } else {
                                 allInstrumentPans = false;
                             }
                             if (effectsIncludeChorus(channel.instruments[instrumentIndex].effects)) {
                                 anyInstrumentChorus = true;
-                            }
-                            else {
+                            } else {
                                 allInstrumentChorus = false;
                             }
                             if (effectsIncludeEcho(channel.instruments[instrumentIndex].effects)) {
                                 anyInstrumentEchoes = true;
-                            }
-                            else {
+                            } else {
                                 allInstrumentEchoes = false;
                             }
                             if (effectsIncludeReverb(channel.instruments[instrumentIndex].effects)) {
                                 anyInstrumentReverbs = true;
-                            }
-                            else {
+                            } else {
                                 allInstrumentReverbs = false;
                             }
                             if (channel.instruments[instrumentIndex].envelopes.length > 0) {
@@ -4175,14 +4001,6 @@ export class SongEditor {
                         }
                         if (!allInstrumentDistorts) {
                             unusedSettingList.push("+ distortion");
-                        }
-                        if (anyInstrumentReshapes) {
-                            //settingList.push("reshape");
-                            //settingList.push("shift");
-                        }
-                        if (!allInstrumentReshapes) {
-                            //unusedSettingList.push("+ reshape");
-                            //settingList.push("+ shift");
                         }
                         if (anyInstrumentBitcrushes) {
                             settingList.push("bit crush");
@@ -4404,8 +4222,9 @@ export class SongEditor {
         this._clicklessTransitionBox.checked = instrument.clicklessTransition ? true : false;
         this._continueThruPatternBox.checked = instrument.continueThruPattern ? true : false;
         this._aliasingBox.checked = instrument.aliases ? true : false;
-        this._percussionBox.checked = instrument.percussion ? true : false;
-        this._songDetuneEffectedBox.checked = instrument.songDetuneEffected ? true : false;
+        this._songKeyAffectedBox.checked = instrument.songKeyAffected ? true : false;
+        this._songDetuneAffectedBox.checked = instrument.songDetuneAffected ? true : false;
+        this._operatorOffsetBox.checked = instrument.FMUsesOperatorOffsets ? true : false;
         this._addEnvelopeButton.disabled = (instrument.envelopeCount >= Config.maxEnvelopeCount);
         this._addPasteEnvelopeButton.disabled = (instrument.envelopeCount >= Config.maxEnvelopeCount);
 
@@ -4787,8 +4606,6 @@ export class SongEditor {
             || document.activeElement == this._unisonOffsetInputBox
             || document.activeElement == this._unisonExpressionInputBox
             || document.activeElement == this._unisonSignInputBox
-            || document.activeElement == this._wavefoldLowerInputBox
-            || document.activeElement == this._wavefoldUpperInputBox
             || this._drumsetEnvelopeSpeedInputBoxes.find(x => x == document.activeElement)
             || this._drumsetLowerBoundInputBoxes.find(x => x == document.activeElement)
             || this._drumsetUpperBoundInputBoxes.find(x => x == document.activeElement)
@@ -5024,7 +4841,19 @@ export class SongEditor {
                 break;
             case 70: // f
                 if (canPlayNotes) break;
-                if (needControlForShortcuts == (event.ctrlKey || event.metaKey)) {
+                if (event.shiftKey) { // Shift+F, move to start of loop bar instead 
+                    this._doc.synth.loopBarStart = -1;
+                    this._doc.synth.loopBarEnd = -1;
+                    this._loopEditor.setLoopAt(this._doc.synth.loopBarStart, this._doc.synth.loopBarEnd);
+                    this._doc.synth.goToBar(this._doc.song.loopStart);
+                    this._doc.synth.snapToBar();
+                    this._doc.synth.initModFilters(this._doc.song);
+                    this._doc.synth.computeLatestModValues();
+                    if (this._doc.prefs.autoFollow) {
+                        this._doc.selection.setChannelBar(this._doc.channel, Math.floor(this._doc.synth.playhead));
+                    }
+                    event.preventDefault();
+                } else if (needControlForShortcuts == (event.ctrlKey || event.metaKey)) {
                     this._doc.synth.loopBarStart = -1;
                     this._doc.synth.loopBarEnd = -1;
                     this._loopEditor.setLoopAt(this._doc.synth.loopBarStart, this._doc.synth.loopBarEnd);
@@ -6116,9 +5945,6 @@ export class SongEditor {
                 break;
             case "showEnvReorderButtons":
                 this._doc.prefs.showEnvReorderButtons = !this._doc.prefs.showEnvReorderButtons;
-                break;
-            case "language":
-                this._openPrompt("language");
                 break;
             case "layout":
                 this._openPrompt("layout");

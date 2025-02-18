@@ -6,7 +6,6 @@ import {ColorConfig} from "./ColorConfig";
 import {SongDocument} from "./SongDocument";
 import {ChangeSetEnvelopeTarget, ChangeSetEnvelopeType, ChangeRemoveEnvelope, ChangeEnvelopeOrder, ChangePerEnvelopeSpeed, ChangeDiscreteEnvelope, ChangeLowerBound, ChangeUpperBound, ChangeEnvelopeDelay, ChangePitchEnvelopeStart, ChangePitchEnvelopeEnd, ChangePitchAmplify, ChangePitchBounce, ChangeEnvelopePosition, ChangeMeasurementType, ChangeClapMirrorAmount, ChangeLFOEnvelopeShape, ChangeEnvelopeAccelerationEnabled, ChangeEnvelopeLooping, ChangeEnvelopeIgnorance, ChangeEnvelopeAcceleration, ChangeLFOEnvelopePulseWidth, ChangeLFOEnvelopeTrapezoidRatio, ChangeLFOEnvelopeStairsStepAmount, ChangePasteEnvelope, RandomEnvelope} from "./changes";
 import {HTML, SVG} from "imperative-html/dist/esm/elements-strict";
-import {Localization as _} from "./Localization";
 import {clamp, remap} from "./UsefulCodingStuff";
 import {Change} from "./Change";
 
@@ -41,6 +40,7 @@ export class EnvelopeLineGraph {
 		}
 		let speed: number = instEnv.envelopeSpeed;
 		let delay: number = instEnv.delay;
+		let phase: number = instEnv.phase;
 		let LFOStepAmount: number = instEnv.LFOSettings.LFOStepAmount;
 		const beatsPerTick: number = 1.0 / (Config.ticksPerPart * Config.partsPerBeat);
 		const beatsPerMinute: number = this._doc.song != null ? this._doc.song.getBeatsPerMinute() : 0;
@@ -54,13 +54,17 @@ export class EnvelopeLineGraph {
 		let timeRangeInSeconds: number = this.range / beatsPerTick * secondsPerTick;
 		let delayInBeats: number = delay * speed;
 		let delayInSeconds: number = delayInBeats / beatsPerTick * secondsPerTick;
+		let phaseInBeats: number = phase * speed;
+		let phaseInSeconds: number = phaseInBeats / beatsPerTick * secondsPerTick;
 		if (xAxisIsInSeconds) {
 			timeRangeInBeats = this.range / secondsPerTick * beatsPerTick;
 			timeRangeInSeconds = this.range;
 			delayInSeconds = delay * speed;
 			delayInBeats = delayInSeconds / secondsPerTick * beatsPerTick;
+			phaseInSeconds = phase * speed;
+			phaseInBeats = phaseInSeconds / secondsPerTick * beatsPerTick;
 		}
-		let qualitySteps: number = 300;
+		let qualitySteps: number = 750;
 		let minValue = -0.1;
       	let maxValue = -Infinity;
 		for (let i: number = 0; i < qualitySteps; i++) {
@@ -70,7 +74,7 @@ export class EnvelopeLineGraph {
 			const beatNote: number = (x * timeRangeInBeats) * speed;
 			const noteSize: number = (1 - x) * Config.noteSizeMax;
 			const pitch: number = 1;
-			let value = EnvelopeComputer.computeEnvelope(envelope, seconds, beats, beatNote, noteSize, instEnv.lowerBound, instEnv.upperBound, delayInBeats, delayInSeconds, 0, 0, pitch, instEnv.mirrorAmount, instEnv.LFOSettings.LFOShape, instEnv.LFOSettings.LFOAllowAccelerate ? instEnv.LFOSettings.LFOAcceleration : 1, instEnv.LFOSettings.LFOLoopOnce, instEnv.LFOSettings.LFOIgnorance, instEnv.LFOSettings.LFOPulseWidth * 5, instEnv.LFOSettings.LFOTrapezoidRatio, LFOStepAmount);
+			let value = EnvelopeComputer.computeEnvelope(envelope, seconds, beats, beatNote, noteSize, instEnv.lowerBound, instEnv.upperBound, delayInBeats, delayInSeconds, phaseInBeats, phaseInSeconds, pitch, instEnv.mirrorAmount, instEnv.LFOSettings.LFOShape, instEnv.LFOSettings.LFOAllowAccelerate ? instEnv.LFOSettings.LFOAcceleration : 1, instEnv.LFOSettings.LFOLoopOnce, instEnv.LFOSettings.LFOIgnorance, instEnv.LFOSettings.LFOPulseWidth * 5, instEnv.LFOSettings.LFOTrapezoidRatio, LFOStepAmount);
 			envelopeGraph.push(value);
 			maxValue = Math.max(value, maxValue);
         	minValue = Math.min(value, minValue);
@@ -103,87 +107,6 @@ export class EnvelopeLineGraph {
 	}
 }
 
-export class EnvelopeStartLine {
-	// MID TODO: Merge this with the EnvelopeLineGraph class.
-	public timeRange: number = 4;
-
-    constructor(public readonly canvas: HTMLCanvasElement, private readonly _doc: SongDocument, public index: number, public forDrumset: boolean) {
-		this.render();
-    }
-
-	private _drawCanvas(graphX: number, graphY: number, graphWidth: number, graphHeight: number): void {
-		let instrument: Instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
-		let instEnv;
-		if (this.forDrumset) {
-			instEnv = instrument.drumsetEnvelopes[this.index];
-		} else {
-			instEnv = instrument.envelopes[this.index];
-		}
-		let speed: number = instEnv.envelopeSpeed;
-		let delay: number = instEnv.delay;
-		let phase: number = instEnv.phase;
-		const beatsPerTick: number = 1.0 / (Config.ticksPerPart * Config.partsPerBeat);
-		const beatsPerMinute: number = this._doc.song != null ? this._doc.song.getBeatsPerMinute() : 0;
-        const beatsPerSecond: number = beatsPerMinute / 60.0;
-        const partsPerSecond: number = Config.partsPerBeat * beatsPerSecond;
-        const tickPerSecond: number = Config.ticksPerPart * partsPerSecond;
-        const samplesPerTick: number = this._doc.synth.samplesPerSecond / tickPerSecond;
-		const secondsPerTick: number = samplesPerTick / this._doc.synth.samplesPerSecond;
-		let xAxisIsInSeconds: boolean = instEnv.measurementType === false;
-		let delayInBeats: number = delay * speed;
-		let delayInSeconds: number = delayInBeats / beatsPerTick * secondsPerTick;
-		let phaseInBeats: number = phase;
-		let phaseInSeconds: number = phaseInBeats / beatsPerTick * secondsPerTick;
-		let positionLine: number = Math.max(0, (phaseInBeats + delayInBeats));
-		let timeRange: number = this.timeRange * speed;
-		if (xAxisIsInSeconds) {
-			delayInSeconds = delay * speed;
-			delayInBeats = delayInSeconds / secondsPerTick * beatsPerTick;
-			phaseInSeconds = phase;
-			phaseInBeats = phaseInSeconds / secondsPerTick * beatsPerTick;
-			positionLine = Math.max(0, (phaseInSeconds + delayInSeconds));
-		}
-
-		var ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
-		ctx.clearRect(0, 0, graphWidth, graphHeight);
-
-		// Draw background.
-        ctx.fillRect(0, 0, graphX, graphY);
-
-		ctx.strokeStyle = ColorConfig.getComputed("--playhead");
-		ctx.fillStyle = ColorConfig.getComputed("--playhead");
-
-		// Draw line.
-		ctx.beginPath();
-		ctx.setLineDash([2, 2]);
-		let x = graphX + remap(positionLine, 0, timeRange, 0, graphWidth);
-		let y = graphY;
-		ctx.moveTo(x, y);
-		x = graphX + remap(positionLine, 0, timeRange, 0, graphWidth);
-		y = graphY + graphHeight;
-		ctx.lineTo(x, y);
-		
-		ctx.lineWidth = 3;
-		ctx.stroke();
-
-		// Draw a triangle mark at the top.
-		const triangleWidth: number = 12;
-		const halfTriangleWidth: number = triangleWidth / 2;
-		const triangleHeight: number = 14;
-		y = graphY + triangleHeight;
-		ctx.setLineDash([]);
-		ctx.beginPath();
-		ctx.moveTo(x - halfTriangleWidth, y - triangleHeight);
-		ctx.lineTo(x + halfTriangleWidth, y - triangleHeight);
-		ctx.lineTo(x, y);
-		ctx.fill();
-	}
-
-	public render() {
-		this._drawCanvas(0, 0, this.canvas.width, this.canvas.height);
-	}
-}
-
 export class EnvelopeEditor {
 	public readonly container: HTMLElement = div({class: "envelopeEditor"});
 	
@@ -191,7 +114,6 @@ export class EnvelopeEditor {
 	// Properly given styles and what not in render()
 	private readonly _rows: HTMLDivElement[] = [];
 	private readonly _envelopePlotters: EnvelopeLineGraph[] = [];
-	private readonly _envelopeStartPlotterLines: EnvelopeStartLine[] = [];
 	private readonly _envelopePlotterRows: HTMLElement[] = [];
 	private readonly _plotterTimeRangeInputBoxes: HTMLInputElement[] = [];
 	private readonly _plotterTimeRangeRows: HTMLElement[] = [];
@@ -263,6 +185,7 @@ export class EnvelopeEditor {
 	private _renderedNoteFilterCount: number = -1;
 	private _renderedInstrumentType: InstrumentType;
 	private _renderedEffects: number = 0;
+	private _renderedFMOperatorWaveforms: number[] = [];
 	private _openPerEnvelopeDropdowns: boolean[] = [];
 	
 	constructor(private _doc: SongDocument, private _openPrompt: (name: string, extraStuff?: any) => void) {
@@ -354,12 +277,12 @@ export class EnvelopeEditor {
 		} 
 		if (startSliderIndex != -1) {
 			this._pitchStartInputBoxes[startSliderIndex].value = this._pitchStartSliders[startSliderIndex].value;
-			this._pitchStartNoteTexts[startSliderIndex].textContent = String(_.pitchStartLabel + this._pitchToNote(parseInt(this._pitchStartInputBoxes[startSliderIndex].value), instrument.isNoiseInstrument) + ":");
+			this._pitchStartNoteTexts[startSliderIndex].textContent = String("‣ Start " + this._pitchToNote(parseInt(this._pitchStartInputBoxes[startSliderIndex].value), instrument.isNoiseInstrument) + ":");
 			this._lastChange = new ChangePitchEnvelopeStart(this._doc, startSliderIndex, instrument.envelopes[startSliderIndex].pitchStart, +(this._pitchStartSliders[startSliderIndex].value));
 		} 
 		if (endSliderIndex != -1) {
 			this._pitchEndInputBoxes[endSliderIndex].value = this._pitchEndSliders[endSliderIndex].value;
-			this._pitchEndNoteTexts[endSliderIndex].textContent = String(_.pitchEndLabel + this._pitchToNote(parseInt(this._pitchEndInputBoxes[endSliderIndex].value), instrument.isNoiseInstrument) + ":");
+			this._pitchEndNoteTexts[endSliderIndex].textContent = String("‣ End " + this._pitchToNote(parseInt(this._pitchEndInputBoxes[endSliderIndex].value), instrument.isNoiseInstrument) + ":");
 			this._lastChange = new ChangePitchEnvelopeEnd(this._doc, endSliderIndex, instrument.envelopes[endSliderIndex].pitchEnd, +(this._pitchEndSliders[endSliderIndex].value));
 		}
 		if (pitchAmplifyToggleIndex != -1) {
@@ -590,7 +513,6 @@ export class EnvelopeEditor {
 	private _changeTimeRange(envelopeIndex: number, oldValue: number, newValue: number): void {
         if (oldValue != newValue) {
             this._envelopePlotters[envelopeIndex].range = newValue;
-			this._envelopeStartPlotterLines[envelopeIndex].timeRange = newValue;
             this._doc.notifier.changed();
         }
 	}
@@ -693,47 +615,46 @@ export class EnvelopeEditor {
 		
 		for (let envelopeIndex: number = this._rows.length; envelopeIndex < instrument.envelopeCount; envelopeIndex++) {
 			const envelopePlotter: EnvelopeLineGraph = new EnvelopeLineGraph(canvas({ width: 180, height: 80, style: `border: 2px solid ${ColorConfig.uiWidgetBackground}; width: 155px; height: 68px; margin-left: 15px;`, id: "EnvelopeLineGraph" }), this._doc, envelopeIndex, false);
-			const envelopeStartPlotLine: EnvelopeStartLine = new EnvelopeStartLine(canvas({ width: 180, height: 90, style: `width: 157px; height: 78px; top: -6px; right: -1px; position: relative; margin-left: 15px;`, id: "EnvelopeStartPlotLine" }), this._doc, envelopeIndex, false);
-			const envelopePlotterRow: HTMLElement = div({class: "selectRow dropFader", style: "margin-top: 22px; margin-bottom: 29px;"}, envelopePlotter.canvas, envelopeStartPlotLine.canvas);
+			const envelopePlotterRow: HTMLElement = div({class: "selectRow dropFader", style: "margin-top: 22px; margin-bottom: 29px;"}, envelopePlotter.canvas);
 			const plotterTimeRangeInputBox: HTMLInputElement = input({style: "width: 14.5em; font-size: 80%; margin-left: 0px; vertical-align: middle;", id: "timeRangeInputBox", type: "number", step: "0.1", min: "0.1", max: "200", value: "4"});
 			const plotterTimeRangeRow: HTMLElement = div({ class: "selectRow dropFader", style: "margin-left: 16px; margin-bottom: 18px;" }, div({},
-				span({ class: "tip", style: "height:1em; font-size: small; white-space: nowrap;", onclick: () => this._openPrompt("plotterTimeRange") }, _.timeRangeLabel),
-				div({ style: "color: " + ColorConfig.secondaryText + "; margin-top: -3px;" }, plotterTimeRangeInputBox),
+				span({ class: "tip", style: "height:1em; font-size: small; white-space: nowrap;", onclick: () => this._openPrompt("plotterTimeRange") }, "‣ Time Range: "),
+				div({ style: "color: " + ColorConfig.secondaryText + "; margin-top: -1px;" }, plotterTimeRangeInputBox),
 			));
 			const perEnvelopeSpeedSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: Config.perEnvelopeSpeedMin, max: Config.perEnvelopeSpeedMax, value: "1", step: "0.25"});
 			const perEnvelopeSpeedInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "perEnvelopeSpeedInputBox", type: "number", step: "0.001", min: Config.perEnvelopeSpeedMin, max: Config.perEnvelopeSpeedMax, value: "1"});
 			const perEnvelopeSpeedRow: HTMLElement = div({class: "selectRow dropFader"}, div({},
-				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("perEnvelopeSpeed")}, span(_.perEnvelopeSpeedLabel)),
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("perEnvelopeSpeed")}, span("‣ Env Spd:")),
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, perEnvelopeSpeedInputBox),
 			), perEnvelopeSpeedSlider);
 			const discreteEnvelopeToggle: HTMLInputElement = input({style: "width: 3em; padding: 0; margin-right: 3em;", type: "checkbox"});
 			const discreteEnvelopeRow: HTMLElement = div({class: "selectRow dropFader"}, div({},
-				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("discreteEnvelope")}, span(_.discreteEnvelopeLabel))
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("discreteEnvelope")}, span("‣ Discrete:"))
 			), discreteEnvelopeToggle);
 			const lowerBoundSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: Config.lowerBoundMin, max: Config.lowerBoundMax, value: "0", step: "0.20"});
 			const upperBoundSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: Config.upperBoundMin, max: Config.upperBoundMax, value: "1", step: "0.20"});
-			const lowerBoundInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "lowerBoundInputBox", type: "number", step: "0.001", min: Config.lowerBoundMin, max: Config.lowerBoundMax, value: "0"});
-			const upperBoundInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "upperBoundInputBox", type: "number", step: "0.001", min: Config.upperBoundMin, max: Config.upperBoundMax, value: "1"});
+			const lowerBoundInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "lowerBoundInputBox", type: "number", step: "0.01", min: Config.lowerBoundMin, max: Config.lowerBoundMax, value: "0"});
+			const upperBoundInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "upperBoundInputBox", type: "number", step: "0.01", min: Config.upperBoundMin, max: Config.upperBoundMax, value: "1"});
 			const lowerBoundRow: HTMLElement = div({class: "selectRow dropFader"}, div({},
-				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeBounds")}, span(_.lowerBoundLabel)),
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeBounds")}, span("‣ Lwr Bnd:")),
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, lowerBoundInputBox),
 			), lowerBoundSlider);
 			const upperBoundRow: HTMLElement = div({class: "selectRow dropFader"}, div({},
-				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeBounds")}, span(_.upperBoundLabel)),
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeBounds")}, span("‣ Upr Bnd:")),
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, upperBoundInputBox),
 			), upperBoundSlider);
 			const envelopeDelaySlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: 0, max: Config.envelopeDelayMax, value: "0", step: "0.5"});
 			const envelopeDelayInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "envelopeDelayInputBox", type: "number", step: "0.01", min: 0, max: Config.envelopeDelayMax, value: "0"});
 			const envelopeDelayRow: HTMLElement = div({class: "selectRow dropFader"}, div({},
-				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeDelay")}, span(_.envelopeDelayLabel)),
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("envelopeDelay")}, span("‣ Delay:")),
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, envelopeDelayInputBox),
 			), envelopeDelaySlider);
 			const pitchStartSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: drumPitchEnvBoolean ? 1 : 0, max: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, value: "0", step: "1"});
 			const pitchStartInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "pitchStartInputBox", type: "number", step: "1", min: drumPitchEnvBoolean ? 1 : 0, max: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, value: "0"});
-			const pitchStartNoteText: HTMLSpanElement = span({class: "tip", style: "height: 1em; white-space: nowrap; font-size: smaller;", onclick: () => this._openPrompt("pitchEnvelope")}, span(_.pitchStartLabel + this._pitchToNote(parseInt(pitchStartInputBox.value), drumPitchEnvBoolean) + ":"));
+			const pitchStartNoteText: HTMLSpanElement = span({class: "tip", style: "height: 1em; white-space: nowrap; font-size: smaller;", onclick: () => this._openPrompt("pitchEnvelope")}, span("‣ Start " + this._pitchToNote(parseInt(pitchStartInputBox.value), drumPitchEnvBoolean) + ":"));
 			const pitchEndSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: drumPitchEnvBoolean ? 1 : 0, max: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, value: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, step: "1"});
 			const pitchEndInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "pitchEndInputBox", type: "number", step: "1", min: drumPitchEnvBoolean ? 1 : 0, max: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch, value: drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch});
-			const pitchEndNoteText: HTMLSpanElement = span({class: "tip", style: "height: 1em; white-space: nowrap; font-size: smaller;", onclick: () => this._openPrompt("pitchEnvelope")}, span(_.pitchEndLabel + this._pitchToNote(parseInt(pitchEndInputBox.value), drumPitchEnvBoolean) + ":"));
+			const pitchEndNoteText: HTMLSpanElement = span({class: "tip", style: "height: 1em; white-space: nowrap; font-size: smaller;", onclick: () => this._openPrompt("pitchEnvelope")}, span("‣ End " + this._pitchToNote(parseInt(pitchEndInputBox.value), drumPitchEnvBoolean) + ":"));
 			const pitchStartGroup: HTMLElement = div({class: "selectRow dropFader"}, div({},
 				pitchStartNoteText,
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, pitchStartInputBox),
@@ -746,110 +667,110 @@ export class EnvelopeEditor {
 			const pitchBounceToggle: HTMLInputElement = input({style: "width: 3em; padding: 0;", type: "checkbox"});
 			const extraPitchSettingRow: HTMLElement = div({}, div({class: "", style: "display: flex; flex-direction: row; justify-content: space-evenly;"},
 				div({style: "display: flex; flex-direction: column; gap: 5px;"},
-					span({class: "tip", style: "height: 1em; width: 4em;", onclick: () => this._openPrompt("extraPitchEnvSettings")}, span(_.pitchAmplifyLabel)),
+					span({class: "tip", style: "height: 1em; width: 4em;", onclick: () => this._openPrompt("extraPitchEnvSettings")}, span("Amplify:")),
 					div({style: ""}, pitchAmplifyToggle),
 				),
 				div({style: "display: flex; flex-direction: column; gap: 5px;"},
-					span({class: "tip", style: "height: 1em; width: 4em;", onclick: () => this._openPrompt("extraPitchEnvSettings")}, span(_.pitchBounceLabel)),
+					span({class: "tip", style: "height: 1em; width: 4em;", onclick: () => this._openPrompt("extraPitchEnvSettings")}, span("Bounce:")),
 					div({style: ""}, pitchBounceToggle),
 				),
 			));
-			const envelopePhaseSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: 0, max: Config.envelopePhaseMax, value: "0", step: "1"});
+			const envelopePhaseSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: 0, max: Config.envelopePhaseMax, value: "0", step: "0.25"});
 			const envelopePhaseInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "envelopePhaseInputBox", type: "number", step: "0.01", min: 0, max: Config.envelopePhaseMax, value: "0"});
 			const envelopePhaseRow: HTMLElement = div({class: "selectRow dropFader"}, div({},
-				span({class: "tip", style: "height: 1em; font-size: 11px;", onclick: () => this._openPrompt("envelopePhase")}, span(_.envelopeStartingPointLabel)),
+				span({class: "tip", style: "height: 1em; font-size: 11px;", onclick: () => this._openPrompt("envelopePhase")}, span("‣ Position:")),
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, envelopePhaseInputBox),
 			), envelopePhaseSlider);
-			const measureInBeatsButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "no-underline", onclick: () => this._switchMeasurementType(true, envelopeIndex) }, span(_.measureInBeatsLabel));
-    		const measureInSecondsButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "last-button no-underline", onclick: () => this._switchMeasurementType(false, envelopeIndex) }, span(_.measureInSecondsLabel));
-    		const measurementTypeRow: HTMLElement = div({ class: "selectRow", style: "padding-top: 4px; margin-bottom: -3px;" }, span({ style: "font-size: small;", class: "tip", onclick: () => this._openPrompt("envelopeDelayPhaseMeasurement") }, span(_.delayPhaseMeasurementLabel)), div({ class: "instrument-bar" }, measureInBeatsButton, measureInSecondsButton));
+			const measureInBeatsButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "no-underline", onclick: () => this._switchMeasurementType(true, envelopeIndex) }, span("beats"));
+    		const measureInSecondsButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "last-button no-underline", onclick: () => this._switchMeasurementType(false, envelopeIndex) }, span("seconds"));
+    		const measurementTypeRow: HTMLElement = div({ class: "selectRow", style: "padding-top: 4px; margin-bottom: -3px;" }, span({ style: "font-size: small;", class: "tip", onclick: () => this._openPrompt("envelopeDelayPhaseMeasurement") }, span("‣ Measure:")), div({ class: "instrument-bar" }, measureInBeatsButton, measureInSecondsButton));
 			const clapMirrorAmountSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: 1, max: Config.clapMirrorsMax, value: "5", step: "1"});
 			const clapMirrorAmountInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "clapMirrorAmountInputBox", type: "number", step: "1", min: 1, max: Config.clapMirrorsMax, value: "5"});
 			const clapMirrorAmountRow: HTMLElement = div({class: "selectRow dropFader"}, div({},
-				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("mirrorAmount")}, span(_.clapMirrorAmountLabel)),
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("mirrorAmount")}, span("‣ Mirrors:")),
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, clapMirrorAmountInputBox),
 			), clapMirrorAmountSlider);
 			const LFOShapeSelect: HTMLSelectElement = buildOptions(select(), [
-				_.LFOShape1Label,
-				_.LFOShape2Label,
-				_.LFOShape3Label,
-				_.LFOShape4Label,
-				_.LFOShape5Label,
-				_.LFOShape6Label,
-				_.LFOShape7Label
+				"sine (tremolo)",
+				"triangle",
+				"pulses",
+				"sawtooth",
+				"trapezoid",
+				"stairs",
+				"absine"
 			]);
-			const LFOShapeRow: HTMLElement = div({class: "selectRow"}, span({ class: "tip", onclick: () => this._openPrompt("LFOShape") }, span(_.LFOShapeLabel)), div({ class: "selectContainer" }, LFOShapeSelect));
+			const LFOShapeRow: HTMLElement = div({class: "selectRow"}, span({ class: "tip", onclick: () => this._openPrompt("LFOShape") }, span("‣ Shape:")), div({ class: "selectContainer" }, LFOShapeSelect));
 			const LFOEnableAccelerationToggle: HTMLInputElement = input({style: "width: 3em; padding: 0;", type: "checkbox"});
 			const LFOLoopOnceToggle: HTMLInputElement = input({style: "width: 3em; padding: 0;", type: "checkbox"});
 			const LFOIgnoranceToggle: HTMLInputElement = input({style: "width: 3em; padding: 0;", type: "checkbox"});
 			const LFORadioButtonsRow: HTMLElement = div({}, div({class: "", style: "display: flex; flex-direction: row; justify-content: space-evenly;"},
 				div({style: "display: flex; flex-direction: column; gap: 5px; text-align: center;"},
-					span({class: "tip", style: "font-size: 10.5px; height: 1em; width: 5em;", onclick: () => this._openPrompt("LFOAcceleration")}, span(_.LFOEnableAccelerationLabel)),
+					span({class: "tip", style: "font-size: 10.5px; height: 1em; width: 5em;", onclick: () => this._openPrompt("LFOAcceleration")}, span("Accelerate:")),
 					div({style: ""}, LFOEnableAccelerationToggle),
 				),
 				div({style: "display: flex; flex-direction: column; gap: 5px; text-align: center;"},
-					span({class: "tip", style: "font-size: 10.5px; height: 1em; width: 5em;", onclick: () => this._openPrompt("LFOLoopOnce")}, span(_.LFOLoopsLabel)),
+					span({class: "tip", style: "font-size: 10.5px; height: 1em; width: 5em; white-space: nowrap;", onclick: () => this._openPrompt("LFOLoopOnce")}, span("Play Once:")),
 					div({style: ""}, LFOLoopOnceToggle),
 				),
 				div({style: "display: flex; flex-direction: column; gap: 5px; text-align: center;"},
-					span({class: "tip", style: "font-size: 10.5px; height: 1em; width: 5em;", onclick: () => this._openPrompt("LFOIgnorance")}, span(_.LFOIgnorantLabel)),
+					span({class: "tip", style: "font-size: 10.5px; height: 1em; width: 5em;", onclick: () => this._openPrompt("LFOIgnorance")}, span("Ignorant:")),
 					div({style: ""}, LFOIgnoranceToggle),
 				),
 			));
 			const LFOAccelerationSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: Config.LFOAccelerationMin, max: Config.LFOAccelerationMax, value: "1", step: "0.25"});
 			const LFOAccelerationInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "LFOAccelerationInputBox", type: "number", step: "0.01", min: Config.LFOAccelerationMin, max: Config.LFOAccelerationMax, value: "1"});
 			const LFOAccelerationRow: HTMLElement = div({class: "selectRow dropFader"}, div({},
-				span({class: "tip", style: "height: 1em; font-size: 10.5px;", onclick: () => this._openPrompt("LFOAcceleration")}, span(_.LFOAccelerationLabel)),
+				span({class: "tip", style: "height: 1em; font-size: 10.5px;", onclick: () => this._openPrompt("LFOAcceleration")}, span("‣ Acceleration:")),
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, LFOAccelerationInputBox),
 			), LFOAccelerationSlider);
 			const LFOPulseWidthSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: 0, max: "20", value: "4", step: "1"});
-			const LFOPulseWidthRow: HTMLElement = div({class: "selectRow dropFader"}, span({ class: "tip", onclick: () => this._openPrompt("LFOPulseWidth") }, span(_.LFOPulseWidthLabel)), LFOPulseWidthSlider);
+			const LFOPulseWidthRow: HTMLElement = div({class: "selectRow dropFader"}, span({ class: "tip", onclick: () => this._openPrompt("LFOPulseWidth") }, span("‣ Width:")), LFOPulseWidthSlider);
 			const LFOTrapezoidRatioSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: Config.LFOTrapezoidRatioMin, max: Config.LFOTrapezoidRatioMax, value: "1", step: "0.1"});
-			const LFOTrapezoidRatioRow: HTMLElement = div({class: "selectRow dropFader"}, span({ class: "tip", onclick: () => this._openPrompt("LFOTrapezoidRatio") }, span(_.LFOTrapezoidRatioLabel)), LFOTrapezoidRatioSlider);
+			const LFOTrapezoidRatioRow: HTMLElement = div({class: "selectRow dropFader"}, span({ class: "tip", onclick: () => this._openPrompt("LFOTrapezoidRatio") }, span("‣ Ratio:")), LFOTrapezoidRatioSlider);
 			const LFOStairsStepAmountSlider: HTMLInputElement = input({style: "margin: 0;", type: "range", min: 1, max: Config.LFOStairsStepAmountMax, value: "4", step: "1"});
 			const LFOStairsStepAmountInputBox: HTMLInputElement = input({style: "width: 4em; font-size: 80%; ", id: "LFOStairsStepAmountInputBox", type: "number", step: "1", min: 1, max: Config.LFOStairsStepAmountMax, value: "4"});
 			const LFOStairsStepAmountRow: HTMLElement = div({class: "selectRow dropFader"}, div({},
-				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("LFOStepAmount")}, span(_.LFOStairsStepAmountLabel)),
+				span({class: "tip", style: "height: 1em; font-size: 12px;", onclick: () => this._openPrompt("LFOStepAmount")}, span("‣ Steps:")),
 				div({style: `color: ${ColorConfig.secondaryText}; margin-top: -3px;`}, LFOStairsStepAmountInputBox),
 			), LFOStairsStepAmountSlider);
-			const envelopeCopyButton: HTMLButtonElement = button({class: "envelope-button", title: _.copyLabel, style: "flex: 3;", onclick: () => this._copyEnvelopeSettings(envelopeIndex)}, 
+			const envelopeCopyButton: HTMLButtonElement = button({class: "envelope-button", title: "Copy", style: "flex: 3;", onclick: () => this._copyEnvelopeSettings(envelopeIndex)}, 
 				// Copy icon:
 				SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 4%; top: 40%; margin-top: -0.75em; pointer-events: none;", width: "2em", height: "2em", viewBox: "-5 -21 26 26" }, [
 					SVG.path({ d: "M 0 -15 L 1 -15 L 1 0 L 13 0 L 13 1 L 0 1 L 0 -15 z M 2 -1 L 2 -17 L 10 -17 L 14 -13 L 14 -1 z M 3 -2 L 13 -2 L 13 -12 L 9 -12 L 9 -16 L 3 -16 z", fill: "currentColor" }),
 				]),
 			);
-			const envelopePasteButton: HTMLButtonElement = button({class: "envelope-button", title: _.pasteLabel, style: "flex: 3;", onclick: () => this._pasteEnvelopeSettings(envelopeIndex)}, 
+			const envelopePasteButton: HTMLButtonElement = button({class: "envelope-button", title: "Paste", style: "flex: 3;", onclick: () => this._pasteEnvelopeSettings(envelopeIndex)}, 
 				// Paste icon:
 				SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 2%; top: 38%; margin-top: -0.75em; pointer-events: none;", width: "2em", height: "2em", viewBox: "0 0 26 26" }, [
 					SVG.path({ d: "M 8 18 L 6 18 L 6 5 L 17 5 L 17 7 M 9 8 L 16 8 L 20 12 L 20 22 L 9 22 z", stroke: "currentColor", fill: "none" }),
 					SVG.path({ d: "M 9 3 L 14 3 L 14 6 L 9 6 L 9 3 z M 16 8 L 20 12 L 16 12 L 16 8 z", fill: "currentColor" }),
 				]),
 			);
-			const randomEnvelopeButton: HTMLButtonElement = button({class: "envelope-button", title: _.randomizeEnvelopeLabel, style: "flex: 3;", onclick: () => this._randomizeEnvelope(envelopeIndex)}, 
+			const randomEnvelopeButton: HTMLButtonElement = button({class: "envelope-button", title: "Randomize Envelope", style: "flex: 3;", onclick: () => this._randomizeEnvelope(envelopeIndex)}, 
 				// Dice icon:
 				SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 5px; top: 21%; pointer-events: none;", width: "16", height: "16", viewBox: "0 0 16 16"}, [
 					SVG.path({ d: "M13 1a2 2 0 012 2v10a2 2 0 01-2 2H3a2 2 0 01-2-2V3a2 2 0 012-2zM3 0a3 3 0 00-3 3v10a3 3 0 003 3h10a3 3 0 003-3V3a3 3 0 00-3-3zM5.5 4a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0m8 0a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0m0 8a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0m-8 0a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0m4-4a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0", fill: "currentColor"}),
 				]),
 			);
-			const envelopeMoveUpButton: HTMLButtonElement = button({class: "envelope-button", title: _.moveUpLabel, style: "flex: 3;"}, 
+			const envelopeMoveUpButton: HTMLButtonElement = button({class: "envelope-button", title: "Move Envelope Up", style: "flex: 3;"}, 
 				// Up-arrow icon:
 				SVG.svg({ style: "flex-shrink: 0; position: absolute; left: -43%; top: 40%; margin-top: -0.75em; pointer-events: none;", width: "2.4em", height: "2.4em", viewBox: "0 0 3 9" }, [
 					SVG.path({ d: "M 2 3 L 4 1 L 6 3 L 4.5 3 L 4.5 6.5 L 3.5 6.5 L 3.5 3 L 2 3 z", fill: "currentColor" }),
 				]),
 			);
-			const envelopeMoveDownButton: HTMLButtonElement = button({class: "envelope-button", title: _.moveDownLabel, style: "flex: 3;"}, 
+			const envelopeMoveDownButton: HTMLButtonElement = button({class: "envelope-button", title: "Move Envelope Down", style: "flex: 3;"}, 
 				// Down-arrow icon:
 				SVG.svg({ style: "flex-shrink: 0; position: absolute; left: -45%; top: 35%; margin-top: -0.75em; pointer-events: none;", width: "2.4em", height: "2.4em", viewBox: "0 0 3 9" }, [
 					SVG.path({ d: "M 6 5 L 4 7 L 2 5 L 3.5 5 L 3.5 1.5 L 4.5 1.5 L 4.5 5 L 6 5 z", fill: "currentColor"}),
 				]),
 			);
-			const pitchEnvAutoBoundButton: HTMLButtonElement = button({class: "envelope-button", title: _.pitchEnvAutoBoundLabel, style: "flex: 3;", onclick: () => this._doc.selection.pitchEnvAutoBind(envelopeIndex, instrument)}, 
+			const pitchEnvAutoBoundButton: HTMLButtonElement = button({class: "envelope-button", title: "Set Start/End to Highest/Lowest Notes", style: "flex: 3;", onclick: () => this._doc.selection.pitchEnvAutoBind(envelopeIndex, instrument)}, 
 				// Horizontal extension icon:
 				SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 5px; top: 21%; pointer-events: none;", width: "3.5em", height: "3.5em", viewBox: "6 6 24 24"}, [
 					SVG.path({ d: "M 6 6 L 14 6 L 14 7 L 6 7 L 6 6 M 6 14 L 14 14 L 14 13 L 6 13 L 6 14 M 10 7 L 8.5 8.5 L 9.4 8.5 L 9.4 11.5 L 8.4 11.5 L 10 13 L 11.5 11.5 L 10.6 11.5 L 10.6 8.5 L 11.5 8.5 L 10 7", fill: "currentColor"}),
 				]),
 			);
-			const basicCustomPromptButton: HTMLButtonElement = button({class: "envelope-button", title: _.basicCustomPromptOpenLabel, style: "flex: 3;", onclick: () => this._openPrompt("basicCustomEnvelopePrompt", envelopeIndex)}, 
+			const basicCustomPromptButton: HTMLButtonElement = button({class: "envelope-button", title: "Edit \"Basic Custom\" Envelope", style: "flex: 3;", onclick: () => this._openPrompt("basicCustomEnvelopePrompt", envelopeIndex)}, 
 				// Pencil icon:
 				SVG.svg({ style: "flex-shrink: 0; position: absolute; left: 4px; top: 19%; pointer-events: none;", width: "4em", height: "4em", viewBox: "6 6 24 24"}, [
 					SVG.path({ d: "M12 6 11.8 6.2 13.8 8.2 14 8C14 6.8 13.2 6 12 6M11.5 6.5 11.8 6.8 7.5 11 7.8 11 7.8 11.3 8.1 11.3 8.1 11.6 8.4 11.6 8.4 11.9 8.7 11.9 8.7 12.2 9 12.2 9 12.5 13 8.5 11.5 7 11.8 6.8 13.5 8.5 9 13 7 11 11.5 6.5M7 11 7 13 9 13", fill: "currentColor"}),
@@ -875,7 +796,7 @@ export class EnvelopeEditor {
 				envelopeSelect.appendChild(option({value: envelope}, Config.envelopes[envelope].name));
 			} 
 			
-			const deleteButton: HTMLButtonElement = button({type: "button", class: "delete-envelope", title: _.removeEnvelopeLabel});
+			const deleteButton: HTMLButtonElement = button({type: "button", class: "delete-envelope", title: "Remove Envelope"});
 
 			const row: HTMLDivElement = div(
 				div({style: "width: 0; position: absolute; margin-top: 22px;"}, envelopeDropdown),
@@ -898,7 +819,6 @@ export class EnvelopeEditor {
 			this.container.appendChild(row);
 			this._rows[envelopeIndex] = row;
 			this._envelopePlotters[envelopeIndex] = envelopePlotter;
-			this._envelopeStartPlotterLines[envelopeIndex] = envelopeStartPlotLine;
 			this._envelopePlotterRows[envelopeIndex] = envelopePlotterRow;
 			this._plotterTimeRangeInputBoxes[envelopeIndex] = plotterTimeRangeInputBox;
 			this._plotterTimeRangeRows[envelopeIndex] = plotterTimeRangeRow;
@@ -989,11 +909,19 @@ export class EnvelopeEditor {
 				this._updateTargetOptionVisibility(this._targetSelects[envelopeIndex], instrument);
 			}
 		}
+		// Specifically for FM pulse width envelope targets.
+		for (let i = 0; i < Config.operatorCount+2; i++) {
+			if (this._renderedFMOperatorWaveforms[i] != instrument.operators[i].waveform) {
+				// Update target option visibility for previously visible rows.
+				for (let envelopeIndex: number = 0; envelopeIndex < this._renderedEnvelopeCount; envelopeIndex++) {
+					this._updateTargetOptionVisibility(this._targetSelects[envelopeIndex], instrument);
+				}
+			}
+		}
 		
 		for (let envelopeIndex: number = 0; envelopeIndex < instrument.envelopeCount; envelopeIndex++) {
 			const instEnv = instrument.envelopes[envelopeIndex];
 			this._envelopePlotters[envelopeIndex].render();
-			this._envelopeStartPlotterLines[envelopeIndex].render();
 			this._plotterTimeRangeInputBoxes[envelopeIndex].value = String(clamp(0.1, 201, this._envelopePlotters[envelopeIndex].range));
 			this._perEnvelopeSpeedSliders[envelopeIndex].value = String(clamp(Config.perEnvelopeSpeedMin, Config.perEnvelopeSpeedMax+1, instEnv.envelopeSpeed));
 			this._perEnvelopeSpeedInputBoxes[envelopeIndex].value = String(clamp(Config.perEnvelopeSpeedMin, Config.perEnvelopeSpeedMax+1, instEnv.envelopeSpeed));
@@ -1015,10 +943,10 @@ export class EnvelopeEditor {
 			this._pitchEndInputBoxes[envelopeIndex].max = (drumPitchEnvBoolean ? Config.drumCount : Config.maxPitch).toString();
 			this._pitchStartSliders[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instEnv.pitchStart));
 			this._pitchStartInputBoxes[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instEnv.pitchStart));
-			this._pitchStartNoteTexts[envelopeIndex].textContent = String(_.pitchStartLabel + this._pitchToNote(parseInt(this._pitchStartInputBoxes[envelopeIndex].value), drumPitchEnvBoolean) + ":");
+			this._pitchStartNoteTexts[envelopeIndex].textContent = String("‣ Start " + this._pitchToNote(parseInt(this._pitchStartInputBoxes[envelopeIndex].value), drumPitchEnvBoolean) + ":");
 			this._pitchEndSliders[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instEnv.pitchEnd));
 			this._pitchEndInputBoxes[envelopeIndex].value = String(clamp(drumPitchEnvBoolean ? 1 : 0, (drumPitchEnvBoolean ? Config.drumCount+1 : Config.maxPitch+1), instEnv.pitchEnd));
-			this._pitchEndNoteTexts[envelopeIndex].textContent = String(_.pitchEndLabel + this._pitchToNote(parseInt(this._pitchEndInputBoxes[envelopeIndex].value), drumPitchEnvBoolean) + ":");
+			this._pitchEndNoteTexts[envelopeIndex].textContent = String("‣ End " + this._pitchToNote(parseInt(this._pitchEndInputBoxes[envelopeIndex].value), drumPitchEnvBoolean) + ":");
 			this._pitchAmplifyToggles[envelopeIndex].checked = instEnv.pitchAmplify ? true : false;
 			this._pitchBounceToggles[envelopeIndex].checked = instEnv.pitchBounce ? true : false;
 			this._envelopePhaseSliders[envelopeIndex].value = String(clamp(0, Config.envelopePhaseMax+1, instEnv.phase));
@@ -1045,7 +973,9 @@ export class EnvelopeEditor {
 			this._envelopeMoveUpButtons[envelopeIndex].disabled = !(this._doc.prefs.showEnvReorderButtons);
 			this._envelopeMoveDownButtons[envelopeIndex].disabled = !(this._doc.prefs.showEnvReorderButtons);
 			this._pitchEnvAutoBoundButtons[envelopeIndex].disabled = !(instEnv.envelope == Config.envelopes.dictionary["pitch"].index);
+			this._pitchEnvAutoBoundButtons[envelopeIndex].style.zIndex = instEnv.envelope == Config.envelopes.dictionary["pitch"].index ? "1" : "0";
 			this._basicCustomPromptButtons[envelopeIndex].disabled = !(instEnv.envelope == Config.envelopes.dictionary["custom (basic)"].index);
+			this._basicCustomPromptButtons[envelopeIndex].style.zIndex = instEnv.envelope == Config.envelopes.dictionary["custom (basic)"].index ? "1" : "0";
 			this._targetSelects[envelopeIndex].value = String(instEnv.target + instEnv.index * Config.instrumentAutomationTargets.length);
 			this._envelopeSelects[envelopeIndex].selectedIndex = instEnv.envelope;
 			this._targetSelects[envelopeIndex].style.minWidth = this._doc.prefs.showEnvReorderButtons ? "" : "116px";
@@ -1176,6 +1106,9 @@ export class EnvelopeEditor {
 		this._renderedNoteFilterCount = useControlPointCount;
 		this._renderedInstrumentType = instrument.type;
 		this._renderedEffects = instrument.effects;
+		for (let i = 0; i < Config.operatorCount+2; i++) {
+			this._renderedFMOperatorWaveforms[i] = instrument.operators[i].waveform;
+		}
 	}
 
 	private _switchMeasurementType(type: boolean, index: number) {

@@ -113,6 +113,7 @@ export class HarmonicsEditor {
 		if (isNaN(this._mouseX)) this._mouseX = 0;
 		if (isNaN(this._mouseY)) this._mouseY = 0;
 		this._whenCursorMoved();
+		this.render();
 	}
 		
 	private _whenCursorMoved(): void {
