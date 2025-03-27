@@ -717,8 +717,7 @@ export class Pattern {
                         size = volumeCap;
                     } else if (pointObject["forMod"] == undefined) {
                         size = Math.max(0, Math.min(volumeCap, Math.round((pointObject["volume"] | 0) * volumeCap / 100)));
-                    }
-                    else {
+                    } else {
                         size = ((pointObject["forMod"] | 0) > 0) ? Math.round(pointObject["volume"] | 0) : Math.max(0, Math.min(volumeCap, Math.round((pointObject["volume"] | 0) * volumeCap / 100)));
                     }
 
@@ -4179,8 +4178,7 @@ export class Instrument {
                 if (this.noteSubFilters[i] != null && this.noteSubFilters[i]!.controlPointCount > largest)
                     largest = this.noteSubFilters[i]!.controlPointCount;
             }
-        }
-        else {
+        } else {
             largest = this.eqFilter.controlPointCount;
             for (let i: number = 0; i < Config.filterMorphCount; i++) {
                 if (this.eqSubFilters[i] != null && this.eqSubFilters[i]!.controlPointCount > largest)
@@ -4998,7 +4996,6 @@ export class Song {
                     buffer.push(base64IntToCharCode[idx.envelope >> 6], base64IntToCharCode[idx.envelope & 0x3F]);
                     // Other per-envelope settings have already been done in a function way above, so call that here.
                     // Discrete was also moved. It goes here.
-                    console.log(idx)
                     encodeEnvelopeSettings(buffer, idx.envelopeSpeed, idx.discrete, idx.lowerBound, idx.upperBound, idx.delay, idx.pitchStart, idx.pitchEnd, idx.pitchAmplify, idx.pitchBounce, idx.phase, idx.measurementType, idx.mirrorAmount, idx.LFOSettings.LFOShape, idx.LFOSettings.LFOAllowAccelerate, idx.LFOSettings.LFOAcceleration, idx.LFOSettings.LFOLoopOnce, idx.LFOSettings.LFOIgnorance, idx.LFOSettings.LFOTrapezoidRatio, idx.LFOSettings.LFOPulseWidth, idx.LFOSettings.LFOStepAmount, idx.basicCustomGridWidth, idx.basicCustomGridHeight, idx.basicCustomGridPoints);
                 }
             }
@@ -8374,10 +8371,10 @@ export class EnvelopeComputer {
                     } else {
                         beatNote = LFOLoopOnce ? Math.max(0, Math.min(0.5, beatNote - delayBeats + phaseBeats)) : Math.max(0, beatNote - delayBeats + phaseBeats);
                     }
-                    let p1: number = mod((LFOIgnorance ? -beats : (Math.pow(-beatNote + 1, LFOAcceleration) - 1)) * envelope.speed, 1);
-                    let p2: number = mod(((LFOIgnorance ? -beats : (Math.pow(-beatNote + 1, LFOAcceleration) - 1)) * envelope.speed) + (LFOPulseWidth / 100), 1) - (LFOPulseWidth / 100);
+                    let p1: number = -mod((LFOIgnorance ? beats : (Math.pow(beatNote + 1, LFOAcceleration) - 1)) * envelope.speed, 1);
+                    let p2: number = -mod(((LFOIgnorance ? beats : (Math.pow(beatNote + 1, LFOAcceleration) - 1)) * envelope.speed) + (LFOPulseWidth / 100), 1) + (LFOPulseWidth / 100);
                     if (timeLeft > 0) return 1 * (upperBound - lowerBound) + lowerBound;
-                    else return (p1 - p2) * (upperBound - lowerBound) + lowerBound;
+                    else return (p1 - p2 + 1) * (upperBound - lowerBound) + lowerBound;
                 } else
                 // Case 4, sawtooth.
                 if (LFOShape == LFOShapes.Sawtooth) {
@@ -8887,7 +8884,6 @@ export class InstrumentState {
             }
         }
         this.envelopeComputer.computeEnvelopes(instrument, currentPart, this.envelopeTime, this.drumsetEnvelopeTime, tickTimeStart, secondsPerTick, tone, useEnvelopeSpeed, this);
-        
         const envelopeStarts: number[] = this.envelopeComputer.envelopeStarts;
         const envelopeEnds: number[] = this.envelopeComputer.envelopeEnds;
 
@@ -8997,8 +8993,7 @@ export class InstrumentState {
         if (instrument.eqFilterType) {
             // Simple EQ filter (old style). For analysis, using random filters from normal style since they are N/A in this context.
             const eqFilterSettingsStart: FilterSettings = instrument.eqFilter;
-            if (instrument.eqSubFilters[1] == null)
-                instrument.eqSubFilters[1] = new FilterSettings();
+            if (instrument.eqSubFilters[1] == null) instrument.eqSubFilters[1] = new FilterSettings();
             const eqFilterSettingsEnd: FilterSettings = instrument.eqSubFilters[1];
 
             // Change location based on slider values
@@ -9006,7 +9001,6 @@ export class InstrumentState {
             let startSimpleGain: number = instrument.eqFilterSimplePeak;
             let endSimpleFreq: number = instrument.eqFilterSimpleCut;
             let endSimpleGain: number = instrument.eqFilterSimplePeak;
-
             let filterChanges: boolean = false;
 
             if (synth.isModActive(Config.modulators.dictionary["eq filt cut"].index, channelIndex, instrumentIndex)) {
@@ -9034,7 +9028,6 @@ export class InstrumentState {
 
                 if (this.eqFilters.length < 1) this.eqFilters[0] = new DynamicBiquadFilter();
                 this.eqFilters[0].loadCoefficientsWithGradient(Synth.tempFilterStartCoefficients, Synth.tempFilterEndCoefficients, 1.0 / roundedSamplesPerTick, startPoint.type == FilterType.lowPass);
-
             } else {
                 eqFilterSettingsStart.convertLegacySettingsForSynth(startSimpleFreq, startSimpleGain, true);
 
@@ -9044,15 +9037,12 @@ export class InstrumentState {
 
                 if (this.eqFilters.length < 1) this.eqFilters[0] = new DynamicBiquadFilter();
                 this.eqFilters[0].loadCoefficientsWithGradient(Synth.tempFilterStartCoefficients, Synth.tempFilterStartCoefficients, 1.0 / roundedSamplesPerTick, startPoint.type == FilterType.lowPass);
-
             }
 
             eqFilterVolume *= startPoint.getVolumeCompensationMult();
-
             this.eqFilterCount = 1;
             eqFilterVolume = Math.min(3.0, eqFilterVolume);
-        }
-        else {
+        } else {
             const eqFilterSettings: FilterSettings = (instrument.tmpEqFilterStart != null) ? instrument.tmpEqFilterStart : instrument.eqFilter;
             //const eqAllFreqsEnvelopeStart: number = envelopeStarts[InstrumentAutomationIndex.eqFilterAllFreqs];
             //const eqAllFreqsEnvelopeEnd:   number = envelopeEnds[  InstrumentAutomationIndex.eqFilterAllFreqs];
@@ -10122,8 +10112,8 @@ export class Synth {
         this.initModFilters(this.song);
         this.computeLatestModValues();
         this.activateAudio();
-        this.warmUpSynthesizer(this.song);
         this.resetEffects();
+        this.warmUpSynthesizer(this.song);
         this.isPlayingSong = true;
     }
 
@@ -11523,6 +11513,7 @@ export class Synth {
                             this.computeTone(song, channelIndex, samplesPerTick, tone, false, false);
                         }
                     }
+                    if (transition.continues && (toneList.count() <= 0) || (note.pitches.length <= 0)) instrumentState.envelopeComputer.reset(); // Stop computing effect envelopes.
                 }
                 // Automatically free or release seamless tones if there's no new note to take over.
                 while (toneList.count() > toneCount) {
@@ -11735,7 +11726,6 @@ export class Synth {
             const noteStartPart: number = tone.noteStartPart;
             const noteEndPart: number = tone.noteEndPart;
 
-
             const endPinIndex: number = note.getEndPinIndex(currentPart);
             const startPin: NotePin = note.pins[endPinIndex - 1];
             const endPin: NotePin = note.pins[endPinIndex];
@@ -11768,7 +11758,6 @@ export class Synth {
                     if (tickTimeEnd >= noteStartTick + noteLengthTicks) toneIsOnLastTick = true;
                 }
             }
-
         }
 
         tone.isOnLastTick = toneIsOnLastTick;
@@ -11839,7 +11828,7 @@ export class Synth {
         const envelopeStarts: number[] = tone.envelopeComputer.envelopeStarts;
         const envelopeEnds: number[] = tone.envelopeComputer.envelopeEnds;
         instrument.noteFilter = tmpNoteFilter;
-        if (transition.continues && (tone.prevNote == null || tone.note == null)) {
+        if (tone.atNoteStart && (transition.continues && (tone.prevNote == null || tone.note == null))) {
             instrumentState.envelopeComputer.reset();
         }
 
@@ -11991,8 +11980,7 @@ export class Synth {
                 noteFilterExpression *= startPoint!.getVolumeCompensationMult();
 
                 tone.noteFilterCount = 1;
-            }
-            else {
+            } else {
                 const noteFilterSettings: FilterSettings = (instrument.tmpNoteFilterStart != null) ? instrument.tmpNoteFilterStart : instrument.noteFilter;
 
                 for (let i: number = 0; i < noteFilterSettings.controlPointCount; i++) {

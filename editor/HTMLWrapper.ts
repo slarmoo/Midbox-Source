@@ -75,6 +75,7 @@ export class Slider {
 }
 
 // Mainly exists for sliders that deal with decimal values which is sabotaged by the parseInt() in the Slider class.
+// TODO: Settle for a boolean passed in the constructor of the slider class above ^^
 export class SliderNoParse {
 	private _change: Change | null = null;
 	private _value: number = 0;

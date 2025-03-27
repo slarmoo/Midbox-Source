@@ -3,7 +3,7 @@
 import { HTML, SVG } from "imperative-html/dist/esm/elements-strict";
 import { Prompt } from "./Prompt";
 import { Config } from "../synth/SynthConfig";
-import { Instrument, EnvelopeSettings, DrumsetEnvelopeSettings } from "../synth/synth";
+import { Instrument, EnvelopeSettings/*, DrumsetEnvelopeSettings*/ } from "../synth/synth";
 import { ColorConfig } from "./ColorConfig";
 import { SongDocument } from "./SongDocument";
 //import { EnvelopeLineGraph } from "./EnvelopeEditor";
@@ -19,9 +19,7 @@ class BasicCustomGridCanvas {
 	private _drawCanvas(graphX: number, graphY: number, graphWidth: number, graphHeight: number): void {
         let instrument: Instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
 		let instEnv: EnvelopeSettings = instrument.envelopes[this._index];
-        let drumEnv: DrumsetEnvelopeSettings = instrument.drumsetEnvelopes[this._index];
-		instEnv;
-        drumEnv;
+        //let drumEnv: DrumsetEnvelopeSettings = instrument.drumsetEnvelopes[this._index];
 
 		const pointIndexWidth: number = graphWidth / instEnv.basicCustomGridWidth;
 		const pointIndexHeight: number = graphHeight / instEnv.basicCustomGridHeight;

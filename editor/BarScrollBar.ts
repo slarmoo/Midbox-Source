@@ -202,17 +202,22 @@ export class BarScrollBar {
 	}
 		
 	public render(): void {
-			this._notchSpace = (this._editorWidth-1) / Math.max(this._doc.trackVisibleBars, this._doc.song.barCount);
-			
-		const resized: boolean = this._renderedNotchCount != this._doc.song.barCount;
+		const barCount: number = this._doc.song.barCount;
+		this._notchSpace = (this._editorWidth-1) / Math.max(this._doc.trackVisibleBars, barCount);
+		const resized: boolean = this._renderedNotchCount != barCount;
 		if (resized) {
-			this._renderedNotchCount = this._doc.song.barCount;
+			this._renderedNotchCount = barCount;
 				
 			while (this._notches.firstChild) this._notches.removeChild(this._notches.firstChild);
 				
-			for (let i: number = 0; i <= this._doc.song.barCount; i++) {
-				const lineHeight: number = (i % 16 == 0) ? 0 : ((i % 4 == 0) ? this._editorHeight / 8 : this._editorHeight / 3);
+			// TODO: Make the scroll bar look nicer on longer songs.
+			for (let i: number = 0; i <= barCount; i++) {
+				const lineHeight: number = ((i % 16 == 0) ? 0 : ((i % 4 == 0) ? this._editorHeight / 8 : this._editorHeight / 3));
+				if (lineHeight == this._editorHeight / 3 && barCount > 192) {
 					this._notches.appendChild(SVG.rect({fill: ColorConfig.uiWidgetBackground, x: i * this._notchSpace - 1, y: lineHeight, width: 2, height: this._editorHeight - lineHeight * 2}));
+				} else {
+					this._notches.appendChild(SVG.rect({fill: ColorConfig.uiWidgetBackground, x: i * this._notchSpace - 1, y: lineHeight, width: 2, height: this._editorHeight - lineHeight * 2}));
+				}
 			}
 		}
 		

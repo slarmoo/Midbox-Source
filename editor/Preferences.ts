@@ -48,26 +48,9 @@ export class Preferences {
 		public customChipOnRandomization: boolean;
 		public noiseOnRandomization: boolean;
 		public wavetableOnRandomization: boolean;
-
 		public drumSpectrumOnRandomization: boolean;
 		public drumNoiseOnRandomization: boolean;
 		public drumsetOnRandomization: boolean;
-
-		public volumeOnRandomization: boolean;
-		public panningOnRandomization: boolean;
-		public panDelayOnRandomization: boolean;
-		public fadeOnRandomization: boolean;
-		public unisonOnRandomization: boolean;
-
-		public EQFilterOnRandomization: boolean;
-		public noteFilterOnRandomization: boolean;
-
-		public customChipGenerationType: string;
-		public wavetableCustomChipGenerationType: string;
-		public wavetableSpeedOnRandomization: boolean;
-		public wavetableWavesInCycleOnRandomization: boolean;
-		public wavetableInterpolationOnRandomization: boolean;
-		public wavetableCycleType: string;
 
 	// Keybind Setup
 		public deactivateCapsLock: boolean;
@@ -119,26 +102,9 @@ export class Preferences {
 		this.customChipOnRandomization = window.localStorage.getItem("customChipOnRandomization") != "false";
 		this.noiseOnRandomization = window.localStorage.getItem("noiseOnRandomization") != "false";
 		this.wavetableOnRandomization = window.localStorage.getItem("wavetableOnRandomization") != "false";
-
 		this.drumSpectrumOnRandomization = window.localStorage.getItem("drumSpectrumOnRandomization") != "false";
 		this.drumNoiseOnRandomization = window.localStorage.getItem("drumNoiseOnRandomization") != "false";
 		this.drumsetOnRandomization = window.localStorage.getItem("drumsetOnRandomization") != "false";
-
-		this.volumeOnRandomization = window.localStorage.getItem("volumeOnRandomization") == "true";
-		this.panningOnRandomization = window.localStorage.getItem("panningOnRandomization") == "true";
-		this.panDelayOnRandomization = window.localStorage.getItem("panDelayOnRandomization") == "true";
-		this.fadeOnRandomization = window.localStorage.getItem("fadeOnRandomization") != "false";
-		this.unisonOnRandomization = window.localStorage.getItem("unisonOnRandomization") != "false";
-
-		this.EQFilterOnRandomization = window.localStorage.getItem("EQFilterOnRandomization") != "false";
-		this.noteFilterOnRandomization = window.localStorage.getItem("noteFilterOnRandomization") != "false";
-
-		this.customChipGenerationType = window.localStorage.getItem("customChipGenerationType") || "customChipGenerateAlgorithm";
-		this.wavetableCustomChipGenerationType = window.localStorage.getItem("wavetableCustomChipGenerationType") || "wavetableCustomChipGenerateAlgorithm";
-		this.wavetableSpeedOnRandomization = window.localStorage.getItem("wavetableSpeedOnRandomization") != "false";
-		this.wavetableWavesInCycleOnRandomization = window.localStorage.getItem("wavetableWavesInCycleOnRandomization") == "true";
-		this.wavetableInterpolationOnRandomization = window.localStorage.getItem("wavetableInterpolationOnRandomization") != "false";
-		this.wavetableCycleType = window.localStorage.getItem("wavetableCycleType") || "wavetableCycleTypePerNoteAndOneShot";
 		
 		// Keybind Setup
 		this.deactivateCapsLock = window.localStorage.getItem("deactivateCapsLock") != "false";
@@ -207,26 +173,9 @@ export class Preferences {
 		window.localStorage.setItem("customChipOnRandomization", this.customChipOnRandomization ? "true" : "false");
 		window.localStorage.setItem("noiseOnRandomization", this.noiseOnRandomization ? "true" : "false");
 		window.localStorage.setItem("wavetableOnRandomization", this.wavetableOnRandomization ? "true" : "false");
-
 		window.localStorage.setItem("drumSpectrumOnRandomization", this.drumSpectrumOnRandomization ? "true" : "false");
 		window.localStorage.setItem("drumNoiseOnRandomization", this.drumNoiseOnRandomization ? "true" : "false");
 		window.localStorage.setItem("drumsetOnRandomization", this.drumsetOnRandomization ? "true" : "false");
-
-		window.localStorage.setItem("volumeOnRandomization", this.volumeOnRandomization ? "true" : "false");
-		window.localStorage.setItem("panningOnRandomization", this.panningOnRandomization ? "true" : "false");
-		window.localStorage.setItem("panDelayOnRandomization", this.panDelayOnRandomization ? "true" : "false");
-		window.localStorage.setItem("fadeOnRandomization", this.fadeOnRandomization ? "true" : "false");
-		window.localStorage.setItem("unisonOnRandomization", this.unisonOnRandomization ? "true" : "false");
-
-		window.localStorage.setItem("EQFilterOnRandomization", this.EQFilterOnRandomization ? "true" : "false");
-		window.localStorage.setItem("noteFilterOnRandomization", this.noteFilterOnRandomization ? "true" : "false");
-
-		window.localStorage.setItem("customChipGenerationType", this.customChipGenerationType);
-		window.localStorage.setItem("wavetableCustomChipGenerationType", this.wavetableCustomChipGenerationType);
-		window.localStorage.setItem("wavetableSpeedOnRandomization", this.wavetableSpeedOnRandomization ? "true" : "false");
-		window.localStorage.setItem("wavetableWavesInCycleOnRandomization", this.wavetableWavesInCycleOnRandomization ? "true" : "false");
-		window.localStorage.setItem("wavetableInterpolationOnRandomization", this.wavetableInterpolationOnRandomization ? "true" : "false");
-		window.localStorage.setItem("wavetableCycleType", this.wavetableCycleType);
 
 		// Keybind Setup
 		window.localStorage.setItem("deactivateCapsLock", this.deactivateCapsLock ? "true" : "false");

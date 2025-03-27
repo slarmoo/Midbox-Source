@@ -1405,13 +1405,16 @@ export class SongEditor {
     private readonly _songDetuneAffectedRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:10px;", onclick: () => this._openPrompt("songDetuneAffected") }, span("‣ SD-Affected:")), this._songDetuneAffectedBox);
     private readonly _operatorOffsetBox: HTMLInputElement = input({ type: "checkbox", style: "width: 1em; padding: 0; margin-right: 4em;" });
     private readonly _operatorOffsetRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:10px; font-size: 85%;", onclick: () => this._openPrompt("FMOperatorOffsets") }, span("‣ Use Default Carrier Offsets:")), this._operatorOffsetBox);
-    private readonly _knobTest: Knob = new Knob(0, 20, 10, 2, [5, 16], 1, this._doc);
-    private readonly _knobTestRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:10px; font-size: 90%;"}, span("Testing Knob:")), this._knobTest);
+    private readonly _knobTest: Knob = new Knob(0, 20, 1, [12], 1, this._doc, (oldValue: number, newValue: number) => new ChangeEnvelopeSpeed(this._doc, oldValue, newValue));
+    private readonly _knobGridTest: Knob = new Knob(0, 30, 1, [12, 22], 1, this._doc, (oldValue: number, newValue: number) => new ChangeEnvelopeSpeed(this._doc, oldValue, newValue));
+    private readonly _knobGridTestAgain: Knob = new Knob(0, 40, 1, [12, 22, 32], 1, this._doc, (oldValue: number, newValue: number) => new ChangeEnvelopeSpeed(this._doc, oldValue, newValue));
+    private readonly _knobContainer: HTMLElement = div({ style: "display: grid; grid: repeat(1, 30px) / auto-flow;" }, this._knobTest.container, this._knobGridTest.container, this._knobGridTestAgain.container)
+    private readonly _knobTestRow: HTMLElement = div({ class: "selectRow dropFader" }, span({ class: "tip", style: "margin-left:10px; font-size: 90%;"}, span("Testing Knob(s):")), this._knobContainer);
     private readonly _advancedSettingsDropdownGroup: HTMLElement = div({ class: "editor-controls", style: "display: none; margin-top: -4px;" }, this._songKeyAffectedRow, this._songDetuneAffectedRow, this._operatorOffsetRow, this._knobTestRow);
     private readonly _advancedSettingsDropdown: HTMLButtonElement = button({ style: "height: 1.5em; width: 65%; padding: 0px; font-size: 10px;", onclick: () => this._toggleDropdownMenu(DropdownID.AdvSettings) }, "▼ Advanced Settings ▼");
     private readonly _advancedSettingsDropdownRow: HTMLElement = div({ class: "selectRow", style: "justify-content: center;" }, this._advancedSettingsDropdown);
 
-    private readonly _envelopeEditor: EnvelopeEditor = new EnvelopeEditor(this._doc, (name) => this._openPrompt(name));
+    private readonly _envelopeEditor: EnvelopeEditor = new EnvelopeEditor(this._doc, (name, number) => this._openPrompt(name, number));
     private readonly _envelopeSpeedDisplay: HTMLSpanElement = span({ style: `color: ${ColorConfig.secondaryText}; font-size: smaller; text-overflow: clip;`, class: "tip", onclick: () => this._openPrompt("x") }, "x1");
     private readonly _envelopeSpeedSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.modulators.dictionary["envelope speed"].maxRawVol, value: "0", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeEnvelopeSpeed(this._doc, oldValue, newValue), false);
     // Issue#59 - Add input boxes to various speed/delay sliders for more accurate inputs.
@@ -2037,7 +2040,7 @@ export class SongEditor {
 			const LFOIgnoranceToggle: HTMLInputElement = input({style: "width: 3em; padding: 0;", type: "checkbox"});
 			const LFORadioButtonsRow: HTMLDivElement = div({}, div({class: "", style: "display: flex; flex-direction: row; justify-content: space-evenly;"},
 				div({style: "display: flex; flex-direction: column; gap: 5px; text-align: center;"},
-					span({class: "tip", style: "font-size: 10.5px; height: 1em; width: 5em;", onclick: () => this._openPrompt("LFOAcceleration")}, span("Accelerate:")),
+					span({class: "tip", style: "font-size: 10px; height: 1em; width: 5em;", onclick: () => this._openPrompt("LFOAcceleration")}, span("Accelerate:")),
 					div({style: ""}, LFOEnableAccelerationToggle),
 				),
 				div({style: "display: flex; flex-direction: column; gap: 5px; text-align: center;"},
@@ -2512,7 +2515,15 @@ export class SongEditor {
         if (target.textContent == "▼" || target.textContent == "▼ Advanced Settings ▼") {
             let instrument: Instrument = this._doc.song.channels[this._doc.channel].instruments[this._doc.getCurrentInstrument()];
             if (target.textContent == "▼") target.textContent = "▲";
-            if (target.textContent == "▼ Advanced Settings ▼") target.textContent = "▲ Advanced Settings ▲";
+            if (target.textContent == "▼ Advanced Settings ▼") { 
+                target.textContent = "▲ Advanced Settings ▲";
+                // Hide settings that need to be hidden in certain conditions.
+                if (instrument.type == InstrumentType.fm || instrument.type == InstrumentType.advfm) {
+                    this._operatorOffsetRow.style.display = "";
+                } else {
+                    this._operatorOffsetRow.style.display = "none";
+                }
+            }
             if (group != this._chordDropdownGroup || group != this._strumDropdownGroup) {
                 group.style.display = "";
             } else if (instrument.chord == Config.chords.dictionary["arpeggio"].index) {
@@ -2543,7 +2554,6 @@ export class SongEditor {
     }
 
     private _modSliderUpdate(): void {
-
         if (!this._doc.synth.playing) {
             this._hasActiveModSliders = false;
             for (let setting: number = 0; setting < Config.modulators.length; setting++) {
@@ -2556,8 +2566,7 @@ export class SongEditor {
                     }
                 }
             }
-        }
-        else {
+        } else {
             let instrument: number = this._doc.getCurrentInstrument();
             const anyModActive: boolean = this._doc.synth.isAnyModActive(this._doc.channel, instrument);
 
@@ -2587,8 +2596,7 @@ export class SongEditor {
                         this._newShowModSliders[setting] = updateModSlider(this, slider, setting, this._doc.channel, instrument);
                     }
                 }
-            }
-            else if (this._hasActiveModSliders) {
+            } else if (this._hasActiveModSliders) {
                 // Zero out show-mod-slider settings (since none are active) to kill active mod slider flag
                 for (let setting: number = 0; setting < Config.modulators.length; setting++) {
                     this._newShowModSliders[setting] = false;
@@ -2606,14 +2614,12 @@ export class SongEditor {
                         if (slider != null) {
                             if (this._showModSliders[setting] == true) {
                                 slider.container.classList.add("modSlider");
-                            }
-                            else {
+                            } else {
                                 slider.container.classList.remove("modSlider");
                             }
                         }
                     }
-                    if (this._newShowModSliders[setting] == true)
-                        anySliderActive = true;
+                    if (this._newShowModSliders[setting] == true) anySliderActive = true;
                 }
                 this._hasActiveModSliders = anySliderActive;
             }
@@ -2721,12 +2727,12 @@ export class SongEditor {
         }
     }
 
-    private _openPrompt(promptName: string, extraStuff?: any): void {
+    private _openPrompt(promptName: string, extraNumber?: number): void {
         this._doc.openPrompt(promptName);
-        this._setPrompt(promptName, extraStuff);
+        this._setPrompt(promptName, extraNumber);
     }
 
-    private _setPrompt(promptName: string | null, extraStuff?: any): void {
+    private _setPrompt(promptName: string | null, extraNumber?: number): void {
         if (this._currentPromptName == promptName) return;
         this._currentPromptName = promptName;
 
@@ -2793,8 +2799,10 @@ export class SongEditor {
                     this.prompt = new CustomFilterPrompt(this._doc, this, true);
                     break;
                 case "basicCustomEnvelopePrompt":
-                    // The "extra stuff" here is the envelope or drumset drum index.
-                    this.prompt = new BasicCustomEnvelopePrompt(this._doc, extraStuff);
+                    // The "extra number" here is the envelope or drumset drum index.
+                    let index: number = 0;
+                    if (extraNumber) index = extraNumber;
+                    this.prompt = new BasicCustomEnvelopePrompt(this._doc, index);
                     break;
                 case "theme":
                     this.prompt = new ThemePrompt(this._doc);
@@ -3609,6 +3617,9 @@ export class SongEditor {
             this._noteFilterSimplePeakSlider.updateValue(instrument.noteFilterSimplePeak);
             this._envelopeSpeedSlider.updateValue(instrument.envelopeSpeed);
             this._envelopeSpeedSlider.input.title = "x" + prettyNumber(Config.arpSpeedScale[instrument.envelopeSpeed]);
+            this._knobTest.updateValue(instrument.envelopeSpeed);
+            this._knobGridTest.updateValue(instrument.envelopeSpeed);
+            this._knobGridTestAgain.updateValue(instrument.envelopeSpeed);
             this._envelopeSpeedDisplay.textContent = "x" + prettyNumber(Config.arpSpeedScale[instrument.envelopeSpeed]);
 
             if (instrument.type == InstrumentType.customChipWave) {

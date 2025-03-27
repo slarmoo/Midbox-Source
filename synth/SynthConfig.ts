@@ -327,7 +327,7 @@ export class Config {
 
     public static readonly blackKeyNameParents:       ReadonlyArray<number> = [-1, 1, -1, 1, -1, 1, -1, -1, 1, -1, 1, -1];
     public static readonly tempoMin:                  number = 1;
-    public static readonly tempoMax:                  number = 750; // MID TODO: Raise to 1k.
+    public static readonly tempoMax:                  number = 750;
     public static readonly octaveMin:                 number = -2;
 	public static readonly octaveMax:                 number = 2;
     public static readonly echoDelayRange:            number = 48;
@@ -388,7 +388,7 @@ export class Config {
     public static readonly pwmBaseExpression:                number = 0.04725;   // It's actually closer to half of this, the synthesized pulse amplitude range is only .5 to -.5, but also note that the fundamental sine partial amplitude of a square wave is 4/π times the measured square wave amplitude.
     public static readonly supersawBaseExpression:           number = 0.061425;  // It's actually closer to half of this, the synthesized sawtooth amplitude range is only .5 to -.5.
     public static readonly pickedStringBaseExpression:       number = 0.025;     // Same as harmonics.
-    public static readonly wavetableBaseExpression:          number = 0.03375;   // Gonna keep it the same as chipBaseExpression for now.
+    public static readonly wavetableBaseExpression:          number = 0.03375;   // Gonna keep it the same as chipBaseExpression.
     public static readonly distortionBaseVolume:             number = 0.011;     // Distortion is not affected by pitchDamping, which otherwise approximately halves expression for notes around the middle of the range.
     public static readonly bitcrusherBaseVolume:             number = 0.010;     // Also not affected by pitchDamping, used when bit crushing is maxed out (aka "1-bit" output).
 
@@ -495,7 +495,7 @@ export class Config {
         { name: "normal", periodsSeconds: [0.14],                         period: 0.14   },
         { name: "shaky",  periodsSeconds: [0.11, 1.618 * 0.11, 3 * 0.11], period: 266.97 },
     ]);
-//  MID TODO: Make the make the envelope speed not use arpSpeedScale.    0       1      2    3     4      5    6    7      8     9   10   11 12   13   14   15   16   17   18   19   20   21 22   23   24   25   26   27   28   29   30   31 32   33   34   35   36   37   38    39  40   41 42    43   44   45   46 47   48 49 50
+//  MID TODO: Make the make the envelope speed not use arpSpeedScale.      0       1      2    3     4      5    6    7      8     9   10   11 12   13   14   15   16   17   18   19   20   21 22   23   24   25   26   27   28   29   30   31 32   33   34   35   36   37   38    39  40   41 42    43   44   45   46 47   48 49 50
     public static readonly arpSpeedScale:         ReadonlyArray<number> = [0, 0.0625, 0.125, 0.2, 0.25, 1 / 3, 0.4, 0.5, 2 / 3, 0.75, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 4, 4.15, 4.3, 4.5, 4.8, 5, 5.5, 6, 8];
     public static readonly strumSpeedScale:       ReadonlyArray<number> = [24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
     public static readonly slideSpeedScale:       ReadonlyArray<number> = [24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];

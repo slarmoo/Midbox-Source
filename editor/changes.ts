@@ -1,7 +1,7 @@
 // Copyright (c) 2012-2022 John Nesky and contributing authors, distributed under the MIT license, see accompanying the LICENSE.md file.
 
 import { Algorithm, Dictionary, FilterType, SustainType, InstrumentType, EffectType, AutomationTarget, Config, effectsIncludeDistortion, effectsIncludeBitcrusher, effectsIncludeChorus, effectsIncludeDetune, effectsIncludeNoteFilter, effectsIncludePitchShift, effectsIncludeReverb, effectsIncludeVibrato, effectsIncludeWavefold, effectsIncludeClipper } from "../synth/SynthConfig";
-import { NotePin, Note, makeNotePin, Pattern, FilterSettings, FilterControlPoint, SpectrumWave, HarmonicsWave, Instrument, Channel, Song, Synth, convertChipWaveToCustomChip, EnvelopeSettings, DrumsetEnvelopeSettings, LFOShapes } from "../synth/synth";
+import { NotePin, Note, makeNotePin, Pattern, FilterSettings, FilterControlPoint, SpectrumWave, HarmonicsWave, Instrument, Channel, Song, Synth, EnvelopeSettings, DrumsetEnvelopeSettings, LFOShapes } from "../synth/synth";
 import { Preset, PresetCategory, EditorConfig } from "./EditorConfig";
 import { Change, ChangeGroup, ChangeSequence, UndoableChange } from "./Change";
 import { SongDocument } from "./SongDocument";
@@ -223,9 +223,7 @@ function projectNoteIntoBar(oldNote: Note, timeOffset: number, noteStartPart: nu
 
 // The following functions are for custom chip generation seen later on.
 export function randomRoundedWave(wave: Float32Array): void {
-    let randomRoundWave: Float32Array = new Float32Array(64);
     let waveLength: number = 64;
-    let foundNonZero = false;
     const roundedWaveType: number = (Math.random() * 2 + 1) | 0;
     if (roundedWaveType == 1) {
         // https://www.desmos.com/calculator/hji1istsat
@@ -234,7 +232,7 @@ export function randomRoundedWave(wave: Float32Array): void {
         let randomNumber2 = Math.random() * 13 + 3;
         let randomNumber3 = Math.random() * 48 - 24;
         for (let i = 0; i < waveLength; i++) {
-            randomRoundWave[i] = clamp(-24, 24+1, Math.round(mod(randomNumber3 + ((Math.sin((i + randomNumber3) / randomNumber2) * 24) + i * randomNumber1), 48) - 24));
+            wave[i] = clamp(-24, 24+1, Math.round(mod(randomNumber3 + ((Math.sin((i + randomNumber3) / randomNumber2) * 24) + i * randomNumber1), 48) - 24));
         }
     } else if (roundedWaveType == 2) {
         // https://www.desmos.com/calculator/0bxjhiwhwq
@@ -244,62 +242,25 @@ export function randomRoundedWave(wave: Float32Array): void {
         let randomNumber3 = Math.random() * 48 - 24;
         let randomNumber4 = Math.random() * 2 - 1;
         for (let i = 0; i < waveLength; i++) {
-            randomRoundWave[i] = clamp(-24, 24+1, Math.round(randomNumber4 * Math.abs(2 * Math.floor((Math.sin((i / randomNumber2) * randomNumber1 + randomNumber3) * Math.cos((i * randomNumber2) * (randomNumber1 / 2)) * 24))) - randomNumber4 * 24));
-        }
-    } else if (roundedWaveType == 3) {
-        // There is no type 3 yet, but perhaps in the future...
-        // "None"
-    }
-    for (let i = 0; i < waveLength; i++) {
-        wave[i] = randomRoundWave[i];
-        let minimum = Infinity;
-        let maximum = -Infinity;
-        for (let i = 0; i < waveLength; i++) {
-            minimum = Math.min(minimum, wave[i]);
-            maximum = Math.max(maximum, wave[i]);
-        }
-        const distance = maximum - minimum;
-        if (distance >= 7) {
-            foundNonZero = true;
+            wave[i] = clamp(-24, 24+1, Math.round(randomNumber4 * Math.abs(2 * Math.floor((Math.sin((i / randomNumber2) * randomNumber1 + randomNumber3) * Math.cos((i * randomNumber2) * (randomNumber1 / 2)) * 24))) - randomNumber4 * 24));
         }
     }
-    // If the waveform is too quiet/all waves are the same, reroll.
-    if (!foundNonZero) randomRoundedWave(wave);
 }
 
 export function randomPulses(wave: Float32Array): void {
-    let randomPulse: Float32Array = new Float32Array(64);
     let waveLength: number = 64;
-    let foundNonZero = false;
-    // Weird math for building random pulses but this is what we are going with.
+    // Weird math for building random pulses.
     let randomNumber2 = Math.round(Math.random() * 15 + 15);
     let randomNumber3 = Math.round(Math.random() * 3 + 1);
     let randomNumber4 = Math.round(Math.random() * 13 + 2);
     for (let i = 0; i < waveLength; i++) {
         let randomNumber1 = sigma(mod(i, randomNumber2), (i) => 1, randomNumber4);
-        randomPulse[i] = clamp(-24, 24+1, Math.round(mod(24 * (sigma(i, (i) => randomNumber1, Math.round(randomNumber2 / randomNumber3))), 24.0000000000001)));
+        wave[i] = clamp(-24, 24+1, Math.round(mod(24 * (sigma(i, (i) => randomNumber1, Math.round(randomNumber2 / randomNumber3))), 24.0000000000001)));
     }
-    for (let i = 0; i < waveLength; i++) {
-        wave[i] = randomPulse[i];
-        let minimum = Infinity;
-        let maximum = -Infinity;
-        for (let i = 0; i < waveLength; i++) {
-            minimum = Math.min(minimum, wave[i]);
-            maximum = Math.max(maximum, wave[i]);
-        }
-        const distance = maximum - minimum;
-        if (distance >= 7) {
-            foundNonZero = true;
-        }
-    }
-    // If the waveform is too quiet/all waves are the same, reroll.
-    if (!foundNonZero) randomPulses(wave);
 }
 
 export function randomChip(wave: Float32Array): void {
-    let randomChipWave: Float32Array = new Float32Array(64);
     let waveLength: number = 64;
-    let foundNonZero = false;
     const chipType: number = (Math.random() * 2 + 1) | 0;
     if (chipType == 1) {
         // https://www.desmos.com/calculator/udpkkpxqaj
@@ -309,7 +270,7 @@ export function randomChip(wave: Float32Array): void {
         let randomNumber3 = Math.random() * 9 + 2;
         let randomNumber4 = Math.random() * 2 - 1;
         for (let i = 0; i < waveLength; i++) {
-            randomChipWave[i] = clamp(-24, 24+1, (Math.round(Math.abs(randomNumber4 * mod(((randomNumber2 / randomNumber3) * randomNumber3) + (sigma(i / (randomNumber1 * randomNumber1), (i) => randomNumber3, randomNumber1 * -randomNumber2)) * randomNumber4, 24)))) * 2 - 24);
+            wave[i] = clamp(-24, 24+1, (Math.round(Math.abs(randomNumber4 * mod(((randomNumber2 / randomNumber3) * randomNumber3) + (sigma(i / (randomNumber1 * randomNumber1), (i) => randomNumber3, randomNumber1 * -randomNumber2)) * randomNumber4, 24)))) * 2 - 24);
         }
     } else if (chipType == 2) {
         // https://www.desmos.com/calculator/bmogge156f
@@ -318,53 +279,21 @@ export function randomChip(wave: Float32Array): void {
         let randomNumber2 = Math.random() * 2 - 1;
         let randomNumber3 = Math.random() * 100;
         for (let i = 0; i < waveLength; i++) {
-            randomChipWave[i] = clamp(-24, 24+1, mod(Math.round(mod((sigma(i / randomNumber1, (i) => (randomNumber1 * randomNumber3), 0)), 25 + randomNumber2) * 24), 48) - 24);
+            wave[i] = clamp(-24, 24+1, mod(Math.round(mod((sigma(i / randomNumber1, (i) => (randomNumber1 * randomNumber3), 0)), 25 + randomNumber2) * 24), 48) - 24);
         }
     }
-    for (let i = 0; i < waveLength; i++) {
-        wave[i] = randomChipWave[i];
-        let minimum = Infinity;
-        let maximum = -Infinity;
-        for (let i = 0; i < waveLength; i++) {
-            minimum = Math.min(minimum, wave[i]);
-            maximum = Math.max(maximum, wave[i]);
-        }
-        const distance = maximum - minimum;
-        if (distance >= 7) {
-            foundNonZero = true;
-        }
-    }
-    // If the waveform is too quiet/all waves are the same, reroll.
-    if (!foundNonZero) randomChip(wave);
 }
 
 export function biasedFullyRandom(wave: Float32Array): void {
-    let fullyRandomWave: Float32Array = new Float32Array(64);
     let waveLength: number = 64;
-    let foundNonZero = false;
     // Math for a fully random custom chip but the higher/lower parts 
     // of the waveform (in height) will contain less samples.
     for (let i: number = 0; i < waveLength; i++) {
         const v = Math.random() * 2 - 1;
         const bias = 6;
         const biased = v > 0 ? Math.pow(v, bias) : -Math.pow(-v, bias);
-        fullyRandomWave[i] = clamp(-24, 24 + 1, Math.floor(biased * 24));
+        wave[i] = clamp(-24, 24 + 1, Math.floor(biased * 24));
     }
-    for (let i = 0; i < waveLength; i++) {
-        wave[i] = fullyRandomWave[i];
-        let minimum = Infinity;
-        let maximum = -Infinity;
-        for (let i = 0; i < waveLength; i++) {
-            minimum = Math.min(minimum, wave[i]);
-            maximum = Math.max(maximum, wave[i]);
-        }
-        const distance = maximum - minimum;
-        if (distance >= 7) {
-            foundNonZero = true;
-        }
-    }
-    // If the waveform is too quiet/all waves are the same, reroll.
-    if (!foundNonZero) biasedFullyRandom(wave);
 }
 
 export function randomizeWave(wave: Float32Array, start: number, end: number): void {
@@ -390,15 +319,13 @@ export class ChangeMoveAndOverflowNotes extends ChangeGroup {
                 pitchChannels.push(newChannel);
             } else if (channelIndex < doc.song.pitchChannelCount + doc.song.noiseChannelCount) {
                 noiseChannels.push(newChannel);
-            }
-            else {
+            } else {
                 modChannels.push(newChannel);
             }
 
             newChannel.muted = oldChannel.muted;
             newChannel.octave = oldChannel.octave;
             newChannel.name = oldChannel.name;
-
             for (const instrument of oldChannel.instruments) {
                 newChannel.instruments.push(instrument);
             }
@@ -407,25 +334,22 @@ export class ChangeMoveAndOverflowNotes extends ChangeGroup {
             const newPartsPerBar: number = Config.partsPerBeat * newBeatsPerBar;
             let currentBar: number = -1;
             let pattern: Pattern | null = null;
-
             for (let oldBar: number = 0; oldBar < doc.song.barCount; oldBar++) {
                 const oldPattern: Pattern | null = doc.song.getPattern(channelIndex, oldBar);
                 if (oldPattern != null) {
                     const oldBarStart: number = oldBar * oldPartsPerBar;
                     for (const oldNote of oldPattern.notes) {
-
                         const absoluteNoteStart: number = oldNote.start + oldBarStart + partsToMove;
                         const absoluteNoteEnd: number = oldNote.end + oldBarStart + partsToMove;
-
                         const startBar: number = Math.floor(absoluteNoteStart / newPartsPerBar);
                         const endBar: number = Math.ceil(absoluteNoteEnd / newPartsPerBar);
+
                         for (let bar: number = startBar; bar < endBar; bar++) {
                             const barStartPart: number = bar * newPartsPerBar;
                             const noteStartPart: number = Math.max(0, absoluteNoteStart - barStartPart);
                             const noteEndPart: number = Math.min(newPartsPerBar, absoluteNoteEnd - barStartPart);
 
                             if (noteStartPart < noteEndPart) {
-
                                 // Ensure a pattern exists for the current bar before inserting notes into it.
                                 if (currentBar < bar || pattern == null) {
                                     currentBar++;
@@ -439,7 +363,6 @@ export class ChangeMoveAndOverflowNotes extends ChangeGroup {
                                     pattern.instruments.length = 0;
                                     pattern.instruments.push(...oldPattern.instruments);
                                 }
-
                                 // This is a consideration to allow arbitrary note sequencing, e.g. for mod channels (so the pattern being used can jump around)
                                 pattern = newChannel.patterns[newChannel.bars[bar] - 1];
 
@@ -491,7 +414,6 @@ class ChangePins extends UndoableChange {
                 i++;
             }
         }
-
         removeRedundantPins(this._newPins);
 
         const firstInterval: number = this._newPins[0].interval;
@@ -736,15 +658,11 @@ export class ChangePreset extends Change {
                     const tempVolume: number = instrument.volume;
                     const tempPan: number = instrument.pan;
                     const tempPanDelay = instrument.panDelay;
-                    //const usesPanning: boolean = effectsIncludePanning(instrument.effects);
                     instrument.fromJsonObject(preset.settings, doc.song.getChannelIsNoise(channelIdx), doc.song.getChannelIsMod(channelIdx), doc.song.rhythm == 0 || doc.song.rhythm == 2, doc.song.rhythm >= 2);
                     instrument.volume = tempVolume;
                     instrument.pan = tempPan;
                     instrument.panDelay = tempPanDelay;
-                    //@jummbus - Disable this check, pan will be on by default.
-                    //if (usesPanning && instrument.pan != Config.panCenter) {
-                        instrument.effects = (instrument.effects | (1 << EffectType.panning));
-                    //}
+                    instrument.effects = (instrument.effects | (1 << EffectType.panning));
                 }
             }
             instrument.preset = newValue;
@@ -818,7 +736,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
 
         const midFreq: number = FilterControlPoint.getRoundedSettingValueFromHz(700.0);
         const maxFreq: number = Config.filterFreqRange - 1;
-        if (doc.prefs.EQFilterOnRandomization && !isMod) {
+        if (!isMod) {
             applyFilterPoints(instrument.eqFilter, [
                 new PotentialFilterPoint(0.8, FilterType.lowPass, midFreq, maxFreq, 4000.0, -1),
                 new PotentialFilterPoint(0.4, FilterType.highPass, 0, midFreq - 1, 250.0, -1),
@@ -845,30 +763,12 @@ export class ChangeRandomGeneratedInstrument extends Change {
             }
             instrument.preset = instrument.type = type;
 
-            if (doc.prefs.volumeOnRandomization) {
-                instrument.volume = Math.floor(Math.random() * 40) - 20;
-            } else {
-                instrument.volume = instrument.volume;
-            }
-            if (doc.prefs.panningOnRandomization) {
-                instrument.pan = Math.floor(Math.random() * 200) - 100;
-            } else {
-                instrument.pan = instrument.pan;
-            }
-            if (doc.prefs.panDelayOnRandomization) {
-                instrument.panDelay = Math.floor(Math.random() * 200) - 100;
-            } else {
-                instrument.panDelay = instrument.panDelay;
-            }
-
             // Drumset doesn't have fade in/out so do not include it here.
-            if (doc.prefs.fadeOnRandomization && (instrument.type != InstrumentType.drumset)) {
+            if (instrument.type != InstrumentType.drumset) {
                 instrument.fadeIn = (Math.random() < 0.5) ? 0 : selectCurvedDistribution(0, Config.fadeInRange - 1, 0, 2);
                 instrument.fadeOut = selectCurvedDistribution(0, Config.fadeOutTicks.length - 1, Config.fadeOutNeutral, 2);
-            } else {
-                instrument.fadeIn = instrument.fadeIn;
-                instrument.fadeOut = instrument.fadeOut;
             }
+
             if (Math.random() < 0.1) {
                 instrument.effects |= 1 << EffectType.transition;
                 instrument.transition = Config.transitions.dictionary[selectWeightedRandom([
@@ -918,7 +818,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "shaky", weight: 2 },
                 ])].index;
             }
-            if (Math.random() < 0.8 && doc.prefs.noteFilterOnRandomization) {
+            if (Math.random() < 0.8) {
                 instrument.effects |= 1 << EffectType.noteFilter;
                 applyFilterPoints(instrument.noteFilter, [
                     new PotentialFilterPoint(1.0, FilterType.lowPass, midFreq, maxFreq, 8000.0, -1),
@@ -939,8 +839,6 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "rise", weight: 2},
                         { item: "jummbox blip", weight: 2},
                 ])].index);
-            } else {
-                instrument.noteFilter = instrument.noteFilter;
             }
             if (Math.random() < 0.175) {
                 instrument.effects |= 1 << EffectType.wavefold;
@@ -1213,31 +1111,10 @@ export class ChangeRandomGeneratedInstrument extends Change {
             }
             instrument.preset = instrument.type = type;
 
-            if (doc.prefs.volumeOnRandomization) {
-                instrument.volume = Math.floor(Math.random() * 40) - 20;
-            } else {
-                instrument.volume = instrument.volume;
-            }
-            if (doc.prefs.panningOnRandomization) {
-                instrument.pan = Math.floor(Math.random() * 200) - 100;
-            } else {
-                instrument.pan = instrument.pan;
-            }
-            if (doc.prefs.panDelayOnRandomization) {
-                instrument.panDelay = Math.floor(Math.random() * 200) - 100;
-            } else {
-                instrument.panDelay = instrument.panDelay;
-            }
+            instrument.fadeIn = (Math.random() < 0.5) ? 0 : selectCurvedDistribution(0, Config.fadeInRange - 1, 0, 2);
+            instrument.fadeOut = selectCurvedDistribution(0, Config.fadeOutTicks.length - 1, Config.fadeOutNeutral, 2);
 
-            if (doc.prefs.fadeOnRandomization) {
-                instrument.fadeIn = (Math.random() < 0.5) ? 0 : selectCurvedDistribution(0, Config.fadeInRange - 1, 0, 2);
-                instrument.fadeOut = selectCurvedDistribution(0, Config.fadeOutTicks.length - 1, Config.fadeOutNeutral, 2);
-            } else {
-                instrument.fadeIn = instrument.fadeIn;
-                instrument.fadeOut = instrument.fadeOut;
-            }
-
-            if (doc.prefs.unisonOnRandomization && (type == InstrumentType.chip || type == InstrumentType.harmonics || type == InstrumentType.pickedString || type == InstrumentType.customChipWave || type == InstrumentType.pwm || type == InstrumentType.spectrum || type == InstrumentType.wavetable || type == InstrumentType.noise)) {
+            if (type == InstrumentType.chip || type == InstrumentType.harmonics || type == InstrumentType.pickedString || type == InstrumentType.customChipWave || type == InstrumentType.pwm || type == InstrumentType.spectrum || type == InstrumentType.wavetable || type == InstrumentType.noise) {
                 instrument.unison = Config.unisons.dictionary[selectWeightedRandom([
                     { item: "none", weight: 20 },
                     { item: "shimmer", weight: 2 },
@@ -1269,9 +1146,6 @@ export class ChangeRandomGeneratedInstrument extends Change {
                 instrument.unisonOffset = Config.unisons[instrument.unison].offset;
                 instrument.unisonExpression = Config.unisons[instrument.unison].expression;
                 instrument.unisonSign = Config.unisons[instrument.unison].sign;
-            }
-            else {
-                instrument.unison = instrument.unison;
             }
             if (Math.random() < 0.1) {
                 instrument.effects |= 1 << EffectType.transition;
@@ -1418,14 +1292,14 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "jummbox blip", weight: 2},
                 ])].index);
             }
-            if (effectsIncludeDistortion(instrument.effects) && Math.random() < 0.8 && (doc.prefs.noteFilterOnRandomization)) {
+            if (effectsIncludeDistortion(instrument.effects) && Math.random() < 0.8) {
                 instrument.effects |= 1 << EffectType.noteFilter;
                 applyFilterPoints(instrument.noteFilter, [
                     new PotentialFilterPoint(1.0, FilterType.lowPass, midFreq, maxFreq, 2000.0, -1),
                     new PotentialFilterPoint(0.9, FilterType.highPass, 0, midFreq - 1, 500.0, -1),
                     new PotentialFilterPoint(0.4, FilterType.peak, 0, maxFreq, 1400.0, 0),
                 ]);
-            } else if (effectsIncludeBitcrusher(instrument.effects) && Math.random() < 0.8 && (instrument.bitcrusherQuantization > 5 || (instrument.bitcrusherFreq > 7 && instrument.bitcrusherFreq < 11)) && (doc.prefs.noteFilterOnRandomization)) {
+            } else if (effectsIncludeBitcrusher(instrument.effects) && Math.random() < 0.8 && (instrument.bitcrusherQuantization > 5 || (instrument.bitcrusherFreq > 7 && instrument.bitcrusherFreq < 11))) {
                 instrument.effects |= 1 << EffectType.noteFilter;
                 applyFilterPoints(instrument.noteFilter, [
                     new PotentialFilterPoint(0.6, FilterType.lowPass, midFreq, maxFreq, 8000.0, -1),
@@ -1448,7 +1322,7 @@ export class ChangeRandomGeneratedInstrument extends Change {
                     { item: "linear", weight: 2},
                     { item: "rise", weight: 2},
                 ])].index);
-            } else if (Math.random() < 0.5 && (doc.prefs.noteFilterOnRandomization)) {
+            } else if (Math.random() < 0.5) {
                 instrument.effects |= 1 << EffectType.noteFilter;
                 applyFilterPoints(instrument.noteFilter, [
                     new PotentialFilterPoint(1.0, FilterType.lowPass, midFreq, maxFreq, 8000.0, -1),
@@ -1469,8 +1343,6 @@ export class ChangeRandomGeneratedInstrument extends Change {
                         { item: "rise", weight: 2},
                         { item: "jummbox blip", weight: 2},
                 ])].index);
-            } else {
-                instrument.noteFilter = instrument.noteFilter;
             }
             if (Math.random() < 0.12) {
                 instrument.effects |= 1 << EffectType.chorus;
@@ -1868,27 +1740,14 @@ export class ChangeRandomGeneratedInstrument extends Change {
                 case InstrumentType.customChipWave: {
                     let randomGeneratedArray: Float32Array = new Float32Array(64);
                     let randomGeneratedArrayIntegral: Float32Array = new Float32Array(65);
-                    if (doc.prefs.customChipGenerationType == "customChipGenerateFully") {
-                        randomizeWave(randomGeneratedArray, 0, 64);
-                    } 
-                    else if (doc.prefs.customChipGenerationType == "customChipGeneratePreset") {
-                        let index = ((Math.random() * Config.chipWaves.length) | 0);
-                        let waveformPreset = Config.chipWaves[index].samples;
-                        randomGeneratedArray = convertChipWaveToCustomChip(waveformPreset)[0];
-                    }
-                    else if (doc.prefs.customChipGenerationType == "customChipGenerateAlgorithm") {
-                        const algorithmFunction: (wave: Float32Array) => void = selectWeightedRandom([
-                            { item: randomRoundedWave, weight: 1},
-                            { item: randomPulses, weight: 1},
-                            { item: randomChip, weight: 1},
-                            { item: biasedFullyRandom, weight: 1},
-                        ]);
-                        algorithmFunction(randomGeneratedArray);
-                    }
-                    else if (doc.prefs.customChipGenerationType == "customChipGenerateNone") {
-                        randomGeneratedArray = instrument.customChipWave;
-                    }
-                    else throw new Error("Unknown preference selected for custom chip randomization.");
+                    const algorithmFunction: (wave: Float32Array, n1: number, n2: number) => void = selectWeightedRandom([
+                        {item: randomRoundedWave, weight: 1},
+                        {item: randomPulses, weight: 1},
+                        {item: randomChip, weight: 1},
+                        {item: biasedFullyRandom, weight: 1},
+                        {item: randomizeWave, weight: 1}
+                    ]);
+                    algorithmFunction(randomGeneratedArray, 0, 64);
 
                     let sum: number = 0.0;
                     for (let i: number = 0; i < randomGeneratedArray.length; i++) sum += randomGeneratedArray[i];
@@ -1911,62 +1770,27 @@ export class ChangeRandomGeneratedInstrument extends Change {
                 case InstrumentType.wavetable: {
                     let randomGeneratedArray: Float32Array[] = [];
                     let randomGeneratedArrayIntegral: Float32Array[] = [];
-                    // Probably exists a better way to randomize the checkboxes but eh. Will be optimized later.
-                    let checkboxRandomizer1: number = Math.round(Math.random());
-                    let checkboxRandomizer2: number = Math.round(Math.random());
-                    let checkboxRandomizer3: number = Math.round(Math.random());
 
-                    if (doc.prefs.wavetableSpeedOnRandomization) instrument.wavetableSpeed = Math.floor(Math.random() * Config.wavetableSpeedMax + 1);
-                    else instrument.wavetableSpeed = instrument.wavetableSpeed;
-
-                    if (doc.prefs.wavetableCycleType == "wavetableCycleTypeNone") {
-                        instrument.cyclePerNote = instrument.cyclePerNote;
-                        instrument.oneShotCycle = instrument.oneShotCycle;
-                    } else if (doc.prefs.wavetableCycleType == "wavetableCycleTypePerNote") {
-                        instrument.cyclePerNote = checkboxRandomizer1 == 0 ? true : false;
-                        instrument.oneShotCycle = false;
-                    } else if (doc.prefs.wavetableCycleType == "wavetableCycleTypePerNoteAndOneShot") {
-                        instrument.cyclePerNote = checkboxRandomizer1 == 0 ? true : false;
-                        instrument.oneShotCycle = (checkboxRandomizer2 == 0 && instrument.cyclePerNote) ? true : false;
-                    } else throw new Error("Unknown preference selected for wavetable cycle type randomization.");
-
-                    if (doc.prefs.wavetableInterpolationOnRandomization) instrument.interpolateWaves = checkboxRandomizer3 == 0 ? true : false;
-                    else instrument.interpolateWaves = instrument.interpolateWaves;
-
-                    if (doc.prefs.wavetableWavesInCycleOnRandomization) {
-                        instrument.currentCycle = [];
-                        for (let i: number = 0; i < 32; i++) {
-                            let isWaveInCycle: boolean = Math.random() <= 0.80;
-                            if (isWaveInCycle) instrument.currentCycle.push(i);
-                        }
-                    } else instrument.currentCycle = instrument.currentCycle;
+                    instrument.wavetableSpeed = Math.floor(Math.random() * Config.wavetableSpeedMax + 1);
+                    instrument.cyclePerNote = Math.round(Math.random()) == 0 ? true : false;
+                    instrument.oneShotCycle = (Math.round(Math.random()) == 0 && instrument.cyclePerNote) ? true : false;
+                    instrument.interpolateWaves = Math.round(Math.random()) == 0 ? true : false;
+                    instrument.currentCycle = [];
+                    for (let i: number = 0; i < 32; i++) {
+                        instrument.currentCycle.push(i);
+                    }
 
                     for (let waveIndex: number = 0; waveIndex < 32; waveIndex++) {
-                        randomGeneratedArray[waveIndex] = new Float32Array(64)
-                        randomGeneratedArrayIntegral[waveIndex] = new Float32Array(65)
-                        if (doc.prefs.wavetableCustomChipGenerationType == "wavetableCustomChipGenerateFully") {
-                            for (let i: number = 0; i < 64; i++) {
-                                randomGeneratedArray[waveIndex][i] = clamp(-24, 24+1, ((Math.random() * 48) | 0) - 24);
-                            }
-                        } 
-                        else if (doc.prefs.wavetableCustomChipGenerationType == "wavetableCustomChipGeneratePreset") {
-                            let index = ((Math.random() * Config.chipWaves.length) | 0);
-                            let waveformPreset = Config.chipWaves[index].samples;
-                            randomGeneratedArray[waveIndex] = convertChipWaveToCustomChip(waveformPreset)[0];
-                        }
-                        else if (doc.prefs.wavetableCustomChipGenerationType == "wavetableCustomChipGenerateAlgorithm") {
-                            const algorithmFunction: (wave: Float32Array) => void = selectWeightedRandom([
-                                { item: randomRoundedWave, weight: 1},
-                                { item: randomPulses, weight: 1},
-                                { item: randomChip, weight: 1},
-                                { item: biasedFullyRandom, weight: 1},
-                            ]);
-                            algorithmFunction(randomGeneratedArray[waveIndex]);
-                        }
-                        else if (doc.prefs.wavetableCustomChipGenerationType == "wavetableCustomChipGenerateNone") {
-                            randomGeneratedArray[waveIndex] = instrument.wavetableWaves[waveIndex];
-                        }
-                        else throw new Error("Unknown preference selected for wavetable custom chip randomization.");
+                        randomGeneratedArray[waveIndex] = new Float32Array(64);
+                        randomGeneratedArrayIntegral[waveIndex] = new Float32Array(65);
+                        const algorithmFunction: (wave: Float32Array, n1: number, n2: number) => void = selectWeightedRandom([
+                            {item: randomRoundedWave, weight: 1},
+                            {item: randomPulses, weight: 1},
+                            {item: randomChip, weight: 1},
+                            {item: biasedFullyRandom, weight: 1},
+                            {item: randomizeWave, weight: 1}
+                        ]);
+                        algorithmFunction(randomGeneratedArray[waveIndex], 0, 64);
 
                         let sum: number = 0.0;
                         for (let i: number = 0; i < randomGeneratedArray[waveIndex].length; i++) sum += randomGeneratedArray[waveIndex][i];
@@ -5929,7 +5753,7 @@ export class RandomEnvelope extends Change {
     constructor(doc: SongDocument, envelopeIndex: number, instrument: Instrument) {
         super();
         const instEnv = instrument.envelopes[envelopeIndex];
-        const randomSpeed: number[] = [0.125, 0.25, 0.333, 0.5, 0.5, 0.667, 0.75, 1, 1, 1, 1, 1.333, 1.5, 1.75, 2, 2, 3, 4, 4, 6, 8, 10, 12, 14, 16];
+        const randomSpeed: number[] = [0.125, 0.2, 0.25, 0.333, 0.4, 0.5, 0.5, 0.667, 0.75, 1, 1, 1, 1, 1.333, 1.5, 1.75, 2, 2, 3, 4, 4, 6, 8, 10, 12, 14, 16];
         const randomLowerBounds: number[] = [0, 0, 0, 0, 0, 0, 0, 0.5, 1,   1, 0.5, 2];
         const randomUpperBounds: number[] = [1, 1, 1, 1, 1, 1, 0.5, 0, 0, 0.5,   1, 0];
         const randomStepAmounts: number[] = [2, 2, 3, 4, 4, 4, 6, 8, 12, 16];
@@ -5979,6 +5803,8 @@ export class RandomEnvelope extends Change {
         }
         // Set early for making sure special-case settings aren't stored in envelopes that can't use them.
         let randomEnvelope: number = Math.floor(Math.random() * (Config.envelopes.length - 1) + 1);
+        // Reroll if basic custom.
+        while (randomEnvelope == Config.envelopes.dictionary["custom (basic)"].index) randomEnvelope = Math.floor(Math.random() * (Config.envelopes.length - 1) + 1);
         instEnv.target = randomTarget;
         if (
             randomTarget == Config.instrumentAutomationTargets.dictionary["operatorFrequency"].index || 
@@ -6080,6 +5906,9 @@ export class ChangeRemoveEnvelope extends Change {
             instEnv.measurementType = nextEnv.measurementType;
             instEnv.mirrorAmount = nextEnv.mirrorAmount;
             instEnv.LFOSettings = nextEnv.LFOSettings;
+            instEnv.basicCustomGridWidth = nextEnv.basicCustomGridWidth;
+            instEnv.basicCustomGridHeight = nextEnv.basicCustomGridHeight;
+            instEnv.basicCustomGridPoints = nextEnv.basicCustomGridPoints;
         }
         // TODO: Shift any envelopes that were targeting other envelope indices after the removed one.
         instrument.preset = instrument.type;
@@ -6145,6 +5974,9 @@ export class ChangeEnvelopeOrder extends Change {
         let env1MeasurementType = instEnv.measurementType;
         let env1MirrorAmount = instEnv.mirrorAmount;
         let env1LFOSettings = instEnv.LFOSettings;
+        let env1BasicCustomGridWidth = instEnv.basicCustomGridWidth;
+        let env1BasicCustomGridHeight = instEnv.basicCustomGridHeight;
+        let env1BasicCustomGridPoints = instEnv.basicCustomGridPoints;
 
         if (moveWhere) {
             let env2Target = envAbove.target;
@@ -6163,6 +5995,9 @@ export class ChangeEnvelopeOrder extends Change {
             let env2MeasurementType = envAbove.measurementType;
             let env2MirrorAmount = envAbove.mirrorAmount;
             let env2LFOSettings = envAbove.LFOSettings;
+            let env2BasicCustomGridWidth = envAbove.basicCustomGridWidth;
+            let env2BasicCustomGridHeight = envAbove.basicCustomGridHeight;
+            let env2BasicCustomGridPoints = envAbove.basicCustomGridPoints;
 
             envAbove.target = env1Target;
             envAbove.index = env1Index;
@@ -6180,6 +6015,9 @@ export class ChangeEnvelopeOrder extends Change {
             envAbove.measurementType = env1MeasurementType;
             envAbove.mirrorAmount = env1MirrorAmount;
             envAbove.LFOSettings = env1LFOSettings;
+            envAbove.basicCustomGridWidth = env1BasicCustomGridWidth;
+            envAbove.basicCustomGridHeight = env1BasicCustomGridHeight;
+            envAbove.basicCustomGridPoints = env1BasicCustomGridPoints;
 
             instEnv.target = env2Target;
             instEnv.index = env2Index;
@@ -6197,6 +6035,9 @@ export class ChangeEnvelopeOrder extends Change {
             instEnv.measurementType = env2MeasurementType;
             instEnv.mirrorAmount = env2MirrorAmount;
             instEnv.LFOSettings = env2LFOSettings;
+            instEnv.basicCustomGridWidth = env2BasicCustomGridWidth;
+            instEnv.basicCustomGridHeight = env2BasicCustomGridHeight;
+            instEnv.basicCustomGridPoints = env2BasicCustomGridPoints;
         } else {
             let env2Target = envBelow.target;
             let env2Index = envBelow.index;
@@ -6214,6 +6055,9 @@ export class ChangeEnvelopeOrder extends Change {
             let env2MeasurementType = envBelow.measurementType;
             let env2MirrorAmount = envBelow.mirrorAmount;
             let env2LFOSettings = envBelow.LFOSettings;
+            let env2BasicCustomGridWidth = envBelow.basicCustomGridWidth;
+            let env2BasicCustomGridHeight = envBelow.basicCustomGridHeight;
+            let env2BasicCustomGridPoints = envBelow.basicCustomGridPoints;
 
             envBelow.target = env1Target;
             envBelow.index = env1Index;
@@ -6231,6 +6075,9 @@ export class ChangeEnvelopeOrder extends Change {
             envBelow.measurementType = env1MeasurementType;
             envBelow.mirrorAmount = env1MirrorAmount;
             envBelow.LFOSettings = env1LFOSettings;
+            envBelow.basicCustomGridWidth = env1BasicCustomGridWidth;
+            envBelow.basicCustomGridHeight = env1BasicCustomGridHeight;
+            envBelow.basicCustomGridPoints = env1BasicCustomGridPoints;
 
             instEnv.target = env2Target;
             instEnv.index = env2Index;
@@ -6248,6 +6095,9 @@ export class ChangeEnvelopeOrder extends Change {
             instEnv.measurementType = env2MeasurementType;
             instEnv.mirrorAmount = env2MirrorAmount;
             instEnv.LFOSettings = env2LFOSettings;
+            instEnv.basicCustomGridWidth = env2BasicCustomGridWidth;
+            instEnv.basicCustomGridHeight = env2BasicCustomGridHeight;
+            instEnv.basicCustomGridPoints = env2BasicCustomGridPoints;
         }
         
         doc.notifier.changed();
@@ -6277,6 +6127,9 @@ export class ChangeDrumsetEnvelopeOrder extends Change {
         let env1MeasurementType = drumEnv.measurementType;
         let env1MirrorAmount = drumEnv.mirrorAmount;
         let env1LFOSettings = drumEnv.LFOSettings;
+        let env1BasicCustomGridWidth = drumEnv.basicCustomGridWidth;
+        let env1BasicCustomGridHeight = drumEnv.basicCustomGridHeight;
+        let env1BasicCustomGridPoints = drumEnv.basicCustomGridPoints;
 
         if (moveWhere) {
             let env2Envelope = envAbove.envelope;
@@ -6289,6 +6142,9 @@ export class ChangeDrumsetEnvelopeOrder extends Change {
             let env2MeasurementType = envAbove.measurementType;
             let env2MirrorAmount = envAbove.mirrorAmount;
             let env2LFOSettings = envAbove.LFOSettings;
+            let env2BasicCustomGridWidth = envAbove.basicCustomGridWidth;
+            let env2BasicCustomGridHeight = envAbove.basicCustomGridHeight;
+            let env2BasicCustomGridPoints = envAbove.basicCustomGridPoints;
 
             envAbove.envelope = env1Envelope;
             envAbove.envelopeSpeed = env1Speed;
@@ -6300,6 +6156,9 @@ export class ChangeDrumsetEnvelopeOrder extends Change {
             envAbove.measurementType = env1MeasurementType;
             envAbove.mirrorAmount = env1MirrorAmount;
             envAbove.LFOSettings = env1LFOSettings;
+            envAbove.basicCustomGridWidth = env1BasicCustomGridWidth;
+            envAbove.basicCustomGridHeight = env1BasicCustomGridHeight;
+            envAbove.basicCustomGridPoints = env1BasicCustomGridPoints;
 
             drumEnv.envelope = env2Envelope;
             drumEnv.envelopeSpeed = env2Speed;
@@ -6311,6 +6170,9 @@ export class ChangeDrumsetEnvelopeOrder extends Change {
             drumEnv.measurementType = env2MeasurementType;
             drumEnv.mirrorAmount = env2MirrorAmount;
             drumEnv.LFOSettings = env2LFOSettings;
+            drumEnv.basicCustomGridWidth = env2BasicCustomGridWidth;
+            drumEnv.basicCustomGridHeight = env2BasicCustomGridHeight;
+            drumEnv.basicCustomGridPoints = env2BasicCustomGridPoints;
         } else {
             let env2Envelope = envBelow.envelope;
             let env2Speed = envBelow.envelopeSpeed;
@@ -6322,6 +6184,9 @@ export class ChangeDrumsetEnvelopeOrder extends Change {
             let env2MeasurementType = envBelow.measurementType;
             let env2MirrorAmount = envBelow.mirrorAmount;
             let env2LFOSettings = envBelow.LFOSettings;
+            let env2BasicCustomGridWidth = envBelow.basicCustomGridWidth;
+            let env2BasicCustomGridHeight = envBelow.basicCustomGridHeight;
+            let env2BasicCustomGridPoints = envBelow.basicCustomGridPoints;
 
             envBelow.envelope = env1Envelope;
             envBelow.envelopeSpeed = env1Speed;
@@ -6333,6 +6198,9 @@ export class ChangeDrumsetEnvelopeOrder extends Change {
             envBelow.measurementType = env1MeasurementType;
             envBelow.mirrorAmount = env1MirrorAmount;
             envBelow.LFOSettings = env1LFOSettings;
+            envBelow.basicCustomGridWidth = env1BasicCustomGridWidth;
+            envBelow.basicCustomGridHeight = env1BasicCustomGridHeight;
+            envBelow.basicCustomGridPoints = env1BasicCustomGridPoints;
 
             drumEnv.envelope = env2Envelope;
             drumEnv.envelopeSpeed = env2Speed;
@@ -6344,6 +6212,9 @@ export class ChangeDrumsetEnvelopeOrder extends Change {
             drumEnv.measurementType = env2MeasurementType;
             drumEnv.mirrorAmount = env2MirrorAmount;
             drumEnv.LFOSettings = env2LFOSettings;
+            drumEnv.basicCustomGridWidth = env2BasicCustomGridWidth;
+            drumEnv.basicCustomGridHeight = env2BasicCustomGridHeight;
+            drumEnv.basicCustomGridPoints = env2BasicCustomGridPoints;
         }
         
         doc.notifier.changed();

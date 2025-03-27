@@ -188,7 +188,7 @@ export class EnvelopeEditor {
 	private _renderedFMOperatorWaveforms: number[] = [];
 	private _openPerEnvelopeDropdowns: boolean[] = [];
 	
-	constructor(private _doc: SongDocument, private _openPrompt: (name: string, extraStuff?: any) => void) {
+	constructor(private _doc: SongDocument, private _openPrompt: (name: string, extraNumber?: number) => void) {
 		this.container.addEventListener("change", this._onChange);
 		this.container.addEventListener("input", this._onInput);
 		this.container.addEventListener("click", this._onClick);
@@ -705,7 +705,7 @@ export class EnvelopeEditor {
 			const LFOIgnoranceToggle: HTMLInputElement = input({style: "width: 3em; padding: 0;", type: "checkbox"});
 			const LFORadioButtonsRow: HTMLElement = div({}, div({class: "", style: "display: flex; flex-direction: row; justify-content: space-evenly;"},
 				div({style: "display: flex; flex-direction: column; gap: 5px; text-align: center;"},
-					span({class: "tip", style: "font-size: 10.5px; height: 1em; width: 5em;", onclick: () => this._openPrompt("LFOAcceleration")}, span("Accelerate:")),
+					span({class: "tip", style: "font-size: 10px; height: 1em; width: 5em;", onclick: () => this._openPrompt("LFOAcceleration")}, span("Accelerate:")),
 					div({style: ""}, LFOEnableAccelerationToggle),
 				),
 				div({style: "display: flex; flex-direction: column; gap: 5px; text-align: center;"},

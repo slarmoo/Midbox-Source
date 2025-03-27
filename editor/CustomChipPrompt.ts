@@ -7,7 +7,6 @@ import { ColorConfig } from "./ColorConfig";
 import { ChangeCustomWave, randomRoundedWave, randomPulses, randomChip, biasedFullyRandom, randomizeWave } from "./changes";
 import { Config } from "../synth/SynthConfig";
 import { SongEditor } from "./SongEditor";
-import { convertChipWaveToCustomChip } from "../synth/synth";
 
 const { button, div, h2, select, option } = HTML;
 
@@ -534,25 +533,14 @@ export class CustomChipPromptCanvas {
 
 	public _randomizeCustomChip = (): void => {
 		let randomGeneratedArray: Float32Array = new Float32Array(64);
-        if (this._doc.prefs.customChipGenerationType == "customChipGenerateFully") {
-            randomizeWave(randomGeneratedArray, 0, 64);
-        } 
-        else if (this._doc.prefs.customChipGenerationType == "customChipGeneratePreset") {
-            let index = ((Math.random() * Config.chipWaves.length) | 0);
-            let waveformPreset = Config.chipWaves[index].samples;
-            randomGeneratedArray = convertChipWaveToCustomChip(waveformPreset)[0];
-    	}
-		// We'll put the "none" type here as it seems more intuitive if "none" only worked on fully randomized custom chips, not just its waveform.
-        else if (this._doc.prefs.customChipGenerationType == "customChipGenerateAlgorithm" || this._doc.prefs.customChipGenerationType == "customChipGenerateNone") {
-            const algorithmFunction: (wave: Float32Array) => void = selectWeightedRandom([
-                { item: randomRoundedWave, weight: 1},
-                { item: randomPulses, weight: 1},
-                { item: randomChip, weight: 1},
-                { item: biasedFullyRandom, weight: 1},
-            ]);
-            algorithmFunction(randomGeneratedArray);
-        }
-		else throw new Error("Unknown preference selected for custom chip randomization.");
+        const algorithmFunction: (wave: Float32Array, n1: number, n2: number) => void = selectWeightedRandom([
+            {item: randomRoundedWave, weight: 1},
+            {item: randomPulses, weight: 1},
+            {item: randomChip, weight: 1},
+            {item: biasedFullyRandom, weight: 1},
+			{item: randomizeWave, weight: 1}
+        ]);
+        algorithmFunction(randomGeneratedArray, 0, 64);
 
 		this.chipData = randomGeneratedArray;
 		this._storeChange();

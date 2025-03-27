@@ -328,20 +328,17 @@ export class PatternEditor {
                     this.modDragValueLabel.style.setProperty("top", "" + this._modDragValueLabelTop + "px");
                     this.modDragValueLabel.textContent = "" + presValue;
 
-                }
-                else {
+                } else {
                     this.modDragValueLabel.style.setProperty("display", "none");
                     this.modDragValueLabel.style.setProperty("pointer-events", "none");
                     this.modDragValueLabel.setAttribute("contenteditable", "false");
                 }
-            }
-            else if (!this.editingModLabel) {
+            } else if (!this.editingModLabel) {
                 this.modDragValueLabel.style.setProperty("display", "none");
                 this.modDragValueLabel.style.setProperty("pointer-events", "none");
                 this.modDragValueLabel.setAttribute("contenteditable", "false");
             }
-        }
-        else {
+        } else {
             this.modDragValueLabel.style.setProperty("display", "none");
             this.modDragValueLabel.style.setProperty("pointer-events", "none");
             this.modDragValueLabel.setAttribute("contenteditable", "false");
@@ -475,7 +472,6 @@ export class PatternEditor {
             }
 
             if (this._doc.song.getChannelIsMod(this._doc.channel)) {
-
                 this._cursor.pitch = Math.max(0, Math.min(Config.modCount - 1, this._cursor.pitch));
 
                 // Return cursor to stashed cursor volumes (so pins aren't destroyed by moving the preview around several volume scales.)
@@ -500,11 +496,9 @@ export class PatternEditor {
                     }
                 }
             }
-
         }
 
         this._cursor.valid = true;
-
     }
 
     private _cursorIsInSelection(): boolean {
@@ -610,7 +604,6 @@ export class PatternEditor {
     }
 
     private _animatePlayhead = (timestamp: number): void => {
-
         if (this._usingTouch && !this.shiftMode && !this._mouseDragging && this._mouseDown && performance.now() > this._touchTime + 1000 && this._cursor.valid && this._doc.lastChangeWas(this._dragChange)) {
             // On a mobile device, the pattern editor supports using a long stationary touch to activate selection.
             this._dragChange!.undo();
@@ -708,24 +701,18 @@ export class PatternEditor {
                 let instrument: Instrument = modChannel.instruments[instrumentIndex];
                 for (let mod: number = 0; mod < Config.modCount; mod++) {
                     // Non-song application
-                    if ( instrument.modulators[mod] == applyToMod && !Config.modulators[instrument.modulators[mod]].forSong && (instrument.modChannels[mod] == thisRef._doc.channel) ) {
+                    if (instrument.modulators[mod] == applyToMod && !Config.modulators[instrument.modulators[mod]].forSong && (instrument.modChannels[mod] == thisRef._doc.channel) ) {
                         // This is a check if the instrument targeted is relevant. Is it the exact one being edited? An "all" or "active" target?
                         // For "active" target it doesn't check if the instrument is active, allowing write to other active instruments from an inactive one. Should be fine since audibly while writing you'll hear what you'd expect -
                         // the current channel's active instruments being modulated, which is what most people would expect even if editing an inactive instrument.
-                        if (  thisRef._doc.getCurrentInstrument() == instrument.modInstruments[mod]
-                            || instrument.modInstruments[mod] >= thisRef._doc.song.channels[thisRef._doc.channel].instruments.length )
-                        {
+                        if (thisRef._doc.getCurrentInstrument() == instrument.modInstruments[mod] || instrument.modInstruments[mod] >= thisRef._doc.song.channels[thisRef._doc.channel].instruments.length) {
                             // If it's an eq/note filter target, one additional step is performed to see if it matches the right modFilterType.
                             if (modFilterIndex != undefined && (applyToMod == Config.modulators.dictionary["eq filter"].index || applyToMod == Config.modulators.dictionary["note filter"].index)) {
-                                if (instrument.modFilterTypes[mod] == modFilterIndex)
-                                    return [instrumentIndex, mod];
-                            }
-                            else
-                                return [instrumentIndex, mod];
+                                if (instrument.modFilterTypes[mod] == modFilterIndex) return [instrumentIndex, mod];
+                            } else return [instrumentIndex, mod];
                         }
-                    }
-                    // Song wide application
-                    else if ( instrument.modulators[mod] == applyToMod && Config.modulators[instrument.modulators[mod]].forSong && (instrument.modChannels[mod] == -1) ) {
+                    } else if (instrument.modulators[mod] == applyToMod && Config.modulators[instrument.modulators[mod]].forSong && (instrument.modChannels[mod] == -1)) {
+                        // Song wide application
                         return [instrumentIndex, mod];
                     }
                 }
@@ -738,8 +725,7 @@ export class PatternEditor {
             if (startPart >= endPart) return;
             for (let noteIndex: number = 0; noteIndex < pattern.notes.length; noteIndex++) {
                 const note: Note = pattern.notes[noteIndex];
-                if (note.pitches[0] != forMod)
-                    continue;
+                if (note.pitches[0] != forMod) continue;
                 if (note.start < endPart && note.end > startPart) {
                     let couldIntersectStart: boolean = false;
                     let intersectsEnd: boolean = false;
@@ -757,8 +743,7 @@ export class PatternEditor {
                             }
                         }
                         // Splice pins inside the interval.
-                        if (interiorPinCount > 0)
-                            note.pins.splice(firstInteriorPin, interiorPinCount);
+                        if (interiorPinCount > 0) note.pins.splice(firstInteriorPin, interiorPinCount);
                         return;
                     }
 
@@ -768,8 +753,7 @@ export class PatternEditor {
                             if (firstInteriorPin < 0)
                                 firstInteriorPin = pinIndex;
                             interiorPinCount++;
-                        }
-                        else {
+                        } else {
                             if (interiorPinCount == 0)
                                 couldIntersectStart = true;
                             if (interiorPinCount > 0)
