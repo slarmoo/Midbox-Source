@@ -325,6 +325,9 @@ export class Config {
         { name: "B",  isWhiteKey: true,  basePitch: 23 },
     ]);
 
+    public static readonly songTitleCharLimit:        number = 63;
+    public static readonly songSubtitleCharLimit:     number = 63;
+    public static readonly channelNameCharLimit:      number = 63;
     public static readonly blackKeyNameParents:       ReadonlyArray<number> = [-1, 1, -1, 1, -1, 1, -1, -1, 1, -1, 1, -1];
     public static readonly tempoMin:                  number = 1;
     public static readonly tempoMax:                  number = 750;
@@ -515,15 +518,15 @@ export class Config {
         { name: "hyper",           voices: 2, spread: 0.03,     offset: -0.02,   expression: 0.85, sign:  0.7 },
         { name: "peak",            voices: 2, spread: 12.038,   offset:  12.01,  expression: 0.85, sign:  0.9 },
         { name: "deep shift",      voices: 2, spread: 12.03,    offset: -17.01,  expression: 0.85, sign:  1.2 },
-        { name: "broke",           voices: 2, spread: 0.000211, offset: -0.3,    expression: 0.8,  sign:  1.0 },
-        { name: "vary",            voices: 2, spread: 0.0018,   offset:  0.0,    expression: 0.85, sign:  1.6 },
+        { name: "broke",           voices: 2, spread: 0.0,      offset: -0.3,    expression: 0.8,  sign:  1.0 },
+        { name: "vary",            voices: 2, spread: 0.002,    offset:  0.0,    expression: 0.85, sign:  1.6 },
         { name: "energetic",       voices: 2, spread: 6.15,     offset:  6.435,  expression: 0.85, sign:  0.9 },
         { name: "lone fifth",      voices: 1, spread: 0.0,      offset:  7.0,    expression: 1.4,  sign:  1.0 },
         { name: "alternate fifth", voices: 2, spread: 2.5,      offset: -2.5,    expression: 0.9,  sign:  1.0 },
         { name: "offtune",         voices: 2, spread: 0.40,     offset:  0.40,   expression: 0.9,  sign:  1.0 },
         { name: "hold",            voices: 2, spread: 0.003,    offset:  0.0,    expression: 0.8,  sign: -2.5 },
-        { name: "buried",          voices: 2, spread: 0.03575,  offset: -36.0,   expression: 1.4,  sign:  1.0 },
-        { name: "corrupt",         voices: 2, spread: 18,       offset:  48.0,   expression: 0.7,  sign:  0.7 },
+        { name: "buried",          voices: 2, spread: 0.036,    offset: -36.0,   expression: 1.4,  sign:  1.0 },
+        { name: "corrupt",         voices: 2, spread: 18.0,     offset:  48.0,   expression: 0.7,  sign:  0.7 },
         { name: "weird octave",    voices: 2, spread: 5.85,     offset:  5.85,   expression: 0.75, sign:  1.0 },
         { name: "bent",            voices: 2, spread: 9.5,      offset:  4.5,    expression: 0.8,  sign: -0.6 },
         { name: "hecking gosh",    voices: 2, spread: 6.25,     offset: -6.0,    expression: 0.8,  sign: -0.7 },
@@ -922,10 +925,10 @@ export class Config {
         { name: "quasi-sine",        samples: generateQuasiSineWave()   },
         { name: "secant",            samples: generateSecantWave()      },
         { name: "absine",            samples: generateAbsineWave()      },
-        { name: "semi-sine",         samples: generateSemiSineWave()    },
+        { name: "semisine",          samples: generateSemiSineWave()    },
         { name: "camelsine",         samples: generateCamelsineWave()   },
         { name: "pulsine",           samples: generatePulsineWave()     },
-        { name: "shark sine",        samples: generateSharkSineWave()   },
+        { name: "sharksine",         samples: generateSharkSineWave()   },
         { name: "logarithmic saw",   samples: generateLogSawWave()      },
         { name: "white noise",       samples: generateWhiteNoise()      },
     ]);

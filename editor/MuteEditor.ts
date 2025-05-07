@@ -5,7 +5,7 @@ import { HTML } from "imperative-html/dist/esm/elements-strict";
 import { ColorConfig } from "./ColorConfig";
 import { ChannelRow } from "./ChannelRow";
 import { InputBox } from "./HTMLWrapper";
-import { ChangeChannelOrder, ChangeChannelName, ChangeRemoveChannel } from "./changes";
+import { ChangeChannelOrder, ChangeChannelNameFromMuteEditor, ChangeRemoveChannel } from "./changes";
 import { Config } from "../synth/SynthConfig";
 import { SongEditor } from "./SongEditor";
 
@@ -15,7 +15,7 @@ export class MuteEditor {
 	private readonly _buttons: HTMLDivElement[] = [];
 	private readonly _channelCounts: HTMLDivElement[] = [];
 	private readonly _channelNameDisplay: HTMLDivElement = HTML.div({ style: `background-color: ${ColorConfig.uiWidgetFocus}; white-space:nowrap; display: none; transform:translate(20px); width: auto; pointer-events: none; position: absolute; border-radius: 0.2em; z-index: 2;`, "color": ColorConfig.primaryText }, "");
-	public readonly _channelNameInput: InputBox = new InputBox(HTML.input({ style: `color: ${ColorConfig.primaryText}; background-color: ${ColorConfig.uiWidgetFocus}; margin-top: -2px; display: none; width: 6em; position: absolute; border-radius: 0.2em; z-index: 2;`, "color": ColorConfig.primaryText }, ""), this._doc, (oldValue: string, newValue: string) => new ChangeChannelName(this._doc, oldValue, newValue));
+	public readonly _channelNameInput: InputBox = new InputBox(HTML.input({ style: `color: ${ColorConfig.primaryText}; background-color: ${ColorConfig.uiWidgetFocus}; margin-top: -2px; display: none; width: 6em; position: absolute; border-radius: 0.2em; z-index: 2;`, "color": ColorConfig.primaryText }, ""), this._doc, (oldValue: string, newValue: string) => new ChangeChannelNameFromMuteEditor(this._doc, oldValue, newValue));
 
 	private readonly _channelDropDown: HTMLSelectElement = HTML.select({ style: "width: 0px; left: 19px; height: 19px; position:absolute; opacity:0" },
 		HTML.option({ value: "rename" }, "Rename..."),
@@ -57,8 +57,8 @@ export class MuteEditor {
 
 	private _channelNameInputWhenInput = (): void => {
 		let newValue = this._channelNameInput.input.value;
-		if (newValue.length > 25) {
-			this._channelNameInput.input.value = newValue.substring(0, 25);
+		if (newValue.length > Config.channelNameCharLimit) {
+			this._channelNameInput.input.value = newValue.substring(0, Config.channelNameCharLimit);
 		}
 	}
 

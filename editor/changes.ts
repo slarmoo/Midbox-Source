@@ -2349,12 +2349,10 @@ export class ChangeEnvelopeSpeed extends Change {
         doc.synth.unsetMod(Config.modulators.dictionary["envelope speed"].index, doc.channel, doc.getCurrentInstrument());
 
         doc.notifier.changed();
-        if (oldValue != newValue) {
-            instrument.envelopeSpeed = newValue;
-            instrument.preset = instrument.type;
-            doc.notifier.changed();
-            this._didSomething();
-        }
+        instrument.envelopeSpeed = newValue;
+        instrument.preset = instrument.type;
+        doc.notifier.changed();
+        if (oldValue != newValue) this._didSomething();
     }
 }
 
@@ -2362,12 +2360,10 @@ export class ChangePerEnvelopeSpeed extends Change {
     constructor(doc: SongDocument, envelopeIndex: number, oldValue: number, newValue: number) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        if (oldValue != newValue) {
-            instrument.envelopes[envelopeIndex].envelopeSpeed = newValue;
-            instrument.preset = instrument.type;
-            doc.notifier.changed();
-            this._didSomething();
-        }
+        instrument.envelopes[envelopeIndex].envelopeSpeed = newValue;
+        instrument.preset = instrument.type;
+        doc.notifier.changed();
+        if (oldValue != newValue) this._didSomething();
     }
 }
 
@@ -2416,12 +2412,10 @@ export class ChangeLowerBound extends Change {
     constructor(doc: SongDocument, envelopeIndex: number, oldValue: number, newValue: number) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        if (oldValue != newValue) {
-            instrument.envelopes[envelopeIndex].lowerBound = newValue;
-            instrument.preset = instrument.type;
-            doc.notifier.changed();
-            this._didSomething();
-        }
+        instrument.envelopes[envelopeIndex].lowerBound = newValue;
+        instrument.preset = instrument.type;
+        doc.notifier.changed();
+        if (oldValue != newValue) this._didSomething();
     }
 }
 
@@ -2442,12 +2436,10 @@ export class ChangeUpperBound extends Change {
     constructor(doc: SongDocument, envelopeIndex: number, oldValue: number, newValue: number) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        if (oldValue != newValue) {
-            instrument.envelopes[envelopeIndex].upperBound = newValue;
-            instrument.preset = instrument.type;
-            doc.notifier.changed();
-            this._didSomething();
-        }
+        instrument.envelopes[envelopeIndex].upperBound = newValue;
+        instrument.preset = instrument.type;
+        doc.notifier.changed();
+        if (oldValue != newValue) this._didSomething();
     }
 }
 
@@ -2468,12 +2460,10 @@ export class ChangeEnvelopeDelay extends Change {
     constructor(doc: SongDocument, envelopeIndex: number, oldValue: number, newValue: number) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        if (oldValue != newValue) {
-            instrument.envelopes[envelopeIndex].delay = newValue;
-            instrument.preset = instrument.type;
-            doc.notifier.changed();
-            this._didSomething();
-        }
+        instrument.envelopes[envelopeIndex].delay = newValue;
+        instrument.preset = instrument.type;
+        doc.notifier.changed();
+        if (oldValue != newValue) this._didSomething();
     }
 }
 
@@ -2494,12 +2484,10 @@ export class ChangePitchEnvelopeStart extends Change {
     constructor(doc: SongDocument, envelopeIndex: number, oldValue: number, newValue: number) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        if (oldValue != newValue) {
-            instrument.envelopes[envelopeIndex].pitchStart = newValue;
-            instrument.preset = instrument.type;
-            doc.notifier.changed();
-            this._didSomething();
-        }
+        instrument.envelopes[envelopeIndex].pitchStart = newValue;
+        instrument.preset = instrument.type;
+        doc.notifier.changed();
+        if (oldValue != newValue) this._didSomething();
     }
 }
 
@@ -2507,12 +2495,10 @@ export class ChangePitchEnvelopeEnd extends Change {
     constructor(doc: SongDocument, envelopeIndex: number, oldValue: number, newValue: number) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        if (oldValue != newValue) {
-            instrument.envelopes[envelopeIndex].pitchEnd = newValue;
-            instrument.preset = instrument.type;
-            doc.notifier.changed();
-            this._didSomething();
-        }
+        instrument.envelopes[envelopeIndex].pitchEnd = newValue;
+        instrument.preset = instrument.type;
+        doc.notifier.changed();
+        if (oldValue != newValue) this._didSomething();
     }
 }
 
@@ -2554,12 +2540,10 @@ export class ChangeEnvelopePosition extends Change {
     constructor(doc: SongDocument, envelopeIndex: number, oldValue: number, newValue: number) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        if (oldValue != newValue) {
-            instrument.envelopes[envelopeIndex].phase = newValue;
-            instrument.preset = instrument.type;
-            doc.notifier.changed();
-            this._didSomething();
-        }
+        instrument.envelopes[envelopeIndex].phase = newValue;
+        instrument.preset = instrument.type;
+        doc.notifier.changed();
+        if (oldValue != newValue) this._didSomething();
     }
 }
 
@@ -2655,17 +2639,16 @@ export class ChangeDrumsetLFOEnvelopeShape extends Change {
 }
 
 export class ChangeEnvelopeAccelerationEnabled extends Change {
-    constructor(doc: SongDocument, envelopeIndex: number, newValue: boolean) {
+    constructor(doc: SongDocument, envelopeIndex: number) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        const oldValue = instrument.envelopes[envelopeIndex].LFOSettings.LFOAllowAccelerate;
-        if (oldValue != newValue) {
-            instrument.envelopes[envelopeIndex].LFOSettings.LFOAllowAccelerate = newValue;
-            // Extra step: Toggle other LFO ratio settings to be off if this one is on.
-            if (instrument.envelopes[envelopeIndex].LFOSettings.LFOAllowAccelerate && (instrument.envelopes[envelopeIndex].LFOSettings.LFOLoopOnce || instrument.envelopes[envelopeIndex].LFOSettings.LFOIgnorance)) {
-                instrument.envelopes[envelopeIndex].LFOSettings.LFOLoopOnce = false;
-                instrument.envelopes[envelopeIndex].LFOSettings.LFOIgnorance = false;
-            }
+        if (instrument.envelopes[envelopeIndex].LFOSettings.LFOActiveCheckbox == 1) { // Off
+            instrument.envelopes[envelopeIndex].LFOSettings.LFOActiveCheckbox = 0;
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        } else { // On
+            instrument.envelopes[envelopeIndex].LFOSettings.LFOActiveCheckbox = 1;
             instrument.preset = instrument.type;
             doc.notifier.changed();
             this._didSomething();
@@ -2674,17 +2657,16 @@ export class ChangeEnvelopeAccelerationEnabled extends Change {
 }
 
 export class ChangeEnvelopeLooping extends Change {
-    constructor(doc: SongDocument, envelopeIndex: number, newValue: boolean) {
+    constructor(doc: SongDocument, envelopeIndex: number) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        const oldValue = instrument.envelopes[envelopeIndex].LFOSettings.LFOLoopOnce;
-        if (oldValue != newValue) {
-            instrument.envelopes[envelopeIndex].LFOSettings.LFOLoopOnce = newValue;
-            // Extra step: Toggle other LFO ratio settings to be off if this one is on.
-            if (instrument.envelopes[envelopeIndex].LFOSettings.LFOLoopOnce && (instrument.envelopes[envelopeIndex].LFOSettings.LFOAllowAccelerate || instrument.envelopes[envelopeIndex].LFOSettings.LFOIgnorance)) {
-                instrument.envelopes[envelopeIndex].LFOSettings.LFOAllowAccelerate = false;
-                instrument.envelopes[envelopeIndex].LFOSettings.LFOIgnorance = false;
-            }
+        if (instrument.envelopes[envelopeIndex].LFOSettings.LFOActiveCheckbox == 2) { // Off
+            instrument.envelopes[envelopeIndex].LFOSettings.LFOActiveCheckbox = 0;
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        } else { // On
+            instrument.envelopes[envelopeIndex].LFOSettings.LFOActiveCheckbox = 2;
             instrument.preset = instrument.type;
             doc.notifier.changed();
             this._didSomething();
@@ -2693,17 +2675,16 @@ export class ChangeEnvelopeLooping extends Change {
 }
 
 export class ChangeEnvelopeIgnorance extends Change {
-    constructor(doc: SongDocument, envelopeIndex: number, newValue: boolean) {
+    constructor(doc: SongDocument, envelopeIndex: number) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        const oldValue = instrument.envelopes[envelopeIndex].LFOSettings.LFOIgnorance;
-        if (oldValue != newValue) {
-            instrument.envelopes[envelopeIndex].LFOSettings.LFOIgnorance = newValue;
-            // Extra step: Toggle other LFO ratio settings to be off if this one is on.
-            if (instrument.envelopes[envelopeIndex].LFOSettings.LFOIgnorance && (instrument.envelopes[envelopeIndex].LFOSettings.LFOAllowAccelerate || instrument.envelopes[envelopeIndex].LFOSettings.LFOLoopOnce)) {
-                instrument.envelopes[envelopeIndex].LFOSettings.LFOAllowAccelerate = false;
-                instrument.envelopes[envelopeIndex].LFOSettings.LFOLoopOnce = false;
-            }
+        if (instrument.envelopes[envelopeIndex].LFOSettings.LFOActiveCheckbox == 3) { // Off
+            instrument.envelopes[envelopeIndex].LFOSettings.LFOActiveCheckbox = 0;
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        } else { // On
+            instrument.envelopes[envelopeIndex].LFOSettings.LFOActiveCheckbox = 3;
             instrument.preset = instrument.type;
             doc.notifier.changed();
             this._didSomething();
@@ -2712,17 +2693,16 @@ export class ChangeEnvelopeIgnorance extends Change {
 }
 
 export class ChangeDrumsetEnvelopeAccelerationEnabled extends Change {
-    constructor(doc: SongDocument, drumIndex: number, newValue: boolean) {
+    constructor(doc: SongDocument, drumIndex: number) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        const oldValue = instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOAllowAccelerate;
-        if (oldValue != newValue) {
-            instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOAllowAccelerate = newValue;
-            // Extra step: Toggle other LFO ratio settings to be off if this one is on.
-            if (instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOAllowAccelerate && (instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOLoopOnce || instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOIgnorance)) {
-                instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOLoopOnce = false;
-                instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOIgnorance = false;
-            }
+        if (instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOActiveCheckbox == 1) { // Off
+            instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOActiveCheckbox = 0;
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        } else { // On
+            instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOActiveCheckbox = 1;
             instrument.preset = instrument.type;
             doc.notifier.changed();
             this._didSomething();
@@ -2731,17 +2711,16 @@ export class ChangeDrumsetEnvelopeAccelerationEnabled extends Change {
 }
 
 export class ChangeDrumsetEnvelopeLooping extends Change {
-    constructor(doc: SongDocument, drumIndex: number, newValue: boolean) {
+    constructor(doc: SongDocument, drumIndex: number) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        const oldValue = instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOLoopOnce;
-        if (oldValue != newValue) {
-            instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOLoopOnce = newValue;
-            // Extra step: Toggle other LFO ratio settings to be off if this one is on.
-            if (instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOLoopOnce && (instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOAllowAccelerate || instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOIgnorance)) {
-                instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOAllowAccelerate = false;
-                instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOIgnorance = false;
-            }
+        if (instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOActiveCheckbox == 2) { // Off
+            instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOActiveCheckbox = 0;
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        } else { // On
+            instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOActiveCheckbox = 2;
             instrument.preset = instrument.type;
             doc.notifier.changed();
             this._didSomething();
@@ -2750,17 +2729,16 @@ export class ChangeDrumsetEnvelopeLooping extends Change {
 }
 
 export class ChangeDrumsetEnvelopeIgnorance extends Change {
-    constructor(doc: SongDocument, drumIndex: number, newValue: boolean) {
+    constructor(doc: SongDocument, drumIndex: number) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
-        const oldValue = instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOIgnorance;
-        if (oldValue != newValue) {
-            instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOIgnorance = newValue;
-            // Extra step: Toggle other LFO ratio settings to be off if this one is on.
-            if (instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOIgnorance && (instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOAllowAccelerate || instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOLoopOnce)) {
-                instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOAllowAccelerate = false;
-                instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOLoopOnce = false;
-            }
+        if (instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOActiveCheckbox == 3) { // Off
+            instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOActiveCheckbox = 0;
+            instrument.preset = instrument.type;
+            doc.notifier.changed();
+            this._didSomething();
+        } else { // On
+            instrument.drumsetEnvelopes[drumIndex].LFOSettings.LFOActiveCheckbox = 3;
             instrument.preset = instrument.type;
             doc.notifier.changed();
             this._didSomething();
@@ -5563,8 +5541,8 @@ export class ChangeVolume extends Change {
 export class ChangeSongTitle extends Change {
     constructor(doc: SongDocument, oldValue: string, newValue: string) {
         super();
-        if (newValue.length > 30) {
-            newValue = newValue.substring(0, 30);
+        if (newValue.length > Config.songTitleCharLimit) {
+            newValue = newValue.substring(0, Config.songTitleCharLimit);
         }
 
         doc.song.title = newValue;
@@ -5577,8 +5555,8 @@ export class ChangeSongTitle extends Change {
 export class ChangeSongSubtitle extends Change {
     constructor(doc: SongDocument, oldValue: string, newValue: string) {
         super();
-        if (newValue.length > 30) {
-            newValue = newValue.substring(0, 30);
+        if (newValue.length > Config.songSubtitleCharLimit) {
+            newValue = newValue.substring(0, Config.songSubtitleCharLimit);
         }
 
         doc.song.subtitle = newValue;
@@ -5587,14 +5565,29 @@ export class ChangeSongSubtitle extends Change {
     }
 }
 
-export class ChangeChannelName extends Change {
+export class ChangeChannelNameFromMuteEditor extends Change {
     constructor(doc: SongDocument, oldValue: string, newValue: string) {
         super();
-        if (newValue.length > 25) {
-            newValue = newValue.substring(0, 25);
+        if (newValue.length > Config.channelNameCharLimit) {
+            newValue = newValue.substring(0, Config.channelNameCharLimit);
         }
 
         doc.song.channels[doc.muteEditorChannel].name = newValue;
+        doc.recalcChannelNames = true;
+
+        doc.notifier.changed();
+        if (oldValue != newValue) this._didSomething();
+    }
+}
+
+export class ChangeChannelName extends Change {
+    constructor(doc: SongDocument, oldValue: string, newValue: string) {
+        super();
+        if (newValue.length > Config.channelNameCharLimit) {
+            newValue = newValue.substring(0, Config.channelNameCharLimit);
+        }
+
+        doc.song.channels[doc.channel].name = newValue;
         doc.recalcChannelNames = true;
 
         doc.notifier.changed();
@@ -5728,11 +5721,13 @@ export class ChangeNoiseSeed extends Change {
 }*/
 
 export class ChangeAddEnvelope extends Change {
-    constructor(doc: SongDocument, storedEnvelope?: any, envelopeSettings?: EnvelopeSettings) {
+    constructor(doc: SongDocument, addingCopiedEnvelope?: boolean) {
         super();
         const instrument: Instrument = doc.song.channels[doc.channel].instruments[doc.getCurrentInstrument()];
         instrument.addEnvelope(0, 0, 0);
-        if (storedEnvelope && envelopeSettings) {
+        if (addingCopiedEnvelope == true) {
+            const storedEnvelope: any = JSON.parse(String(window.localStorage.getItem("envelopeCopy")));
+            const envelopeSettings = instrument.envelopes[instrument.envelopeCount - 1];
             envelopeSettings.fromJsonObject(storedEnvelope, instrument);
             // Check and make sure that the envelope target is supported.
             if (instrument.supportsEnvelopeTarget(envelopeSettings.target, envelopeSettings.index)) {
@@ -5853,28 +5848,10 @@ export class RandomEnvelope extends Change {
             } else {
                 instEnv.LFOSettings.LFOStepAmount = 4;
             }
-            let spunRandomRadioButton: number = randomLFORadioButtons[Math.floor(Math.random() * randomLFORadioButtons.length)];
-            if (spunRandomRadioButton == 1) {
-                instEnv.LFOSettings.LFOAllowAccelerate = true;
-                instEnv.LFOSettings.LFOAcceleration = randomAcceleration[Math.floor(Math.random() * randomAcceleration.length)];
-                instEnv.LFOSettings.LFOLoopOnce = false;
-                instEnv.LFOSettings.LFOIgnorance = false;
-            } else if (spunRandomRadioButton == 2) {
-                instEnv.LFOSettings.LFOAllowAccelerate = false;
-                instEnv.LFOSettings.LFOAcceleration = 1;
-                instEnv.LFOSettings.LFOLoopOnce = true;
-                instEnv.LFOSettings.LFOIgnorance = false;
-            } else if (spunRandomRadioButton == 3) {
-                instEnv.LFOSettings.LFOAllowAccelerate = false;
-                instEnv.LFOSettings.LFOAcceleration = 1;
-                instEnv.LFOSettings.LFOLoopOnce = false;
-                instEnv.LFOSettings.LFOIgnorance = true;
-            } else {
-                instEnv.LFOSettings.LFOAllowAccelerate = false;
-                instEnv.LFOSettings.LFOAcceleration = 1;
-                instEnv.LFOSettings.LFOLoopOnce = false;
-                instEnv.LFOSettings.LFOIgnorance = false;
-            }
+            let randomLFOCheckbox = randomLFORadioButtons[Math.floor(Math.random() * randomLFORadioButtons.length)];
+            instEnv.LFOSettings.LFOActiveCheckbox = randomLFOCheckbox;
+            if (randomLFOCheckbox == 1) instEnv.LFOSettings.LFOAcceleration = randomAcceleration[Math.floor(Math.random() * randomAcceleration.length)];
+            else instEnv.LFOSettings.LFOAcceleration = 1;
         }
         instrument.preset = instrument.type;
         doc.notifier.changed();
@@ -5905,7 +5882,12 @@ export class ChangeRemoveEnvelope extends Change {
             instEnv.phase = nextEnv.phase;
             instEnv.measurementType = nextEnv.measurementType;
             instEnv.mirrorAmount = nextEnv.mirrorAmount;
-            instEnv.LFOSettings = nextEnv.LFOSettings;
+            instEnv.LFOSettings.LFOShape = nextEnv.LFOSettings.LFOShape;
+            instEnv.LFOSettings.LFOActiveCheckbox = nextEnv.LFOSettings.LFOActiveCheckbox;
+            instEnv.LFOSettings.LFOAcceleration = nextEnv.LFOSettings.LFOAcceleration;
+            instEnv.LFOSettings.LFOPulseWidth = nextEnv.LFOSettings.LFOPulseWidth;
+            instEnv.LFOSettings.LFOTrapezoidRatio = nextEnv.LFOSettings.LFOTrapezoidRatio;
+            instEnv.LFOSettings.LFOStepAmount = nextEnv.LFOSettings.LFOStepAmount;
             instEnv.basicCustomGridWidth = nextEnv.basicCustomGridWidth;
             instEnv.basicCustomGridHeight = nextEnv.basicCustomGridHeight;
             instEnv.basicCustomGridPoints = nextEnv.basicCustomGridPoints;
@@ -5973,31 +5955,42 @@ export class ChangeEnvelopeOrder extends Change {
         let env1Phase = instEnv.phase;
         let env1MeasurementType = instEnv.measurementType;
         let env1MirrorAmount = instEnv.mirrorAmount;
-        let env1LFOSettings = instEnv.LFOSettings;
+        let env1LFOShape = instEnv.LFOSettings.LFOShape;
+        let env1LFOActiveCheckbox = instEnv.LFOSettings.LFOActiveCheckbox;
+        let env1LFOAcceleration = instEnv.LFOSettings.LFOAcceleration;
+        let env1LFOPulseWidth = instEnv.LFOSettings.LFOPulseWidth;
+        let env1LFOTrapezoidRatio = instEnv.LFOSettings.LFOTrapezoidRatio;
+        let env1LFOStepAmount = instEnv.LFOSettings.LFOStepAmount;
         let env1BasicCustomGridWidth = instEnv.basicCustomGridWidth;
         let env1BasicCustomGridHeight = instEnv.basicCustomGridHeight;
         let env1BasicCustomGridPoints = instEnv.basicCustomGridPoints;
 
+        let env2Target, env2Index, env2Envelope, env2Speed, env2Discrete, env2LowerBound, env2UpperBound, env2Delay, env2PitchStart, env2PitchEnd, env2PitchAmplify, env2PitchBounce, env2Phase, env2MeasurementType, env2MirrorAmount, env2LFOShape, env2LFOActiveCheckbox, env2LFOAcceleration, env2LFOPulseWidth, env2LFOTrapezoidRatio, env2LFOStepAmount, env2BasicCustomGridWidth, env2BasicCustomGridHeight, env2BasicCustomGridPoints;
         if (moveWhere) {
-            let env2Target = envAbove.target;
-            let env2Index = envAbove.index;
-            let env2Envelope = envAbove.envelope;
-            let env2Speed = envAbove.envelopeSpeed;
-            let env2Discrete = envAbove.discrete;
-            let env2LowerBound = envAbove.lowerBound;
-            let env2UpperBound = envAbove.upperBound;
-            let env2Delay = envAbove.delay;
-            let env2PitchStart = envAbove.pitchStart;
-            let env2PitchEnd = envAbove.pitchEnd;
-            let env2PitchAmplify = envAbove.pitchAmplify;
-            let env2PitchBounce = envAbove.pitchBounce;
-            let env2Phase = envAbove.phase;
-            let env2MeasurementType = envAbove.measurementType;
-            let env2MirrorAmount = envAbove.mirrorAmount;
-            let env2LFOSettings = envAbove.LFOSettings;
-            let env2BasicCustomGridWidth = envAbove.basicCustomGridWidth;
-            let env2BasicCustomGridHeight = envAbove.basicCustomGridHeight;
-            let env2BasicCustomGridPoints = envAbove.basicCustomGridPoints;
+            env2Target = envAbove.target;
+            env2Index = envAbove.index;
+            env2Envelope = envAbove.envelope;
+            env2Speed = envAbove.envelopeSpeed;
+            env2Discrete = envAbove.discrete;
+            env2LowerBound = envAbove.lowerBound;
+            env2UpperBound = envAbove.upperBound;
+            env2Delay = envAbove.delay;
+            env2PitchStart = envAbove.pitchStart;
+            env2PitchEnd = envAbove.pitchEnd;
+            env2PitchAmplify = envAbove.pitchAmplify;
+            env2PitchBounce = envAbove.pitchBounce;
+            env2Phase = envAbove.phase;
+            env2MeasurementType = envAbove.measurementType;
+            env2MirrorAmount = envAbove.mirrorAmount;
+            env2LFOShape = envAbove.LFOSettings.LFOShape;
+            env2LFOActiveCheckbox = envAbove.LFOSettings.LFOActiveCheckbox;
+            env2LFOAcceleration = envAbove.LFOSettings.LFOAcceleration;
+            env2LFOPulseWidth = envAbove.LFOSettings.LFOPulseWidth;
+            env2LFOTrapezoidRatio = envAbove.LFOSettings.LFOTrapezoidRatio;
+            env2LFOStepAmount = envAbove.LFOSettings.LFOStepAmount;
+            env2BasicCustomGridWidth = envAbove.basicCustomGridWidth;
+            env2BasicCustomGridHeight = envAbove.basicCustomGridHeight;
+            env2BasicCustomGridPoints = envAbove.basicCustomGridPoints;
 
             envAbove.target = env1Target;
             envAbove.index = env1Index;
@@ -6014,50 +6007,40 @@ export class ChangeEnvelopeOrder extends Change {
             envAbove.phase = env1Phase;
             envAbove.measurementType = env1MeasurementType;
             envAbove.mirrorAmount = env1MirrorAmount;
-            envAbove.LFOSettings = env1LFOSettings;
+            envAbove.LFOSettings.LFOShape = env1LFOShape;
+            envAbove.LFOSettings.LFOActiveCheckbox = env1LFOActiveCheckbox;
+            envAbove.LFOSettings.LFOAcceleration = env1LFOAcceleration;
+            envAbove.LFOSettings.LFOPulseWidth = env1LFOPulseWidth;
+            envAbove.LFOSettings.LFOTrapezoidRatio = env1LFOTrapezoidRatio;
+            envAbove.LFOSettings.LFOStepAmount = env1LFOStepAmount;
             envAbove.basicCustomGridWidth = env1BasicCustomGridWidth;
             envAbove.basicCustomGridHeight = env1BasicCustomGridHeight;
             envAbove.basicCustomGridPoints = env1BasicCustomGridPoints;
-
-            instEnv.target = env2Target;
-            instEnv.index = env2Index;
-            instEnv.envelope = env2Envelope;
-            instEnv.envelopeSpeed = env2Speed;
-            instEnv.discrete = env2Discrete;
-            instEnv.lowerBound = env2LowerBound;
-            instEnv.upperBound = env2UpperBound;
-            instEnv.delay = env2Delay;
-            instEnv.pitchStart = env2PitchStart;
-            instEnv.pitchEnd = env2PitchEnd;
-            instEnv.pitchAmplify = env2PitchAmplify;
-            instEnv.pitchBounce = env2PitchBounce;
-            instEnv.phase = env2Phase;
-            instEnv.measurementType = env2MeasurementType;
-            instEnv.mirrorAmount = env2MirrorAmount;
-            instEnv.LFOSettings = env2LFOSettings;
-            instEnv.basicCustomGridWidth = env2BasicCustomGridWidth;
-            instEnv.basicCustomGridHeight = env2BasicCustomGridHeight;
-            instEnv.basicCustomGridPoints = env2BasicCustomGridPoints;
         } else {
-            let env2Target = envBelow.target;
-            let env2Index = envBelow.index;
-            let env2Envelope = envBelow.envelope;
-            let env2Speed = envBelow.envelopeSpeed;
-            let env2Discrete = envBelow.discrete;
-            let env2LowerBound = envBelow.lowerBound;
-            let env2UpperBound = envBelow.upperBound;
-            let env2Delay = envBelow.delay;
-            let env2PitchStart = envBelow.pitchStart;
-            let env2PitchEnd = envBelow.pitchEnd;
-            let env2PitchAmplify = envBelow.pitchAmplify;
-            let env2PitchBounce = envBelow.pitchBounce;
-            let env2Phase = envBelow.phase;
-            let env2MeasurementType = envBelow.measurementType;
-            let env2MirrorAmount = envBelow.mirrorAmount;
-            let env2LFOSettings = envBelow.LFOSettings;
-            let env2BasicCustomGridWidth = envBelow.basicCustomGridWidth;
-            let env2BasicCustomGridHeight = envBelow.basicCustomGridHeight;
-            let env2BasicCustomGridPoints = envBelow.basicCustomGridPoints;
+            env2Target = envBelow.target;
+            env2Index = envBelow.index;
+            env2Envelope = envBelow.envelope;
+            env2Speed = envBelow.envelopeSpeed;
+            env2Discrete = envBelow.discrete;
+            env2LowerBound = envBelow.lowerBound;
+            env2UpperBound = envBelow.upperBound;
+            env2Delay = envBelow.delay;
+            env2PitchStart = envBelow.pitchStart;
+            env2PitchEnd = envBelow.pitchEnd;
+            env2PitchAmplify = envBelow.pitchAmplify;
+            env2PitchBounce = envBelow.pitchBounce;
+            env2Phase = envBelow.phase;
+            env2MeasurementType = envBelow.measurementType;
+            env2MirrorAmount = envBelow.mirrorAmount;
+            env2LFOShape = envBelow.LFOSettings.LFOShape;
+            env2LFOActiveCheckbox = envBelow.LFOSettings.LFOActiveCheckbox;
+            env2LFOAcceleration = envBelow.LFOSettings.LFOAcceleration;
+            env2LFOPulseWidth = envBelow.LFOSettings.LFOPulseWidth;
+            env2LFOTrapezoidRatio = envBelow.LFOSettings.LFOTrapezoidRatio;
+            env2LFOStepAmount = envBelow.LFOSettings.LFOStepAmount;
+            env2BasicCustomGridWidth = envBelow.basicCustomGridWidth;
+            env2BasicCustomGridHeight = envBelow.basicCustomGridHeight;
+            env2BasicCustomGridPoints = envBelow.basicCustomGridPoints;
 
             envBelow.target = env1Target;
             envBelow.index = env1Index;
@@ -6074,31 +6057,41 @@ export class ChangeEnvelopeOrder extends Change {
             envBelow.phase = env1Phase;
             envBelow.measurementType = env1MeasurementType;
             envBelow.mirrorAmount = env1MirrorAmount;
-            envBelow.LFOSettings = env1LFOSettings;
+            envBelow.LFOSettings.LFOShape = env1LFOShape;
+            envBelow.LFOSettings.LFOActiveCheckbox = env1LFOActiveCheckbox;
+            envBelow.LFOSettings.LFOAcceleration = env1LFOAcceleration;
+            envBelow.LFOSettings.LFOPulseWidth = env1LFOPulseWidth;
+            envBelow.LFOSettings.LFOTrapezoidRatio = env1LFOTrapezoidRatio;
+            envBelow.LFOSettings.LFOStepAmount = env1LFOStepAmount;
             envBelow.basicCustomGridWidth = env1BasicCustomGridWidth;
             envBelow.basicCustomGridHeight = env1BasicCustomGridHeight;
             envBelow.basicCustomGridPoints = env1BasicCustomGridPoints;
-
-            instEnv.target = env2Target;
-            instEnv.index = env2Index;
-            instEnv.envelope = env2Envelope;
-            instEnv.envelopeSpeed = env2Speed;
-            instEnv.discrete = env2Discrete;
-            instEnv.lowerBound = env2LowerBound;
-            instEnv.upperBound = env2UpperBound;
-            instEnv.delay = env2Delay;
-            instEnv.pitchStart = env2PitchStart;
-            instEnv.pitchEnd = env2PitchEnd;
-            instEnv.pitchAmplify = env2PitchAmplify;
-            instEnv.pitchBounce = env2PitchBounce;
-            instEnv.phase = env2Phase;
-            instEnv.measurementType = env2MeasurementType;
-            instEnv.mirrorAmount = env2MirrorAmount;
-            instEnv.LFOSettings = env2LFOSettings;
-            instEnv.basicCustomGridWidth = env2BasicCustomGridWidth;
-            instEnv.basicCustomGridHeight = env2BasicCustomGridHeight;
-            instEnv.basicCustomGridPoints = env2BasicCustomGridPoints;
         }
+
+        instEnv.target = env2Target;
+        instEnv.index = env2Index;
+        instEnv.envelope = env2Envelope;
+        instEnv.envelopeSpeed = env2Speed;
+        instEnv.discrete = env2Discrete;
+        instEnv.lowerBound = env2LowerBound;
+        instEnv.upperBound = env2UpperBound;
+        instEnv.delay = env2Delay;
+        instEnv.pitchStart = env2PitchStart;
+        instEnv.pitchEnd = env2PitchEnd;
+        instEnv.pitchAmplify = env2PitchAmplify;
+        instEnv.pitchBounce = env2PitchBounce;
+        instEnv.phase = env2Phase;
+        instEnv.measurementType = env2MeasurementType;
+        instEnv.mirrorAmount = env2MirrorAmount;
+        instEnv.LFOSettings.LFOShape = env2LFOShape;
+        instEnv.LFOSettings.LFOActiveCheckbox = env2LFOActiveCheckbox;
+        instEnv.LFOSettings.LFOAcceleration = env2LFOAcceleration;
+        instEnv.LFOSettings.LFOPulseWidth = env2LFOPulseWidth;
+        instEnv.LFOSettings.LFOTrapezoidRatio = env2LFOTrapezoidRatio;
+        instEnv.LFOSettings.LFOStepAmount = env2LFOStepAmount;
+        instEnv.basicCustomGridWidth = env2BasicCustomGridWidth;
+        instEnv.basicCustomGridHeight = env2BasicCustomGridHeight;
+        instEnv.basicCustomGridPoints = env2BasicCustomGridPoints;
         
         doc.notifier.changed();
         this._didSomething();
@@ -6126,25 +6119,36 @@ export class ChangeDrumsetEnvelopeOrder extends Change {
         let env1Phase = drumEnv.phase;
         let env1MeasurementType = drumEnv.measurementType;
         let env1MirrorAmount = drumEnv.mirrorAmount;
-        let env1LFOSettings = drumEnv.LFOSettings;
+        let env1LFOShape = drumEnv.LFOSettings.LFOShape;
+        let env1LFOActiveCheckbox = drumEnv.LFOSettings.LFOActiveCheckbox;
+        let env1LFOAcceleration = drumEnv.LFOSettings.LFOAcceleration;
+        let env1LFOPulseWidth = drumEnv.LFOSettings.LFOPulseWidth;
+        let env1LFOTrapezoidRatio = drumEnv.LFOSettings.LFOTrapezoidRatio;
+        let env1LFOStepAmount = drumEnv.LFOSettings.LFOStepAmount;
         let env1BasicCustomGridWidth = drumEnv.basicCustomGridWidth;
         let env1BasicCustomGridHeight = drumEnv.basicCustomGridHeight;
         let env1BasicCustomGridPoints = drumEnv.basicCustomGridPoints;
 
+        let env2Envelope, env2Speed, env2Discrete, env2LowerBound, env2UpperBound, env2Delay, env2Phase, env2MeasurementType, env2MirrorAmount, env2LFOShape, env2LFOActiveCheckbox, env2LFOAcceleration, env2LFOPulseWidth, env2LFOTrapezoidRatio, env2LFOStepAmount, env2BasicCustomGridWidth, env2BasicCustomGridHeight, env2BasicCustomGridPoints;
         if (moveWhere) {
-            let env2Envelope = envAbove.envelope;
-            let env2Speed = envAbove.envelopeSpeed;
-            let env2Discrete = envAbove.discrete;
-            let env2LowerBound = envAbove.lowerBound;
-            let env2UpperBound = envAbove.upperBound;
-            let env2Delay = envAbove.delay;
-            let env2Phase = envAbove.phase;
-            let env2MeasurementType = envAbove.measurementType;
-            let env2MirrorAmount = envAbove.mirrorAmount;
-            let env2LFOSettings = envAbove.LFOSettings;
-            let env2BasicCustomGridWidth = envAbove.basicCustomGridWidth;
-            let env2BasicCustomGridHeight = envAbove.basicCustomGridHeight;
-            let env2BasicCustomGridPoints = envAbove.basicCustomGridPoints;
+            env2Envelope = envAbove.envelope;
+            env2Speed = envAbove.envelopeSpeed;
+            env2Discrete = envAbove.discrete;
+            env2LowerBound = envAbove.lowerBound;
+            env2UpperBound = envAbove.upperBound;
+            env2Delay = envAbove.delay;
+            env2Phase = envAbove.phase;
+            env2MeasurementType = envAbove.measurementType;
+            env2MirrorAmount = envAbove.mirrorAmount;
+            env2LFOShape = envAbove.LFOSettings.LFOShape;
+            env2LFOActiveCheckbox = envAbove.LFOSettings.LFOActiveCheckbox;
+            env2LFOAcceleration = envAbove.LFOSettings.LFOAcceleration;
+            env2LFOPulseWidth = envAbove.LFOSettings.LFOPulseWidth;
+            env2LFOTrapezoidRatio = envAbove.LFOSettings.LFOTrapezoidRatio;
+            env2LFOStepAmount = envAbove.LFOSettings.LFOStepAmount;
+            env2BasicCustomGridWidth = envAbove.basicCustomGridWidth;
+            env2BasicCustomGridHeight = envAbove.basicCustomGridHeight;
+            env2BasicCustomGridPoints = envAbove.basicCustomGridPoints;
 
             envAbove.envelope = env1Envelope;
             envAbove.envelopeSpeed = env1Speed;
@@ -6155,38 +6159,34 @@ export class ChangeDrumsetEnvelopeOrder extends Change {
             envAbove.phase = env1Phase;
             envAbove.measurementType = env1MeasurementType;
             envAbove.mirrorAmount = env1MirrorAmount;
-            envAbove.LFOSettings = env1LFOSettings;
+            envAbove.LFOSettings.LFOShape = env1LFOShape;
+            envAbove.LFOSettings.LFOActiveCheckbox = env1LFOActiveCheckbox;
+            envAbove.LFOSettings.LFOAcceleration = env1LFOAcceleration;
+            envAbove.LFOSettings.LFOPulseWidth = env1LFOPulseWidth;
+            envAbove.LFOSettings.LFOTrapezoidRatio = env1LFOTrapezoidRatio;
+            envAbove.LFOSettings.LFOStepAmount = env1LFOStepAmount;
             envAbove.basicCustomGridWidth = env1BasicCustomGridWidth;
             envAbove.basicCustomGridHeight = env1BasicCustomGridHeight;
             envAbove.basicCustomGridPoints = env1BasicCustomGridPoints;
-
-            drumEnv.envelope = env2Envelope;
-            drumEnv.envelopeSpeed = env2Speed;
-            drumEnv.discrete = env2Discrete;
-            drumEnv.lowerBound = env2LowerBound;
-            drumEnv.upperBound = env2UpperBound;
-            drumEnv.delay = env2Delay;
-            drumEnv.phase = env2Phase;
-            drumEnv.measurementType = env2MeasurementType;
-            drumEnv.mirrorAmount = env2MirrorAmount;
-            drumEnv.LFOSettings = env2LFOSettings;
-            drumEnv.basicCustomGridWidth = env2BasicCustomGridWidth;
-            drumEnv.basicCustomGridHeight = env2BasicCustomGridHeight;
-            drumEnv.basicCustomGridPoints = env2BasicCustomGridPoints;
         } else {
-            let env2Envelope = envBelow.envelope;
-            let env2Speed = envBelow.envelopeSpeed;
-            let env2Discrete = envBelow.discrete;
-            let env2LowerBound = envBelow.lowerBound;
-            let env2UpperBound = envBelow.upperBound;
-            let env2Delay = envBelow.delay;
-            let env2Phase = envBelow.phase;
-            let env2MeasurementType = envBelow.measurementType;
-            let env2MirrorAmount = envBelow.mirrorAmount;
-            let env2LFOSettings = envBelow.LFOSettings;
-            let env2BasicCustomGridWidth = envBelow.basicCustomGridWidth;
-            let env2BasicCustomGridHeight = envBelow.basicCustomGridHeight;
-            let env2BasicCustomGridPoints = envBelow.basicCustomGridPoints;
+            env2Envelope = envBelow.envelope;
+            env2Speed = envBelow.envelopeSpeed;
+            env2Discrete = envBelow.discrete;
+            env2LowerBound = envBelow.lowerBound;
+            env2UpperBound = envBelow.upperBound;
+            env2Delay = envBelow.delay;
+            env2Phase = envBelow.phase;
+            env2MeasurementType = envBelow.measurementType;
+            env2MirrorAmount = envBelow.mirrorAmount;
+            env2LFOShape = envBelow.LFOSettings.LFOShape;
+            env2LFOActiveCheckbox = envBelow.LFOSettings.LFOActiveCheckbox;
+            env2LFOAcceleration = envBelow.LFOSettings.LFOAcceleration;
+            env2LFOPulseWidth = envBelow.LFOSettings.LFOPulseWidth;
+            env2LFOTrapezoidRatio = envBelow.LFOSettings.LFOTrapezoidRatio;
+            env2LFOStepAmount = envBelow.LFOSettings.LFOStepAmount;
+            env2BasicCustomGridWidth = envBelow.basicCustomGridWidth;
+            env2BasicCustomGridHeight = envBelow.basicCustomGridHeight;
+            env2BasicCustomGridPoints = envBelow.basicCustomGridPoints;
 
             envBelow.envelope = env1Envelope;
             envBelow.envelopeSpeed = env1Speed;
@@ -6197,25 +6197,35 @@ export class ChangeDrumsetEnvelopeOrder extends Change {
             envBelow.phase = env1Phase;
             envBelow.measurementType = env1MeasurementType;
             envBelow.mirrorAmount = env1MirrorAmount;
-            envBelow.LFOSettings = env1LFOSettings;
+            envBelow.LFOSettings.LFOShape = env1LFOShape;
+            envBelow.LFOSettings.LFOActiveCheckbox = env1LFOActiveCheckbox;
+            envBelow.LFOSettings.LFOAcceleration = env1LFOAcceleration;
+            envBelow.LFOSettings.LFOPulseWidth = env1LFOPulseWidth;
+            envBelow.LFOSettings.LFOTrapezoidRatio = env1LFOTrapezoidRatio;
+            envBelow.LFOSettings.LFOStepAmount = env1LFOStepAmount;
             envBelow.basicCustomGridWidth = env1BasicCustomGridWidth;
             envBelow.basicCustomGridHeight = env1BasicCustomGridHeight;
             envBelow.basicCustomGridPoints = env1BasicCustomGridPoints;
-
-            drumEnv.envelope = env2Envelope;
-            drumEnv.envelopeSpeed = env2Speed;
-            drumEnv.discrete = env2Discrete;
-            drumEnv.lowerBound = env2LowerBound;
-            drumEnv.upperBound = env2UpperBound;
-            drumEnv.delay = env2Delay;
-            drumEnv.phase = env2Phase;
-            drumEnv.measurementType = env2MeasurementType;
-            drumEnv.mirrorAmount = env2MirrorAmount;
-            drumEnv.LFOSettings = env2LFOSettings;
-            drumEnv.basicCustomGridWidth = env2BasicCustomGridWidth;
-            drumEnv.basicCustomGridHeight = env2BasicCustomGridHeight;
-            drumEnv.basicCustomGridPoints = env2BasicCustomGridPoints;
         }
+
+        drumEnv.envelope = env2Envelope;
+        drumEnv.envelopeSpeed = env2Speed;
+        drumEnv.discrete = env2Discrete;
+        drumEnv.lowerBound = env2LowerBound;
+        drumEnv.upperBound = env2UpperBound;
+        drumEnv.delay = env2Delay;
+        drumEnv.phase = env2Phase;
+        drumEnv.measurementType = env2MeasurementType;
+        drumEnv.mirrorAmount = env2MirrorAmount;
+        drumEnv.LFOSettings.LFOShape = env2LFOShape;
+        drumEnv.LFOSettings.LFOActiveCheckbox = env2LFOActiveCheckbox;
+        drumEnv.LFOSettings.LFOAcceleration = env2LFOAcceleration;
+        drumEnv.LFOSettings.LFOPulseWidth = env2LFOPulseWidth;
+        drumEnv.LFOSettings.LFOTrapezoidRatio = env2LFOTrapezoidRatio;
+        drumEnv.LFOSettings.LFOStepAmount = env2LFOStepAmount;
+        drumEnv.basicCustomGridWidth = env2BasicCustomGridWidth;
+        drumEnv.basicCustomGridHeight = env2BasicCustomGridHeight;
+        drumEnv.basicCustomGridPoints = env2BasicCustomGridPoints;
         
         doc.notifier.changed();
         this._didSomething();

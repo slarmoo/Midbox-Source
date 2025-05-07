@@ -15,11 +15,8 @@ export class Knob {
     private _change: Change | null = null;
     private _oldValue: number; // For changes.
     private _dragValue: number; // Starting value when dragging.
-    private _value: number; // Decoy value that the variable above exchanges value with.
+    public value: number; // Decoy value that the variable above exchanges value with.
     private _sensitivity: number;
-    private _uiWidgetColor;
-    private _uiFocusedColor;
-    private _mainColor;
     private _baseComponent: SVGPathElement;
     private _tickComponent: SVGPathElement;
     private _barComponent: SVGPathElement;
@@ -41,15 +38,12 @@ export class Knob {
         knobSize is an extra variable for changing the scale of the knob if needed.
         */
         this._dragValue = 0;
-        this._value = 0;
-        this._sensitivity = ((this.knobMaxValue - this.knobMinValue + this.knobStepSize) / this.knobStepSize * 1.15) / 80;
-        this._uiWidgetColor = ColorConfig.getComputed("--ui-widget-background");
-        this._uiFocusedColor = ColorConfig.getComputed("--ui-widget-focus");
-        this._mainColor = ColorConfig.getComputedChannelColor(this._doc.song, this._doc.channel).primaryNote;
+        this.value = 0;
+        this._sensitivity = ((this.knobMaxValue - this.knobMinValue + this.knobStepSize) / this.knobStepSize * 0.2) / 80;
         // Draw components once.
         this._baseComponent = path({
-            stroke: this._uiWidgetColor, 
-            fill: this._uiWidgetColor, 
+            stroke: ColorConfig.getComputed("--ui-widget-background"), 
+            fill: ColorConfig.getComputed("--ui-widget-background"), 
             d: `
                 M 13,88 
                 A 1 1 0 0 0 113,38 
@@ -57,8 +51,8 @@ export class Knob {
         `});
         this._tickComponent = path({
             "transform-origin": "63 62.9",
-            stroke: this._mainColor, 
-            fill: this._mainColor, 
+            stroke: "currentColor", 
+            fill: "currentColor", 
             d: `
                 M 17.5,65.76 
                 L 43,65.76 
@@ -68,13 +62,13 @@ export class Knob {
         `});
         this._barComponent = path({
             style: "stroke-width: 4px;",
-            stroke: this._uiWidgetColor,
+            stroke: ColorConfig.getComputed("--ui-widget-background"),
             fill: "none", 
             d: makeArcPath(1, 63, 63, 61),
         });
         this._filledBarComponent = path({
             style: "stroke-width: 4px;",
-            stroke: this._mainColor,
+            stroke: "currentColor",
             fill: "none", 
             d: makeArcPath(remap(this._dragValue, this.knobMinValue, this.knobMaxValue, 0, 1), 63, 63, 61),
         });
@@ -83,8 +77,8 @@ export class Knob {
         for (let i = 0; i < this.extraTicks.length; i++) {
             this._extraTickComponents[i] = path({
                 "transform-origin": "63 62.5",
-                stroke: this._uiFocusedColor,
-                fill: this._uiFocusedColor,
+                stroke: ColorConfig.getComputed("--ui-widget-focus"),
+                fill: ColorConfig.getComputed("--ui-widget-focus"),
                 d: `
                 M 10.5,64 
                 L 42,64 
@@ -139,6 +133,13 @@ export class Knob {
                 const bounds: DOMRect = this._componentGroup.getBoundingClientRect();
                 this._clickX = mouseEvent.clientX - bounds.left;
 
+                const continuingProspectiveChange: boolean = this._doc.lastChangeWas(this._change)
+                if (!continuingProspectiveChange) this._oldValue = this.value;
+		        if (this._getChange != null) {
+			        this._change = this._getChange(this._oldValue, this.value);
+			        this._doc.setProspectiveChange(this._change);
+		        }
+
                 this.render(this._dragValue);
             } break;
             case "mousemove": {
@@ -153,14 +154,14 @@ export class Knob {
                 if (this._mouseDown) {
                     const continuingProspectiveChange: boolean = this._doc.lastChangeWas(this._change);
                     // Calculate value based on mouse position and clamp.
-                    this._value = clamp(this.knobMinValue, this.knobMaxValue+1, this.knobMinValue + Math.floor(((this._dragValue - this.knobMinValue) + (xDifference * this._sensitivity)) / this.knobStepSize) * this.knobStepSize);
-                    if (!continuingProspectiveChange) this._oldValue = this._value;
+                    this.value = clamp(this.knobMinValue, this.knobMaxValue+1, this.knobMinValue + Math.floor(((this._dragValue - this.knobMinValue) + (xDifference * this._sensitivity)) / this.knobStepSize) * this.knobStepSize);
+                    if (!continuingProspectiveChange) this._oldValue = this.value;
 		            if (this._getChange != null) {
-			            this._change = this._getChange(this._oldValue, this._value);
+			            this._change = this._getChange(this._oldValue, this.value);
 			            this._doc.setProspectiveChange(this._change);
 		            }
 
-                    this.render(this._value);
+                    this.render(this.value);
                 }
             } break;
             case "mouseup": {
@@ -170,8 +171,8 @@ export class Knob {
                     event.preventDefault();
                     event.stopPropagation();
 
-                    this._dragValue = this._value;
-                    this._value = this._dragValue;
+                    this._dragValue = this.value;
+                    this.value = this._dragValue;
                     if (this._getChange != null) {
                         this._doc.record(this._change!);
                         this._change = null;
@@ -191,6 +192,13 @@ export class Knob {
                 const bounds: DOMRect = this._componentGroup.getBoundingClientRect();
                 this._clickX = touchEvent.touches[0].clientX - bounds.left;
 
+                const continuingProspectiveChange: boolean = this._doc.lastChangeWas(this._change)
+                if (!continuingProspectiveChange) this._oldValue = this.value;
+		        if (this._getChange != null) {
+			        this._change = this._getChange(this._oldValue, this.value);
+			        this._doc.setProspectiveChange(this._change);
+		        }
+
                 this.render(this._dragValue);
             } break;
             case "touchmove": {
@@ -205,14 +213,14 @@ export class Knob {
                 if (this._mouseDown) {
                     const continuingProspectiveChange: boolean = this._doc.lastChangeWas(this._change);
                     // Calculate value based on mouse position and clamp.
-                    this._value = clamp(this.knobMinValue, this.knobMaxValue+1, this.knobMinValue + Math.floor(((this._dragValue - this.knobMinValue) + (xDifference * this._sensitivity)) / this.knobStepSize) * this.knobStepSize);
-                    if (!continuingProspectiveChange) this._oldValue = this._value;
+                    this.value = clamp(this.knobMinValue, this.knobMaxValue+1, this.knobMinValue + Math.floor(((this._dragValue - this.knobMinValue) + (xDifference * this._sensitivity)) / this.knobStepSize) * this.knobStepSize);
+                    if (!continuingProspectiveChange) this._oldValue = this.value;
 		            if (this._getChange != null) {
-			            this._change = this._getChange(this._oldValue, this._value);
+			            this._change = this._getChange(this._oldValue, this.value);
 			            this._doc.setProspectiveChange(this._change);
 		            }
 
-                    this.render(this._value);
+                    this.render(this.value);
                 }
             } break;
             case "touchend": {
@@ -222,8 +230,8 @@ export class Knob {
                     event.preventDefault();
                     event.stopPropagation();
 
-                    this._dragValue = this._value;
-                    this._value = this._dragValue;
+                    this._dragValue = this.value;
+                    this.value = this._dragValue;
                     if (this._getChange != null) {
                         this._doc.record(this._change!);
                         this._change = null;
@@ -240,20 +248,19 @@ export class Knob {
 
                 // Only detect when focused. Prevents page scrolling from being interrupted by knobs.
                 if (this._componentGroup == document.activeElement) {
-                    const continuingProspectiveChange: boolean = this._doc.lastChangeWas(this._change);
                     event.preventDefault();
                     event.stopPropagation();
-                    this._value = clamp(this.knobMinValue, this.knobMaxValue+1, this.knobMinValue + Math.floor(((this._dragValue - this.knobMinValue) + (wheelDirection * this.knobStepSize)) / this.knobStepSize) * this.knobStepSize);
-                    if (!continuingProspectiveChange) this._oldValue = this._value;
+                    this.value = clamp(this.knobMinValue, this.knobMaxValue+1, this.knobMinValue + Math.floor(((this._dragValue - this.knobMinValue) + (wheelDirection * this.knobStepSize)) / this.knobStepSize) * this.knobStepSize);
 		            if (this._getChange != null) {
-			            this._change = this._getChange(this._oldValue, this._value);
-			            this._doc.setProspectiveChange(this._change);
+			            this._change = this._getChange(this._oldValue, this.value);
+                        this._doc.record(this._change);
+                        this._doc.notifier.notifyWatchers();
 		            }
 
-                    this._dragValue = this._value;
-                    this._value = this._dragValue;
+                    this._dragValue = this.value;
+                    this.value = this._dragValue;
                     
-                    this.render(this._value);
+                    this.render(this.value);
                 }
             } break;
             case "blur": {
@@ -267,7 +274,7 @@ export class Knob {
     public updateValue(value: number): void {
         // To prevent sliding, do not proceed with this function if the knob itself is being used.
         if (this._mouseDown) return;
-        this._value = value;
+        this.value = value;
 		this._dragValue = value;
         this.render(this._dragValue);
 	}
@@ -280,22 +287,23 @@ export class Knob {
     // Redraw elements that need their visuals updated.
     render(value: number): void {
         this._tickComponent.setAttribute("transform", `rotate(${remap(value, this.knobMinValue, this.knobMaxValue, 0, 360)})`);
+        this._barComponent.setAttribute("stroke", ColorConfig.getComputed("--ui-widget-background")); // Mainly for swapping themes.
         this._filledBarComponent.setAttribute("d", 
             makeArcPath(remap(value, this.knobMinValue, this.knobMaxValue, 0, 1), 63, 63, 61)
         );
         if (this._componentGroup == document.activeElement) {
-            this._baseComponent.setAttribute("stroke", this._uiFocusedColor);
-            this._baseComponent.setAttribute("fill", this._uiFocusedColor);
+            this._baseComponent.setAttribute("stroke", ColorConfig.getComputed("--ui-widget-focus"));
+            this._baseComponent.setAttribute("fill", ColorConfig.getComputed("--ui-widget-focus"));
             for (let i = 0; i < this.extraTicks.length; i++) {
-                this._extraTickComponents[i].setAttribute("stroke", this._uiWidgetColor);
-                this._extraTickComponents[i].setAttribute("fill", this._uiWidgetColor);
+                this._extraTickComponents[i].setAttribute("stroke", ColorConfig.getComputed("--ui-widget-background"));
+                this._extraTickComponents[i].setAttribute("fill", ColorConfig.getComputed("--ui-widget-background"));
             }
         } else {
-            this._baseComponent.setAttribute("stroke", this._uiWidgetColor);
-            this._baseComponent.setAttribute("fill", this._uiWidgetColor);
+            this._baseComponent.setAttribute("stroke", ColorConfig.getComputed("--ui-widget-background"));
+            this._baseComponent.setAttribute("fill", ColorConfig.getComputed("--ui-widget-background"));
             for (let i = 0; i < this.extraTicks.length; i++) {
-                this._extraTickComponents[i].setAttribute("stroke", this._uiFocusedColor);
-                this._extraTickComponents[i].setAttribute("fill", this._uiFocusedColor);
+                this._extraTickComponents[i].setAttribute("stroke", ColorConfig.getComputed("--ui-widget-focus"));
+                this._extraTickComponents[i].setAttribute("fill", ColorConfig.getComputed("--ui-widget-focus"));
             }
         }
     }

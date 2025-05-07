@@ -1532,6 +1532,19 @@ document.head.appendChild(HTML.style({ type: "text/css" }, `
 	color: ${ColorConfig.primaryText};
 }
 
+.beepboxEditor input[type=text]::placeholder, .beepboxEditor input[type=number]::placeholder {
+	color: ${ColorConfig.secondaryText};
+}
+
+.beepboxEditor .plotterInputBox::-webkit-outer-spin-button,
+.beepboxEditor .plotterInputBox::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.beepboxEditor .plotterInputBox {
+    -moz-appearance: textfield; 
+}
+
 .beepboxEditor input[type=checkbox] {
   transform: scale(1.5);
 }
