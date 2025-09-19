@@ -442,12 +442,12 @@ export class TipPrompt implements Prompt {
 					p("The range of the pitch shift bar goes from -1 octave [-12 semitones] at the very left side of the bar, and +1 octave [+12 semitones] at the very right. The very middle of the bar is the default pitch. If you want to change the key of more than one of your instruments at once, try song key!"),
 				);
 			} break;
-			case "detune": {
-				message = div(
-					h2("Detune"),
-					p("This setting slightly adjusts the frequency of notes played by the instrument. You can use a little bit to add a shifting sound similar to the \"unison\" setting when combined with other instruments. If you use too much, then the instrument may sound unpleasantly out-of-tune. This setting can also, when appiled to the grand majority of instruments, change the feel of your song, even if ever so slightly."),
-				);
-			} break;
+			// case "detune": {
+			// 	message = div(
+			// 		h2("Detune"),
+			// 		p("This setting slightly adjusts the frequency of notes played by the instrument. You can use a little bit to add a shifting sound similar to the \"unison\" setting when combined with other instruments. If you use too much, then the instrument may sound unpleasantly out-of-tune. This setting can also, when appiled to the grand majority of instruments, change the feel of your song, even if ever so slightly."),
+			// 	);
+			// } break;
 			case "wavefold": {
 				message = div(
 					h2("Wavefolding"),
