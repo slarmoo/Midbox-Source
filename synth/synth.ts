@@ -133,11 +133,6 @@ function encodeEnvelopeSettings(buffer: number[], s: number, d: boolean, lb: num
 }
 
 function encodeDrumEnvelopeSettings(buffer: number[], s: number, d: boolean, lb: number, ub: number, dl: number, ph: number, mt: boolean, mi: number, sh: number, LFOState: number, acNum: number, r: number, w: number, sa: number, gridW: number, gridH: number, points: Point[]): void {
-    // IES (Speed)
-    let cleanS = Math.round(Math.abs(s) * 1000);
-    let cleanSDivided = Math.floor(cleanS / 63);
-    buffer.push(base64IntToCharCode[cleanS % 63], base64IntToCharCode[cleanSDivided % 63], base64IntToCharCode[Math.floor(cleanSDivided / 63)]);
-
     // Place to store all boolean values. Drumsets use two less bits since it doesn't allow pitch envelopes.
     const booleanBitfield: number = (
         (+d << 0) // Discrete
@@ -146,26 +141,28 @@ function encodeDrumEnvelopeSettings(buffer: number[], s: number, d: boolean, lb:
     );
     buffer.push(base64IntToCharCode[booleanBitfield]); 
 
+    // IES (Speed)
+    let cleanS = Math.round(Math.abs(s) * 1000);
+    let cleanSDivided = Math.floor(cleanS / 64);
+    buffer.push(base64IntToCharCode[cleanS % 64], base64IntToCharCode[cleanSDivided % 64], base64IntToCharCode[Math.floor(cleanSDivided / 64)]);
+
     // Lower/Upper Bound
     let cleanLB = Math.round(Math.abs(lb) * 1000);
-    let cleanLBDivided = Math.floor(cleanLB / 63);
-    buffer.push(base64IntToCharCode[cleanLB % 63], base64IntToCharCode[cleanLBDivided % 63], base64IntToCharCode[Math.floor(cleanLBDivided / 63)]);
+    let cleanLBDivided = Math.floor(cleanLB / 64);
+    buffer.push(base64IntToCharCode[cleanLB % 64], base64IntToCharCode[cleanLBDivided % 64], base64IntToCharCode[Math.floor(cleanLBDivided / 64)]);
     let cleanUB = Math.round(Math.abs(ub) * 1000);
-    let cleanUBDivided = Math.floor(cleanUB / 63);
-    buffer.push(base64IntToCharCode[cleanUB % 63], base64IntToCharCode[cleanUBDivided % 63], base64IntToCharCode[Math.floor(cleanUBDivided / 63)]);
+    let cleanUBDivided = Math.floor(cleanUB / 64);
+    buffer.push(base64IntToCharCode[cleanUB % 64], base64IntToCharCode[cleanUBDivided % 64], base64IntToCharCode[Math.floor(cleanUBDivided / 64)]);
 
     // Delay
     let cleanDL = Math.round(Math.abs(dl) * 1000);
-    let cleanDLDivided = Math.floor(cleanDL / 63);
-    buffer.push(base64IntToCharCode[cleanDL % 63], base64IntToCharCode[cleanDLDivided % 63], base64IntToCharCode[Math.floor(cleanDLDivided / 63)]);
+    let cleanDLDivided = Math.floor(cleanDL / 64);
+    buffer.push(base64IntToCharCode[cleanDL % 64], base64IntToCharCode[cleanDLDivided % 64], base64IntToCharCode[Math.floor(cleanDLDivided / 64)]);
 
     // Phase
     let cleanPH = Math.round(Math.abs(ph) * 1000);
-    let cleanPHDivided = Math.floor(cleanPH / 63);
-    buffer.push(base64IntToCharCode[cleanPH % 63], base64IntToCharCode[cleanPHDivided % 63], base64IntToCharCode[Math.floor(cleanPHDivided / 63)]);
-
-    // Measurement Type
-    buffer.push(base64IntToCharCode[+mt]);
+    let cleanPHDivided = Math.floor(cleanPH / 64);
+    buffer.push(base64IntToCharCode[cleanPH % 64], base64IntToCharCode[cleanPHDivided % 64], base64IntToCharCode[Math.floor(cleanPHDivided / 64)]);
 
     // Mirror Amount
     buffer.push(base64IntToCharCode[mi]);
@@ -175,8 +172,8 @@ function encodeDrumEnvelopeSettings(buffer: number[], s: number, d: boolean, lb:
 
     // LFO Acceleration Amount
     let cleanAC = Math.round(Math.abs(acNum) * 1000);
-    let cleanACDivided = Math.floor(cleanAC / 63);
-    buffer.push(base64IntToCharCode[cleanAC % 63], base64IntToCharCode[cleanACDivided % 63], base64IntToCharCode[Math.floor(cleanACDivided / 63)]);
+    let cleanACDivided = Math.floor(cleanAC / 64);
+    buffer.push(base64IntToCharCode[cleanAC % 64], base64IntToCharCode[cleanACDivided % 64], base64IntToCharCode[Math.floor(cleanACDivided / 64)]);
 
     // LFO Trapezoid Ratio
     buffer.push(base64IntToCharCode[r]);
